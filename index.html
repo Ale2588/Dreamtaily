@@ -681,99 +681,11 @@ button,input,textarea{font-family:inherit;}
 
 </div><!-- end app -->
 
+<script src="data.js"></script>
 <script>
 // ══════════════════════════════════════
-// DATA
+// APP LOGIC — edit data.js for content
 // ══════════════════════════════════════
-
-const COMPANIONS = [
-  {id:'rabbit', name:'Etto',    species:'Coniglietto'},
-  {id:'bear',   name:'Rubens',  species:'Orsacchiotto'},
-  {id:'fox',    name:'Fiamma',  species:'Volpetta'},
-  {id:'owl',    name:'Ulivo',   species:'Gufetto'},
-  {id:'frog',   name:'Salto',   species:'Ranocchio'},
-  {id:'eagle',  name:'Vento',   species:'Aquilotto'},
-  {id:'hedgehog',name:'Pinto',  species:'Riccetto'},
-  {id:'mouse',  name:'Briciola',species:'Topolino'},
-];
-
-const STYLES = [
-  {id:'paper',  name:'Paper Cut',  tag:'Forme nette, strati colorati'},
-  {id:'water',  name:'Acquerello', tag:'Morbido, caldo, onirico'},
-  {id:'crayon', name:'Pastelli',   tag:'Vivace, tattile, giocoso'},
-];
-
-// Tint palettes for spot illustrations
-const TINTS = {
-  forest: ['#E9F1E3','#D4E6CD','#9DBE90','#5E8C6A','#456B4F'],
-  sea:    ['#E4F0F1','#CCE5E6','#8FC3C4','#5B9EA0','#3F7779'],
-  night:  ['#ECE8F3','#D9D3EC','#B6AED4','#8E84BC','#6E6498'],
-  meadow: ['#F4EFD6','#ECE4BF','#CFD494','#A6B05E','#7E8742'],
-  coral:  ['#FBE9E3','#F8D9CE','#F0B0A0','#E8735A','#C4513A'],
-  gold:   ['#FCF0CF','#F8E5AE','#F2D079','#EBB430','#C9941C'],
-  home:   ['#FDF4E7','#F5E8D0','#E8D0A8','#C9A870','#9E7A42'],
-};
-
-const EMBLEMS = {
-  home:'🏠', forest:'🌲', sea:'🌊', meadow:'🌻',
-  moon:'🌙', star:'⭐', storm:'⛈️', map:'🗺️',
-  friend:'🤝', door:'🚪', mountain:'⛰️', path:'🛤️',
-  voice:'💫', animal:'🦊', sound:'🔔', courage:'❤️',
-};
-
-// ── STATIONS (our narrative system) ──
-const STATIONS = [
-  {
-    id:'s1', name:'Il Mondo Ordinario', icon:'🏡',
-    role:'Come inizia la giornata?',
-    options:[
-      {id:'bored',   label:'Si annoia',                    blurb:'La noia è l\'inizio di ogni avventura.',      grant:{world:'home'},   requires:{}, emblem:'home',   tint:'home'},
-      {id:'explore', label:'Vuole esplorare',              blurb:'Qualcosa fuori dalla finestra lo chiama.',    grant:{world:'garden'}, requires:{}, emblem:'forest', tint:'meadow'},
-      {id:'noise',   label:'Sente un rumore dalla finestra',blurb:'Un suono misterioso arriva dal bosco.',      grant:{world:'forest'}, requires:{}, emblem:'sound',  tint:'forest'},
-      {id:'alone',   label:'Si sente solo',                blurb:'Qualcuno o qualcosa lo aspetta là fuori.',    grant:{world:'home'},   requires:{}, emblem:'friend', tint:'coral'},
-    ]
-  },
-  {
-    id:'s2', name:'Il Conflitto', icon:'⚡',
-    role:'Cosa succede dopo?',
-    options:[
-      {id:'garden',  label:'Esplora il giardino',          blurb:'Il giardino nasconde più di quanto sembri.',  grant:{tone:'discover'},  requires:{world:['home','garden']},  emblem:'meadow', tint:'meadow'},
-      {id:'forest',  label:'Va nel bosco',                 blurb:'Il bosco è fitto e pieno di ombre.',          grant:{tone:'adventure'}, requires:{world:['garden','forest']}, emblem:'forest', tint:'forest'},
-      {id:'sound',   label:'Segue un suono misterioso',    blurb:'Ogni passo porta verso l\'ignoto.',           grant:{tone:'mystery'},   requires:{world:['forest','home']},  emblem:'sound',  tint:'night'},
-      {id:'seek',    label:'Cerca qualcuno',               blurb:'Forse c\'è qualcuno che ha bisogno di lui.',  grant:{tone:'friendship'},requires:{world:['home','garden']},  emblem:'friend', tint:'coral'},
-    ]
-  },
-  {
-    id:'s3', name:'Il Mondo Straordinario', icon:'✨',
-    role:'Cosa trova?',
-    options:[
-      {id:'animals', label:'Trova gli animaletti del bosco',blurb:'Una famiglia segreta lo accoglie.',           grant:{place:'forest'}, requires:{tone:['adventure','mystery']},   emblem:'forest',   tint:'forest'},
-      {id:'character',label:'Incontra qualcuno di speciale',blurb:'Un incontro cambia tutto.',                   grant:{place:'any'},    requires:{tone:['friendship','discover']}, emblem:'friend',   tint:'coral'},
-      {id:'passage', label:'Trova un passaggio nascosto',   blurb:'Una porta che non c\'era ieri.',              grant:{place:'secret'}, requires:{tone:['mystery','adventure']},   emblem:'door',     tint:'night'},
-      {id:'voice',   label:'Sente una voce misteriosa',     blurb:'La voce sa cose che lui non sa.',             grant:{place:'any'},    requires:{tone:['mystery','adventure']},   emblem:'voice',    tint:'night'},
-    ]
-  },
-  {
-    id:'s4', name:'La Sfida', icon:'🗝️',
-    role:'Cosa deve affrontare?',
-    options:[
-      {id:'trust',   label:'Guadagnarsi la fiducia di un animale',blurb:'Fermo, tranquillo, paziente.',           requires:{place:['forest','any']},  emblem:'animal',   tint:'forest'},
-      {id:'road',    label:'Trovare la strada nel buio',          blurb:'Ricorda un segno che aveva notato.',     requires:{place:['forest','secret']},emblem:'moon',     tint:'night'},
-      {id:'help',    label:'Chiedere aiuto a uno sconosciuto',    blurb:'La timidezza si scioglie in un sorriso.',requires:{place:['any']},           emblem:'friend',   tint:'coral'},
-      {id:'big',     label:'Affrontare qualcosa di enorme',       blurb:'Da vicino era solo piccolo e spaventato.',requires:{place:['forest','secret']},emblem:'mountain', tint:'meadow'},
-    ]
-  },
-  {
-    id:'s5', name:'Il Ritorno', icon:'🎈',
-    role:'Come torna a casa?',
-    options:[
-      {id:'new',     label:'Torna con qualcosa di nuovo',        blurb:'Non un oggetto — una consapevolezza.',   requires:{}, emblem:'star',    tint:'gold'},
-      {id:'sleep',   label:'Torna a dormire sereno',             blurb:'La paura si è trasformata in qualcosa di morbido.', requires:{}, emblem:'moon',    tint:'night'},
-      {id:'parents', label:'I genitori lo aspettano',            blurb:'Ha qualcosa di bello da raccontare.',    requires:{}, emblem:'home',    tint:'home'},
-      {id:'friend',  label:'Ha fatto un nuovo amico',            blurb:'Il mondo straordinario è diventato familiare.', requires:{}, emblem:'friend', tint:'coral'},
-    ]
-  },
-];
 
 // ══════════════════════════════════════
 // STATE
