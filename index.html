@@ -628,10 +628,22 @@ button,input,textarea{font-family:inherit;}
         <div class="section-label">Scegli il formato</div>
         <div class="plan-grid" id="plan-grid"></div>
 
+        <!-- EMAIL -->
+        <div style="margin-top:20px;">
+          <div class="section-label">Dove ti mandiamo il libro?</div>
+          <input class="input" id="input-email" type="email"
+                 placeholder="La tua email"
+                 oninput="updateCreateBtn()"
+                 style="margin-bottom:6px;">
+          <p style="font-size:12px;color:var(--warm-gray);">Riceverai il PDF entro 48 ore. Nessuno spam, promesso.</p>
+        </div>
+
         <!-- CTA -->
-        <button class="btn-primary" id="btn-create" onclick="goTo('confirm')" style="width:100%;justify-content:center;font-size:17px;padding:17px;margin-top:4px;">
+        <button class="btn-primary" id="btn-create" onclick="submitOrder()"
+                style="width:100%;justify-content:center;font-size:17px;padding:17px;margin-top:16px;">
           Crea il mio libro · <span id="price-label">€29</span>
         </button>
+        <div id="order-error" style="display:none;text-align:center;color:#C9543C;font-size:13px;font-weight:600;margin-top:10px;"></div>
         <p style="text-align:center;font-size:13px;color:var(--warm-gray);margin-top:10px;">Il tuo libro sarà pronto entro 48 ore. Ti invieremo tutto via email.</p>
 
         <button onclick="goTo('builder')" style="width:100%;background:none;border:none;color:var(--warm-gray);font-size:14px;font-weight:600;cursor:pointer;padding:14px;margin-top:8px;">
@@ -698,6 +710,7 @@ let state = {
   companion: null,
   choices: {},   // {s1: optionId, s2: optionId, ...}
   plan: 'digital',
+  email: '',
 };
 
 // ══════════════════════════════════════
@@ -1030,6 +1043,9 @@ function renderConfirm() {
   const nameEl = document.getElementById('confirm-name');
   if (nameEl) nameEl.textContent = state.name || 'il tuo bambino';
 
+  const emailEl = document.getElementById('confirm-email');
+  if (emailEl) emailEl.textContent = state.email || '';
+
   const charWrap = document.getElementById('confirm-char-wrap');
   if (charWrap && state.companion) {
     charWrap.innerHTML = `
@@ -1043,7 +1059,7 @@ function renderConfirm() {
 // RESET
 // ══════════════════════════════════════
 function resetAll() {
-  state = {screen:'landing', styleId:'water', name:'', desc:'', companion:null, choices:{}, plan:'digital'};
+  state = {screen:'landing', styleId:'water', name:'', desc:'', companion:null, choices:{}, plan:'digital', email:''};
   const nameEl = document.getElementById('input-name');
   const descEl = document.getElementById('input-desc');
   if (nameEl) nameEl.value = '';
@@ -1052,6 +1068,90 @@ function resetAll() {
 
 // ══════════════════════════════════════
 // INIT
+
+// ══════════════════════════════════════
+// SUPABASE CONFIG
+// Replace with your actual values
+// ══════════════════════════════════════
+const SUPABASE_URL = 'https://hirzbtruxvjzmcnncvmv.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_baZvlGyMLBkkiOwHina6CA_HB59Lclw'; // ← replace this
+
+async function supabaseInsert(table, data) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Prefer': 'return=representation',
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  return res.json();
+}
+
+// ══════════════════════════════════════
+// SUBMIT ORDER
+// ══════════════════════════════════════
+async function submitOrder() {
+  const email = document.getElementById('input-email')?.value?.trim();
+  if (!email) {
+    showOrderError('Inserisci la tua email per continuare.');
+    return;
+  }
+  if (!/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
+    showOrderError('Email non valida.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-create');
+  btn.disabled = true;
+  btn.textContent = 'Invio in corso…';
+  hideOrderError();
+
+  const order = {
+    name:        state.name,
+    description: state.desc,
+    style:       state.styleId,
+    companion:   state.companion,
+    choices:     state.choices,
+    plan:        state.plan,
+    email:       email,
+    status:      'new',
+  };
+
+  try {
+    await supabaseInsert('orders', order);
+    state.email = email;
+    goTo('confirm');
+  } catch (err) {
+    console.error('Order error:', err);
+    showOrderError('Qualcosa è andato storto. Riprova tra un momento.');
+    btn.disabled = false;
+    btn.innerHTML = 'Crea il mio libro · <span id="price-label">€' + (state.plan === 'print' ? '49' : '29') + '</span>';
+  }
+}
+
+function showOrderError(msg) {
+  const el = document.getElementById('order-error');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
+function hideOrderError() {
+  const el = document.getElementById('order-error');
+  if (el) el.style.display = 'none';
+}
+
+function updateCreateBtn() {
+  const email = document.getElementById('input-email')?.value?.trim();
+  const btn = document.getElementById('btn-create');
+  if (btn) btn.disabled = !email;
+}
+
 // ══════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   initFireflies();
