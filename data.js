@@ -339,3 +339,74 @@ const STATIONS = [
     ],
   },
 ];
+
+// ══════════════════════════════════════
+// STORY TEXTS — Station 1 preview
+// ══════════════════════════════════════
+// COMPANION_LORE: physical description + affective detail per companion.
+// Used inside the story text. Write with care — this is the product.
+
+const COMPANION_LORE = {
+  rabbit:   { desc:'un coniglietto di pezza con le orecchie lunghe e il naso fatto con un bottone marrone', detail:'una piccola toppa sul ginocchio sinistro' },
+  bear:     { desc:'un orsacchiotto con il pelo consumato dagli abbracci',                                  detail:'un occhio cucito un po\' storto, che lo faceva sembrare sempre curioso' },
+  fox:      { desc:'una volpetta di stoffa con la coda lunga e le zampe bianche',                           detail:'un orecchio ripiegato che non si raddrizzava mai' },
+  owl:      { desc:'un gufetto morbido con gli occhi grandi come bottoni',                                  detail:'una piuma sulla testa che puntava sempre dalla parte sbagliata' },
+  frog:     { desc:'un ranocchio di pezza verde con la pancia chiara',                                      detail:'un sorriso cucito un po\' più largo da un lato' },
+  eagle:    { desc:'un aquilotto con le ali morbide e le punte chiare',                                     detail:'un filo dorato che spuntava dall\'ala destra' },
+  hedgehog: { desc:'un riccetto con gli aculei di feltro morbidissimo',                                     detail:'il nasino sbiadito a forza di carezze' },
+  mouse:    { desc:'un topolino piccolo con le orecchie rotonde',                                           detail:'una macchiolina scura vicino al baffo, che non era mai andata via' },
+};
+
+// Shared intro — same for every story.
+// Placeholders: {nome} {comp} {desc} {detail}
+const STORY_INTRO =
+`{nome} aveva una stanza piena di cose belle. Ma la cosa più bella di tutte era {comp}.
+
+{comp} era {desc}. Aveva {detail}. Andava ovunque con {nome}. A tavola. Sul divano. Anche in bagno, una volta.`;
+
+// Opening variant per Station 1 choice.
+// Keyed by option id in STATIONS[0].
+// NOTE: texts avoid gendered words for the child on purpose.
+const STORY_OPENINGS = {
+  bored:
+`Quel pomeriggio, però, la stanza sembrava piccola. I giochi stavano zitti. Perfino il soffitto sembrava sempre lo stesso soffitto.
+
+«Uffa» disse {nome}. «Non succede mai niente.»
+
+{comp} non rispose. I pupazzi di pezza non parlano.
+
+Ma quel giorno — e questo era strano — sembrava proprio che stesse ascoltando.`,
+
+  explore:
+`Dalla finestra della stanza si vedeva il giardino. E dietro il giardino, il mondo.
+
+{nome} lo guardava ogni mattina. Sembrava che là fuori stesse sempre per succedere qualcosa.
+
+«Secondo te cosa c'è là in fondo, {comp}?»
+
+{comp} non rispose. I pupazzi di pezza non parlano.
+
+Ma {nome} avrebbe giurato che anche {comp} volesse scoprirlo.`,
+
+  noise:
+`Quella sera, dalla finestra, arrivò un rumore.
+
+Non forte. Non spaventoso. Un rumore piccolo, come un campanello lontano, che veniva dal bosco.
+
+{nome} si avvicinò al vetro. «L'hai sentito anche tu, {comp}?»
+
+{comp} non rispose. I pupazzi di pezza non parlano.
+
+Però {comp}, chissà come, sembrava guardare dritto verso il bosco.`,
+
+  alone:
+`Quel giorno la casa era silenziosa. Troppo silenziosa.
+
+{nome} si sedette sul letto e fece un sospiro grande, di quelli che riempiono tutta la stanza.
+
+«Almeno ci sei tu, {comp}.»
+
+{comp} non rispose. I pupazzi di pezza non parlano.
+
+Ma si lasciò abbracciare stretto stretto — e questo, per un pupazzo, è un modo di rispondere.`,
+};
