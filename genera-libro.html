@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DreamTaily — Genera libro (strumento interno)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,sans-serif;background:#F4EFE6;color:#3D2B1F;padding:24px;max-width:760px;margin:0 auto;}
+h1{font-size:20px;margin-bottom:4px;}
+.sub{font-size:13px;color:#8C7B6B;margin-bottom:22px;}
+label{display:block;font-weight:700;font-size:13px;margin:14px 0 5px;}
+input,select,textarea{width:100%;padding:10px 12px;border:2px solid #E4D8C2;border-radius:10px;font-size:14px;font-family:inherit;background:#fff;}
+textarea{min-height:260px;font-family:monospace;font-size:12px;}
+button{margin-top:18px;padding:13px 22px;border:none;border-radius:11px;background:#E8735A;color:#fff;font-weight:800;font-size:15px;cursor:pointer;font-family:inherit;}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.hint{font-size:12px;color:#8C7B6B;margin-top:4px;}
+.ok{margin-top:10px;font-size:13px;color:#1D7A4F;font-weight:700;display:none;}
+</style>
+</head>
+<body>
+<h1>🛠 Genera libro</h1>
+<p class="sub">Strumento interno. Copia i dati dell'ordine da Supabase, genera il JSON, incollalo nella tabella <b>books</b>.</p>
+
+<div class="row">
+  <div><label>Nome bambino</label><input id="f-name" placeholder="Sofia"></div>
+  <div><label>Cover URL (preview_url dell'ordine)</label><input id="f-cover" placeholder="https://... (opzionale)"></div>
+</div>
+<div class="row">
+  <div><label>Compagno</label><select id="f-comp"></select></div>
+  <div><label>Stile</label><select id="f-style"></select></div>
+</div>
+<div class="row">
+  <div><label>Stazione 1</label><select id="f-s1"></select></div>
+  <div><label>Stazione 2</label><select id="f-s2"></select></div>
+</div>
+<div class="row">
+  <div><label>Stazione 3</label><select id="f-s3"></select></div>
+  <div><label>Stazione 4</label><select id="f-s4"></select></div>
+</div>
+<div class="row">
+  <div><label>Stazione 5</label><select id="f-s5"></select></div>
+  <div><label>Order ID (opzionale)</label><input id="f-order" placeholder="uuid dell'ordine"></div>
+</div>
+
+<button onclick="generate()">Genera JSON</button>
+<div class="ok" id="ok">✓ Copiato negli appunti</div>
+
+<label style="margin-top:20px;">Riga per la tabella <b>books</b> (Table Editor → Insert → paste)</label>
+<textarea id="out" readonly onclick="this.select()"></textarea>
+<p class="hint">Il capitolo 1 è assemblato dai testi in data.js. I capitoli 2–5 sono segnaposto da scrivere/rifinire direttamente nel campo <b>pages</b> della riga, poi metti <b>status = ready</b>.</p>
+
+<script src="data.js"></script>
+<script>
+function fill(sel, items, getLabel, getVal){
+  const el = document.getElementById(sel);
+  el.innerHTML = items.map(i=>`<option value="${getVal(i)}">${getLabel(i)}</option>`).join('');
+}
+fill('f-comp', COMPANIONS, c=>`${c.name} (${c.species})`, c=>c.id);
+fill('f-style', STYLES, s=>s.name, s=>s.id);
+STATIONS.forEach((st,i)=>{
+  fill('f-s'+(i+1), st.options, o=>o.label, o=>o.id);
+});
+
+function generate(){
+  const name  = document.getElementById('f-name').value.trim() || 'Il nostro eroe';
+  const comp  = document.getElementById('f-comp').value;
+  const style = document.getElementById('f-style').value;
+  const cover = document.getElementById('f-cover').value.trim() || null;
+  const order = document.getElementById('f-order').value.trim() || null;
+  const compObj = COMPANIONS.find(c=>c.id===comp);
+  const lore = COMPANION_LORE[comp] || {desc:'un pupazzo di pezza morbidissimo',detail:'un dettaglio tutto suo'};
+
+  const choices = {};
+  STATIONS.forEach((st,i)=>{ choices[st.id] = document.getElementById('f-s'+(i+1)).value; });
+
+  // Capitolo 1 — assemblato
+  const opening = STORY_OPENINGS[choices.s1] || STORY_OPENINGS.explore;
+  const ch1 = (STORY_INTRO + '\n\n' + opening)
+    .replaceAll('{nome}', name)
+    .replaceAll('{comp}', compObj ? compObj.name : 'il suo amico')
+    .replaceAll('{desc}', lore.desc)
+    .replaceAll('{detail}', lore.detail);
+
+  const pages = [{chapter:1, station:STATIONS[0].name, text:ch1, image_url:null}];
+
+  // Capitoli 2–5 — segnaposto con la scelta fatta
+  STATIONS.slice(1).forEach((st,i)=>{
+    const opt = st.options.find(o=>o.id===choices[st.id]);
+    pages.push({
+      chapter: i+2,
+      station: st.name,
+      text: `[DA SCRIVERE — scelta: "${opt?opt.label:''}"]`,
+      image_url: null
+    });
+  });
+
+  const row = {
+    child_name: name,
+    companion_id: comp,
+    style: style,
+    cover_url: cover,
+    pages: pages,
+    status: 'draft',
+    order_id: order
+  };
+
+  const out = JSON.stringify(row, null, 2);
+  document.getElementById('out').value = out;
+  navigator.clipboard?.writeText(out).then(()=>{
+    document.getElementById('ok').style.display='block';
+    setTimeout(()=>document.getElementById('ok').style.display='none',2000);
+  });
+}
+</script>
+</body>
+</html>
