@@ -1143,13 +1143,13 @@ async function generatePreviewImage() {
         'apikey': SUPABASE_ANON_KEY,        
       },
       body: JSON.stringify({
-        preview_id: state.previewId,
-        name: state.name,
-        description: state.desc,
-        style: state.styleId,
-        companion_id: state.companion,
-        s1: state.choices['s1'],
-      }),
+  preview_id: state.previewId,
+  name: state.name,
+  description: state.desc,
+  style: state.styleId,
+  companion_id: state.companion,
+  choices: state.choices,
+}),
       signal: ctrl.signal,
     });
     clearTimeout(timer);
