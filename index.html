@@ -589,14 +589,16 @@ body{background:
 .enchanted-cover .hero-char{position:relative;height:auto;object-fit:contain;filter:drop-shadow(0 22px 18px rgba(14,31,28,.32));transform-origin:bottom center}
 .hero-rabbit{width:58%;animation:rabbitCurious 5.8s ease-in-out infinite!important;z-index:2}.hero-bear{width:44%;animation:bearHello 5.2s .6s ease-in-out infinite!important;z-index:3;margin-left:-15%}
 .character-aura{position:absolute;left:50%;top:56%;width:90%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(255,224,119,.34),transparent 65%);filter:blur(8px);animation:auraBreathe 5s ease-in-out infinite}
-.hero-greeters{position:absolute;z-index:16;left:clamp(18px,4vw,58px);bottom:9%;display:flex;gap:16px;align-items:flex-end;pointer-events:none}
-.hero-greeter{position:relative;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 16px 16px rgba(14,31,28,.2));animation:greetFloat 4.6s ease-in-out infinite}
-.hero-greeter img{display:block;height:clamp(86px,11vw,130px);object-fit:contain;transform-origin:bottom center}
-.hero-greeter .wave-arm{position:absolute;right:8%;top:26%;font-size:18px;line-height:1;transform-origin:20% 90%;animation:helloWave 2.2s ease-in-out infinite;color:#fff5cf;text-shadow:0 0 12px rgba(255,240,170,.7)}
-.hero-greeter-bubble{margin-bottom:8px;padding:7px 12px;border-radius:999px;background:rgba(255,252,245,.92);color:#6f5842;border:1px solid rgba(237,220,188,.95);font-size:12px;font-weight:800;box-shadow:0 10px 26px rgba(61,43,31,.1);animation:bubbleGlow 3.2s ease-in-out infinite;white-space:nowrap}
-.hero-greeter-bubble::after{content:'';position:absolute}
-.greeter-fox{animation-delay:.2s}.greeter-owl{animation-delay:1s}
-.greeter-fox img{transform:rotate(-2deg)}.greeter-owl img{height:clamp(76px,9vw,112px);transform:rotate(2deg)}
+.hero-greeters{position:absolute;inset:0;z-index:16;pointer-events:none}
+.hero-greeter{position:absolute;filter:drop-shadow(0 14px 14px rgba(14,31,28,.2));transform-origin:bottom center}
+.hero-greeter img{display:block;object-fit:contain;transform-origin:bottom center}
+.greeter-fox{left:-8px;bottom:2%;animation:greetFloat 4.8s ease-in-out infinite}
+.greeter-fox img{height:clamp(84px,9vw,120px);transform:rotate(-3deg)}
+.greeter-owl{left:clamp(18px,4vw,54px);top:15%;animation:greetFloat 5.2s 1s ease-in-out infinite}
+.greeter-owl img{height:clamp(62px,6.5vw,92px);transform:rotate(2deg)}
+.hero-greeter .wave-arm{position:absolute;font-size:16px;line-height:1;transform-origin:20% 90%;animation:helloWave 2.4s ease-in-out infinite;color:#fff5cf;text-shadow:0 0 12px rgba(255,240,170,.7)}
+.greeter-fox .wave-arm{right:-2px;top:28%}
+.greeter-owl .wave-arm{right:-8px;top:18%;font-size:14px}
 .foreground-grass{position:absolute;z-index:20;left:-4%;right:-4%;bottom:-8%;height:23%;background:radial-gradient(ellipse at 5% 100%,#244834 0 36%,transparent 37%),radial-gradient(ellipse at 25% 100%,#31543b 0 42%,transparent 43%),radial-gradient(ellipse at 52% 100%,#244834 0 40%,transparent 41%),radial-gradient(ellipse at 78% 100%,#31543b 0 44%,transparent 45%),radial-gradient(ellipse at 98% 100%,#244834 0 39%,transparent 40%)}
 .floating-leaf{position:absolute;z-index:18;top:18%;left:-8%;color:#dfc76f;font-size:25px;opacity:0;animation:leafSail 14s linear infinite}.leaf-2{top:35%;animation-delay:4.2s;font-size:18px}.leaf-3{top:55%;animation-delay:8.4s;font-size:22px}
 .scroll-whisper{position:absolute;z-index:30;left:50%;bottom:18px;transform:translateX(-50%);border:0;background:transparent;color:#f6ebcf;font-size:12px;font-weight:700;letter-spacing:.3px;cursor:pointer;animation:whisperBob 2.5s ease-in-out infinite}.scroll-whisper span{display:block;font-size:24px;line-height:16px}
@@ -616,7 +618,7 @@ body{background:
 #stations-container{position:relative;padding-left:8px}#stations-container::before{content:'';position:absolute;left:25px;top:20px;bottom:25px;width:3px;border-radius:4px;background:repeating-linear-gradient(to bottom,#e3bd61 0 10px,transparent 10px 18px);animation:trailFlow 2.8s linear infinite;opacity:.55}
 .station-card{margin-left:24px;border-radius:22px}.station-num{position:relative;z-index:2;box-shadow:0 0 0 6px #f7f1e7}
 @media(max-width:760px){
- .nav{position:absolute}.enchanted-cover{min-height:880px}.cover-copy{top:18%;transform:none;left:22px;right:22px;max-width:none;text-align:center}.cover-copy h1{font-size:clamp(43px,13vw,64px)}.cover-copy p{font-size:16px;margin:auto}.cover-actions{justify-content:center}.enchanted-cover .hero-chars{right:3%;left:3%;bottom:9%;width:auto;height:43%}.moon-orbit{right:5%;top:8%;width:130px}.forest-back,.forest-mid{bottom:17%}.storybook-steps .steps::before{display:none}.storybook-steps .step-card{margin-top:25px}.builder-guide{display:none!important}.hero-greeters{left:12px;bottom:7%;gap:8px}.hero-greeter-bubble{font-size:10px;padding:6px 9px}.hero-greeter img{height:76px}.hero-greeter .wave-arm{font-size:14px}
+ .nav{position:absolute}.enchanted-cover{min-height:880px}.cover-copy{top:18%;transform:none;left:22px;right:22px;max-width:none;text-align:center}.cover-copy h1{font-size:clamp(43px,13vw,64px)}.cover-copy p{font-size:16px;margin:auto}.cover-actions{justify-content:center}.enchanted-cover .hero-chars{right:3%;left:3%;bottom:9%;width:auto;height:43%}.moon-orbit{right:5%;top:8%;width:130px}.forest-back,.forest-mid{bottom:17%}.storybook-steps .steps::before{display:none}.storybook-steps .step-card{margin-top:25px}.builder-guide{display:none!important}.greeter-fox{left:-12px;bottom:1%}.greeter-fox img{height:72px}.greeter-owl{left:10px;top:12%}.greeter-owl img{height:54px}.hero-greeter .wave-arm{font-size:12px}
 }
 @media(min-width:761px) and (max-width:1050px){.cover-copy{max-width:55vw}.enchanted-cover .hero-chars{right:1%;width:43vw}.cover-copy h1{font-size:7vw}}
 
@@ -661,16 +663,14 @@ body{background:
               <span class="cover-note">Da €29 · pronto in 48 ore</span>
             </div>
           </div>
-          <div class="hero-greeters layer" id="hero-greeters" data-depth="4.5" aria-hidden="true">
+          <div class="hero-greeters" id="hero-greeters" aria-hidden="true">
             <div class="hero-greeter greeter-fox">
-              <div class="hero-greeter-bubble">Ciao! ✦</div>
               <div style="position:relative;">
                 <img class="hero-greeter-img" data-char="fox" src="assets/char/water/fox.png" alt="">
                 <span class="wave-arm">👋</span>
               </div>
             </div>
             <div class="hero-greeter greeter-owl">
-              <div class="hero-greeter-bubble">Benvenuti!</div>
               <div style="position:relative;">
                 <img class="hero-greeter-img" data-char="owl" src="assets/char/water/owl.png" alt="">
                 <span class="wave-arm">👋</span>
