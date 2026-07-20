@@ -366,6 +366,26 @@ button,input,textarea{font-family:inherit;}
   background:linear-gradient(to bottom,transparent,#FBF6EC 85%);
 }
 
+
+.book-illustration{
+  width:100%;border-radius:13px;overflow:hidden;
+  margin:4px 0 16px;background:#F4ECDD;
+  aspect-ratio:16/10;position:relative;
+}
+.book-illustration img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  opacity:0;transition:opacity .8s ease;
+}
+.book-illustration img.loaded{opacity:1;}
+.illu-status{
+  text-align:center;font-family:'Lora',serif;font-style:italic;
+  font-size:12.5px;color:#B7A88F;margin:-8px 0 14px;
+}
+.illu-status .dots::after{
+  content:'';animation:dots 1.5s steps(4,end) infinite;
+}
+@keyframes dots{0%{content:'';}25%{content:'.';}50%{content:'..';}75%{content:'...';}}
+
 /* ── LANDING STEPS ── */
 .steps{display:grid;grid-template-columns:1fr;gap:14px;margin-top:28px;}
 @media(min-width:600px){.steps{grid-template-columns:repeat(3,1fr);}}
@@ -678,6 +698,8 @@ button,input,textarea{font-family:inherit;}
         <!-- BOOK PAGE 1 PREVIEW -->
         <div class="book-page" style="margin-bottom:14px;">
           <div class="book-chapter-label">Capitolo 1 — Il Mondo Ordinario</div>
+          <div class="book-illustration" id="book-illustration" style="display:none;"><img id="book-illu-img" alt="Illustrazione"></div>
+          <div class="illu-status" id="illu-status" style="display:none;">L'illustrazione sta prendendo forma<span class="dots"></span></div>
           <div class="book-companion" id="book-companion"></div>
           <div class="book-text" id="book-text"></div>
           <div class="book-pagenum">— 1 —</div>
@@ -773,6 +795,9 @@ let state = {
   choices: {},   // {s1: optionId, s2: optionId, ...}
   plan: 'digital',
   email: '',
+  previewId: null,
+  previewImageUrl: null,
+  previewLoading: false,
 };
 
 // ══════════════════════════════════════
@@ -1078,8 +1103,84 @@ function renderSummary() {
       </p>`;
   }
 
+  // Illustrazione generata (una sola volta per sessione)
+  const illuBox = document.getElementById('book-illustration');
+  const illuImg = document.getElementById('book-illu-img');
+  const illuStatus = document.getElementById('illu-status');
+  if (state.previewImageUrl) {
+    if (illuBox && illuImg) {
+      illuBox.style.display = 'block';
+      illuImg.src = state.previewImageUrl;
+      illuImg.classList.add('loaded');
+      if (compWrap) compWrap.style.display = 'none';
+      if (illuStatus) illuStatus.style.display = 'none';
+    }
+  } else if (!state.previewLoading) {
+    if (illuStatus) illuStatus.style.display = 'block';
+    generatePreviewImage();
+  }
+
   // Plan cards
   renderPlanCards();
+}
+
+// ══════════════════════════════════════
+// PREVIEW IMAGE GENERATION
+// ══════════════════════════════════════
+async function generatePreviewImage() {
+  if (state.previewLoading || state.previewImageUrl) return;
+  state.previewLoading = true;
+  if (!state.previewId) state.previewId = crypto.randomUUID();
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 90000);
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-preview`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({
+        preview_id: state.previewId,
+        name: state.name,
+        description: state.desc,
+        style: state.styleId,
+        companion_id: state.companion,
+        s1: state.choices['s1'],
+      }),
+      signal: ctrl.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if (!json.url) throw new Error('no url');
+
+    state.previewImageUrl = json.url;
+
+    const illuBox = document.getElementById('book-illustration');
+    const illuImg = document.getElementById('book-illu-img');
+    const illuStatus = document.getElementById('illu-status');
+    const compWrap = document.getElementById('book-companion');
+    if (illuBox && illuImg) {
+      illuImg.onload = () => {
+        illuBox.style.display = 'block';
+        illuImg.classList.add('loaded');
+        if (compWrap) compWrap.style.display = 'none';
+        if (illuStatus) illuStatus.style.display = 'none';
+      };
+      illuImg.src = json.url;
+    }
+  } catch (err) {
+    clearTimeout(timer);
+    console.warn('Preview image failed (fallback to companion):', err);
+    const illuStatus = document.getElementById('illu-status');
+    if (illuStatus) illuStatus.style.display = 'none';
+  } finally {
+    state.previewLoading = false;
+  }
 }
 
 function renderPlanCards() {
@@ -1134,7 +1235,7 @@ function renderConfirm() {
 // RESET
 // ══════════════════════════════════════
 function resetAll() {
-  state = {screen:'landing', styleId:'water', name:'', desc:'', companion:null, choices:{}, plan:'digital', email:''};
+  state = {screen:'landing', styleId:'water', name:'', desc:'', companion:null, choices:{}, plan:'digital', email:'', previewId:null, previewImageUrl:null, previewLoading:false};
   const nameEl = document.getElementById('input-name');
   const descEl = document.getElementById('input-desc');
   if (nameEl) nameEl.value = '';
@@ -1197,6 +1298,8 @@ async function submitOrder() {
     plan:        state.plan,
     email:       email,
     status:      'new',
+    preview_id:  state.previewId,
+    preview_url: state.previewImageUrl,
   };
 
   try {
