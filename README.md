@@ -1,15 +1,18 @@
-# DreamTaily protagonist foundation v1
+# DreamTaily — protagonista v2
 
-Target branch: `feature/story-engine-v1`
+Correzioni incluse:
 
-This package intentionally excludes image uploads.
+- soltanto due tipi di protagonista:
+  - `real_person`
+  - `fictional_character`
+- `fictional_character` comprende persone inventate, animali, robot e creature;
+- le card degli stili mantengono la propria immagine;
+- scegliendo uno stile, le altre card vengono solo attenuate.
 
-## Files
+Sostituire su GitHub Web:
 
+- `index.html`
 - `schemas/protagonist-input.schema.json`
 - `schemas/character-bible.schema.json`
-- `supabase/migrations/202607210002_add_protagonist_foundation.sql`
 
-Recommended commit message:
-
-`feat: add structured protagonist and character bible foundation`
+La migration SQL già eseguita non cambia.
