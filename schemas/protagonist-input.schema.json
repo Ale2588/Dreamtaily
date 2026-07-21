@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dreamtaily.com/schemas/protagonist-input.schema.json",
+  "title": "DreamTaily Protagonist Input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "display_name",
+    "narrative_age_group",
+    "personality",
+    "appearance"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "real_person",
+        "original_character",
+        "creature"
+      ]
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "age": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1,
+      "maximum": 120
+    },
+    "narrative_age_group": {
+      "type": "string",
+      "enum": [
+        "0-2",
+        "3-5",
+        "6-8",
+        "9-12",
+        "teen",
+        "adult",
+        "ageless"
+      ]
+    },
+    "pronouns": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 40
+    },
+    "short_description": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "personality": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 80
+      }
+    },
+    "interests": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      }
+    },
+    "appearance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "species",
+        "hair_color",
+        "hair_style",
+        "eye_color",
+        "skin_tone",
+        "body_color",
+        "body_shape",
+        "default_outfit",
+        "distinctive_features"
+      ],
+      "properties": {
+        "species": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 100
+        },
+        "hair_color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 80
+        },
+        "hair_style": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "eye_color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 80
+        },
+        "skin_tone": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 80
+        },
+        "body_color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 100
+        },
+        "body_shape": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 160
+        },
+        "default_outfit": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "top",
+            "bottom",
+            "shoes",
+            "accessory"
+          ],
+          "properties": {
+            "top": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 120
+            },
+            "bottom": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 120
+            },
+            "shoes": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 120
+            },
+            "accessory": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 120
+            }
+          }
+        },
+        "distinctive_features": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        }
+      }
+    }
+  }
+}
