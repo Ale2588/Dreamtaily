@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import schema from "./story-package.schema.json" with { type: "json" };
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -82,9 +83,7 @@ Deno.serve(async (req) => {
       choices: order.choices ?? {},
     };
 
-    const schema = await fetch(new URL("./story-package.schema.json", import.meta.url))
-      .then((r) => r.json());
-
+ 
     const model = Deno.env.get("OPENAI_STORY_MODEL") || "gpt-5-mini";
     const openai = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
