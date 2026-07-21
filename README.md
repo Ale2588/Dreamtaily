@@ -1,18 +1,35 @@
-# DreamTaily — protagonista v2
+# DreamTaily Story Engine v2 — Character Bible
 
-Correzioni incluse:
+Questa versione:
 
-- soltanto due tipi di protagonista:
-  - `real_person`
-  - `fictional_character`
-- `fictional_character` comprende persone inventate, animali, robot e creature;
-- le card degli stili mantengono la propria immagine;
-- scegliendo uno stile, le altre card vengono solo attenuate.
+- legge `orders.protagonist`;
+- mantiene un fallback per gli ordini legacy basati su `name` e `description`;
+- genera `character_bible` insieme a Story Bible, Story Outline e Visual Bible;
+- salva `character_bible` in `story_packages.character_bible`;
+- usa soltanto `real_person` e `fictional_character`;
+- preserva i tratti fisici forniti e non inventa quelli mancanti.
 
-Sostituire su GitHub Web:
+## Uso dal Dashboard Supabase
 
-- `index.html`
-- `schemas/protagonist-input.schema.json`
-- `schemas/character-bible.schema.json`
+Apri la Edge Function `generate-story-bible` e sostituisci il contenuto con:
 
-La migration SQL già eseguita non cambia.
+`supabase/functions/generate-story-bible/index.dashboard-single-file.ts`
+
+È la versione consigliata per il Dashboard perché contiene lo schema JSON inline e non richiede import locali.
+
+## Uso dal repository / CLI
+
+Usa insieme:
+
+- `supabase/functions/generate-story-bible/index.ts`
+- `supabase/functions/generate-story-bible/story-package.schema.json`
+
+## Test
+
+Invoca la funzione con:
+
+```json
+{"order_id":"c8b86a91-6e46-4c58-af1e-a60dec670b63"}
+```
+
+Prima del test elimina un eventuale `story_packages` già pronto per lo stesso ordine, altrimenti la cache restituirà il pacchetto precedente.

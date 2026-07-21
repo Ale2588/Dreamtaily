@@ -2,6 +2,7 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
+    "character_bible",
     "story_bible",
     "story_outline",
     "visual_bible"
@@ -965,6 +966,218 @@
           "items": {
             "type": "string",
             "minLength": 1
+          }
+        }
+      }
+    },
+    "character_bible": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "type",
+        "identity",
+        "narrative_profile",
+        "visual_profile",
+        "immutable_traits",
+        "allowed_variations",
+        "forbidden_inventions"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "real_person",
+            "fictional_character"
+          ]
+        },
+        "identity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "display_name",
+            "age",
+            "narrative_age_group",
+            "pronouns"
+          ],
+          "properties": {
+            "display_name": {
+              "type": "string"
+            },
+            "age": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "narrative_age_group": {
+              "type": "string"
+            },
+            "pronouns": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "narrative_profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "personality",
+            "interests",
+            "strengths",
+            "growth_opportunities"
+          ],
+          "properties": {
+            "personality": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "interests": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "strengths": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "growth_opportunities": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "visual_profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "species",
+            "hair_color",
+            "hair_style",
+            "eye_color",
+            "skin_tone",
+            "body_color",
+            "body_shape",
+            "default_outfit",
+            "distinctive_features"
+          ],
+          "properties": {
+            "species": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "hair_color": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "hair_style": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "eye_color": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "skin_tone": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "body_color": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "body_shape": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "default_outfit": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "top",
+                "bottom",
+                "shoes",
+                "accessory"
+              ],
+              "properties": {
+                "top": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "bottom": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "shoes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "accessory": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "distinctive_features": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "immutable_traits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowed_variations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "forbidden_inventions": {
+          "type": "array",
+          "items": {
+            "type": "string"
           }
         }
       }
