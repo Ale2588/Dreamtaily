@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DreamTaily — Il libro scritto per tuo figlio</title>
+<title>DreamTaily — Il libro scritto per il tuo protagonista</title>
 <link rel="icon" type="image/png" href="assets/brand/dreamtaily-icon.png">
 <link rel="apple-touch-icon" href="assets/brand/dreamtaily-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -154,6 +154,14 @@ button,input,textarea{font-family:inherit;}
   outline:none;transition:border-color .2s;
 }
 .input:focus{border-color:var(--coral);}
+.protagonist-type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:14px;}
+.protagonist-type{border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px 8px;cursor:pointer;text-align:center;font-weight:800;font-size:13px;color:var(--brown);}
+.protagonist-type.selected{border-color:var(--coral);background:var(--tint-coral);color:var(--coral-deep);}
+.protagonist-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.protagonist-fields .full{grid-column:1/-1;}
+.field-label{display:block;font-size:12px;font-weight:800;color:var(--warm-gray);margin:0 0 5px 2px;}
+.field-help{font-size:11.5px;color:var(--warm-gray);line-height:1.4;margin-top:8px;}
+@media(max-width:560px){.protagonist-type-grid{grid-template-columns:1fr}.protagonist-fields{grid-template-columns:1fr}.protagonist-fields .full{grid-column:auto}}
 
 /* ── WRAPPER ── */
 .app{max-width:100%;overflow-x:hidden;}
@@ -728,7 +736,7 @@ body{background:
           <div class="cover-copy">
             <div class="cover-kicker">✦ UNA STORIA CHE CONOSCE IL SUO NOME</div>
             <h1>Apri la porta<br>del suo <em>mondo incantato.</em></h1>
-            <p>Voi scegliete il viaggio. DreamTaily lo trasforma in un libro illustrato unico, dove tuo figlio diventa l’eroe.</p>
+            <p>Voi scegliete il viaggio. DreamTaily lo trasforma in un libro illustrato unico, dove il protagonista che scegli diventa l’eroe.</p>
             <div class="cover-actions">
               <button class="btn-primary cover-cta" onclick="goTo('builder')"><span>Inizia l’avventura</span><b>→</b></button>
               <span class="cover-note">Da €29 · pronto in 48 ore</span>
@@ -816,7 +824,7 @@ body{background:
 
         <!-- FOOTER CTA -->
         <div class="footer-cta" style="border-radius:20px;margin-top:32px;">
-          <div style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(18px,3vw,26px);margin-bottom:16px;">Inizia oggi la storia del tuo bambino</div>
+          <div style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(18px,3vw,26px);margin-bottom:16px;">Inizia oggi la storia del tuo protagonista</div>
           <button class="btn-primary" onclick="goTo('builder')">Inizia a costruire →</button>
         </div>
 
@@ -879,9 +887,89 @@ body{background:
 
         <!-- ② PROTAGONIST -->
         <div style="margin-bottom:28px;">
-          <div class="section-label">② Il tuo protagonista</div>
-          <input class="input" id="input-name" placeholder="Nome del bambino" oninput="updateState()" style="margin-bottom:10px;">
-          <input class="input" id="input-desc" placeholder="Descrizione (es. ha i capelli ricci e ama i dinosauri)" oninput="updateState()">
+          <div class="section-label">② Crea il protagonista</div>
+          <p style="font-size:13px;color:var(--warm-gray);margin-bottom:12px;">Può essere una persona reale oppure un personaggio inventato, inclusi animali, robot e creature fantastiche.</p>
+
+          <div class="protagonist-type-grid">
+            <button type="button" class="protagonist-type selected"
+                    data-protagonist-type="real_person"
+                    onclick="selectProtagonistType('real_person')">👤 Persona reale</button>
+            <button type="button" class="protagonist-type"
+                    data-protagonist-type="fictional_character"
+                    onclick="selectProtagonistType('fictional_character')">✨ Personaggio inventato</button>
+          </div>
+
+          <div class="protagonist-fields">
+            <div>
+              <label class="field-label" for="input-name">Nome o soprannome *</label>
+              <input class="input" id="input-name" placeholder="Es. Tommy" oninput="updateState()">
+            </div>
+            <div>
+              <label class="field-label" for="input-age">Età</label>
+              <input class="input" id="input-age" type="number" min="1" max="120" placeholder="Es. 4" oninput="updateState()">
+            </div>
+            <div>
+              <label class="field-label" for="input-age-group">Fascia narrativa *</label>
+              <select class="input" id="input-age-group" onchange="updateState()">
+                <option value="">Scegli</option>
+                <option value="0-2">0–2 anni</option>
+                <option value="3-5">3–5 anni</option>
+                <option value="6-8">6–8 anni</option>
+                <option value="9-12">9–12 anni</option>
+                <option value="teen">Adolescente</option>
+                <option value="adult">Adulto</option>
+                <option value="ageless">Senza età</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="input-pronouns">Pronomi</label>
+              <input class="input" id="input-pronouns" placeholder="Es. lui, lei, neutro" oninput="updateState()">
+            </div>
+
+            <div id="human-hair-color">
+              <label class="field-label" for="input-hair-color">Colore dei capelli</label>
+              <input class="input" id="input-hair-color" placeholder="Es. biondi" oninput="updateState()">
+            </div>
+            <div id="human-hair-style">
+              <label class="field-label" for="input-hair-style">Tipo di capelli</label>
+              <input class="input" id="input-hair-style" placeholder="Es. corti e mossi" oninput="updateState()">
+            </div>
+            <div id="human-eye-color">
+              <label class="field-label" for="input-eye-color">Colore degli occhi</label>
+              <input class="input" id="input-eye-color" placeholder="Es. marrone scuro" oninput="updateState()">
+            </div>
+            <div id="human-skin-tone">
+              <label class="field-label" for="input-skin-tone">Tono della pelle</label>
+              <input class="input" id="input-skin-tone" placeholder="Es. chiaro, medio, scuro" oninput="updateState()">
+            </div>
+
+            <div id="fantasy-species" style="display:none;">
+              <label class="field-label" for="input-species">Tipo o specie *</label>
+              <input class="input" id="input-species" placeholder="Es. piccolo drago" oninput="updateState()">
+            </div>
+            <div id="fantasy-body-color" style="display:none;">
+              <label class="field-label" for="input-body-color">Colore principale</label>
+              <input class="input" id="input-body-color" placeholder="Es. verde salvia" oninput="updateState()">
+            </div>
+            <div id="fantasy-body-shape" style="display:none;">
+              <label class="field-label" for="input-body-shape">Forma o corporatura</label>
+              <input class="input" id="input-body-shape" placeholder="Es. piccolo e tondeggiante" oninput="updateState()">
+            </div>
+
+            <div class="full">
+              <label class="field-label" for="input-outfit">Abbigliamento o accessorio principale</label>
+              <input class="input" id="input-outfit" placeholder="Es. felpa verde e pantaloni blu / sciarpa gialla" oninput="updateState()">
+            </div>
+            <div class="full">
+              <label class="field-label" for="input-personality">Carattere</label>
+              <input class="input" id="input-personality" placeholder="Es. curioso, affettuoso, coraggioso" oninput="updateState()">
+            </div>
+            <div class="full">
+              <label class="field-label" for="input-desc">Altri dettagli facoltativi</label>
+              <input class="input" id="input-desc" placeholder="Interessi, particolarità o indicazioni utili" oninput="updateState()">
+            </div>
+          </div>
+          <p class="field-help">Per ora DreamTaily usa solo i dati inseriti qui. Il caricamento di immagini non è attivo.</p>
         </div>
 
         <!-- ③ COMPANION -->
@@ -1035,6 +1123,27 @@ let state = {
   styleId: 'water',
   name: '',
   desc: '',
+  protagonist: {
+    type: 'real_person',
+    display_name: '',
+    age: null,
+    narrative_age_group: '',
+    pronouns: null,
+    short_description: '',
+    personality: [],
+    interests: [],
+    appearance: {
+      species: null,
+      hair_color: null,
+      hair_style: null,
+      eye_color: null,
+      skin_tone: null,
+      body_color: null,
+      body_shape: null,
+      default_outfit: {top: null, bottom: null, shoes: null, accessory: null},
+      distinctive_features: []
+    }
+  },
   companion: null,
   choices: {},   // {s1: optionId, s2: optionId, ...}
   plan: 'digital',
@@ -1152,9 +1261,7 @@ function selectStyle(styleId) {
     art.style.animation = 'none';
     art.offsetHeight; // reflow
     art.style.animation = 'cardflip .5s ease';
-    // Update image
-    const img = card.querySelector('img');
-    img.src = `assets/char/${styleId}/rabbit.png`;
+    // Keep each style card's original preview image.
   });
 
   // Update hero scene chars
@@ -1297,15 +1404,85 @@ function updateProgress() {
 // ══════════════════════════════════════
 // STATE UPDATE
 // ══════════════════════════════════════
+function valueOf(id) {
+  const value = document.getElementById(id)?.value?.trim();
+  return value || null;
+}
+
+function splitList(value) {
+  return (value || '').split(',').map(item => item.trim()).filter(Boolean).slice(0, 8);
+}
+
+function selectProtagonistType(type) {
+  state.protagonist.type = type;
+
+  document.querySelectorAll('.protagonist-type').forEach(button => {
+    button.classList.toggle('selected', button.dataset.protagonistType === type);
+  });
+
+  const isHuman = type === 'real_person';
+
+  ['human-hair-color','human-hair-style','human-eye-color','human-skin-tone'].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) element.style.display = isHuman ? '' : 'none';
+  });
+
+  ['fantasy-species','fantasy-body-color','fantasy-body-shape'].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) element.style.display = isHuman ? 'none' : '';
+  });
+
+  updateState();
+}
+
 function updateState() {
-  state.name = document.getElementById('input-name')?.value || '';
-  state.desc = document.getElementById('input-desc')?.value || '';
+  const ageRaw = valueOf('input-age');
+  const description = valueOf('input-desc') || '';
+  const outfit = valueOf('input-outfit');
+
+  state.name = valueOf('input-name') || '';
+  state.desc = description;
+
+  state.protagonist = {
+    type: state.protagonist?.type || 'real_person',
+    display_name: state.name,
+    age: ageRaw ? Number(ageRaw) : null,
+    narrative_age_group: valueOf('input-age-group') || '',
+    pronouns: valueOf('input-pronouns'),
+    short_description: description,
+    personality: splitList(valueOf('input-personality') || ''),
+    interests: [],
+    appearance: {
+      species: valueOf('input-species'),
+      hair_color: valueOf('input-hair-color'),
+      hair_style: valueOf('input-hair-style'),
+      eye_color: valueOf('input-eye-color'),
+      skin_tone: valueOf('input-skin-tone'),
+      body_color: valueOf('input-body-color'),
+      body_shape: valueOf('input-body-shape'),
+      default_outfit: {
+        top: outfit,
+        bottom: null,
+        shoes: null,
+        accessory: state.protagonist?.type === 'real_person' ? null : outfit
+      },
+      distinctive_features: []
+    }
+  };
+
   updateProceedBtn();
+}
+
+function protagonistIsValid() {
+  const protagonist = state.protagonist;
+  if (!protagonist?.display_name || !protagonist.narrative_age_group) return false;
+  if (protagonist.type !== 'real_person' && !protagonist.appearance.species) return false;
+  return true;
 }
 
 function updateProceedBtn() {
   const allDone = STATIONS.every(st => state.choices[st.id]);
-  const canProceed = state.styleId && state.name.trim() && state.companion && allDone;
+  const canProceed = state.styleId && protagonistIsValid() && state.companion && allDone;
   const btn = document.getElementById('btn-proceed');
   if (btn) {
     btn.disabled = !canProceed;
@@ -1323,7 +1500,7 @@ function renderSummary() {
 
   // Title + badge
   const titleEl = document.getElementById('summary-title');
-  if (titleEl) titleEl.textContent = `Ecco come inizia la storia di ${state.name || 'tuo figlio'}...`;
+  if (titleEl) titleEl.textContent = `Ecco come inizia la storia di ${state.name || 'il tuo protagonista'}...`;
   const badgeEl = document.getElementById('summary-style-badge');
   if (badgeEl) badgeEl.textContent = `Stile: ${styleName}`;
 
@@ -1502,7 +1679,7 @@ function selectPlan(planId) {
 // ══════════════════════════════════════
 function renderConfirm() {
   const nameEl = document.getElementById('confirm-name');
-  if (nameEl) nameEl.textContent = state.name || 'il tuo bambino';
+  if (nameEl) nameEl.textContent = state.name || 'il tuo protagonista';
 
   const emailEl = document.getElementById('confirm-email');
   if (emailEl) emailEl.textContent = state.email || '';
@@ -1520,11 +1697,55 @@ function renderConfirm() {
 // RESET
 // ══════════════════════════════════════
 function resetAll() {
-  state = {screen:'landing', styleId:'water', name:'', desc:'', companion:null, choices:{}, plan:'digital', email:'', previewId:null, previewImageUrl:null, previewLoading:false};
-  const nameEl = document.getElementById('input-name');
-  const descEl = document.getElementById('input-desc');
-  if (nameEl) nameEl.value = '';
-  if (descEl) descEl.value = '';
+  state = {
+    screen:'landing',
+    styleId:'water',
+    name:'',
+    desc:'',
+    protagonist:{
+      type:'real_person',
+      display_name:'',
+      age:null,
+      narrative_age_group:'',
+      pronouns:null,
+      short_description:'',
+      personality:[],
+      interests:[],
+      appearance:{
+        species:null,
+        hair_color:null,
+        hair_style:null,
+        eye_color:null,
+        skin_tone:null,
+        body_color:null,
+        body_shape:null,
+        default_outfit:{top:null,bottom:null,shoes:null,accessory:null},
+        distinctive_features:[]
+      }
+    },
+    companion:null,
+    choices:{},
+    plan:'digital',
+    email:'',
+    previewId:null,
+    previewImageUrl:null,
+    previewLoading:false
+  };
+
+  [
+    'input-name','input-desc','input-age','input-age-group','input-pronouns',
+    'input-hair-color','input-hair-style','input-eye-color','input-skin-tone',
+    'input-species','input-body-color','input-body-shape','input-outfit',
+    'input-personality','input-email'
+  ].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) element.value = '';
+  });
+
+  selectProtagonistType('real_person');
+  renderCompanions();
+  renderStations();
+  updateProceedBtn();
 }
 
 // ══════════════════════════════════════
@@ -1610,6 +1831,7 @@ async function submitOrder() {
   const order = {
     name:        state.name,
     description: state.desc,
+    protagonist: state.protagonist,
     style:       state.styleId,
     companion:   state.companion,
     choices:     state.choices,

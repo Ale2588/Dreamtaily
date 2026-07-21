@@ -1,0 +1,314 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "style",
+    "protagonist",
+    "companion",
+    "locations",
+    "recurring_visual_motifs",
+    "global_continuity_rules",
+    "negative_constraints"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "style": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "medium",
+        "palette",
+        "lighting",
+        "linework",
+        "texture",
+        "composition_rules"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": [
+            "paper",
+            "water",
+            "crayon"
+          ]
+        },
+        "medium": {
+          "type": "string",
+          "minLength": 1
+        },
+        "palette": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "lighting": {
+          "type": "string",
+          "minLength": 1
+        },
+        "linework": {
+          "type": "string",
+          "minLength": 1
+        },
+        "texture": {
+          "type": "string",
+          "minLength": 1
+        },
+        "composition_rules": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "protagonist": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_description",
+        "age_appearance",
+        "face",
+        "hair",
+        "eyes",
+        "skin_tone",
+        "clothing",
+        "body_proportions",
+        "expression_range",
+        "unknown_fields",
+        "must_never_change"
+      ],
+      "properties": {
+        "canonical_description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "age_appearance": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "face": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hair": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "eyes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "skin_tone": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "clothing": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "body_proportions": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expression_range": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "unknown_fields": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "age_appearance",
+              "face",
+              "hair",
+              "eyes",
+              "skin_tone",
+              "clothing"
+            ]
+          }
+        },
+        "must_never_change": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "companion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_description",
+        "species",
+        "color",
+        "size_relative_to_protagonist",
+        "accessories",
+        "expression_range",
+        "must_never_change"
+      ],
+      "properties": {
+        "canonical_description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "species": {
+          "type": "string",
+          "minLength": 1
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1
+        },
+        "size_relative_to_protagonist": {
+          "type": "string",
+          "minLength": 1
+        },
+        "accessories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12
+        },
+        "expression_range": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "must_never_change": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "locations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "canonical_description",
+          "palette",
+          "landmarks",
+          "lighting",
+          "must_never_change"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "canonical_description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "palette": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 8,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "landmarks": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "lighting": {
+            "type": "string",
+            "minLength": 1
+          },
+          "must_never_change": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "recurring_visual_motifs": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "global_continuity_rules": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "negative_constraints": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

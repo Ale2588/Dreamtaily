@@ -1,0 +1,387 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "language",
+    "target_age",
+    "protagonist",
+    "companion",
+    "world",
+    "themes",
+    "tone",
+    "moral",
+    "narrative_constraints",
+    "continuity_rules"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "it"
+      ]
+    },
+    "target_age": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "min",
+        "max"
+      ],
+      "properties": {
+        "min": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 12
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 12
+        }
+      }
+    },
+    "protagonist": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "description_raw",
+        "age",
+        "appearance",
+        "personality",
+        "strengths",
+        "growth_need",
+        "story_goal"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "description_raw": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "age": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 2,
+          "maximum": 12
+        },
+        "appearance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "hair",
+            "eyes",
+            "skin_tone",
+            "clothing",
+            "distinctive_traits",
+            "unknown_fields"
+          ],
+          "properties": {
+            "hair": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "eyes": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "skin_tone": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "clothing": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "distinctive_traits": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 12
+            },
+            "unknown_fields": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "age",
+                  "hair",
+                  "eyes",
+                  "skin_tone",
+                  "clothing"
+                ]
+              }
+            }
+          }
+        },
+        "personality": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "strengths": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "growth_need": {
+          "type": "string",
+          "minLength": 1
+        },
+        "story_goal": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "companion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "display_name",
+        "species",
+        "personality",
+        "story_role",
+        "relationship_with_protagonist"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": [
+            "rabbit",
+            "bear",
+            "fox",
+            "owl",
+            "frog",
+            "eagle",
+            "hedgehog",
+            "mouse"
+          ]
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "species": {
+          "type": "string",
+          "minLength": 1
+        },
+        "personality": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "story_role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relationship_with_protagonist": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "world": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primary_setting",
+        "secondary_settings",
+        "world_rules",
+        "recurring_elements",
+        "sensory_identity"
+      ],
+      "properties": {
+        "primary_setting": {
+          "type": "string",
+          "minLength": 1
+        },
+        "secondary_settings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12
+        },
+        "world_rules": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "recurring_elements": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "sensory_identity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "colors",
+            "sounds",
+            "textures",
+            "scents"
+          ],
+          "properties": {
+            "colors": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 8,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "sounds": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 6,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "textures": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 6,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "scents": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 12
+            }
+          }
+        }
+      }
+    },
+    "themes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 6,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "tone": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 6,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "moral": {
+      "type": "string",
+      "minLength": 1
+    },
+    "narrative_constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "danger_level",
+        "ending",
+        "no_graphic_violence",
+        "no_horror",
+        "no_abandonment",
+        "age_appropriate_language",
+        "must_honor_user_choices"
+      ],
+      "properties": {
+        "danger_level": {
+          "type": "string",
+          "enum": [
+            "very_low",
+            "low"
+          ]
+        },
+        "ending": {
+          "type": "string",
+          "enum": [
+            "positive",
+            "warm_positive"
+          ]
+        },
+        "no_graphic_violence": {
+          "type": "boolean",
+          "const": true
+        },
+        "no_horror": {
+          "type": "boolean",
+          "const": true
+        },
+        "no_abandonment": {
+          "type": "boolean",
+          "const": true
+        },
+        "age_appropriate_language": {
+          "type": "boolean",
+          "const": true
+        },
+        "must_honor_user_choices": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "continuity_rules": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 16,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}
