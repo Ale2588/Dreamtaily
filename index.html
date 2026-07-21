@@ -154,7 +154,7 @@ button,input,textarea{font-family:inherit;}
   outline:none;transition:border-color .2s;
 }
 .input:focus{border-color:var(--coral);}
-.protagonist-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+.protagonist-type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:14px;}
 .protagonist-type{border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px 8px;cursor:pointer;text-align:center;font-weight:800;font-size:13px;color:var(--brown);}
 .protagonist-type.selected{border-color:var(--coral);background:var(--tint-coral);color:var(--coral-deep);}
 .protagonist-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -888,12 +888,15 @@ body{background:
         <!-- ② PROTAGONIST -->
         <div style="margin-bottom:28px;">
           <div class="section-label">② Crea il protagonista</div>
-          <p style="font-size:13px;color:var(--warm-gray);margin-bottom:12px;">Può essere una persona reale, un personaggio inventato oppure una creatura.</p>
+          <p style="font-size:13px;color:var(--warm-gray);margin-bottom:12px;">Può essere una persona reale oppure un personaggio inventato, inclusi animali, robot e creature fantastiche.</p>
 
           <div class="protagonist-type-grid">
-            <button type="button" class="protagonist-type selected" data-protagonist-type="real_person" onclick="selectProtagonistType('real_person')">👤 Persona reale</button>
-            <button type="button" class="protagonist-type" data-protagonist-type="original_character" onclick="selectProtagonistType('original_character')">✨ Personaggio inventato</button>
-            <button type="button" class="protagonist-type" data-protagonist-type="creature" onclick="selectProtagonistType('creature')">🐉 Animale o creatura</button>
+            <button type="button" class="protagonist-type selected"
+                    data-protagonist-type="real_person"
+                    onclick="selectProtagonistType('real_person')">👤 Persona reale</button>
+            <button type="button" class="protagonist-type"
+                    data-protagonist-type="fictional_character"
+                    onclick="selectProtagonistType('fictional_character')">✨ Personaggio inventato</button>
           </div>
 
           <div class="protagonist-fields">
@@ -1258,9 +1261,7 @@ function selectStyle(styleId) {
     art.style.animation = 'none';
     art.offsetHeight; // reflow
     art.style.animation = 'cardflip .5s ease';
-    // Update image
-    const img = card.querySelector('img');
-    img.src = `assets/char/${styleId}/rabbit.png`;
+    // Keep each style card's original preview image.
   });
 
   // Update hero scene chars

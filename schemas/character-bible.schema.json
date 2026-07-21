@@ -23,8 +23,7 @@
       "type": "string",
       "enum": [
         "real_person",
-        "original_character",
-        "creature"
+        "fictional_character"
       ]
     },
     "identity": {
