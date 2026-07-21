@@ -87,17 +87,32 @@ button,input,textarea{font-family:inherit;}
   backdrop-filter:blur(10px);
   border-bottom:1px solid #E6DAC6;
 }
-.logo{display:flex;align-items:center;gap:9px;}
-.logo-mark{
-  width:30px;height:30px;border-radius:50%;
-  background:var(--coral);
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 10px rgba(232,115,90,.35);
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
 }
-.logo-diamond{
-  width:13px;height:13px;border-radius:50% 50% 50% 0;
-  transform:rotate(45deg);background:var(--gold);
+
+.logo-image {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform .2s ease;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.45),
+    0 6px 18px rgba(242,193,78,.35);
 }
+
+.logo:hover .logo-image {
+  transform: scale(1.04);
+}
+  
 .logo-text{font-family:'Baloo 2',cursive;font-weight:800;font-size:21px;letter-spacing:-.4px;}
 .logo-text span{color:var(--coral);}
 
@@ -1039,6 +1054,16 @@ function goTo(screen) {
   window.scrollTo(0, 0);
   if (screen === 'summary') renderSummary();
   if (screen === 'confirm') renderConfirm();
+}
+  function goHome() {
+  goTo('landing');
+
+  requestAnimationFrame(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
 }
 
 // ══════════════════════════════════════
