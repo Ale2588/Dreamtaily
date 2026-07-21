@@ -368,22 +368,67 @@ button,input,textarea{font-family:inherit;}
 
 
 .book-illustration{
-  width:100%;border-radius:13px;overflow:hidden;
-  margin:4px 0 16px;background:#F4ECDD;
-  aspect-ratio:16/10;position:relative;
+  width:100%;border-radius:20px;overflow:hidden;
+  margin:8px 0 18px;background:#EDE4D5;
+  min-height:clamp(300px,54vw,470px);position:relative;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),0 14px 38px rgba(61,43,31,.10);
 }
-.book-illustration img{
-  width:100%;height:100%;object-fit:cover;display:block;
-  opacity:0;transition:opacity .8s ease;
+.book-illustration>img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
+  opacity:0;transition:opacity 1s ease;z-index:4;
 }
-.book-illustration img.loaded{opacity:1;}
-.illu-status{
-  text-align:center;font-family:'Lora',serif;font-style:italic;
-  font-size:12.5px;color:#B7A88F;margin:-8px 0 14px;
+.book-illustration>img.loaded{opacity:1;}
+.preview-loader{
+  position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 22%,rgba(255,239,175,.58),transparent 28%),
+    linear-gradient(180deg,#dfe8df 0%,#f4ead9 62%,#ead5b7 100%);
+  transition:opacity .55s ease,visibility .55s ease;
 }
-.illu-status .dots::after{
-  content:'';animation:dots 1.5s steps(4,end) infinite;
+.preview-loader.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+.preview-loader::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(115deg,transparent 26%,rgba(255,255,255,.35) 45%,transparent 62%);
+  animation:previewShimmer 3.8s linear infinite;
 }
+.preview-loader-title{
+  position:relative;z-index:3;font-family:'Baloo 2',cursive;font-weight:800;
+  font-size:clamp(20px,3.2vw,30px);color:#5d4938;text-align:center;margin-bottom:4px;
+}
+.preview-loader-copy{
+  position:relative;z-index:3;font-family:'Lora',serif;font-style:italic;
+  font-size:clamp(13px,1.7vw,16px);color:#8a755f;text-align:center;
+  min-height:24px;padding:0 18px;
+}
+.preview-carousel{
+  position:relative;z-index:2;width:115%;height:clamp(150px,27vw,230px);
+  margin:18px 0 12px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+}
+.preview-track{
+  position:absolute;left:0;top:0;height:100%;display:flex;align-items:flex-end;gap:22px;
+  width:max-content;animation:previewParade 16s linear infinite;
+}
+.preview-card{
+  flex:none;width:clamp(105px,18vw,165px);height:88%;border-radius:28px 28px 18px 18px;
+  display:flex;align-items:flex-end;justify-content:center;padding:12px 8px 0;
+  background:rgba(255,253,247,.68);border:1px solid rgba(255,255,255,.82);
+  box-shadow:0 14px 28px rgba(61,43,31,.10);backdrop-filter:blur(5px);
+  transform-origin:bottom center;
+}
+.preview-card:nth-child(2n){transform:translateY(-12px) rotate(1.5deg);}
+.preview-card:nth-child(3n){transform:translateY(6px) rotate(-1.5deg);}
+.preview-card img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 12px 10px rgba(61,43,31,.15));animation:previewCharacterBob 3.8s ease-in-out infinite;}
+.preview-card:nth-child(2n) img{animation-delay:.7s}.preview-card:nth-child(3n) img{animation-delay:1.4s}
+.preview-progress{position:relative;z-index:3;width:min(310px,68%);height:5px;border-radius:999px;background:rgba(255,255,255,.62);overflow:hidden;}
+.preview-progress::after{content:'';display:block;width:38%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#e8735a,#f2c14e);animation:previewProgress 2.2s ease-in-out infinite;}
+.illu-status{display:none!important;}
+@keyframes previewParade{from{transform:translateX(0)}to{transform:translateX(calc(-50% - 11px))}}
+@keyframes previewCharacterBob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
+@keyframes previewShimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+@keyframes previewProgress{0%{transform:translateX(-110%)}50%{transform:translateX(175%)}100%{transform:translateX(175%)}}
 @keyframes dots{0%{content:'';}25%{content:'.';}50%{content:'..';}75%{content:'...';}}
 
 /* ── LANDING STEPS ── */
@@ -852,8 +897,27 @@ body{background:
         <!-- BOOK PAGE 1 PREVIEW -->
         <div class="book-page" style="margin-bottom:14px;">
           <div class="book-chapter-label">Capitolo 1 — Il Mondo Ordinario</div>
-          <div class="book-illustration" id="book-illustration" style="display:none;"><img id="book-illu-img" alt="Illustrazione"></div>
-          <div class="illu-status" id="illu-status" style="display:none;">L'illustrazione sta prendendo forma<span class="dots"></span></div>
+          <div class="book-illustration" id="book-illustration" style="display:none;">
+            <div class="preview-loader" id="preview-loader" aria-live="polite">
+              <div class="preview-loader-title">Il mondo della storia si sta aprendo…</div>
+              <div class="preview-loader-copy" id="preview-loader-copy">I personaggi stanno arrivando.</div>
+              <div class="preview-carousel" aria-hidden="true">
+                <div class="preview-track">
+                  <div class="preview-card"><img src="assets/char/water/rabbit.png" alt=""></div>
+                  <div class="preview-card"><img src="assets/char/water/bear.png" alt=""></div>
+                  <div class="preview-card"><img src="assets/char/water/fox.png" alt=""></div>
+                  <div class="preview-card"><img src="assets/char/water/owl.png" alt=""></div>
+                  <div class="preview-card"><img src="assets/char/water/rabbit.png" alt=""></div>
+                  <div class="preview-card"><img src="assets/char/water/bear.png" alt=""></div>
+                  <div class="preview-card"><img src="assets/char/water/fox.png" alt=""></div>
+                  <div class="preview-card"><img src="assets/char/water/owl.png" alt=""></div>
+                </div>
+              </div>
+              <div class="preview-progress"></div>
+            </div>
+            <img id="book-illu-img" alt="Illustrazione personalizzata">
+          </div>
+          <div class="illu-status" id="illu-status" style="display:none;"></div>
           <div class="book-companion" id="book-companion"></div>
           <div class="book-text" id="book-text"></div>
           <div class="book-pagenum">— 1 —</div>
@@ -1271,17 +1335,24 @@ function renderSummary() {
   const illuBox = document.getElementById('book-illustration');
   const illuImg = document.getElementById('book-illu-img');
   const illuStatus = document.getElementById('illu-status');
+  const previewLoader = document.getElementById('preview-loader');
+  document.querySelectorAll('.preview-card img').forEach((img, index) => {
+    const chars = ['rabbit', 'bear', 'fox', 'owl'];
+    img.src = `assets/char/${state.styleId}/${chars[index % chars.length]}.png`;
+  });
   if (state.previewImageUrl) {
     if (illuBox && illuImg) {
       illuBox.style.display = 'block';
       illuImg.src = state.previewImageUrl;
       illuImg.classList.add('loaded');
+      if (previewLoader) previewLoader.classList.add('hidden');
       if (compWrap) compWrap.style.display = 'none';
       if (illuStatus) illuStatus.style.display = 'none';
     }
-  } else if (!state.previewLoading) {
-    if (illuStatus) illuStatus.style.display = 'block';
-    generatePreviewImage();
+  } else {
+    if (illuBox) illuBox.style.display = 'block';
+    if (previewLoader) previewLoader.classList.remove('hidden');
+    if (!state.previewLoading) generatePreviewImage();
   }
 
   // Plan cards
@@ -1298,6 +1369,18 @@ async function generatePreviewImage() {
 
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 90000);
+  const loaderCopy = document.getElementById('preview-loader-copy');
+  const loaderMessages = [
+    'I personaggi stanno arrivando.',
+    'I colori stanno scegliendo il loro posto.',
+    'Il bosco sta preparando un piccolo segreto.',
+    `La pagina di ${state.name || 'questa storia'} è quasi pronta.`
+  ];
+  let loaderMessageIndex = 0;
+  const loaderMessageTimer = setInterval(() => {
+    loaderMessageIndex = (loaderMessageIndex + 1) % loaderMessages.length;
+    if (loaderCopy) loaderCopy.textContent = loaderMessages[loaderMessageIndex];
+  }, 3200);
 
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-preview`, {
@@ -1328,9 +1411,11 @@ async function generatePreviewImage() {
     const illuStatus = document.getElementById('illu-status');
     const compWrap = document.getElementById('book-companion');
     if (illuBox && illuImg) {
+      const previewLoader = document.getElementById('preview-loader');
       illuImg.onload = () => {
         illuBox.style.display = 'block';
         illuImg.classList.add('loaded');
+        if (previewLoader) previewLoader.classList.add('hidden');
         if (compWrap) compWrap.style.display = 'none';
         if (illuStatus) illuStatus.style.display = 'none';
       };
@@ -1342,6 +1427,7 @@ async function generatePreviewImage() {
     const illuStatus = document.getElementById('illu-status');
     if (illuStatus) illuStatus.style.display = 'none';
   } finally {
+    clearInterval(loaderMessageTimer);
     state.previewLoading = false;
   }
 }
