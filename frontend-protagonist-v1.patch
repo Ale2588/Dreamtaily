@@ -1,0 +1,255 @@
+diff --git a/index.html b/index.html
+--- a/index.html
++++ b/index.html
+@@
+ .input:focus{border-color:var(--coral);}
++.protagonist-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
++.protagonist-type{
++  border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px 8px;
++  cursor:pointer;text-align:center;font-weight:800;font-size:13px;color:var(--brown);
++}
++.protagonist-type.selected{border-color:var(--coral);background:var(--tint-coral);color:var(--coral-deep);}
++.protagonist-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
++.protagonist-fields .full{grid-column:1/-1;}
++.field-label{display:block;font-size:12px;font-weight:800;color:var(--warm-gray);margin:0 0 5px 2px;}
++.field-help{font-size:11.5px;color:var(--warm-gray);line-height:1.4;margin-top:8px;}
++@media(max-width:560px){
++  .protagonist-type-grid{grid-template-columns:1fr;}
++  .protagonist-fields{grid-template-columns:1fr;}
++  .protagonist-fields .full{grid-column:auto;}
++}
+@@
+-        <!-- ② PROTAGONIST -->
+-        <div style="margin-bottom:28px;">
+-          <div class="section-label">② Il tuo protagonista</div>
+-          <input class="input" id="input-name" placeholder="Nome del bambino" oninput="updateState()" style="margin-bottom:10px;">
+-          <input class="input" id="input-desc" placeholder="Descrizione (es. ha i capelli ricci e ama i dinosauri)" oninput="updateState()">
+-        </div>
++        <!-- ② PROTAGONIST -->
++        <div style="margin-bottom:28px;">
++          <div class="section-label">② Crea il protagonista</div>
++          <p style="font-size:13px;color:var(--warm-gray);margin-bottom:12px;">
++            Può essere una persona reale, un personaggio inventato oppure una creatura.
++          </p>
++
++          <div class="protagonist-type-grid">
++            <button type="button" class="protagonist-type selected" data-protagonist-type="real_person"
++                    onclick="selectProtagonistType('real_person')">👤 Persona reale</button>
++            <button type="button" class="protagonist-type" data-protagonist-type="original_character"
++                    onclick="selectProtagonistType('original_character')">✨ Personaggio inventato</button>
++            <button type="button" class="protagonist-type" data-protagonist-type="creature"
++                    onclick="selectProtagonistType('creature')">🐉 Animale o creatura</button>
++          </div>
++
++          <div class="protagonist-fields">
++            <div>
++              <label class="field-label" for="input-name">Nome o soprannome *</label>
++              <input class="input" id="input-name" placeholder="Es. Tommy" oninput="updateState()">
++            </div>
++            <div>
++              <label class="field-label" for="input-age">Età</label>
++              <input class="input" id="input-age" type="number" min="1" max="120" placeholder="Es. 4" oninput="updateState()">
++            </div>
++            <div>
++              <label class="field-label" for="input-age-group">Fascia narrativa *</label>
++              <select class="input" id="input-age-group" onchange="updateState()">
++                <option value="">Scegli</option>
++                <option value="0-2">0–2 anni</option>
++                <option value="3-5">3–5 anni</option>
++                <option value="6-8">6–8 anni</option>
++                <option value="9-12">9–12 anni</option>
++                <option value="teen">Adolescente</option>
++                <option value="adult">Adulto</option>
++                <option value="ageless">Senza età</option>
++              </select>
++            </div>
++            <div>
++              <label class="field-label" for="input-pronouns">Pronomi</label>
++              <input class="input" id="input-pronouns" placeholder="Es. lui, lei, neutro" oninput="updateState()">
++            </div>
++
++            <div id="human-hair-color">
++              <label class="field-label" for="input-hair-color">Colore dei capelli</label>
++              <input class="input" id="input-hair-color" placeholder="Es. biondi" oninput="updateState()">
++            </div>
++            <div id="human-hair-style">
++              <label class="field-label" for="input-hair-style">Tipo di capelli</label>
++              <input class="input" id="input-hair-style" placeholder="Es. corti e mossi" oninput="updateState()">
++            </div>
++            <div id="human-eye-color">
++              <label class="field-label" for="input-eye-color">Colore degli occhi</label>
++              <input class="input" id="input-eye-color" placeholder="Es. marrone scuro" oninput="updateState()">
++            </div>
++            <div id="human-skin-tone">
++              <label class="field-label" for="input-skin-tone">Tono della pelle</label>
++              <input class="input" id="input-skin-tone" placeholder="Es. chiaro, medio, scuro" oninput="updateState()">
++            </div>
++
++            <div id="fantasy-species" style="display:none;">
++              <label class="field-label" for="input-species">Tipo o specie *</label>
++              <input class="input" id="input-species" placeholder="Es. piccolo drago" oninput="updateState()">
++            </div>
++            <div id="fantasy-body-color" style="display:none;">
++              <label class="field-label" for="input-body-color">Colore principale</label>
++              <input class="input" id="input-body-color" placeholder="Es. verde salvia" oninput="updateState()">
++            </div>
++            <div id="fantasy-body-shape" style="display:none;">
++              <label class="field-label" for="input-body-shape">Forma o corporatura</label>
++              <input class="input" id="input-body-shape" placeholder="Es. piccolo e tondeggiante" oninput="updateState()">
++            </div>
++
++            <div class="full">
++              <label class="field-label" for="input-outfit">Abbigliamento o accessorio principale</label>
++              <input class="input" id="input-outfit" placeholder="Es. felpa verde e pantaloni blu / sciarpa gialla" oninput="updateState()">
++            </div>
++            <div class="full">
++              <label class="field-label" for="input-personality">Carattere</label>
++              <input class="input" id="input-personality" placeholder="Es. curioso, affettuoso, coraggioso" oninput="updateState()">
++            </div>
++            <div class="full">
++              <label class="field-label" for="input-desc">Altri dettagli facoltativi</label>
++              <input class="input" id="input-desc" placeholder="Interessi, particolarità o indicazioni utili" oninput="updateState()">
++            </div>
++          </div>
++          <p class="field-help">Per ora DreamTaily usa solo i dati inseriti qui. Il caricamento di immagini non è attivo.</p>
++        </div>
+@@
+ let state = {
+   screen: 'landing',
+   styleId: 'water',
+   name: '',
+   desc: '',
++  protagonist: {
++    type: 'real_person',
++    display_name: '',
++    age: null,
++    narrative_age_group: '',
++    pronouns: null,
++    short_description: '',
++    personality: [],
++    interests: [],
++    appearance: {
++      species: null,
++      hair_color: null,
++      hair_style: null,
++      eye_color: null,
++      skin_tone: null,
++      body_color: null,
++      body_shape: null,
++      default_outfit: {top: null, bottom: null, shoes: null, accessory: null},
++      distinctive_features: []
++    }
++  },
+   companion: null,
+@@
+-function updateState() {
+-  state.name = document.getElementById('input-name')?.value || '';
+-  state.desc = document.getElementById('input-desc')?.value || '';
+-  updateProceedBtn();
+-}
++function valueOf(id) {
++  const value = document.getElementById(id)?.value?.trim();
++  return value || null;
++}
++
++function splitList(value) {
++  return (value || '').split(',').map(item => item.trim()).filter(Boolean).slice(0, 8);
++}
++
++function selectProtagonistType(type) {
++  state.protagonist.type = type;
++  document.querySelectorAll('.protagonist-type').forEach(button => {
++    button.classList.toggle('selected', button.dataset.protagonistType === type);
++  });
++
++  const isHuman = type === 'real_person';
++  ['human-hair-color','human-hair-style','human-eye-color','human-skin-tone'].forEach(id => {
++    const element = document.getElementById(id);
++    if (element) element.style.display = isHuman ? '' : 'none';
++  });
++  ['fantasy-species','fantasy-body-color','fantasy-body-shape'].forEach(id => {
++    const element = document.getElementById(id);
++    if (element) element.style.display = isHuman ? 'none' : '';
++  });
++  updateState();
++}
++
++function updateState() {
++  const ageRaw = valueOf('input-age');
++  const personalityRaw = valueOf('input-personality') || '';
++  const description = valueOf('input-desc') || '';
++  const outfit = valueOf('input-outfit');
++
++  state.name = valueOf('input-name') || '';
++  state.desc = description;
++  state.protagonist = {
++    type: state.protagonist?.type || 'real_person',
++    display_name: state.name,
++    age: ageRaw ? Number(ageRaw) : null,
++    narrative_age_group: valueOf('input-age-group') || '',
++    pronouns: valueOf('input-pronouns'),
++    short_description: description,
++    personality: splitList(personalityRaw),
++    interests: [],
++    appearance: {
++      species: valueOf('input-species'),
++      hair_color: valueOf('input-hair-color'),
++      hair_style: valueOf('input-hair-style'),
++      eye_color: valueOf('input-eye-color'),
++      skin_tone: valueOf('input-skin-tone'),
++      body_color: valueOf('input-body-color'),
++      body_shape: valueOf('input-body-shape'),
++      default_outfit: {
++        top: outfit,
++        bottom: null,
++        shoes: null,
++        accessory: state.protagonist?.type === 'real_person' ? null : outfit
++      },
++      distinctive_features: []
++    }
++  };
++  updateProceedBtn();
++}
++
++function protagonistIsValid() {
++  const protagonist = state.protagonist;
++  if (!protagonist?.display_name || !protagonist.narrative_age_group) return false;
++  if (protagonist.type !== 'real_person' && !protagonist.appearance.species) return false;
++  return true;
++}
+@@
+-  const canProceed = state.styleId && state.name.trim() && state.companion && allDone;
++  const canProceed = state.styleId && protagonistIsValid() && state.companion && allDone;
+@@
+-  state = {screen:'landing', styleId:'water', name:'', desc:'', companion:null, choices:{}, plan:'digital', email:'', previewId:null, previewImageUrl:null, previewLoading:false};
++  state = {
++    screen:'landing', styleId:'water', name:'', desc:'',
++    protagonist:{
++      type:'real_person', display_name:'', age:null, narrative_age_group:'',
++      pronouns:null, short_description:'', personality:[], interests:[],
++      appearance:{
++        species:null,hair_color:null,hair_style:null,eye_color:null,skin_tone:null,
++        body_color:null,body_shape:null,
++        default_outfit:{top:null,bottom:null,shoes:null,accessory:null},
++        distinctive_features:[]
++      }
++    },
++    companion:null, choices:{}, plan:'digital', email:'',
++    previewId:null, previewImageUrl:null, previewLoading:false
++  };
+@@
+   if (nameEl) nameEl.value = '';
+   if (descEl) descEl.value = '';
++  ['input-age','input-age-group','input-pronouns','input-hair-color','input-hair-style',
++   'input-eye-color','input-skin-tone','input-species','input-body-color',
++   'input-body-shape','input-outfit','input-personality'].forEach(id => {
++    const element = document.getElementById(id);
++    if (element) element.value = '';
++  });
++  selectProtagonistType('real_person');
+@@
+   const order = {
+     name:        state.name,
+     description: state.desc,
++    protagonist: state.protagonist,
+     style:       state.styleId,
