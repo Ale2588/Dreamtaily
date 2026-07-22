@@ -813,6 +813,62 @@ body{background:
   }
 }
 
+
+
+/* FOREST SILHOUETTE FIX — remove crossed X shapes */
+.forest-back,
+.forest-mid {
+  background-image: none !important;
+  background-repeat: repeat-x;
+  background-position: bottom;
+  overflow: hidden;
+}
+
+.forest-back::before,
+.forest-mid::before,
+.forest-back::after,
+.forest-mid::after {
+  content: "";
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  bottom: 0;
+  height: 100%;
+  background-repeat: repeat-x;
+  background-position: bottom;
+  pointer-events: none;
+}
+
+.forest-back::before {
+  opacity: .58;
+  background-size: 220px 100%;
+  background-image:
+    linear-gradient(150deg, transparent 47%, #405e57 48% 66%, transparent 67%);
+}
+
+.forest-back::after {
+  left: 5%;
+  opacity: .42;
+  background-size: 260px 92%;
+  background-image:
+    linear-gradient(210deg, transparent 47%, #48685f 48% 66%, transparent 67%);
+}
+
+.forest-mid::before {
+  opacity: .88;
+  background-size: 175px 100%;
+  background-image:
+    linear-gradient(150deg, transparent 46%, #294b43 47% 68%, transparent 69%);
+}
+
+.forest-mid::after {
+  left: 3%;
+  opacity: .72;
+  background-size: 205px 94%;
+  background-image:
+    linear-gradient(210deg, transparent 46%, #31534b 47% 68%, transparent 69%);
+}
+
 </style>
 </head>
 <body>
