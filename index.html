@@ -1242,9 +1242,13 @@ async function getOrCreateDraftBook(){
   }
 
   const title=value('name')?`Il libro di ${value('name')}`:'Il mio libro DreamTaily';
+  const {data:{user},error:userError}=await client.auth.getUser();
+  if(userError||!user) throw userError||new Error('USER_REQUIRED');
+
   const {data:created,error:createError}=await client
     .from('books')
     .insert({
+      profile_id:user.id,
       title,
       status:'draft',
       current_style:app.style
@@ -1360,7 +1364,8 @@ async function continueWithStory(){
     showScreen('book');
   }catch(error){
     console.error('[DreamTaily] Book save error:',error);
-    showError('story-error','Non sono riuscito a salvare la storia nel libro. Riprova.');
+    const detail=error?.message||error?.details||error?.hint||'Errore sconosciuto';
+    showError('story-error',`Non sono riuscito a salvare la storia nel libro: ${detail}`);
   }finally{
     button.disabled=false;
     button.textContent='Continua con questa storia →';
