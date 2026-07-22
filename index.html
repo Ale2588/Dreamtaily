@@ -723,10 +723,20 @@ async function generateCharacter(force=false){
   const timeout=setTimeout(()=>controller.abort(),90000);
 
   try{
+    await ensureUser();
+    const client=getSupabase();
+    const {data:{session},error:sessionError}=await client.auth.getSession();
+    if(sessionError) throw sessionError;
+    if(!session?.access_token) throw new Error('SESSIONE_ANONIMA_NON_DISPONIBILE');
+
     const character=buildCharacter();
     const response=await fetch(`${SUPABASE_URL}/functions/v1/generate-preview`,{
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
+      headers:{
+        'Content-Type':'application/json',
+        'apikey':SUPABASE_ANON_KEY,
+        'Authorization':`Bearer ${session.access_token}`
+      },
       body:JSON.stringify({
         mode:'character_preview',
         preview_id:app.previewId,
@@ -740,7 +750,14 @@ async function generateCharacter(force=false){
       signal:controller.signal
     });
     clearTimeout(timeout);
-    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+    if(!response.ok){
+      let detail='';
+      try{
+        const errorPayload=await response.json();
+        detail=errorPayload?.error?` — ${errorPayload.error}`:'';
+      }catch(_error){}
+      throw new Error(`Errore generazione HTTP ${response.status}${detail}`);
+    }
     const payload=await response.json();
     if(!payload.url) throw new Error('La funzione non ha restituito un’immagine.');
 
