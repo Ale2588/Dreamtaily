@@ -3,2697 +3,690 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DreamTaily — Il libro scritto per il tuo protagonista</title>
+<title>DreamTaily — Dai vita al suo personaggio</title>
 <link rel="icon" type="image/png" href="assets/brand/dreamtaily-icon.png">
 <link rel="apple-touch-icon" href="assets/brand/dreamtaily-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Lora:ital@0;1&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ── RESET & BASE ── */
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
-html,body{min-height:100%;background:#EFE7DA;font-family:'Nunito',sans-serif;color:#3D2B1F;}
-button,input,textarea{font-family:inherit;}
-::-webkit-scrollbar{width:9px;height:9px;}
-::-webkit-scrollbar-thumb{background:#E2D6C2;border-radius:9px;}
-::-webkit-scrollbar-track{background:transparent;}
-
-/* ── TOKENS ── */
+*{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --cream:#FDF8F0;
-  --coral:#E8735A;
-  --coral-deep:#C9543C;
-  --teal:#5B9EA0;
-  --gold:#F2C14E;
-  --brown:#3D2B1F;
-  --warm-gray:#8C7B6B;
-  --line:#EFE5D3;
-  --surface:#FFFFFF;
-  --tint-coral:#FBE9E3;
-  --tint-teal:#E2EFEF;
+  --cream:#f7f0e5;--paper:#fffdf8;--brown:#3d2b1f;--muted:#8a7868;
+  --coral:#e8735a;--coral-dark:#c9543c;--teal:#5b9ea0;--gold:#f2c14e;
+  --line:#eadfce;--shadow:0 18px 50px rgba(61,43,31,.12)
 }
-
-/* ── ANIMATIONS ── */
-@keyframes firefly{
-  0%{transform:translate(0,0) scale(.7);opacity:0;}
-  20%{opacity:.95;}
-  50%{transform:translate(var(--dx),var(--dy)) scale(1.1);opacity:.6;}
-  80%{opacity:.9;}
-  100%{transform:translate(0,0) scale(.7);opacity:0;}
-}
-@keyframes breathe{
-  0%,100%{transform:translateY(0) scale(1);}
-  50%{transform:translateY(-5px) scale(1.018);}
-}
-@keyframes fadeScreen{
-  0%{opacity:0;transform:translateY(10px);}
-  100%{opacity:1;transform:translateY(0);}
-}
-@keyframes slideIn{
-  0%{opacity:0;transform:translateY(18px);}
-  100%{opacity:1;transform:translateY(0);}
-}
-@keyframes cardflip{
-  0%{transform:perspective(700px) rotateY(0);opacity:1;}
-  45%{transform:perspective(700px) rotateY(90deg);opacity:.4;}
-  55%{transform:perspective(700px) rotateY(-90deg);opacity:.4;}
-  100%{transform:perspective(700px) rotateY(0);opacity:1;}
-}
-@keyframes pop{
-  0%{transform:scale(.6);opacity:0;}
-  60%{transform:scale(1.12);}
-  100%{transform:scale(1);opacity:1;}
-}
-@keyframes kiteFly{
-  0%{transform:translate(-12vw,40px) rotate(-8deg);}
-  50%{transform:translate(50vw,-30px) rotate(6deg);}
-  100%{transform:translate(112vw,30px) rotate(-4deg);}
-}
-@keyframes twinkle{
-  0%,100%{opacity:.3;transform:scale(.8);}
-  50%{opacity:1;transform:scale(1.15);}
-}
-
-/* ── SCREENS ── */
-.screen{display:none;animation:fadeScreen .5s ease;}
-.screen.active{display:block;}
-
-/* ── NAV ── */
+html,body{min-height:100%;font-family:'Nunito',sans-serif;background:var(--cream);color:var(--brown)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+img{max-width:100%}
+.screen{display:none;min-height:100svh}
+.screen.active{display:block;animation:screenIn .45s ease}
+@keyframes screenIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes shimmer{from{transform:translateX(-120%)}to{transform:translateX(120%)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
 .nav{
-  position:sticky;top:0;z-index:40;
-  display:flex;align-items:center;gap:14px;
-  padding:12px clamp(14px,3vw,30px);
-  background:rgba(247,241,231,.92);
-  backdrop-filter:blur(10px);
-  border-bottom:1px solid #E6DAC6;
+  position:absolute;z-index:30;top:0;left:0;right:0;display:flex;align-items:center;
+  padding:18px clamp(18px,4vw,48px)
 }
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
+.logo{display:flex;align-items:center;gap:10px;border:0;background:transparent;color:#fff}
+.logo img{width:44px;height:44px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.45),0 8px 22px rgba(0,0,0,.18)}
+.logo span{font-family:'Baloo 2';font-weight:800;font-size:22px;text-shadow:0 2px 16px rgba(0,0,0,.25)}
+.logo span b{color:#ffd978}
+.hero{
+  position:relative;min-height:100svh;overflow:hidden;display:grid;align-items:center;
+  background:
+    radial-gradient(circle at 75% 20%,rgba(255,226,133,.42),transparent 18%),
+    linear-gradient(180deg,#29445b 0%,#52716c 48%,#78906a 75%,#3a593f 100%)
 }
-
-.logo-image {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  object-fit: cover;
-  transition: transform .2s ease;
-  box-shadow:
-    0 0 0 2px rgba(255,255,255,.45),
-    0 6px 18px rgba(242,193,78,.35);
+.hero::before,.hero::after{
+  content:"";position:absolute;left:-10%;right:-10%;bottom:-10%;height:48%;border-radius:50% 50% 0 0
 }
-
-.logo:hover .logo-image {
-  transform: scale(1.04);
+.hero::before{background:#6f8a62;bottom:-22%;z-index:1}
+.hero::after{background:#47684a;bottom:-30%;z-index:2}
+.hero-copy{position:relative;z-index:5;padding:130px clamp(22px,7vw,110px) 100px;max-width:760px;color:white}
+.kicker{font-size:12px;letter-spacing:2px;font-weight:800;color:#ffe69a;margin-bottom:18px}
+.hero h1{font-family:'Baloo 2';font-size:clamp(48px,7vw,94px);line-height:.93;letter-spacing:-2px;margin-bottom:24px}
+.hero h1 em{font-family:'Lora';font-weight:400;color:#ffd978}
+.hero p{font-size:clamp(17px,1.7vw,21px);line-height:1.65;max-width:48ch;color:#f8f2e4}
+.hero-art{position:absolute;z-index:4;right:4%;bottom:5%;width:min(42vw,560px);animation:float 5s ease-in-out infinite}
+.hero-art::before{content:"";position:absolute;inset:12% 5% 0;border-radius:50%;background:radial-gradient(circle,rgba(255,221,117,.38),transparent 68%);filter:blur(10px)}
+.hero-art img{position:relative;display:block;filter:drop-shadow(0 24px 22px rgba(15,30,25,.35))}
+.btn{
+  border:0;border-radius:15px;padding:15px 24px;font-weight:800;display:inline-flex;
+  align-items:center;justify-content:center;gap:10px;transition:.2s
 }
-  
-.logo-text{font-family:'Baloo 2',cursive;font-weight:800;font-size:21px;letter-spacing:-.4px;}
-.logo-text span{color:var(--coral);}
-
-/* ── BUTTONS ── */
-.btn-primary{
-  display:inline-flex;align-items:center;gap:8px;
-  border:none;border-radius:14px;padding:14px 26px;
-  font-weight:800;font-size:16px;cursor:pointer;
-  background:linear-gradient(180deg,#EC8068,#E8735A);
-  color:#fff;
-  box-shadow:0 10px 22px rgba(232,115,90,.34);
-  transition:transform .15s,box-shadow .15s;
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:linear-gradient(#ef876d,#df684f);color:white;box-shadow:0 12px 30px rgba(27,38,32,.28)}
+.btn-ghost{background:white;color:var(--brown);border:1px solid var(--line)}
+.btn-soft{background:#e4f0ef;color:#356f70}
+.hero .btn{margin-top:30px;font-size:17px}
+.shell{max-width:1080px;margin:auto;padding:28px 18px 56px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}
+.brand-dark{display:flex;align-items:center;gap:10px;border:0;background:transparent;color:var(--brown)}
+.brand-dark img{width:42px;height:42px;border-radius:50%}
+.brand-dark span{font-family:'Baloo 2';font-size:21px;font-weight:800}
+.phase{font-size:12px;font-weight:800;letter-spacing:1.3px;color:var(--coral-dark);text-transform:uppercase}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow)}
+.creator{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(330px,.95fr);overflow:hidden}
+.creator-form{padding:clamp(24px,4vw,46px)}
+.creator-preview{position:relative;padding:28px;background:linear-gradient(160deg,#dce8df,#f4e6d2);display:flex;align-items:center;justify-content:center;min-height:640px}
+.creator-preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 28%,rgba(255,244,194,.72),transparent 32%)}
+.step-title{font-family:'Baloo 2';font-size:clamp(30px,4vw,46px);line-height:1.02;margin:8px 0 12px}
+.intro{color:var(--muted);font-size:15px;line-height:1.6;margin-bottom:26px}
+.style-grid,.type-grid{display:grid;gap:10px}
+.style-grid{grid-template-columns:repeat(3,1fr);margin-bottom:26px}
+.type-grid{grid-template-columns:1fr 1fr;margin-bottom:22px}
+.choice{
+  border:2px solid var(--line);border-radius:17px;background:white;padding:11px;text-align:center;
+  color:var(--brown);font-weight:800;transition:.2s
 }
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(232,115,90,.38);}
-.btn-primary:active{transform:translateY(0);}
-.btn-primary:disabled{background:#EAD9C4;color:#B09C84;box-shadow:none;cursor:not-allowed;transform:none;}
-
-/* ── CARDS ── */
-.card{
-  background:var(--surface);
-  border-radius:18px;
-  box-shadow:0 4px 12px rgba(61,43,31,.05);
-  border:1px solid var(--line);
-}
-
-/* ── SECTION LABEL ── */
-.section-label{
-  font-family:'Baloo 2',cursive;font-weight:800;
-  font-size:12.5px;letter-spacing:.3px;
-  color:var(--coral-deep);text-transform:uppercase;
-  margin-bottom:14px;
-}
-
-/* ── INPUT ── */
+.choice.selected{border-color:var(--coral);background:#fff5f1;box-shadow:0 8px 20px rgba(232,115,90,.13)}
+.style-thumb{height:82px;border-radius:12px;background:#f1e7d7;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;margin-bottom:8px}
+.style-thumb img{height:94%;object-fit:contain}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field.full{grid-column:1/-1}
+label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0 6px 2px}
 .input{
-  width:100%;border:2px solid var(--line);
-  background:#FFF;border-radius:13px;
-  padding:13px 15px;font-size:15px;color:var(--brown);
-  outline:none;transition:border-color .2s;
-}
-.input:focus{border-color:var(--coral);}
-.protagonist-type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:14px;}
-.protagonist-type{border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px 8px;cursor:pointer;text-align:center;font-weight:800;font-size:13px;color:var(--brown);}
-.protagonist-type.selected{border-color:var(--coral);background:var(--tint-coral);color:var(--coral-deep);}
-.protagonist-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.protagonist-fields .full{grid-column:1/-1;}
-.field-label{display:block;font-size:12px;font-weight:800;color:var(--warm-gray);margin:0 0 5px 2px;}
-.field-help{font-size:11.5px;color:var(--warm-gray);line-height:1.4;margin-top:8px;}
-@media(max-width:560px){.protagonist-type-grid{grid-template-columns:1fr}.protagonist-fields{grid-template-columns:1fr}.protagonist-fields .full{grid-column:auto}}
-
-/* ── WRAPPER ── */
-.app{max-width:100%;overflow-x:hidden;}
-.content-wrap{max-width:760px;margin:0 auto;padding:0 16px;}
-
-/* ── HERO SCENE ── */
-.hero-scene{
-  position:relative;width:100%;
-  background:linear-gradient(170deg,#EAE7F0 0%,#E7EDE6 50%,#DCE7D6 100%);
-  border-radius:24px;overflow:hidden;min-height:280px;
-}
-.hero-moon{
-  position:absolute;top:14%;left:50%;transform:translateX(-50%);
-  width:clamp(90px,28%,140px);height:clamp(90px,28%,140px);
-  border-radius:50%;
-  background:radial-gradient(circle at 40% 35%,#FCF3DC,#F2D079);
-  box-shadow:0 0 60px rgba(242,193,78,.45);
-}
-.hero-hill{position:absolute;bottom:0;left:0;right:0;height:55%;background:#BBD0AE;border-radius:60% 60% 0 0;}
-.hero-hill2{position:absolute;bottom:0;left:-10%;right:-10%;height:45%;background:#9DBE90;border-radius:55% 55% 0 0;}
-.hero-hill3{position:absolute;bottom:0;left:0;right:0;height:32%;background:#7E9E72;border-radius:50% 50% 0 0;}
-.hero-chars{position:absolute;bottom:18%;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:flex-end;}
-.hero-char{height:clamp(70px,18vw,110px);object-fit:contain;animation:breathe 5s ease-in-out infinite;transform-origin:bottom center;}
-.hero-char:nth-child(2){animation-delay:.8s;height:clamp(55px,14vw,88px);}
-.firefly{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:firefly var(--dur) ease-in-out infinite;animation-delay:var(--delay);}
-
-/* ── STYLE SELECTOR ── */
-.style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.style-card{
-  border:2px solid var(--line);background:#FFF;
-  border-radius:16px;padding:10px;cursor:pointer;
-  transition:all .2s;text-align:center;
-  box-shadow:0 3px 9px rgba(61,43,31,.04);
-}
-.style-card.selected{
-  border-color:var(--coral);
-  box-shadow:0 10px 24px rgba(232,115,90,.22);
-}
-.style-card.selected .style-check{display:flex;}
-.style-art{
-  position:relative;height:100px;border-radius:11px;overflow:hidden;
-  background:#F4ECDD;margin-bottom:8px;
-  display:flex;align-items:flex-end;justify-content:center;
-  transition:filter .3s;
-}
-.style-card:not(.selected) .style-art{filter:saturate(.4) opacity(.72);}
-.style-art img{height:90%;object-fit:contain;}
-.style-check{
-  display:none;position:absolute;top:6px;right:6px;
-  width:22px;height:22px;border-radius:50%;
-  background:var(--coral);color:#fff;
-  font-size:12px;font-weight:800;
-  align-items:center;justify-content:center;
-  animation:pop .35s ease;
-}
-.style-name{font-family:'Baloo 2',cursive;font-weight:700;font-size:14px;color:var(--brown);}
-.style-tag{font-size:11px;color:var(--warm-gray);margin-top:2px;}
-
-/* ── COMPANION TRAY ── */
-.companion-tray{
-  display:flex;gap:10px;overflow-x:auto;
-  padding:4px 2px 12px;scroll-snap-type:x mandatory;
-}
-.companion-card{
-  flex:none;width:90px;text-align:center;
-  cursor:pointer;background:transparent;border:none;padding:0;
-  scroll-snap-align:start;
-}
-.companion-circle{
-  width:78px;height:78px;border-radius:50%;
-  background:#F4ECDD;border:2.5px solid var(--line);
-  display:flex;align-items:flex-end;justify-content:center;
-  overflow:hidden;margin:0 auto 6px;
-  box-shadow:0 3px 8px rgba(61,43,31,.06);
-  transition:all .2s;
-}
-.companion-card.selected .companion-circle{
-  background:var(--tint-coral);border-color:var(--coral);
-  box-shadow:0 8px 18px rgba(232,115,90,.25);
-}
-.companion-circle img{height:94%;object-fit:contain;}
-.companion-name{font-size:12px;font-weight:700;color:var(--brown);}
-.companion-species{font-size:10px;color:var(--warm-gray);}
-
-/* ── STATIONS ── */
-.station-card{
-  border:1px solid var(--line);background:#FFF;
-  border-radius:18px;margin-bottom:12px;overflow:hidden;
-  transition:all .25s;
-  box-shadow:0 4px 12px rgba(61,43,31,.04);
-}
-.station-card.active{
-  border-color:#F0C9A8;
-  box-shadow:0 10px 26px rgba(232,115,90,.12);
-}
-.station-card.locked{opacity:.6;background:#F8F2E8;}
-.station-header{
-  display:flex;align-items:center;gap:11px;width:100%;
-  border:none;background:transparent;padding:15px 18px;
-  cursor:pointer;text-align:left;
-}
-.station-header.locked-header{cursor:default;}
-.station-num{
-  flex:none;width:36px;height:36px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:17px;background:var(--tint-coral);
-  transition:background .2s;
-}
-.station-card.done .station-num{background:var(--teal);}
-.station-card.locked .station-num{background:#E2D6C2;}
-.station-title{font-family:'Baloo 2',cursive;font-weight:700;font-size:16px;color:var(--brown);}
-.station-role{font-size:12.5px;color:var(--warm-gray);margin-top:2px;}
-.station-card.done .station-role{color:var(--teal);font-family:'Lora',serif;font-style:italic;font-weight:700;}
-.station-badge{
-  margin-left:auto;flex:none;
-  font-size:11.5px;font-weight:800;
-  border-radius:20px;padding:4px 10px;
-  background:var(--tint-coral);color:var(--coral);
-}
-.station-card.done .station-badge{background:var(--teal);color:#fff;}
-.station-card.locked .station-badge{background:transparent;color:#B7A892;}
-.station-body{display:none;padding:2px 12px 14px;animation:slideIn .4s ease;}
-.station-body.open{display:block;}
-.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-
-/* ── OPTION CARDS ── */
-.option-card{
-  position:relative;text-align:left;
-  border:2px solid var(--line);background:#FFF;
-  border-radius:15px;padding:7px;cursor:pointer;
-  transition:all .2s;
-  box-shadow:0 3px 9px rgba(61,43,31,.04);
-}
-.option-card:hover:not(.locked):not(.selected){border-color:#F0C9A8;}
-.option-card.selected{
-  border-color:var(--coral);
-  box-shadow:0 8px 18px rgba(232,115,90,.2);
-}
-.option-card.locked{cursor:not-allowed;opacity:.55;}
-.option-art{
-  height:84px;border-radius:11px;overflow:hidden;
-  margin-bottom:7px;background:#F4ECDD;
-  display:flex;align-items:center;justify-content:center;
-}
-.option-check{
-  display:none;position:absolute;top:6px;right:6px;
-  width:20px;height:20px;border-radius:50%;
-  background:var(--coral);color:#fff;
-  font-size:11px;font-weight:800;
-  align-items:center;justify-content:center;
-}
-.option-card.selected .option-check{display:flex;animation:pop .35s ease;}
-.option-lock{
-  display:none;position:absolute;top:6px;right:6px;
-  font-size:13px;
-}
-.option-card.locked .option-lock{display:block;}
-.option-label{font-weight:800;font-size:13px;line-height:1.18;color:var(--brown);margin:0 0 2px;}
-.option-blurb{font-size:11px;color:#9A8771;margin:0;line-height:1.32;}
-.option-card.locked .option-label{color:#B7A892;}
-.option-card.locked .option-blurb{color:#C2B5A2;}
-
-/* ── SPOT ILLUSTRATIONS (CSS shapes) ── */
-.spot{position:relative;width:100%;height:100%;overflow:hidden;}
-.spot-sky{position:absolute;inset:0;}
-.spot-ground{position:absolute;bottom:0;left:0;right:0;height:38%;border-radius:60% 60% 0 0;}
-.spot-glow{position:absolute;top:18%;left:50%;transform:translateX(-50%);width:44%;padding-bottom:44%;border-radius:50%;}
-.spot-emblem{position:absolute;bottom:28%;left:50%;transform:translateX(-50%);font-size:28px;}
-
-
-/* ── BOOK PREVIEW ── */
-.book-page{
-  background:#FFFDF8;
-  border:1px solid #EFE3CC;
-  border-radius:18px;
-  padding:28px 24px 24px;
-  box-shadow:0 10px 30px rgba(61,43,31,.08);
-  position:relative;
-}
-.book-chapter-label{
-  font-family:'Baloo 2',cursive;font-weight:700;
-  font-size:12px;letter-spacing:.5px;text-transform:uppercase;
-  color:var(--coral-deep);text-align:center;margin-bottom:14px;
-}
-.book-text{
-  font-family:'Lora',serif;
-  font-size:16.5px;line-height:1.85;color:#3D2B1F;
-  white-space:pre-line;
-}
-.book-text::first-letter{
-  font-family:'Baloo 2',cursive;font-size:2.4em;
-  color:var(--coral);float:left;line-height:.9;
-  padding-right:6px;padding-top:2px;
-}
-.book-companion{
-  text-align:center;margin:18px 0 6px;
-}
-.book-companion img{
-  height:130px;object-fit:contain;
-  animation:breathe 5s ease-in-out infinite;
-  transform-origin:bottom center;
-  filter:drop-shadow(0 8px 12px rgba(61,43,31,.15));
-}
-.book-pagenum{
-  text-align:center;font-family:'Lora',serif;font-style:italic;
-  font-size:12px;color:#B7A88F;margin-top:14px;
-}
-.locked-chapter{
-  background:#FBF6EC;border:1px dashed #E4D5B8;
-  border-radius:15px;padding:16px 18px;margin-top:10px;
-  position:relative;overflow:hidden;
-}
-.locked-chapter-title{
-  font-family:'Baloo 2',cursive;font-weight:700;font-size:14px;
-  color:var(--brown);display:flex;align-items:center;gap:8px;
-}
-.locked-chapter-choice{
-  font-family:'Lora',serif;font-style:italic;
-  font-size:13px;color:var(--teal);margin-top:2px;
-}
-.locked-lines{margin-top:10px;filter:blur(4px);user-select:none;pointer-events:none;}
-.locked-line{height:9px;border-radius:5px;background:#E7DCC6;margin-bottom:7px;}
-.locked-line:nth-child(2){width:92%;}
-.locked-line:nth-child(3){width:78%;}
-.locked-fade{
-  position:absolute;inset:auto 0 0 0;height:44px;
-  background:linear-gradient(to bottom,transparent,#FBF6EC 85%);
-}
-
-
-.book-illustration{
-  width:100%;border-radius:20px;overflow:hidden;
-  margin:8px 0 18px;background:#EDE4D5;
-  min-height:clamp(300px,54vw,470px);position:relative;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),0 14px 38px rgba(61,43,31,.10);
-}
-.book-illustration>img{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
-  opacity:0;transition:opacity 1s ease;z-index:4;
-}
-.book-illustration>img.loaded{opacity:1;}
-.preview-loader{
-  position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;overflow:hidden;
-  background:
-    radial-gradient(circle at 50% 22%,rgba(255,239,175,.58),transparent 28%),
-    linear-gradient(180deg,#dfe8df 0%,#f4ead9 62%,#ead5b7 100%);
-  transition:opacity .55s ease,visibility .55s ease;
-}
-.preview-loader.hidden{opacity:0;visibility:hidden;pointer-events:none;}
-.preview-loader::before{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(115deg,transparent 26%,rgba(255,255,255,.35) 45%,transparent 62%);
-  animation:previewShimmer 3.8s linear infinite;
-}
-.preview-loader-title{
-  position:relative;z-index:3;font-family:'Baloo 2',cursive;font-weight:800;
-  font-size:clamp(20px,3.2vw,30px);color:#5d4938;text-align:center;margin-bottom:4px;
-}
-.preview-loader-copy{
-  position:relative;z-index:3;font-family:'Lora',serif;font-style:italic;
-  font-size:clamp(13px,1.7vw,16px);color:#8a755f;text-align:center;
-  min-height:24px;padding:0 18px;
-}
-.preview-carousel{
-  position:relative;z-index:2;width:115%;height:clamp(150px,27vw,230px);
-  margin:18px 0 12px;overflow:hidden;
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
-  mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
-}
-.preview-track{
-  position:absolute;left:0;top:0;height:100%;display:flex;align-items:flex-end;gap:22px;
-  width:max-content;animation:previewParade 16s linear infinite;
-}
-.preview-card{
-  flex:none;width:clamp(105px,18vw,165px);height:88%;border-radius:28px 28px 18px 18px;
-  display:flex;align-items:flex-end;justify-content:center;padding:12px 8px 0;
-  background:rgba(255,253,247,.68);border:1px solid rgba(255,255,255,.82);
-  box-shadow:0 14px 28px rgba(61,43,31,.10);backdrop-filter:blur(5px);
-  transform-origin:bottom center;
-}
-.preview-card:nth-child(2n){transform:translateY(-12px) rotate(1.5deg);}
-.preview-card:nth-child(3n){transform:translateY(6px) rotate(-1.5deg);}
-.preview-card img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 12px 10px rgba(61,43,31,.15));animation:previewCharacterBob 3.8s ease-in-out infinite;}
-.preview-card:nth-child(2n) img{animation-delay:.7s}.preview-card:nth-child(3n) img{animation-delay:1.4s}
-.preview-progress{position:relative;z-index:3;width:min(310px,68%);height:5px;border-radius:999px;background:rgba(255,255,255,.62);overflow:hidden;}
-.preview-progress::after{content:'';display:block;width:38%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#e8735a,#f2c14e);animation:previewProgress 2.2s ease-in-out infinite;}
-.illu-status{display:none!important;}
-@keyframes previewParade{from{transform:translateX(0)}to{transform:translateX(calc(-50% - 11px))}}
-@keyframes previewCharacterBob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
-@keyframes previewShimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-@keyframes previewProgress{0%{transform:translateX(-110%)}50%{transform:translateX(175%)}100%{transform:translateX(175%)}}
-@keyframes dots{0%{content:'';}25%{content:'.';}50%{content:'..';}75%{content:'...';}}
-
-/* ── LANDING STEPS ── */
-.steps{display:grid;grid-template-columns:1fr;gap:14px;margin-top:28px;}
-@media(min-width:600px){.steps{grid-template-columns:repeat(3,1fr);}}
-.step-card{
-  background:#FFF;border-radius:16px;padding:20px 16px;
-  border:1px solid var(--line);
-  box-shadow:0 4px 12px rgba(61,43,31,.05);
-}
-.step-num{
-  width:32px;height:32px;border-radius:50%;
-  background:var(--gold);color:var(--brown);
-  font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:12px;
-}
-.step-title{font-family:'Baloo 2',cursive;font-weight:700;font-size:16px;margin-bottom:6px;}
-.step-body{font-size:14px;color:var(--warm-gray);line-height:1.55;}
-
-/* ── QUOTES ── */
-.quotes-section{background:#FBF4E9;border-radius:20px;padding:28px 20px;margin-top:32px;}
-.quotes-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:18px;}
-@media(min-width:600px){.quotes-grid{grid-template-columns:repeat(3,1fr);}}
-.quote-card{background:#FFF;border-radius:14px;padding:16px;border:1px solid var(--line);}
-.quote-text{font-family:'Lora',serif;font-style:italic;font-size:14px;color:var(--brown);line-height:1.6;margin-bottom:12px;}
-.quote-stars{color:var(--gold);font-size:13px;margin-bottom:8px;}
-.quote-author{display:flex;align-items:center;gap:8px;}
-.quote-avatar{
-  width:30px;height:30px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:800;font-size:13px;color:#fff;flex:none;
-}
-.quote-name{font-size:13px;font-weight:700;}
-
-/* ── SUMMARY ── */
-.storyboard{display:flex;gap:10px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x mandatory;}
-.storyboard-card{
-  flex:none;width:120px;scroll-snap-align:start;
-  background:#FFF;border-radius:14px;padding:8px;
-  border:1px solid var(--line);text-align:center;
-}
-.storyboard-art{height:72px;border-radius:9px;overflow:hidden;background:#F4ECDD;margin-bottom:6px;display:flex;align-items:center;justify-content:center;}
-.storyboard-label{font-size:10px;font-weight:700;color:var(--brown);line-height:1.25;}
-.storyboard-station{font-size:9px;color:var(--warm-gray);margin-top:2px;}
-
-.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
-.plan-card{
-  position:relative;text-align:left;
-  border:2px solid var(--line);background:#FFFDF8;
-  border-radius:18px;padding:16px 18px;cursor:pointer;
-  transition:all .2s;
-  box-shadow:0 4px 12px rgba(61,43,31,.04);
-}
-.plan-card.selected{border-color:var(--coral);background:#FFF;box-shadow:0 10px 24px rgba(232,115,90,.18);}
-.plan-badge{
-  position:absolute;top:-10px;left:50%;transform:translateX(-50%);
-  background:var(--coral);color:#fff;
-  font-size:10px;font-weight:800;border-radius:20px;padding:3px 10px;
-  white-space:nowrap;
-}
-.plan-title{font-family:'Baloo 2',cursive;font-weight:800;font-size:16px;}
-.plan-price{font-family:'Baloo 2',cursive;font-weight:800;font-size:24px;color:var(--coral);margin:4px 0;}
-.plan-desc{font-size:13px;color:var(--warm-gray);line-height:1.45;margin-bottom:10px;}
-.plan-feat{list-style:none;display:flex;flex-direction:column;gap:4px;}
-.plan-feat li{font-size:12px;color:var(--brown);font-weight:600;}
-.plan-feat li::before{content:'✓ ';color:var(--teal);}
-
-/* ── CONFIRMATION ── */
-.confirm-scene{
-  position:relative;height:220px;border-radius:20px;overflow:hidden;
-  background:linear-gradient(170deg,#EAE7F0,#DCE7D6);
-  margin-bottom:24px;
-}
-.kite{
-  position:absolute;top:30%;font-size:40px;
-  animation:kiteFly 9s ease-in-out infinite;
-}
-
-/* ── PROGRESS ── */
-.progress-bar{
-  display:flex;gap:6px;align-items:center;
-  margin:20px 0 24px;
-}
-.progress-step{
-  flex:1;height:4px;border-radius:4px;
-  background:var(--line);transition:background .3s;
-}
-.progress-step.done{background:var(--teal);}
-.progress-step.active{background:var(--coral);}
-
-/* ── FOOTER ── */
-.footer-cta{
-  background:var(--cream);border-top:1px solid var(--line);
-  text-align:center;padding:40px 20px;margin-top:40px;
-}
-
-/* ── RESPONSIVE ── */
-@media(min-width:700px){
-  .hero-inner{display:grid;grid-template-columns:46% 54%;gap:24px;align-items:center;}
-  .hero-scene{min-height:340px;}
-  .options-grid{grid-template-columns:repeat(4,1fr);}
-  .style-art{height:130px;}
-}
-
-
-/* ── FAIRYTALE EXPERIENCE ── */
-@keyframes moonGlow{0%,100%{box-shadow:0 0 45px rgba(242,193,78,.38),0 0 90px rgba(242,193,78,.12)}50%{box-shadow:0 0 70px rgba(242,193,78,.58),0 0 120px rgba(242,193,78,.22)}}
-@keyframes cloudDrift{from{transform:translateX(-25%)}to{transform:translateX(125%)}}
-@keyframes swayCharacter{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-7px) rotate(1.5deg)}}
-@keyframes sparkleRise{0%{opacity:0;transform:translate(-50%,8px) scale(.4) rotate(0)}30%{opacity:1}100%{opacity:0;transform:translate(-50%,-42px) scale(1.15) rotate(95deg)}}
-@keyframes pathPulse{0%,100%{box-shadow:0 0 0 rgba(242,193,78,0)}50%{box-shadow:0 0 18px rgba(242,193,78,.75)}}
-@keyframes pageReveal{0%{opacity:0;transform:perspective(1000px) rotateY(-7deg) translateY(18px)}100%{opacity:1;transform:perspective(1000px) rotateY(0) translateY(0)}}
-@keyframes mistMove{0%,100%{transform:translateX(-4%);opacity:.38}50%{transform:translateX(4%);opacity:.62}}
-@keyframes logoShine{0%,72%,100%{filter:none}82%{filter:drop-shadow(0 0 8px rgba(242,193,78,.9)) brightness(1.08)}}
-
-body{background:
- radial-gradient(circle at 15% 8%,rgba(255,255,255,.85),transparent 28%),
- radial-gradient(circle at 88% 18%,rgba(226,239,239,.8),transparent 30%),
- #EFE7DA;}
-.logo{animation:logoShine 7s ease-in-out infinite;}
-.hero-scene{isolation:isolate;box-shadow:0 24px 55px rgba(61,43,31,.13),inset 0 0 0 1px rgba(255,255,255,.45);transition:transform .25s ease;}
-.hero-scene::after{content:'';position:absolute;inset:0;z-index:8;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.13) 43%,transparent 60%);mix-blend-mode:screen;}
-.hero-moon{animation:moonGlow 5.5s ease-in-out infinite;z-index:1;}
-.hero-cloud{position:absolute;z-index:2;width:92px;height:26px;border-radius:999px;background:rgba(255,255,255,.48);filter:blur(.2px);animation:cloudDrift var(--cloud-speed) linear infinite;opacity:var(--cloud-opacity);}
-.hero-cloud::before,.hero-cloud::after{content:'';position:absolute;border-radius:50%;background:inherit;}
-.hero-cloud::before{width:38px;height:38px;left:14px;top:-17px}.hero-cloud::after{width:48px;height:48px;right:9px;top:-24px}
-.hero-star{position:absolute;z-index:3;color:#fff7c7;text-shadow:0 0 10px rgba(255,240,160,.95);animation:twinkle var(--star-speed) ease-in-out infinite;animation-delay:var(--star-delay);pointer-events:none;}
-.hero-hill,.hero-hill2,.hero-hill3,.hero-chars{will-change:transform;transition:transform .35s ease-out;}
-.hero-char:first-child{animation:swayCharacter 5.2s ease-in-out infinite;}
-.hero-char:nth-child(2){animation:swayCharacter 4.7s ease-in-out infinite .8s;}
-.fairy-mist{position:absolute;left:-8%;right:-8%;bottom:8%;height:28%;z-index:4;background:radial-gradient(ellipse at center,rgba(255,255,255,.34),transparent 65%);filter:blur(8px);animation:mistMove 7s ease-in-out infinite;pointer-events:none;}
-.magic-spark{position:fixed;z-index:9999;color:#F2C14E;font-size:15px;pointer-events:none;animation:sparkleRise .8s ease-out forwards;text-shadow:0 0 10px rgba(242,193,78,.9);}
-
-.style-card,.companion-card,.option-card,.plan-card,.step-card{will-change:transform;}
-.style-card:hover,.option-card:hover:not(.locked),.plan-card:hover,.step-card:hover{transform:translateY(-4px) rotate(.35deg);}
-.companion-card:hover .companion-circle{transform:translateY(-4px) rotate(-2deg);}
-.companion-card.selected .companion-circle{animation:pop .42s ease,pathPulse 2.2s ease-in-out infinite;}
-.companion-card.selected img{animation:swayCharacter 3.4s ease-in-out infinite;transform-origin:bottom center;}
-.station-card{position:relative;}
-.station-card::before{content:'';position:absolute;left:17px;top:52px;bottom:-14px;width:2px;background:linear-gradient(var(--gold),rgba(242,193,78,0));opacity:0;transition:opacity .3s;}
-.station-card.done::before{opacity:.8;}
-.station-card.active{transform:translateY(-2px);}
-.station-card.active .station-num{animation:pathPulse 2s ease-in-out infinite;}
-.station-card.locked::after{content:'✦';position:absolute;right:18px;top:17px;color:#CDBEAA;animation:twinkle 2.5s ease-in-out infinite;}
-.book-page{animation:pageReveal .7s cubic-bezier(.2,.8,.2,1);overflow:hidden;}
-.book-page::before{content:'';position:absolute;inset:-30%;pointer-events:none;background:radial-gradient(circle,rgba(242,193,78,.11),transparent 58%);animation:moonGlow 6s ease-in-out infinite;}
-.illu-status{position:relative;}
-.illu-status::before{content:'✦';display:inline-block;margin-right:7px;color:var(--gold);animation:twinkle 1.4s ease-in-out infinite;}
-.screen.active{animation:pageReveal .55s cubic-bezier(.2,.8,.2,1);}
-.btn-primary{position:relative;overflow:hidden;}
-.btn-primary::after{content:'';position:absolute;top:-60%;left:-35%;width:28%;height:220%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);transform:rotate(20deg);transition:left .65s ease;}
-.btn-primary:hover::after{left:115%;}
-.input:focus{box-shadow:0 0 0 4px rgba(232,115,90,.1),0 8px 20px rgba(61,43,31,.06);}
-
-@media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}
-}
-
-
-/* ══════════════════════════════════════
-   ENCHANTED COVER — IMMERSIVE REDESIGN
-══════════════════════════════════════ */
-@keyframes coverIn{0%{opacity:0;transform:scale(1.025)}100%{opacity:1;transform:scale(1)}}
-@keyframes titleRise{0%{opacity:0;transform:translateY(28px)}100%{opacity:1;transform:translateY(0)}}
-@keyframes rabbitCurious{0%,100%{transform:translateY(0) rotate(-2deg)}35%{transform:translateY(-10px) rotate(1deg)}55%{transform:translateY(-7px) rotate(3deg)}}
-@keyframes bearHello{0%,100%{transform:translateY(0) rotate(2deg)}45%{transform:translateY(-7px) rotate(-1deg)}60%{transform:translateY(-5px) rotate(-3deg)}}
-@keyframes auraBreathe{0%,100%{opacity:.38;transform:translate(-50%,-50%) scale(.88)}50%{opacity:.8;transform:translate(-50%,-50%) scale(1.08)}}
-@keyframes leafSail{0%{opacity:0;transform:translate(-10vw,-10px) rotate(0deg)}12%{opacity:.65}88%{opacity:.5}100%{opacity:0;transform:translate(110vw,80px) rotate(520deg)}}
-@keyframes whisperBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
-@keyframes guideFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
-@keyframes trailFlow{from{background-position:0 0}to{background-position:0 36px}}
-@keyframes helloWave{0%,100%{transform:rotate(0deg) translateY(0)}20%{transform:rotate(7deg) translateY(-2px)}40%{transform:rotate(-5deg) translateY(-4px)}60%{transform:rotate(7deg) translateY(-2px)}80%{transform:rotate(-3deg) translateY(0)}}
-@keyframes greetFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-@keyframes bubbleGlow{0%,100%{transform:translateY(0) scale(1);opacity:.92}50%{transform:translateY(-3px) scale(1.03);opacity:1}}
-
-.nav{position:absolute;left:0;right:0;top:0;background:linear-gradient(to bottom,rgba(29,43,48,.55),transparent);border:0;color:white;backdrop-filter:none;padding-top:18px;z-index:60}
-.logo-text{color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.35)}
-.logo-mark{box-shadow:0 0 24px rgba(242,193,78,.6)}
-#screen-landing>div{padding:0!important}
-#screen-landing .content-wrap{max-width:none;padding:0}
-.enchanted-cover{position:relative;min-height:100svh;overflow:hidden;isolation:isolate;background:linear-gradient(180deg,#263b52 0%,#536f70 40%,#a5b993 72%,#526d4f 100%);animation:coverIn 1.1s ease both}
-.sky-wash{position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 72% 23%,rgba(255,238,172,.36),transparent 18%),radial-gradient(circle at 32% 22%,rgba(183,207,224,.2),transparent 30%),linear-gradient(180deg,rgba(28,43,64,.2),rgba(243,225,177,.08) 55%,transparent)}
-.moon-orbit{position:absolute;z-index:1;right:10%;top:10%;width:clamp(120px,19vw,230px);aspect-ratio:1}
-.enchanted-cover .hero-moon{position:absolute;inset:0;width:100%;height:100%;left:auto;top:auto;transform:none;background:radial-gradient(circle at 38% 34%,#fffbe7,#f4d982 58%,#dab55b);box-shadow:0 0 80px rgba(250,224,139,.58),0 0 180px rgba(247,214,117,.2)}
-.forest-back,.forest-mid{position:absolute;left:-3%;right:-3%;bottom:22%;height:48%;transform-origin:bottom;background-repeat:repeat-x;background-position:bottom;background-size:180px 100%;opacity:.54}
-.forest-back{z-index:2;filter:blur(1.2px);background-image:linear-gradient(135deg,transparent 48%,#405e57 49% 63%,transparent 64%),linear-gradient(45deg,transparent 48%,#405e57 49% 63%,transparent 64%)}
-.forest-mid{z-index:3;bottom:12%;height:54%;opacity:.8;background-size:145px 100%;background-image:linear-gradient(135deg,transparent 47%,#294b43 48% 65%,transparent 66%),linear-gradient(45deg,transparent 47%,#294b43 48% 65%,transparent 66%)}
-.enchanted-cover .hero-hill{z-index:4;height:40%;background:#77936d;bottom:-7%;border-radius:62% 62% 0 0}
-.enchanted-cover .hero-hill2{z-index:5;height:31%;background:#5e7b59;bottom:-4%}
-.enchanted-cover .hero-hill3{z-index:6;height:21%;background:#3d5e41;bottom:-2%}
-.enchanted-cover .fairy-mist{z-index:7;bottom:2%;height:42%;background:radial-gradient(ellipse at 55% 60%,rgba(255,255,255,.33),transparent 50%)}
-.cover-copy{position:absolute;z-index:15;left:clamp(22px,7vw,110px);top:50%;transform:translateY(-52%);max-width:min(620px,53vw);color:#fff;text-shadow:0 2px 18px rgba(10,27,30,.34)}
-.cover-kicker{font-size:12px;font-weight:800;letter-spacing:2.1px;color:#ffe89a;margin-bottom:18px;animation:titleRise .8s .15s both}
-.cover-copy h1{font-family:'Baloo 2',cursive;font-size:clamp(46px,6.8vw,92px);line-height:.92;letter-spacing:-2.3px;margin:0 0 24px;animation:titleRise .9s .28s both}
-.cover-copy h1 em{font-family:'Lora',serif;font-weight:400;color:#ffd978;text-shadow:0 0 32px rgba(255,217,120,.3)}
-.cover-copy p{max-width:48ch;font-size:clamp(16px,1.55vw,21px);line-height:1.65;color:#f6f0df;animation:titleRise .9s .42s both}
-.cover-actions{display:flex;align-items:center;gap:20px;margin-top:30px;flex-wrap:wrap;animation:titleRise .9s .56s both}
-.cover-cta{font-size:17px;padding:17px 27px;background:linear-gradient(180deg,#f18b6f,#dc664f);box-shadow:0 14px 36px rgba(20,32,30,.34),0 0 0 1px rgba(255,255,255,.18) inset}
-.cover-cta b{font-size:23px;transition:transform .2s}.cover-cta:hover b{transform:translateX(5px)}
-.cover-note{font-size:13px;font-weight:700;color:#f7eacb}
-.enchanted-cover .hero-chars{z-index:14;left:auto;right:clamp(4%,8vw,12%);bottom:10%;transform:none;width:clamp(280px,34vw,520px);height:55%;display:flex;align-items:flex-end;justify-content:center;gap:clamp(4px,1.2vw,18px)}
-.enchanted-cover .hero-char{position:relative;height:auto;object-fit:contain;filter:drop-shadow(0 22px 18px rgba(14,31,28,.32));transform-origin:bottom center}
-.hero-rabbit{width:58%;animation:rabbitCurious 5.8s ease-in-out infinite!important;z-index:2}.hero-bear{width:44%;animation:bearHello 5.2s .6s ease-in-out infinite!important;z-index:3;margin-left:-15%}
-.character-aura{position:absolute;left:50%;top:56%;width:90%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(255,224,119,.34),transparent 65%);filter:blur(8px);animation:auraBreathe 5s ease-in-out infinite}
-.hero-greeters{position:absolute;inset:0;z-index:16;pointer-events:none}
-.hero-greeter{position:absolute;filter:drop-shadow(0 14px 14px rgba(14,31,28,.2));transform-origin:bottom center}
-.hero-greeter img{display:block;object-fit:contain;transform-origin:bottom center}
-.greeter-fox{left:-8px;bottom:2%;animation:greetFloat 4.8s ease-in-out infinite}
-.greeter-fox img{height:clamp(84px,9vw,120px);transform:rotate(-3deg)}
-.greeter-owl{left:clamp(18px,4vw,54px);top:15%;animation:greetFloat 5.2s 1s ease-in-out infinite}
-.greeter-owl img{height:clamp(62px,6.5vw,92px);transform:rotate(2deg)}
-.hero-greeter .wave-arm{position:absolute;font-size:16px;line-height:1;transform-origin:20% 90%;animation:helloWave 2.4s ease-in-out infinite;color:#fff5cf;text-shadow:0 0 12px rgba(255,240,170,.7)}
-.greeter-fox .wave-arm{right:-2px;top:28%}
-.greeter-owl .wave-arm{right:-8px;top:18%;font-size:14px}
-.foreground-grass{position:absolute;z-index:20;left:-4%;right:-4%;bottom:-8%;height:23%;background:radial-gradient(ellipse at 5% 100%,#244834 0 36%,transparent 37%),radial-gradient(ellipse at 25% 100%,#31543b 0 42%,transparent 43%),radial-gradient(ellipse at 52% 100%,#244834 0 40%,transparent 41%),radial-gradient(ellipse at 78% 100%,#31543b 0 44%,transparent 45%),radial-gradient(ellipse at 98% 100%,#244834 0 39%,transparent 40%)}
-.floating-leaf{position:absolute;z-index:18;top:18%;left:-8%;color:#dfc76f;font-size:25px;opacity:0;animation:leafSail 14s linear infinite}.leaf-2{top:35%;animation-delay:4.2s;font-size:18px}.leaf-3{top:55%;animation-delay:8.4s;font-size:22px}
-.scroll-whisper{position:absolute;z-index:30;left:50%;bottom:18px;transform:translateX(-50%);border:0;background:transparent;color:#f6ebcf;font-size:12px;font-weight:700;letter-spacing:.3px;cursor:pointer;animation:whisperBob 2.5s ease-in-out infinite}.scroll-whisper span{display:block;font-size:24px;line-height:16px}
-.enchanted-cover .firefly{z-index:19}
-.storybook-steps{max-width:960px;margin-left:auto!important;margin-right:auto;padding:20px 18px 0}
-.storybook-steps .section-label{text-align:center;font-size:13px;letter-spacing:1.4px}
-.storybook-steps .steps{position:relative;gap:22px}.storybook-steps .steps::before{content:'';position:absolute;top:34px;left:12%;right:12%;height:2px;background:linear-gradient(90deg,transparent,#d9bd70,#d9bd70,transparent);z-index:0}
-.storybook-steps .step-card{position:relative;z-index:1;text-align:center;padding:28px 20px 22px;border-radius:26px;background:rgba(255,253,248,.86);backdrop-filter:blur(8px);box-shadow:0 18px 48px rgba(61,43,31,.08)}
-.storybook-steps .step-num{margin:-44px auto 16px;width:48px;height:48px;border:5px solid #f6eee1;box-shadow:0 6px 18px rgba(61,43,31,.13)}
-.quotes-section,.footer-cta{max-width:960px;margin-left:auto!important;margin-right:auto}
-.builder-world{position:relative}
-.builder-guide{position:fixed;right:max(16px,calc((100vw - 1000px)/2));bottom:22px;z-index:35;width:150px;pointer-events:none;display:none}
-#screen-builder.active .builder-guide{display:block}
-.builder-guide img{display:block;width:90px;margin:0 auto;filter:drop-shadow(0 10px 10px rgba(61,43,31,.2));animation:guideFloat 4.4s ease-in-out infinite}
-.guide-glow{position:absolute;width:120px;height:120px;left:50%;top:25px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,rgba(242,193,78,.32),transparent 68%)}
-.guide-speech{position:relative;background:#fffdf7;border:1px solid #ead9bd;border-radius:16px;padding:9px 11px;text-align:center;font-family:'Lora',serif;font-style:italic;font-size:11px;box-shadow:0 8px 24px rgba(61,43,31,.12)}
-#stations-container{position:relative;padding-left:8px}#stations-container::before{content:'';position:absolute;left:25px;top:20px;bottom:25px;width:3px;border-radius:4px;background:repeating-linear-gradient(to bottom,#e3bd61 0 10px,transparent 10px 18px);animation:trailFlow 2.8s linear infinite;opacity:.55}
-.station-card{margin-left:24px;border-radius:22px}.station-num{position:relative;z-index:2;box-shadow:0 0 0 6px #f7f1e7}
-@media(max-width:760px){
- .nav{position:absolute}.enchanted-cover{min-height:880px}.cover-copy{top:18%;transform:none;left:22px;right:22px;max-width:none;text-align:center}.cover-copy h1{font-size:clamp(43px,13vw,64px)}.cover-copy p{font-size:16px;margin:auto}.cover-actions{justify-content:center}.enchanted-cover .hero-chars{right:3%;left:3%;bottom:9%;width:auto;height:43%}.moon-orbit{right:5%;top:8%;width:130px}.forest-back,.forest-mid{bottom:17%}.storybook-steps .steps::before{display:none}.storybook-steps .step-card{margin-top:25px}.builder-guide{display:none!important}.greeter-fox{left:-12px;bottom:1%}.greeter-fox img{height:72px}.greeter-owl{left:10px;top:12%}.greeter-owl img{height:54px}.hero-greeter .wave-arm{font-size:12px}
-}
-@media(min-width:761px) and (max-width:1050px){.cover-copy{max-width:55vw}.enchanted-cover .hero-chars{right:1%;width:43vw}.cover-copy h1{font-size:7vw}}
-
-
-
-/* HOMEPAGE HERO — RABBIT + BEAR CLEANUP */
-.hero-greeters,
-.hero-book-stage {
-  display: none !important;
-}
-
-.enchanted-cover .hero-chars {
-  z-index: 14;
-  left: auto;
-  right: clamp(3%, 7vw, 10%);
-  bottom: 7%;
-  transform: none;
-  width: clamp(300px, 36vw, 540px);
-  height: 58%;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 0;
-  isolation: isolate;
-}
-
-.hero-character-frame {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  overflow: hidden;
-  filter: drop-shadow(0 24px 18px rgba(14,31,28,.34));
-}
-
-.hero-rabbit-frame {
-  width: 60%;
-  height: 100%;
-  z-index: 2;
-  margin-right: -8%;
-  border-radius: 48% 48% 16% 16% / 34% 34% 14% 14%;
-}
-
-.hero-bear-frame {
-  width: 46%;
-  height: 78%;
-  z-index: 3;
-  margin-left: -5%;
-  border-radius: 48% 48% 18% 18% / 34% 34% 16% 16%;
-}
-
-.enchanted-cover .hero-char {
-  position: relative;
-  display: block;
-  width: auto;
-  max-width: none;
-  height: 112%;
-  object-fit: contain;
-  object-position: center bottom;
-  transform-origin: bottom center;
-  filter:
-    saturate(.94)
-    contrast(.98)
-    drop-shadow(0 0 1px rgba(255,255,255,.22));
-}
-
-.enchanted-cover .hero-rabbit {
-  height: 116%;
-  animation: rabbitCurious 5.8s ease-in-out infinite !important;
-}
-
-.enchanted-cover .hero-bear {
-  height: 108%;
-  animation: bearHello 5.2s .6s ease-in-out infinite !important;
-}
-
-.enchanted-cover .character-aura {
-  left: 52%;
-  top: 57%;
-  width: 96%;
-  background:
-    radial-gradient(circle, rgba(255,224,119,.42), rgba(255,224,119,.12) 43%, transparent 69%);
-}
-
-.enchanted-cover .hero-chars::after {
-  content: "";
-  position: absolute;
-  left: 8%;
-  right: 3%;
-  bottom: -1%;
-  height: 16%;
-  z-index: 5;
-  background:
-    radial-gradient(ellipse at 32% 100%, #31543b 0 34%, transparent 35%),
-    radial-gradient(ellipse at 65% 100%, #244834 0 42%, transparent 43%),
-    radial-gradient(ellipse at 88% 100%, #31543b 0 36%, transparent 37%);
-  filter: blur(.3px);
-  pointer-events: none;
-}
-
-@media (max-width: 760px) {
-  .enchanted-cover {
-    min-height: 880px;
-  }
-
-  .enchanted-cover .hero-chars {
-    left: 4%;
-    right: 4%;
-    bottom: 7%;
-    width: auto;
-    height: 43%;
-  }
-
-  .hero-rabbit-frame {
-    width: 58%;
-    margin-right: -10%;
-  }
-
-  .hero-bear-frame {
-    width: 44%;
-    height: 75%;
-  }
-}
-
-
-
-/* FOREST SILHOUETTE FIX — remove crossed X shapes */
-.forest-back,
-.forest-mid {
-  background-image: none !important;
-  background-repeat: repeat-x;
-  background-position: bottom;
-  overflow: hidden;
-}
-
-.forest-back::before,
-.forest-mid::before,
-.forest-back::after,
-.forest-mid::after {
-  content: "";
-  position: absolute;
-  left: -4%;
-  right: -4%;
-  bottom: 0;
-  height: 100%;
-  background-repeat: repeat-x;
-  background-position: bottom;
-  pointer-events: none;
-}
-
-.forest-back::before {
-  opacity: .58;
-  background-size: 220px 100%;
-  background-image:
-    linear-gradient(150deg, transparent 47%, #405e57 48% 66%, transparent 67%);
-}
-
-.forest-back::after {
-  left: 5%;
-  opacity: .42;
-  background-size: 260px 92%;
-  background-image:
-    linear-gradient(210deg, transparent 47%, #48685f 48% 66%, transparent 67%);
-}
-
-.forest-mid::before {
-  opacity: .88;
-  background-size: 175px 100%;
-  background-image:
-    linear-gradient(150deg, transparent 46%, #294b43 47% 68%, transparent 69%);
-}
-
-.forest-mid::after {
-  left: 3%;
-  opacity: .72;
-  background-size: 205px 94%;
-  background-image:
-    linear-gradient(210deg, transparent 46%, #31534b 47% 68%, transparent 69%);
-}
-
-
-/* ── PERSISTENT CHARACTERS — TEST MODE ── */
-.saved-characters-section{
-  display:none;
-  max-width:960px;
-  margin:28px auto 0;
-  padding:0 18px;
-}
-.saved-characters-section.visible{display:block;}
-.saved-characters-panel{
-  background:rgba(255,253,248,.9);
-  border:1px solid var(--line);
-  border-radius:24px;
-  padding:22px;
-  box-shadow:0 16px 38px rgba(61,43,31,.08);
-}
-.saved-characters-head{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:16px;
-  margin-bottom:16px;
-}
-.saved-characters-title{
-  font-family:'Baloo 2',cursive;
-  font-size:22px;
-  font-weight:800;
-}
-.saved-characters-copy{
-  color:var(--warm-gray);
-  font-size:13px;
-  line-height:1.5;
-}
-.saved-characters-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:12px;
-}
-.saved-character-card{
-  border:1px solid var(--line);
-  border-radius:18px;
-  background:#fff;
-  padding:12px;
-  text-align:left;
-  box-shadow:0 5px 14px rgba(61,43,31,.05);
-}
-.saved-character-image{
-  width:100%;
-  aspect-ratio:4/3;
-  border-radius:13px;
-  background:#F4ECDD;
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin-bottom:10px;
-}
-.saved-character-image img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-.saved-character-name{
-  font-family:'Baloo 2',cursive;
-  font-size:17px;
-  font-weight:800;
-}
-.saved-character-meta{
-  color:var(--warm-gray);
-  font-size:11.5px;
-  margin:2px 0 10px;
-}
-.saved-character-use{
-  width:100%;
-  border:0;
-  border-radius:11px;
-  padding:10px 12px;
-  background:var(--tint-teal);
-  color:#376f71;
-  font-weight:800;
-  cursor:pointer;
-}
-.saved-character-use:hover{transform:translateY(-1px);}
-.character-save-box{
-  display:none;
-  margin:0 0 18px;
-  padding:15px 16px;
-  border-radius:16px;
-  background:var(--tint-teal);
-  border:1px solid #C9E1E1;
-}
-.character-save-box.visible{display:block;}
-.character-save-row{
-  display:flex;
-  align-items:center;
-  gap:11px;
-}
-.character-save-icon{
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex:none;
-  background:var(--teal);
-  color:white;
-  font-weight:900;
-}
-.character-save-title{
-  font-weight:800;
-  color:#376f71;
-}
-.character-save-copy{
-  color:#537f80;
-  font-size:12px;
-  margin-top:2px;
-}
-.character-save-actions{
-  display:flex;
-  gap:8px;
-  margin-top:12px;
-  flex-wrap:wrap;
-}
-.btn-secondary-small{
-  border:1px solid #BFD8D8;
-  background:#fff;
-  color:#376f71;
-  border-radius:11px;
-  padding:9px 12px;
-  font-weight:800;
-  cursor:pointer;
+  width:100%;border:2px solid var(--line);border-radius:13px;background:#fff;padding:13px 14px;color:var(--brown);outline:none
+}
+.input:focus{border-color:var(--coral);box-shadow:0 0 0 4px rgba(232,115,90,.09)}
+.advanced-toggle{border:0;background:transparent;color:var(--teal);font-weight:800;margin:17px 0 8px}
+.advanced{display:none;padding-top:6px}
+.advanced.open{display:block}
+.form-actions{display:flex;gap:10px;margin-top:24px}
+.form-actions .btn-primary{flex:1}
+.preview-placeholder{position:relative;z-index:2;text-align:center;max-width:330px;color:#766351}
+.preview-orb{width:150px;height:150px;margin:0 auto 22px;border-radius:50%;background:rgba(255,255,255,.62);display:flex;align-items:center;justify-content:center;font-size:62px;animation:pulse 3s ease-in-out infinite}
+.preview-title{font-family:'Baloo 2';font-size:25px;font-weight:800;margin-bottom:8px}
+.preview-copy{font-family:'Lora';font-style:italic;line-height:1.55}
+.loader{display:none;position:absolute;z-index:4;inset:0;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:30px;background:linear-gradient(160deg,#dce8df,#f4e6d2)}
+.loader.visible{display:flex}
+.loader-bar{width:min(300px,70%);height:6px;border-radius:20px;background:rgba(255,255,255,.7);overflow:hidden;margin-top:22px}
+.loader-bar::after{content:"";display:block;width:40%;height:100%;background:linear-gradient(90deg,var(--coral),var(--gold));animation:shimmer 1.8s infinite}
+.error{display:none;margin-top:13px;padding:12px 14px;border-radius:12px;background:#fdeae5;color:#a8402e;font-size:13px;font-weight:700}
+.error.visible{display:block}
+.wow{min-height:100svh;background:linear-gradient(160deg,#dbe8df,#f6ead7);padding:24px 18px 50px}
+.wow-wrap{max-width:1000px;margin:auto}
+.wow-stage{position:relative;min-height:620px;overflow:hidden;border-radius:32px;background:#efe7d9;box-shadow:var(--shadow)}
+.wow-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.wow-overlay{position:absolute;inset:auto 0 0;padding:120px 30px 32px;background:linear-gradient(transparent,rgba(30,33,28,.78));color:white;text-align:center}
+.wow-overlay h2{font-family:'Baloo 2';font-size:clamp(34px,5vw,58px)}
+.wow-overlay p{font-family:'Lora';font-style:italic;font-size:17px;margin-top:4px}
+.wow-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:22px}
+.details-card{display:none;margin-top:16px;padding:22px}
+.details-card.open{display:block}
+.saved-note{display:none;margin:16px auto 0;max-width:760px;padding:15px 18px;border-radius:16px;background:#e2efef;color:#356f70;font-weight:700;text-align:center}
+.saved-note.visible{display:block}
+.next{min-height:100svh;display:grid;place-items:center;padding:30px 18px;background:linear-gradient(160deg,#29465a,#5d7b70)}
+.next-card{max-width:720px;background:var(--paper);border-radius:30px;padding:clamp(28px,5vw,52px);text-align:center;box-shadow:var(--shadow)}
+.next-icon{font-size:58px;margin-bottom:14px}
+.next h2{font-family:'Baloo 2';font-size:clamp(34px,5vw,52px);line-height:1.05;margin-bottom:12px}
+.next p{color:var(--muted);font-size:16px;line-height:1.6;margin-bottom:24px}
+.small{font-size:12px;color:var(--muted);line-height:1.5}
+@media(max-width:820px){
+  .creator{grid-template-columns:1fr}
+  .creator-preview{min-height:360px;order:-1}
+  .hero-art{opacity:.38;width:78vw;right:-20%;bottom:0}
+  .hero-copy{padding-top:130px}
 }
 @media(max-width:560px){
-  .saved-characters-head{display:block;}
-  .saved-characters-title{font-size:20px;}
+  .style-grid{grid-template-columns:1fr}
+  .style-card{display:grid;grid-template-columns:90px 1fr;align-items:center;text-align:left;gap:10px}
+  .style-thumb{height:70px;margin:0}
+  .grid,.type-grid{grid-template-columns:1fr}
+  .form-actions{flex-direction:column}
+  .wow-stage{min-height:520px}
+}
+
+.home-section,.home-showcase,.home-proof,.home-cta{
+  max-width:1080px;margin:0 auto;padding:72px 18px
+}
+.home-heading{max-width:700px;text-align:center;margin:0 auto 34px}
+.home-heading.compact{margin-bottom:28px}
+.home-heading h2,.home-showcase h2,.home-cta h2{
+  font-family:'Baloo 2';font-size:clamp(32px,4.5vw,54px);line-height:1.04;margin:8px 0 12px
+}
+.home-heading p,.home-showcase p,.home-cta p{color:var(--muted);font-size:16px;line-height:1.65}
+.home-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.home-step{
+  position:relative;background:var(--paper);border:1px solid var(--line);border-radius:24px;
+  padding:26px;box-shadow:0 12px 30px rgba(61,43,31,.07)
+}
+.home-step-num{
+  position:absolute;top:18px;right:18px;width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:#f7e7b8;font-weight:800
+}
+.home-step-icon{font-size:34px;margin-bottom:16px}
+.home-step h3{font-family:'Baloo 2';font-size:22px;margin-bottom:8px}
+.home-step p{color:var(--muted);line-height:1.55;font-size:14px}
+.home-showcase{
+  display:grid;grid-template-columns:1fr 1fr;gap:38px;align-items:center;
+  background:#efe7da;border-radius:34px;margin-top:18px;margin-bottom:18px
+}
+.home-showcase-copy{padding:10px 0 10px 24px}
+.home-showcase-copy .btn{margin-top:20px}
+.home-showcase-art{position:relative;min-height:360px}
+.showcase-card{
+  position:absolute;width:190px;height:240px;border-radius:28px;background:white;border:1px solid var(--line);
+  display:flex;align-items:flex-end;justify-content:center;overflow:hidden;box-shadow:0 18px 35px rgba(61,43,31,.12)
+}
+.showcase-card img{height:90%;object-fit:contain}
+.showcase-card.one{left:4%;top:68px;transform:rotate(-8deg)}
+.showcase-card.two{left:34%;top:8px;z-index:2}
+.showcase-card.three{right:2%;top:78px;transform:rotate(8deg)}
+.proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.proof-card{background:white;border:1px solid var(--line);border-radius:20px;padding:22px}
+.proof-stars{color:var(--gold);margin-bottom:10px}
+.proof-card p{font-family:'Lora';font-style:italic;line-height:1.6;margin-bottom:14px}
+.proof-card span{font-size:13px;font-weight:800;color:var(--muted)}
+.home-cta{
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+  margin-bottom:50px;background:linear-gradient(135deg,#fff8ef,#e7f1ef);border-radius:30px
+}
+@media(max-width:820px){
+  .home-steps,.proof-grid{grid-template-columns:1fr}
+  .home-showcase{grid-template-columns:1fr;padding-top:52px}
+  .home-showcase-copy{padding:0 10px}
+  .home-showcase-art{min-height:320px}
+  .home-cta{flex-direction:column;text-align:center}
+}
+@media(max-width:560px){
+  .home-showcase-art{transform:scale(.9);transform-origin:center top}
+  .showcase-card{width:150px;height:205px}
+  .showcase-card.one{left:0}
+  .showcase-card.two{left:28%}
+  .showcase-card.three{right:0}
 }
 
 </style>
 </head>
 <body>
-<div class="app" id="app">
 
-  <!-- NAV -->
+<section class="screen active" id="screen-landing">
   <nav class="nav">
-    <button
-  class="logo"
-  type="button"
-  onclick="goHome()"
-  aria-label="Torna alla homepage"
->
-  <img
-    class="logo-image"
-    src="assets/brand/dreamtaily-icon.png"
-    alt=""
-  >
-  <span class="logo-text">Dream<span>Taily</span></span>
-</button>
+    <button class="logo" type="button" onclick="showScreen('landing')">
+      <img src="assets/brand/dreamtaily-icon.png" alt="">
+      <span>Dream<b>Taily</b></span>
+    </button>
   </nav>
 
-  <!-- ═══════════════════════════════════════
-       SCREEN: LANDING
-  ═══════════════════════════════════════ -->
-  <div class="screen active" id="screen-landing">
-    <div style="padding:32px 16px 0;">
-      <div class="content-wrap">
+  <div class="hero">
+    <div class="hero-copy">
+      <div class="kicker">✦ UNA STORIA CHE COMINCIA DA LUI</div>
+      <h1>Crea il suo personaggio.<br>Apri il suo <em>mondo.</em></h1>
+      <p>DreamTaily trasforma un bambino o un personaggio inventato in un eroe illustrato, pronto a vivere storie sempre nuove e a diventare il cuore del suo libro.</p>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:30px">
+        <button class="btn btn-primary" onclick="showScreen('creator')">Crea il suo personaggio →</button>
+        <span style="font-size:13px;font-weight:700;color:#f7e9c8">Nessun account prima del primo incontro</span>
+      </div>
+    </div>
+    <div class="hero-art"><img src="assets/char/water/rabbit.png" alt="Personaggio DreamTaily"></div>
+  </div>
 
-        <section class="enchanted-cover" id="hero-scene" aria-label="Benvenuto nel mondo di DreamTaily">
-          <div class="sky-wash"></div>
-          <div class="moon-orbit"><div class="hero-moon"></div></div>
-          <div class="hero-cloud cloud-a"></div>
-          <div class="hero-cloud cloud-b"></div>
-          <div class="hero-star star-a">✦</div><div class="hero-star star-b">✧</div><div class="hero-star star-c">✦</div>
-          <div class="forest-back layer" data-depth="1"></div>
-          <div class="forest-mid layer" data-depth="2"></div>
-          <div class="hero-hill layer" data-depth="2"></div>
-          <div class="hero-hill2 layer" data-depth="3"></div>
-          <div class="hero-hill3 layer" data-depth="4"></div>
-          <div class="fairy-mist"></div>
-          <div class="cover-copy">
-            <div class="cover-kicker">✦ UNA STORIA CHE CONOSCE IL SUO NOME</div>
-            <h1>Apri la porta<br>del suo <em>mondo incantato.</em></h1>
-            <p>Voi scegliete il viaggio. DreamTaily lo trasforma in un libro illustrato unico, dove il protagonista che scegli diventa l’eroe.</p>
-            <div class="cover-actions">
-              <button class="btn-primary cover-cta" onclick="goTo('builder')"><span>Inizia l’avventura</span><b>→</b></button>
-              <span class="cover-note">Da €29 · pronto in 48 ore</span>
-            </div>
+  <section class="home-section">
+    <div class="home-heading">
+      <div class="phase">Come funziona</div>
+      <h2>Un personaggio, tante avventure, un solo libro.</h2>
+      <p>Il cuore di DreamTaily non è compilare un ordine. È creare un personaggio che può tornare, crescere e vivere storie diverse.</p>
+    </div>
+
+    <div class="home-steps">
+      <article class="home-step">
+        <div class="home-step-num">1</div>
+        <div class="home-step-icon">✨</div>
+        <h3>Dai vita al personaggio</h3>
+        <p>Scegli lo stile, inserisci pochi dettagli e incontralo illustrato in pochi istanti.</p>
+      </article>
+      <article class="home-step">
+        <div class="home-step-num">2</div>
+        <div class="home-step-icon">🗺️</div>
+        <h3>Scegli le sue avventure</h3>
+        <p>Usalo nelle storie che preferite e componi il cast di ogni racconto.</p>
+      </article>
+      <article class="home-step">
+        <div class="home-step-num">3</div>
+        <div class="home-step-icon">📚</div>
+        <h3>Componi il suo libro</h3>
+        <p>Raccogli più storie in un libro personale, fatto per essere riletto e ricordato.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="home-showcase">
+    <div class="home-showcase-copy">
+      <div class="phase">Il primo incontro</div>
+      <h2>Prima si vede. Poi si salva.</h2>
+      <p>Nessuna registrazione prima del momento importante. Il personaggio prende vita, lo guardate insieme e solo dopo scegliete di continuare.</p>
+      <button class="btn btn-soft" onclick="showScreen('creator')">Inizia dal personaggio</button>
+    </div>
+    <div class="home-showcase-art">
+      <div class="showcase-card one"><img src="assets/char/paper/rabbit.png" alt="Paper Cut"></div>
+      <div class="showcase-card two"><img src="assets/char/water/bear.png" alt="Acquerello"></div>
+      <div class="showcase-card three"><img src="assets/char/crayon/fox.png" alt="Pastelli"></div>
+    </div>
+  </section>
+
+  <section class="home-proof">
+    <div class="home-heading compact">
+      <div class="phase">Pensato per le famiglie</div>
+      <h2>Facile da capire. Bello da vivere insieme.</h2>
+    </div>
+    <div class="proof-grid">
+      <div class="proof-card">
+        <div class="proof-stars">★★★★★</div>
+        <p>“Il momento in cui si è visto illustrato è stato quello che ha reso tutto reale.”</p>
+        <span>Elena, mamma di Sofia</span>
+      </div>
+      <div class="proof-card">
+        <div class="proof-stars">★★★★★</div>
+        <p>“Non sembrava un form. Sembrava l’inizio di una storia fatta per noi.”</p>
+        <span>Marco, papà di Leo</span>
+      </div>
+      <div class="proof-card">
+        <div class="proof-stars">★★★★★</div>
+        <p>“La cosa più bella è poter immaginare lo stesso personaggio in avventure diverse.”</p>
+        <span>Priya, mamma di Aanya</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-cta">
+    <div>
+      <div class="phase">Il primo passo</div>
+      <h2>Comincia dal suo personaggio.</h2>
+      <p>Pochi dettagli. Nessun account. Poi il primo incontro.</p>
+    </div>
+    <button class="btn btn-primary" onclick="showScreen('creator')">Crea il suo personaggio →</button>
+  </section>
+</section>
+
+<section class="screen" id="screen-creator">
+  <div class="shell">
+    <div class="topbar">
+      <button class="brand-dark" onclick="showScreen('landing')">
+        <img src="assets/brand/dreamtaily-icon.png" alt="">
+        <span>DreamTaily</span>
+      </button>
+      <div class="phase">1 · Crea il personaggio</div>
+    </div>
+
+    <div class="panel creator">
+      <div class="creator-form">
+        <div class="phase">Il momento magico</div>
+        <h1 class="step-title">Cominciamo da chi sarà l’eroe.</h1>
+        <p class="intro">Bastano pochi dettagli. Potrai aggiungerne altri dopo averlo visto prendere vita.</p>
+
+        <label>Scegli lo stile</label>
+        <div class="style-grid">
+          <button class="choice style-card" data-style="paper" onclick="selectStyle('paper')">
+            <div class="style-thumb"><img src="assets/char/paper/rabbit.png" alt=""></div>
+            <span>Paper Cut</span>
+          </button>
+          <button class="choice style-card selected" data-style="water" onclick="selectStyle('water')">
+            <div class="style-thumb"><img src="assets/char/water/rabbit.png" alt=""></div>
+            <span>Acquerello</span>
+          </button>
+          <button class="choice style-card" data-style="crayon" onclick="selectStyle('crayon')">
+            <div class="style-thumb"><img src="assets/char/crayon/rabbit.png" alt=""></div>
+            <span>Pastelli</span>
+          </button>
+        </div>
+
+        <label>Chi stiamo creando?</label>
+        <div class="type-grid">
+          <button class="choice selected" data-type="real_person" onclick="selectType('real_person')">👤 Un bambino reale</button>
+          <button class="choice" data-type="fictional_character" onclick="selectType('fictional_character')">✨ Un personaggio inventato</button>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label for="name">Nome *</label>
+            <input class="input" id="name" placeholder="Es. Tommy">
           </div>
-          <div class="hero-chars layer" id="hero-chars" data-depth="5">
-            <div class="character-aura"></div>
-            <div class="hero-character-frame hero-rabbit-frame">
-              <img class="hero-char hero-rabbit" src="assets/char/water/rabbit.png" alt="Coniglietto di DreamTaily">
-            </div>
-            <div class="hero-character-frame hero-bear-frame">
-              <img class="hero-char hero-bear" src="assets/char/water/bear.png" alt="Orsetto di DreamTaily">
-            </div>
+          <div class="field">
+            <label for="age-group">Fascia d’età *</label>
+            <select class="input" id="age-group">
+              <option value="">Scegli</option>
+              <option value="0-2">0–2 anni</option>
+              <option value="3-5">3–5 anni</option>
+              <option value="6-8">6–8 anni</option>
+              <option value="9-12">9–12 anni</option>
+            </select>
           </div>
-          <div class="foreground-grass layer" data-depth="6"></div>
-          <div class="floating-leaf leaf-1">❧</div><div class="floating-leaf leaf-2">❧</div><div class="floating-leaf leaf-3">❧</div>
-          <button class="scroll-whisper" onclick="document.querySelector('.storybook-steps').scrollIntoView({behavior:'smooth'})">Scopri come nasce una storia <span>⌄</span></button>
-        </section>
-
-
-        <section class="saved-characters-section" id="saved-characters-section" aria-live="polite">
-          <div class="saved-characters-panel">
-            <div class="saved-characters-head">
-              <div>
-                <div class="saved-characters-title">I tuoi personaggi</div>
-                <div class="saved-characters-copy">Sono disponibili su questo browser durante il test. Scegline uno per iniziare una nuova storia senza ricrearlo.</div>
-              </div>
-              <button class="btn-secondary-small" type="button" onclick="startNewCharacter()">+ Nuovo personaggio</button>
-            </div>
-            <div class="saved-characters-grid" id="saved-characters-grid"></div>
+          <div class="field real-only">
+            <label for="hair">Capelli</label>
+            <input class="input" id="hair" placeholder="Es. biondi e mossi">
           </div>
-        </section>
-
-                <!-- HOW IT WORKS -->
-        <div class="storybook-steps" style="margin-top:54px;">
-          <div class="section-label">Il viaggio in tre capitoli</div>
-          <div class="steps">
-            <div class="step-card">
-              <div class="step-num">1</div>
-              <div class="step-title">Scegli lo stile</div>
-              <div class="step-body">Paper Cut, Acquerello o Pastelli — ogni illustrazione segue il tuo stile.</div>
-            </div>
-            <div class="step-card">
-              <div class="step-num">2</div>
-              <div class="step-title">Costruisci la storia</div>
-              <div class="step-body">Scegliete insieme ogni svolta del viaggio dell'eroe. Ogni scelta determina cosa succede dopo.</div>
-            </div>
-            <div class="step-card">
-              <div class="step-num">3</div>
-              <div class="step-title">Ricevi il tuo libro</div>
-              <div class="step-body">Un libro bellissimo e personalizzato, pronto come PDF o stampato e spedito a casa.</div>
-            </div>
+          <div class="field fictional-only" style="display:none">
+            <label for="species">Che cosa è? *</label>
+            <input class="input" id="species" placeholder="Es. un piccolo drago">
+          </div>
+          <div class="field full">
+            <label for="feature">Un dettaglio riconoscibile</label>
+            <input class="input" id="feature" placeholder="Es. camicia a quadri, lentiggini, sciarpa gialla">
           </div>
         </div>
 
-        <!-- QUOTES -->
-        <div class="quotes-section">
-          <div style="text-align:center;">
-            <div style="font-size:20px;color:var(--gold);margin-bottom:6px;">★★★★★</div>
-            <div style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(18px,3vw,24px);">Amato dai genitori che ci tengono</div>
-          </div>
-          <div class="quotes-grid">
-            <div class="quote-card">
-              <div class="quote-stars">★★★★★</div>
-              <div class="quote-text">"Mia figlia è rimasta a bocca aperta quando si è vista protagonista. Lo rileggiamo ogni sera."</div>
-              <div class="quote-author">
-                <div class="quote-avatar" style="background:var(--coral);">E</div>
-                <div class="quote-name">Elena, mamma di Sofia</div>
-              </div>
-            </div>
-            <div class="quote-card">
-              <div class="quote-stars">★★★★★</div>
-              <div class="quote-text">"Lo stile acquerello è davvero bellissimo. Sembra un libro di una libreria speciale."</div>
-              <div class="quote-author">
-                <div class="quote-avatar" style="background:var(--teal);">M</div>
-                <div class="quote-name">Marco, papà di Leo</div>
-              </div>
-            </div>
-            <div class="quote-card">
-              <div class="quote-stars">★★★★★</div>
-              <div class="quote-text">"Costruire la storia insieme è stata la parte più bella — sembrava davvero nostra."</div>
-              <div class="quote-author">
-                <div class="quote-avatar" style="background:var(--gold);color:var(--brown);">P</div>
-                <div class="quote-name">Priya, mamma di Aanya</div>
-              </div>
-            </div>
+        <button class="advanced-toggle" type="button" onclick="toggleAdvanced()">+ Aggiungi dettagli facoltativi</button>
+        <div class="advanced" id="advanced">
+          <div class="grid">
+            <div class="field"><label for="eyes">Occhi</label><input class="input" id="eyes" placeholder="Es. marrone scuro"></div>
+            <div class="field"><label for="skin">Tono della pelle</label><input class="input" id="skin" placeholder="Es. chiaro, medio, scuro"></div>
+            <div class="field"><label for="pronouns">Pronomi</label><input class="input" id="pronouns" placeholder="Es. lui, lei"></div>
+            <div class="field"><label for="personality">Carattere</label><input class="input" id="personality" placeholder="Es. curioso, affettuoso"></div>
+            <div class="field full"><label for="notes">Altri dettagli</label><textarea class="input" id="notes" rows="3" placeholder="Qualunque dettaglio che lo rende proprio lui"></textarea></div>
           </div>
         </div>
 
-        <!-- FOOTER CTA -->
-        <div class="footer-cta" style="border-radius:20px;margin-top:32px;">
-          <div style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(18px,3vw,26px);margin-bottom:16px;">Inizia oggi la storia del tuo protagonista</div>
-          <button class="btn-primary" onclick="goTo('builder')">Inizia a costruire →</button>
+        <div class="form-actions">
+          <button class="btn btn-ghost" onclick="showScreen('landing')">Indietro</button>
+          <button class="btn btn-primary" id="generate-btn" onclick="generateCharacter()">Dai vita al personaggio ✨</button>
         </div>
+        <div class="error" id="creator-error"></div>
+      </div>
 
+      <div class="creator-preview">
+        <div class="preview-placeholder">
+          <div class="preview-orb">✨</div>
+          <div class="preview-title">Qui prenderà vita.</div>
+          <div class="preview-copy">Pochi dettagli, poi il primo incontro con il suo personaggio.</div>
+        </div>
+        <div class="loader" id="loader">
+          <div class="preview-title" id="loader-title">I colori stanno trovando il loro posto…</div>
+          <div class="preview-copy" id="loader-copy">Tra poco incontrerete il vostro personaggio.</div>
+          <div class="loader-bar"></div>
+        </div>
       </div>
     </div>
   </div>
+</section>
 
-  <!-- ═══════════════════════════════════════
-       SCREEN: BUILDER
-  ═══════════════════════════════════════ -->
-  <div class="screen" id="screen-builder">
-    <div style="padding:24px 16px 40px;">
-      <div class="content-wrap builder-world">
-        <div class="builder-guide" id="builder-guide" aria-hidden="true">
-          <div class="guide-glow"></div>
-          <img id="guide-character" src="assets/char/water/rabbit.png" alt="">
-          <div class="guide-speech">Costruiamo insieme il suo viaggio…</div>
-        </div>
+<section class="screen wow" id="screen-wow">
+  <div class="wow-wrap">
+    <div class="topbar">
+      <button class="brand-dark" onclick="showScreen('landing')">
+        <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
+      </button>
+      <div class="phase">2 · Il primo incontro</div>
+    </div>
 
-        <!-- PROGRESS -->
-        <div class="progress-bar" id="progress-bar">
-          <div class="progress-step active" id="prog-0"></div>
-          <div class="progress-step" id="prog-1"></div>
-          <div class="progress-step" id="prog-2"></div>
-          <div class="progress-step" id="prog-3"></div>
-          <div class="progress-step" id="prog-4"></div>
-        </div>
-
-        <!-- ① STYLE -->
-        <div style="margin-bottom:28px;">
-          <div class="section-label">① Scegli lo stile illustrativo</div>
-          <p style="font-size:13px;color:var(--warm-gray);margin-bottom:14px;">Questa scelta dà il tono visivo a tutto il libro. Non potrai cambiarla dopo aver scelto i personaggi.</p>
-          <div class="style-grid" id="style-grid">
-            <div class="style-card" data-style="paper" onclick="selectStyle('paper')">
-              <div class="style-art">
-                <img src="assets/char/paper/rabbit.png" alt="Paper Cut">
-                <div class="style-check">✓</div>
-              </div>
-              <div class="style-name">Paper Cut</div>
-              <div class="style-tag">Forme nette, strati colorati</div>
-            </div>
-            <div class="style-card selected" data-style="water" onclick="selectStyle('water')">
-              <div class="style-art">
-                <img src="assets/char/water/rabbit.png" alt="Acquerello">
-                <div class="style-check">✓</div>
-              </div>
-              <div class="style-name">Acquerello</div>
-              <div class="style-tag">Morbido, caldo, onirico</div>
-            </div>
-            <div class="style-card" data-style="crayon" onclick="selectStyle('crayon')">
-              <div class="style-art">
-                <img src="assets/char/crayon/rabbit.png" alt="Pastelli">
-                <div class="style-check">✓</div>
-              </div>
-              <div class="style-name">Pastelli</div>
-              <div class="style-tag">Vivace, tattile, giocoso</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ② PROTAGONIST -->
-        <div style="margin-bottom:28px;">
-          <div class="section-label">② Crea il protagonista</div>
-          <p style="font-size:13px;color:var(--warm-gray);margin-bottom:12px;">Può essere una persona reale oppure un personaggio inventato, inclusi animali, robot e creature fantastiche.</p>
-
-          <div class="protagonist-type-grid">
-            <button type="button" class="protagonist-type selected"
-                    data-protagonist-type="real_person"
-                    onclick="selectProtagonistType('real_person')">👤 Persona reale</button>
-            <button type="button" class="protagonist-type"
-                    data-protagonist-type="fictional_character"
-                    onclick="selectProtagonistType('fictional_character')">✨ Personaggio inventato</button>
-          </div>
-
-          <div class="protagonist-fields">
-            <div>
-              <label class="field-label" for="input-name">Nome o soprannome *</label>
-              <input class="input" id="input-name" placeholder="Es. Tommy" oninput="updateState()">
-            </div>
-            <div>
-              <label class="field-label" for="input-age">Età</label>
-              <input class="input" id="input-age" type="number" min="1" max="120" placeholder="Es. 4" oninput="updateState()">
-            </div>
-            <div>
-              <label class="field-label" for="input-age-group">Fascia narrativa *</label>
-              <select class="input" id="input-age-group" onchange="updateState()">
-                <option value="">Scegli</option>
-                <option value="0-2">0–2 anni</option>
-                <option value="3-5">3–5 anni</option>
-                <option value="6-8">6–8 anni</option>
-                <option value="9-12">9–12 anni</option>
-                <option value="teen">Adolescente</option>
-                <option value="adult">Adulto</option>
-                <option value="ageless">Senza età</option>
-              </select>
-            </div>
-            <div>
-              <label class="field-label" for="input-pronouns">Pronomi</label>
-              <input class="input" id="input-pronouns" placeholder="Es. lui, lei, neutro" oninput="updateState()">
-            </div>
-
-            <div id="human-hair-color">
-              <label class="field-label" for="input-hair-color">Colore dei capelli</label>
-              <input class="input" id="input-hair-color" placeholder="Es. biondi" oninput="updateState()">
-            </div>
-            <div id="human-hair-style">
-              <label class="field-label" for="input-hair-style">Tipo di capelli</label>
-              <input class="input" id="input-hair-style" placeholder="Es. corti e mossi" oninput="updateState()">
-            </div>
-            <div id="human-eye-color">
-              <label class="field-label" for="input-eye-color">Colore degli occhi</label>
-              <input class="input" id="input-eye-color" placeholder="Es. marrone scuro" oninput="updateState()">
-            </div>
-            <div id="human-skin-tone">
-              <label class="field-label" for="input-skin-tone">Tono della pelle</label>
-              <input class="input" id="input-skin-tone" placeholder="Es. chiaro, medio, scuro" oninput="updateState()">
-            </div>
-
-            <div id="fantasy-species" style="display:none;">
-              <label class="field-label" for="input-species">Tipo o specie *</label>
-              <input class="input" id="input-species" placeholder="Es. piccolo drago" oninput="updateState()">
-            </div>
-            <div id="fantasy-body-color" style="display:none;">
-              <label class="field-label" for="input-body-color">Colore principale</label>
-              <input class="input" id="input-body-color" placeholder="Es. verde salvia" oninput="updateState()">
-            </div>
-            <div id="fantasy-body-shape" style="display:none;">
-              <label class="field-label" for="input-body-shape">Forma o corporatura</label>
-              <input class="input" id="input-body-shape" placeholder="Es. piccolo e tondeggiante" oninput="updateState()">
-            </div>
-
-            <div class="full">
-              <label class="field-label" for="input-outfit">Abbigliamento o accessorio principale</label>
-              <input class="input" id="input-outfit" placeholder="Es. felpa verde e pantaloni blu / sciarpa gialla" oninput="updateState()">
-            </div>
-            <div class="full">
-              <label class="field-label" for="input-personality">Carattere</label>
-              <input class="input" id="input-personality" placeholder="Es. curioso, affettuoso, coraggioso" oninput="updateState()">
-            </div>
-            <div class="full">
-              <label class="field-label" for="input-desc">Altri dettagli facoltativi</label>
-              <input class="input" id="input-desc" placeholder="Interessi, particolarità o indicazioni utili" oninput="updateState()">
-            </div>
-          </div>
-          <p class="field-help">Per ora DreamTaily usa solo i dati inseriti qui. Il caricamento di immagini non è attivo.</p>
-        </div>
-
-        <!-- ③ COMPANION -->
-        <div style="margin-bottom:28px;">
-          <div class="section-label">③ Il compagno di avventura</div>
-          <p style="font-size:13px;color:var(--warm-gray);margin-bottom:12px;">Scegli il peluche che accompagnerà il protagonista in ogni stazione.</p>
-          <div class="companion-tray" id="companion-tray"></div>
-        </div>
-
-        <!-- ④ STATIONS -->
-        <div style="margin-bottom:28px;">
-          <div class="section-label">④ Costruisci la storia</div>
-          <p style="font-size:13px;color:var(--warm-gray);margin-bottom:16px;">Ogni scelta determina cosa è disponibile nella stazione successiva.</p>
-          <div id="stations-container"></div>
-        </div>
-
-        <!-- PROCEED -->
-        <button class="btn-primary" id="btn-proceed" onclick="goTo('summary')" disabled style="width:100%;justify-content:center;font-size:16px;padding:17px;">
-          Vedi il tuo libro →
-        </button>
-
+    <div class="wow-stage">
+      <img id="wow-image" alt="Il personaggio illustrato">
+      <div class="wow-overlay">
+        <h2 id="wow-title">Ecco il tuo personaggio</h2>
+        <p>È pronto per entrare nel suo primo racconto.</p>
       </div>
     </div>
-  </div>
 
-  <!-- ═══════════════════════════════════════
-       SCREEN: SUMMARY
-  ═══════════════════════════════════════ -->
-  <div class="screen" id="screen-summary">
-    <div style="padding:24px 16px 40px;">
-      <div class="content-wrap">
-
-        <div style="text-align:center;margin-bottom:24px;">
-          <div class="section-label" style="justify-content:center;display:flex;">La storia è iniziata</div>
-          <h2 id="summary-title" style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(22px,4vw,32px);margin-bottom:8px;"></h2>
-          <div id="summary-style-badge" style="display:inline-block;padding:5px 14px;border-radius:20px;background:var(--tint-coral);color:var(--coral-deep);font-weight:800;font-size:12px;"></div>
-        </div>
-
-
-        <div class="character-save-box" id="character-save-box" aria-live="polite">
-          <div class="character-save-row">
-            <div class="character-save-icon">✓</div>
-            <div>
-              <div class="character-save-title" id="character-save-title">Il personaggio è stato salvato</div>
-              <div class="character-save-copy" id="character-save-copy">Potrai riutilizzarlo in una nuova storia da questo browser.</div>
-            </div>
-          </div>
-          <div class="character-save-actions">
-            <button class="btn-secondary-small" type="button" onclick="goToSavedCharacters()">Vedi i miei personaggi</button>
-            <button class="btn-secondary-small" type="button" onclick="startNewCharacter()">Crea un altro personaggio</button>
-          </div>
-        </div>
-
-                <!-- BOOK PAGE 1 PREVIEW -->
-        <div class="book-page" style="margin-bottom:14px;">
-          <div class="book-chapter-label">Capitolo 1 — Il Mondo Ordinario</div>
-          <div class="book-illustration" id="book-illustration" style="display:none;">
-            <div class="preview-loader" id="preview-loader" aria-live="polite">
-              <div class="preview-loader-title">Il mondo della storia si sta aprendo…</div>
-              <div class="preview-loader-copy" id="preview-loader-copy">I personaggi stanno arrivando.</div>
-              <div class="preview-carousel" aria-hidden="true">
-                <div class="preview-track">
-                  <div class="preview-card"><img src="assets/char/water/rabbit.png" alt=""></div>
-                  <div class="preview-card"><img src="assets/char/water/bear.png" alt=""></div>
-                  <div class="preview-card"><img src="assets/char/water/fox.png" alt=""></div>
-                  <div class="preview-card"><img src="assets/char/water/owl.png" alt=""></div>
-                  <div class="preview-card"><img src="assets/char/water/rabbit.png" alt=""></div>
-                  <div class="preview-card"><img src="assets/char/water/bear.png" alt=""></div>
-                  <div class="preview-card"><img src="assets/char/water/fox.png" alt=""></div>
-                  <div class="preview-card"><img src="assets/char/water/owl.png" alt=""></div>
-                </div>
-              </div>
-              <div class="preview-progress"></div>
-            </div>
-            <img id="book-illu-img" alt="Illustrazione personalizzata">
-          </div>
-          <div class="illu-status" id="illu-status" style="display:none;"></div>
-          <div class="book-companion" id="book-companion"></div>
-          <div class="book-text" id="book-text"></div>
-          <div class="book-pagenum">— 1 —</div>
-        </div>
-
-        <!-- LOCKED CHAPTERS -->
-        <div id="locked-chapters" style="margin-bottom:24px;"></div>
-
-        <!-- PLAN -->
-        <div class="section-label">Scegli il formato</div>
-        <div class="plan-grid" id="plan-grid"></div>
-
-        <!-- EMAIL -->
-        <div style="margin-top:20px;">
-          <div class="section-label">Dove ti mandiamo il libro?</div>
-          <input class="input" id="input-email" type="email"
-                 placeholder="La tua email"
-                 oninput="updateCreateBtn()"
-                 style="margin-bottom:6px;">
-          <p style="font-size:12px;color:var(--warm-gray);">Riceverai il PDF entro 48 ore. Nessuno spam, promesso.</p>
-        </div>
-
-        <!-- CTA -->
-        <button class="btn-primary" id="btn-create" onclick="submitOrder()"
-                style="width:100%;justify-content:center;font-size:17px;padding:17px;margin-top:16px;">
-          Sblocca tutta la storia · <span id="price-label">€29</span>
-        </button>
-        <div id="order-error" style="display:none;text-align:center;color:#C9543C;font-size:13px;font-weight:600;margin-top:10px;"></div>
-        <p style="text-align:center;font-size:13px;color:var(--warm-gray);margin-top:10px;">Il tuo libro sarà pronto entro 48 ore. Ti invieremo tutto via email.</p>
-
-        <button onclick="goTo('builder')" style="width:100%;background:none;border:none;color:var(--warm-gray);font-size:14px;font-weight:600;cursor:pointer;padding:14px;margin-top:8px;">
-          ← Torna a modificare
-        </button>
-
-      </div>
+    <div class="wow-actions">
+      <button class="btn btn-ghost" onclick="showScreen('creator')">Modifica</button>
+      <button class="btn btn-ghost" onclick="regenerateCharacter()">Rigenera</button>
+      <button class="btn btn-soft" onclick="toggleWowDetails()">Aggiungi dettagli</button>
+      <button class="btn btn-primary" id="continue-btn" onclick="saveAndContinue()">Continua con questo personaggio →</button>
     </div>
-  </div>
 
-  <!-- ═══════════════════════════════════════
-       SCREEN: CONFIRMATION
-  ═══════════════════════════════════════ -->
-  <div class="screen" id="screen-confirm">
-    <div style="padding:32px 16px 40px;">
-      <div class="content-wrap" style="text-align:center;">
-
-        <div class="confirm-scene">
-          <div class="kite">🪁</div>
-          <div id="confirm-char-wrap" style="position:absolute;bottom:12%;left:50%;transform:translateX(-50%);"></div>
-          <!-- Stars -->
-          <div style="position:absolute;top:10%;left:15%;font-size:18px;animation:twinkle 2.5s ease-in-out infinite;">✦</div>
-          <div style="position:absolute;top:20%;right:18%;font-size:12px;animation:twinkle 3s ease-in-out infinite .5s;">✦</div>
-          <div style="position:absolute;top:35%;left:28%;font-size:10px;animation:twinkle 2.8s ease-in-out infinite 1s;">✦</div>
-        </div>
-
-        <div style="font-size:32px;margin-bottom:16px;">🎉</div>
-        <h2 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(22px,4vw,30px);margin-bottom:12px;">
-          La storia di <span id="confirm-name" style="color:var(--coral);"></span> è in creazione!
-        </h2>
-        <p style="font-size:16px;color:var(--warm-gray);line-height:1.6;margin-bottom:24px;max-width:32ch;margin-left:auto;margin-right:auto;">
-          Riceverai il tuo libro via email entro 48 ore. Ogni pagina è realizzata con cura.
-        </p>
-
-        <div style="background:#FBF4E9;border-radius:16px;padding:20px;margin-bottom:24px;text-align:left;">
-          <div style="font-weight:700;margin-bottom:8px;">📬 Conferma inviata a:</div>
-          <div id="confirm-email" style="color:var(--warm-gray);font-size:15px;">La tua email di ordine</div>
-        </div>
-
-        <button class="btn-primary" onclick="goTo('landing');resetAll();" style="justify-content:center;">
-          Crea un altro libro →
-        </button>
-
+    <div class="panel details-card" id="wow-details">
+      <div class="grid">
+        <div class="field"><label for="wow-outfit">Abbigliamento</label><input class="input" id="wow-outfit" placeholder="Es. felpa verde e pantaloni blu"></div>
+        <div class="field"><label for="wow-feature">Dettaglio distintivo</label><input class="input" id="wow-feature" placeholder="Es. lentiggini o sciarpa gialla"></div>
       </div>
+      <p class="small" style="margin-top:10px">Le modifiche aggiornano la scheda del personaggio. Per vederle nell’immagine usa “Rigenera”.</p>
     </div>
+
+    <div class="saved-note" id="saved-note">✓ Il personaggio è stato salvato nel profilo di test.</div>
+    <div class="error" id="wow-error"></div>
   </div>
+</section>
 
-</div><!-- end app -->
+<section class="screen next" id="screen-next">
+  <div class="next-card">
+    <div class="next-icon">📚</div>
+    <h2 id="next-title">Ora scegliamo la sua prima avventura.</h2>
+    <p>La creazione del personaggio è completa. Il prossimo blocco di DreamTaily sarà il catalogo delle storie pronte e la composizione del libro.</p>
+    <button class="btn btn-primary" onclick="startAnother()">Crea un altro personaggio</button>
+    <p class="small" style="margin-top:18px">Modalità test: nessun login visibile. Il profilo anonimo viene mantenuto su questo browser.</p>
+  </div>
+</section>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="data.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
-// ══════════════════════════════════════
-// APP LOGIC — edit data.js for content
-// ══════════════════════════════════════
+const SUPABASE_URL = 'https://hirzbtruxvjzmcnncvmv.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_baZvlGyMLBkkiOwHina6CA_HB59Lclw';
 
-// ══════════════════════════════════════
-// STATE
-// ══════════════════════════════════════
-let state = {
-  screen: 'landing',
-  styleId: 'water',
-  name: '',
-  desc: '',
-  protagonist: {
-    type: 'real_person',
-    display_name: '',
-    age: null,
-    narrative_age_group: '',
-    pronouns: null,
-    short_description: '',
-    personality: [],
-    interests: [],
-    appearance: {
-      species: null,
-      hair_color: null,
-      hair_style: null,
-      eye_color: null,
-      skin_tone: null,
-      body_color: null,
-      body_shape: null,
-      default_outfit: {top: null, bottom: null, shoes: null, accessory: null},
-      distinctive_features: []
-    }
-  },
-  companion: null,
-  choices: {},   // {s1: optionId, s2: optionId, ...}
-  plan: 'digital',
-  email: '',
-  previewId: null,
-  previewImageUrl: null,
-  previewLoading: false,
-  characterAssetId: null,
+const app = {
+  style:'water',
+  type:'real_person',
+  previewId:null,
+  previewUrl:null,
+  characterAssetId:null,
+  saving:false
 };
 
-// ══════════════════════════════════════
-// NAVIGATION
-// ══════════════════════════════════════
-function goTo(screen) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + screen).classList.add('active');
-  state.screen = screen;
-  window.scrollTo(0, 0);
-  if (screen === 'summary') renderSummary();
-  if (screen === 'confirm') renderConfirm();
-}
-  function goHome() {
-  goTo('landing');
-
-  requestAnimationFrame(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  });
-}
-
-// ══════════════════════════════════════
-// FIREFLIES
-// ══════════════════════════════════════
-function initFireflies() {
-  const scene = document.getElementById('hero-scene');
-  if (!scene) return;
-  for (let i = 0; i < 16; i++) {
-    const ff = document.createElement('div');
-    ff.className = 'firefly';
-    const x = Math.random() * 90 + 5;
-    const y = Math.random() * 70 + 5;
-    const dx = (Math.random() - .5) * 60;
-    const dy = (Math.random() - .5) * 40;
-    const dur = (Math.random() * 5 + 4).toFixed(1) + 's';
-    const delay = (Math.random() * 6).toFixed(1) + 's';
-    ff.style.cssText = `left:${x}%;top:${y}%;--dx:${dx}px;--dy:${dy}px;--dur:${dur};animation-delay:${delay};`;
-    scene.appendChild(ff);
-  }
-}
-
-// ══════════════════════════════════════
-// SPOT ILLUSTRATIONS
-// ══════════════════════════════════════
-function makeSpot(emblem, tintKey) {
-  const t = TINTS[tintKey] || TINTS.forest;
-  return `<div class="spot">
-    <div class="spot-sky" style="background:linear-gradient(180deg,${t[0]},${t[1]});"></div>
-    <div class="spot-ground" style="background:${t[2]};"></div>
-    <div class="spot-glow" style="background:radial-gradient(circle,${t[3]}80,transparent 70%);"></div>
-    <div class="spot-emblem">${EMBLEMS[emblem] || '✨'}</div>
-  </div>`;
-}
-
-// ══════════════════════════════════════
-// LOCKING LOGIC
-// ══════════════════════════════════════
-function getGrants() {
-  const grants = {};
-  STATIONS.forEach(st => {
-    const choiceId = state.choices[st.id];
-    if (choiceId) {
-      const opt = st.options.find(o => o.id === choiceId);
-      if (opt && opt.grant) Object.assign(grants, opt.grant);
-    }
-  });
-  return grants;
-}
-
-function isOptionLocked(stationIdx, option) {
-  if (stationIdx === 0) return false;
-  const grants = getGrants();
-  const req = option.requires || {};
-  for (const [key, vals] of Object.entries(req)) {
-    if (!vals || vals.length === 0) continue;
-    const grantVal = grants[key];
-    if (!grantVal) return true;
-    if (!vals.includes(grantVal) && !vals.includes('any')) return true;
-  }
-  return false;
-}
-
-function getActiveStationIndex() {
-  for (let i = 0; i < STATIONS.length; i++) {
-    if (!state.choices[STATIONS[i].id]) return i;
-  }
-  return STATIONS.length; // all done
-}
-
-// ══════════════════════════════════════
-// STYLE SELECTION
-// ══════════════════════════════════════
-function selectStyle(styleId) {
-  state.styleId = styleId;
-  // Reset choices downstream when style changes
-  state.companion = null;
-  state.choices = {};
-
-  // Update style cards UI
-  document.querySelectorAll('.style-card').forEach(card => {
-    const isSelected = card.dataset.style === styleId;
-    card.classList.toggle('selected', isSelected);
-    // Flip animation on all style arts
-    const art = card.querySelector('.style-art');
-    art.style.animation = 'none';
-    art.offsetHeight; // reflow
-    art.style.animation = 'cardflip .5s ease';
-    // Keep each style card's original preview image.
-  });
-
-  // Update hero scene chars
-  document.querySelectorAll('.hero-char').forEach((img, i) => {
-    const chars = ['rabbit', 'bear'];
-    img.src = `assets/char/${styleId}/${chars[i]}.png`;
-  });
-  const guide = document.getElementById('guide-character');
-  if (guide) guide.src = `assets/char/${styleId}/${state.companion || 'rabbit'}.png`;
-  document.querySelectorAll('.hero-greeter-img').forEach(img => {
-    const charId = img.dataset.char;
-    if (charId) img.src = `assets/char/${styleId}/${charId}.png`;
-  });
-
-  renderCompanions();
-  renderStations();
-  updateProceedBtn();
-}
-
-// ══════════════════════════════════════
-// COMPANIONS
-// ══════════════════════════════════════
-function renderCompanions() {
-  const tray = document.getElementById('companion-tray');
-  if (!tray) return;
-  tray.innerHTML = COMPANIONS.map(c => `
-    <button class="companion-card ${state.companion === c.id ? 'selected' : ''}"
-            onclick="selectCompanion('${c.id}')">
-      <div class="companion-circle">
-        <img src="assets/char/${state.styleId}/${c.id}.png" alt="${c.name}">
-      </div>
-      <div class="companion-name">${c.name}</div>
-      <div class="companion-species">${c.species}</div>
-    </button>
-  `).join('');
-}
-
-function selectCompanion(id) {
-  state.companion = id;
-  renderCompanions();
-  const guide = document.getElementById('guide-character');
-  if (guide) guide.src = `assets/char/${state.styleId}/${id}.png`;
-  const speech = document.querySelector('.guide-speech');
-  if (speech) speech.textContent = 'Ottima scelta. Ora decidiamo dove ci porterà la storia…';
-  updateState();
-}
-
-// ══════════════════════════════════════
-// STATIONS
-// ══════════════════════════════════════
-function renderStations() {
-  const container = document.getElementById('stations-container');
-  if (!container) return;
-  const activeIdx = getActiveStationIndex();
-
-  container.innerHTML = STATIONS.map((st, i) => {
-    const choiceId = state.choices[st.id];
-    const isDone = !!choiceId;
-    const isLocked = i > activeIdx;
-    const isActive = i === activeIdx;
-    const chosenOpt = choiceId ? st.options.find(o => o.id === choiceId) : null;
-
-    const cardClass = `station-card ${isDone ? 'done' : ''} ${isLocked ? 'locked' : ''} ${isActive ? 'active' : ''}`;
-    const badge = isDone ? '✓' : (isLocked ? '🔒' : 'scegli');
-    const roleText = isDone ? `"${chosenOpt.label}"` : st.role;
-
-    const optionsHTML = st.options.map(opt => {
-      const locked = isOptionLocked(i, opt);
-      const selected = choiceId === opt.id;
-      return `
-        <button class="option-card ${selected ? 'selected' : ''} ${locked ? 'locked' : ''}"
-                onclick="${locked || isLocked ? '' : `chooseOption('${st.id}', '${opt.id}')`}">
-          <div class="option-art">${makeSpot(opt.emblem, opt.tint)}</div>
-          <div class="option-check">✓</div>
-          <div class="option-lock">🔒</div>
-          <div class="option-label">${opt.label}</div>
-          <p class="option-blurb">${opt.blurb}</p>
-        </button>`;
-    }).join('');
-
-    return `
-      <div class="${cardClass}" id="station-${st.id}">
-        <button class="station-header ${isLocked ? 'locked-header' : ''}"
-                onclick="${isLocked ? '' : `toggleStation('${st.id}')`}">
-          <div class="station-num">${st.icon}</div>
-          <div>
-            <div class="station-title">${st.name}</div>
-            <div class="station-role">${roleText}</div>
-          </div>
-          <div class="station-badge">${badge}</div>
-        </button>
-        <div class="station-body ${isActive || isDone ? 'open' : ''}" id="body-${st.id}">
-          <div class="options-grid">${optionsHTML}</div>
-        </div>
-      </div>`;
-  }).join('');
-
-  updateProgress();
-}
-
-function toggleStation(stId) {
-  const body = document.getElementById(`body-${stId}`);
-  if (body) body.classList.toggle('open');
-}
-
-function chooseOption(stationId, optionId) {
-  state.choices[stationId] = optionId;
-  // Reset downstream choices
-  let found = false;
-  STATIONS.forEach(st => {
-    if (found) delete state.choices[st.id];
-    if (st.id === stationId) found = true;
-  });
-  renderStations();
-  updateState();
-  // Auto-scroll to next station
-  const activeIdx = getActiveStationIndex();
-  if (activeIdx < STATIONS.length) {
-    setTimeout(() => {
-      const nextCard = document.getElementById(`station-${STATIONS[activeIdx].id}`);
-      if (nextCard) nextCard.scrollIntoView({behavior:'smooth', block:'nearest'});
-    }, 350);
-  }
-}
-
-// ══════════════════════════════════════
-// PROGRESS
-// ══════════════════════════════════════
-function updateProgress() {
-  const activeIdx = getActiveStationIndex();
-  STATIONS.forEach((st, i) => {
-    const el = document.getElementById(`prog-${i}`);
-    if (!el) return;
-    el.className = 'progress-step';
-    if (i < activeIdx) el.classList.add('done');
-    else if (i === activeIdx) el.classList.add('active');
-  });
-}
-
-// ══════════════════════════════════════
-// STATE UPDATE
-// ══════════════════════════════════════
-function valueOf(id) {
-  const value = document.getElementById(id)?.value?.trim();
-  return value || null;
-}
-
-function splitList(value) {
-  return (value || '').split(',').map(item => item.trim()).filter(Boolean).slice(0, 8);
-}
-
-function selectProtagonistType(type) {
-  state.protagonist.type = type;
-
-  document.querySelectorAll('.protagonist-type').forEach(button => {
-    button.classList.toggle('selected', button.dataset.protagonistType === type);
-  });
-
-  const isHuman = type === 'real_person';
-
-  ['human-hair-color','human-hair-style','human-eye-color','human-skin-tone'].forEach(id => {
-    const element = document.getElementById(id);
-    if (element) element.style.display = isHuman ? '' : 'none';
-  });
-
-  ['fantasy-species','fantasy-body-color','fantasy-body-shape'].forEach(id => {
-    const element = document.getElementById(id);
-    if (element) element.style.display = isHuman ? 'none' : '';
-  });
-
-  updateState();
-}
-
-function updateState() {
-  const ageRaw = valueOf('input-age');
-  const description = valueOf('input-desc') || '';
-  const outfit = valueOf('input-outfit');
-
-  state.name = valueOf('input-name') || '';
-  state.desc = description;
-
-  state.protagonist = {
-    type: state.protagonist?.type || 'real_person',
-    display_name: state.name,
-    age: ageRaw ? Number(ageRaw) : null,
-    narrative_age_group: valueOf('input-age-group') || '',
-    pronouns: valueOf('input-pronouns'),
-    short_description: description,
-    personality: splitList(valueOf('input-personality') || ''),
-    interests: [],
-    appearance: {
-      species: valueOf('input-species'),
-      hair_color: valueOf('input-hair-color'),
-      hair_style: valueOf('input-hair-style'),
-      eye_color: valueOf('input-eye-color'),
-      skin_tone: valueOf('input-skin-tone'),
-      body_color: valueOf('input-body-color'),
-      body_shape: valueOf('input-body-shape'),
-      default_outfit: {
-        top: outfit,
-        bottom: null,
-        shoes: null,
-        accessory: state.protagonist?.type === 'real_person' ? null : outfit
-      },
-      distinctive_features: []
-    }
-  };
-
-  updateProceedBtn();
-}
-
-function protagonistIsValid() {
-  const protagonist = state.protagonist;
-  if (!protagonist?.display_name || !protagonist.narrative_age_group) return false;
-  if (protagonist.type !== 'real_person' && !protagonist.appearance.species) return false;
-  return true;
-}
-
-function updateProceedBtn() {
-  const allDone = STATIONS.every(st => state.choices[st.id]);
-  const canProceed = state.styleId && protagonistIsValid() && state.companion && allDone;
-  const btn = document.getElementById('btn-proceed');
-  if (btn) {
-    btn.disabled = !canProceed;
-    btn.textContent = canProceed ? 'Vedi il tuo libro →' : 'Completa tutte le scelte per continuare';
-  }
-}
-
-// ══════════════════════════════════════
-// SUMMARY
-// ══════════════════════════════════════
-function renderSummary() {
-  const styleName = STYLES.find(s => s.id === state.styleId)?.name || '';
-  const comp = COMPANIONS.find(c => c.id === state.companion);
-  const lore = COMPANION_LORE[state.companion] || {desc:'un pupazzo di pezza morbidissimo', detail:'un dettaglio tutto suo'};
-
-  // Title + badge
-  const titleEl = document.getElementById('summary-title');
-  if (titleEl) titleEl.textContent = `Ecco come inizia la storia di ${state.name || 'il tuo protagonista'}...`;
-  const badgeEl = document.getElementById('summary-style-badge');
-  if (badgeEl) badgeEl.textContent = `Stile: ${styleName}`;
-
-  // Companion illustration inside the page
-  const compWrap = document.getElementById('book-companion');
-  if (compWrap && comp) {
-    compWrap.innerHTML = `<img src="assets/char/${state.styleId}/${comp.id}.png" alt="${comp.name}">`;
-  }
-
-  // Assemble Station 1 text
-  const s1choice = state.choices['s1'];
-  const opening = STORY_OPENINGS[s1choice] || STORY_OPENINGS['explore'];
-  const fullText = (STORY_INTRO + '\n\n' + opening)
-    .replaceAll('{nome}', state.name || 'il nostro eroe')
-    .replaceAll('{comp}', comp ? comp.name : 'il suo amico')
-    .replaceAll('{desc}', lore.desc)
-    .replaceAll('{detail}', lore.detail);
-  const textEl = document.getElementById('book-text');
-  if (textEl) textEl.textContent = fullText;
-
-  // Locked chapters (stations 2-5)
-  const lockedEl = document.getElementById('locked-chapters');
-  if (lockedEl) {
-    lockedEl.innerHTML = STATIONS.slice(1).map((st, i) => {
-      const choiceId = state.choices[st.id];
-      const opt = choiceId ? st.options.find(o => o.id === choiceId) : null;
-      return `
-        <div class="locked-chapter">
-          <div class="locked-chapter-title">🔒 Capitolo ${i + 2} — ${st.name}</div>
-          <div class="locked-chapter-choice">${opt ? '"' + opt.label + '"' : ''}</div>
-          <div class="locked-lines">
-            <div class="locked-line"></div>
-            <div class="locked-line"></div>
-            <div class="locked-line"></div>
-          </div>
-          <div class="locked-fade"></div>
-        </div>`;
-    }).join('') + `
-      <p style="text-align:center;font-family:'Lora',serif;font-style:italic;font-size:14px;color:var(--warm-gray);margin-top:14px;">
-        La storia continua... sbloccala per leggerla tutta.
-      </p>`;
-  }
-
-  // Illustrazione generata (una sola volta per sessione)
-  const illuBox = document.getElementById('book-illustration');
-  const illuImg = document.getElementById('book-illu-img');
-  const illuStatus = document.getElementById('illu-status');
-  const previewLoader = document.getElementById('preview-loader');
-  document.querySelectorAll('.preview-card img').forEach((img, index) => {
-    const chars = ['rabbit', 'bear', 'fox', 'owl'];
-    img.src = `assets/char/${state.styleId}/${chars[index % chars.length]}.png`;
-  });
-  if (state.previewImageUrl) {
-    if (illuBox && illuImg) {
-      illuBox.style.display = 'block';
-      illuImg.src = state.previewImageUrl;
-      illuImg.classList.add('loaded');
-      if (previewLoader) previewLoader.classList.add('hidden');
-      if (compWrap) compWrap.style.display = 'none';
-      if (illuStatus) illuStatus.style.display = 'none';
-    }
-  } else {
-    if (illuBox) illuBox.style.display = 'block';
-    if (previewLoader) previewLoader.classList.remove('hidden');
-    if (!state.previewLoading) generatePreviewImage();
-  }
-
-  const savedCharacter = readSessionJson(SAVED_CHARACTER_KEY);
-  if (savedCharacter?.id === state.characterAssetId) {
-    showCharacterSaved(savedCharacter);
-  }
-
-  // Plan cards
-  renderPlanCards();
-}
-
-// ══════════════════════════════════════
-// PREVIEW IMAGE GENERATION
-// ══════════════════════════════════════
-async function generatePreviewImage() {
-  if (state.previewLoading || state.previewImageUrl) return;
-  state.previewLoading = true;
-  if (!state.previewId) state.previewId = crypto.randomUUID();
-
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 90000);
-  const loaderCopy = document.getElementById('preview-loader-copy');
-  const loaderMessages = [
-    'I personaggi stanno arrivando.',
-    'I colori stanno scegliendo il loro posto.',
-    'Il bosco sta preparando un piccolo segreto.',
-    `La pagina di ${state.name || 'questa storia'} è quasi pronta.`
-  ];
-  let loaderMessageIndex = 0;
-  const loaderMessageTimer = setInterval(() => {
-    loaderMessageIndex = (loaderMessageIndex + 1) % loaderMessages.length;
-    if (loaderCopy) loaderCopy.textContent = loaderMessages[loaderMessageIndex];
-  }, 3200);
-
-  try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-preview`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({
-        preview_id: state.previewId,
-        name: state.name,
-        description: state.desc,
-        style: state.styleId,
-        companion_id: state.companion,
-        choices: state.choices,
-      }),
-      signal: ctrl.signal,
-    });
-    clearTimeout(timer);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    if (!json.url) throw new Error('no url');
-
-    state.previewImageUrl = json.url;
-
-    // Test mode: save the character automatically through an anonymous
-    // Supabase session. A save failure never blocks the visible preview.
-    saveCurrentCharacter().catch(error => {
-      console.error('[DreamTaily] Salvataggio personaggio fallito:', error);
-    });
-
-    const illuBox = document.getElementById('book-illustration');
-    const illuImg = document.getElementById('book-illu-img');
-    const illuStatus = document.getElementById('illu-status');
-    const compWrap = document.getElementById('book-companion');
-    if (illuBox && illuImg) {
-      const previewLoader = document.getElementById('preview-loader');
-      illuImg.onload = () => {
-        illuBox.style.display = 'block';
-        illuImg.classList.add('loaded');
-        if (previewLoader) previewLoader.classList.add('hidden');
-        if (compWrap) compWrap.style.display = 'none';
-        if (illuStatus) illuStatus.style.display = 'none';
-      };
-      illuImg.src = json.url;
-    }
-  } catch (err) {
-    clearTimeout(timer);
-    console.warn('Preview image failed (fallback to companion):', err);
-    const illuStatus = document.getElementById('illu-status');
-    if (illuStatus) illuStatus.style.display = 'none';
-  } finally {
-    clearInterval(loaderMessageTimer);
-    state.previewLoading = false;
-  }
-}
-
-function renderPlanCards() {
-  const grid = document.getElementById('plan-grid');
-  if (!grid) return;
-  const plans = [
-    {id:'digital', title:'PDF Digitale', price:'€29', badge:null,
-     desc:'Un libro ad alta risoluzione da leggere su qualsiasi schermo.',
-     feats:['Pronto entro 48 ore','Stampalo quando vuoi','Tienilo per sempre']},
-    {id:'print', title:'Digitale + Stampa', price:'€49', badge:'Il più amato',
-     desc:'Tutto il digitale, più una copia cartonata spedita a casa.',
-     feats:['Libro cartonato premium','PDF digitale incluso','Spedito in 5-7 giorni']},
-  ];
-  grid.innerHTML = plans.map(p => `
-    <div class="plan-card ${state.plan === p.id ? 'selected' : ''}" onclick="selectPlan('${p.id}')">
-      ${p.badge ? `<div class="plan-badge">${p.badge}</div>` : ''}
-      <div class="plan-title">${p.title}</div>
-      <div class="plan-price">${p.price}</div>
-      <div class="plan-desc">${p.desc}</div>
-      <ul class="plan-feat">${p.feats.map(f => `<li>${f}</li>`).join('')}</ul>
-    </div>`).join('');
-
-  const priceEl = document.getElementById('price-label');
-  if (priceEl) priceEl.textContent = state.plan === 'print' ? '€49' : '€29';
-}
-
-function selectPlan(planId) {
-  state.plan = planId;
-  renderPlanCards();
-}
-
-// ══════════════════════════════════════
-// CONFIRM
-// ══════════════════════════════════════
-function renderConfirm() {
-  const nameEl = document.getElementById('confirm-name');
-  if (nameEl) nameEl.textContent = state.name || 'il tuo protagonista';
-
-  const emailEl = document.getElementById('confirm-email');
-  if (emailEl) emailEl.textContent = state.email || '';
-
-  const charWrap = document.getElementById('confirm-char-wrap');
-  if (charWrap && state.companion) {
-    charWrap.innerHTML = `
-      <img src="assets/char/${state.styleId}/${state.companion}.png"
-           style="height:110px;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(0,0,0,.2));animation:breathe 4.6s ease-in-out infinite;transform-origin:bottom center;"
-           alt="companion">`;
-  }
-}
-
-// ══════════════════════════════════════
-// RESET
-// ══════════════════════════════════════
-function resetAll() {
-  state = {
-    screen:'landing',
-    styleId:'water',
-    name:'',
-    desc:'',
-    protagonist:{
-      type:'real_person',
-      display_name:'',
-      age:null,
-      narrative_age_group:'',
-      pronouns:null,
-      short_description:'',
-      personality:[],
-      interests:[],
-      appearance:{
-        species:null,
-        hair_color:null,
-        hair_style:null,
-        eye_color:null,
-        skin_tone:null,
-        body_color:null,
-        body_shape:null,
-        default_outfit:{top:null,bottom:null,shoes:null,accessory:null},
-        distinctive_features:[]
-      }
-    },
-    companion:null,
-    choices:{},
-    plan:'digital',
-    email:'',
-    previewId:null,
-    previewImageUrl:null,
-    previewLoading:false,
-    characterAssetId:null
-  };
-
-  [
-    'input-name','input-desc','input-age','input-age-group','input-pronouns',
-    'input-hair-color','input-hair-style','input-eye-color','input-skin-tone',
-    'input-species','input-body-color','input-body-shape','input-outfit',
-    'input-personality','input-email'
-  ].forEach(id => {
-    const element = document.getElementById(id);
-    if (element) element.value = '';
-  });
-
-  selectProtagonistType('real_person');
-  renderCompanions();
-  renderStations();
-  updateProceedBtn();
-}
-
-// ══════════════════════════════════════
-// INIT
-
-// ══════════════════════════════════════
-// SUPABASE CONFIG
-// Replace with your actual values
-// ══════════════════════════════════════
-const SUPABASE_URL = 'https://hirzbtruxvjzmcnncvmv.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_baZvlGyMLBkkiOwHina6CA_HB59Lclw'; // ← replace this
-
-const PENDING_CHARACTER_KEY = 'dreamtaily.pendingCharacter.v1';
-const SAVED_CHARACTER_KEY = 'dreamtaily.savedCharacter.v1';
-
 let supabaseClient = null;
-let characterSavePromise = null;
 
-function getSupabaseClient() {
-  if (supabaseClient) return supabaseClient;
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(screen=>screen.classList.remove('active'));
+  document.getElementById('screen-'+name)?.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
-  if (!window.supabase?.createClient) {
-    throw new Error('SUPABASE_CLIENT_NOT_LOADED');
-  }
+function selectStyle(style){
+  app.style=style;
+  document.querySelectorAll('[data-style]').forEach(el=>el.classList.toggle('selected',el.dataset.style===style));
+}
 
-  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
+function selectType(type){
+  app.type=type;
+  document.querySelectorAll('[data-type]').forEach(el=>el.classList.toggle('selected',el.dataset.type===type));
+  document.querySelectorAll('.real-only').forEach(el=>el.style.display=type==='real_person'?'':'none');
+  document.querySelectorAll('.fictional-only').forEach(el=>el.style.display=type==='fictional_character'?'':'none');
+}
+
+function toggleAdvanced(){document.getElementById('advanced').classList.toggle('open')}
+function toggleWowDetails(){document.getElementById('wow-details').classList.toggle('open')}
+
+function value(id){return document.getElementById(id)?.value?.trim()||null}
+function list(value){return (value||'').split(',').map(v=>v.trim()).filter(Boolean).slice(0,8)}
+
+function buildCharacter(){
+  const feature=value('wow-feature')||value('feature');
+  const outfit=value('wow-outfit')||feature;
+  return {
+    type:app.type,
+    display_name:value('name'),
+    age:null,
+    narrative_age_group:value('age-group'),
+    pronouns:value('pronouns'),
+    short_description:value('notes')||'',
+    personality:list(value('personality')),
+    interests:[],
+    appearance:{
+      species:app.type==='fictional_character'?value('species'):null,
+      hair_color:app.type==='real_person'?value('hair'):null,
+      hair_style:null,
+      eye_color:value('eyes'),
+      skin_tone:value('skin'),
+      body_color:app.type==='fictional_character'?feature:null,
+      body_shape:null,
+      default_outfit:{top:outfit,bottom:null,shoes:null,accessory:app.type==='fictional_character'?feature:null},
+      distinctive_features:feature?[feature]:[]
     }
-  });
+  };
+}
 
+function validateCharacter(){
+  if(!value('name')) return 'Inserisci il nome.';
+  if(!value('age-group')) return 'Scegli la fascia d’età.';
+  if(app.type==='fictional_character'&&!value('species')) return 'Indica che tipo di personaggio è.';
+  return null;
+}
+
+function showError(id,message){
+  const el=document.getElementById(id);
+  el.textContent=message||'';
+  el.classList.toggle('visible',Boolean(message));
+}
+
+function getSupabase(){
+  if(supabaseClient) return supabaseClient;
+  if(!window.supabase?.createClient) throw new Error('SUPABASE_CLIENT_NOT_LOADED');
+  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  });
   return supabaseClient;
 }
 
-function readSessionJson(key) {
-  try {
-    const raw = sessionStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  } catch (error) {
-    console.warn(`[DreamTaily] Dato sessione non valido: ${key}`, error);
-    sessionStorage.removeItem(key);
-    return null;
-  }
-}
-
-function writeSessionJson(key, value) {
-  sessionStorage.setItem(key, JSON.stringify(value));
-}
-
-async function ensureAnonymousUser() {
-  const client = getSupabaseClient();
-  const { data: sessionData, error: sessionError } = await client.auth.getSession();
-
-  if (sessionError) throw sessionError;
-  if (sessionData.session?.user) return sessionData.session.user;
-
-  const { data, error } = await client.auth.signInAnonymously();
-
-  if (error) throw error;
-  if (!data.user) throw new Error('ANONYMOUS_USER_NOT_CREATED');
-
+async function ensureUser(){
+  const client=getSupabase();
+  const {data:{user},error:userError}=await client.auth.getUser();
+  if(userError && userError.status!==401) throw userError;
+  if(user) return user;
+  const {data,error}=await client.auth.signInAnonymously();
+  if(error) throw error;
   return data.user;
 }
 
-function buildPendingCharacter() {
-  const existing = readSessionJson(PENDING_CHARACTER_KEY);
-  const samePreview = existing?.preview_id && existing.preview_id === state.previewId;
+async function generateCharacter(force=false){
+  const validation=validateCharacter();
+  if(validation){showError('creator-error',validation);return}
+  showError('creator-error',null);
+  showError('wow-error',null);
 
-  return {
-    version: 1,
-    client_request_id: samePreview
-      ? existing.client_request_id
-      : crypto.randomUUID(),
-    created_at: samePreview
-      ? existing.created_at
-      : new Date().toISOString(),
-    preview_id: state.previewId || null,
-    preview_url: state.previewImageUrl || null,
-    name: state.protagonist?.display_name || state.name || '',
-    description: state.protagonist?.short_description || state.desc || '',
-    traits: JSON.parse(JSON.stringify(state.protagonist || {})),
-    default_style: state.styleId || 'water'
-  };
+  if(force||!app.previewId) app.previewId=crypto.randomUUID();
+  app.previewUrl=null;
+
+  const loader=document.getElementById('loader');
+  loader.classList.add('visible');
+  document.getElementById('generate-btn').disabled=true;
+
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),90000);
+
+  try{
+    const character=buildCharacter();
+    const response=await fetch(`${SUPABASE_URL}/functions/v1/generate-preview`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY},
+      body:JSON.stringify({
+        mode:'character_preview',
+        preview_id:app.previewId,
+        name:character.display_name,
+        description:character.short_description,
+        style:app.style,
+        character,
+        companion_id:null,
+        choices:{}
+      }),
+      signal:controller.signal
+    });
+    clearTimeout(timeout);
+    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+    const payload=await response.json();
+    if(!payload.url) throw new Error('La funzione non ha restituito un’immagine.');
+
+    app.previewUrl=payload.url;
+    document.getElementById('wow-image').src=payload.url;
+    document.getElementById('wow-title').textContent=`Ecco ${character.display_name}.`;
+    showScreen('wow');
+  }catch(error){
+    clearTimeout(timeout);
+    showError('creator-error',error.name==='AbortError'
+      ?'La generazione sta impiegando troppo tempo. Riprova.'
+      :'Non sono riuscito a creare il personaggio. Riprova tra un momento.');
+    console.error('[DreamTaily] Preview error:',error);
+  }finally{
+    loader.classList.remove('visible');
+    document.getElementById('generate-btn').disabled=false;
+  }
 }
 
-async function saveCurrentCharacter() {
-  if (characterSavePromise) return characterSavePromise;
+function regenerateCharacter(){generateCharacter(true)}
 
-  characterSavePromise = (async () => {
-    const pending = buildPendingCharacter();
-    writeSessionJson(PENDING_CHARACTER_KEY, pending);
-    showCharacterSaving();
+async function saveCharacter(){
+  if(app.saving) return app.characterAssetId;
+  if(!app.previewUrl) throw new Error('PREVIEW_REQUIRED');
+  app.saving=true;
+  const button=document.getElementById('continue-btn');
+  button.disabled=true;
+  button.textContent='Salvataggio…';
 
-    if (!pending.name) throw new Error('CHARACTER_NAME_REQUIRED');
-    if (!pending.preview_url) throw new Error('CHARACTER_PREVIEW_REQUIRED');
+  try{
+    const user=await ensureUser();
+    const client=getSupabase();
+    const character=buildCharacter();
+    const requestId=app.previewId;
 
-    const user = await ensureAnonymousUser();
-    const client = getSupabaseClient();
-
-    const { data: asset, error: assetError } = await client
-      .from('character_assets')
-      .upsert({
-        profile_id: user.id,
-        name: pending.name,
-        description: pending.description,
-        traits: pending.traits,
-        character_bible: {},
-        default_style: pending.default_style,
-        status: 'ready',
-        client_request_id: pending.client_request_id
-      }, {
-        onConflict: 'profile_id,client_request_id',
-        ignoreDuplicates: false
-      })
-      .select('id,profile_id,name,description,traits,default_style,status,created_at')
-      .single();
-
-    if (assetError) throw assetError;
-
-    const { error: referenceError } = await client
-      .from('character_references')
-      .upsert({
-        character_asset_id: asset.id,
-        style: pending.default_style,
-        view_type: 'wow_preview',
-        storage_path: null,
-        public_url: pending.preview_url,
-        status: 'ready',
-        approved: false,
-        generation_metadata: {
-          source: 'legacy_generate_preview',
-          preview_id: pending.preview_id,
-          test_mode: true
-        }
-      }, {
-        onConflict: 'character_asset_id,style,view_type',
-        ignoreDuplicates: false
-      });
-
-    if (referenceError) throw referenceError;
-
-    const savedCharacter = {
-      ...asset,
-      preview_url: pending.preview_url,
-      reference_style: pending.default_style,
-      saved_at: new Date().toISOString()
+    const assetPayload={
+      profile_id:user.id,
+      name:character.display_name,
+      description:character.short_description,
+      traits:character,
+      character_bible:{},
+      default_style:app.style,
+      status:'ready',
+      client_request_id:requestId
     };
 
-    state.characterAssetId = asset.id;
-    writeSessionJson(SAVED_CHARACTER_KEY, savedCharacter);
-    sessionStorage.removeItem(PENDING_CHARACTER_KEY);
+    const {data:asset,error:assetError}=await client
+      .from('character_assets')
+      .upsert(assetPayload,{onConflict:'profile_id,client_request_id'})
+      .select('id,name')
+      .single();
 
-    console.info('[DreamTaily] Personaggio salvato:', asset.id);
-    showCharacterSaved(savedCharacter);
-    loadSavedCharacters();
-    return savedCharacter;
-  })();
+    if(assetError) throw assetError;
 
-  try {
-    return await characterSavePromise;
-  } finally {
-    characterSavePromise = null;
+    const referencePayload={
+      character_asset_id:asset.id,
+      style:app.style,
+      view_type:'wow_preview',
+      storage_path:null,
+      public_url:app.previewUrl,
+      status:'ready',
+      approved:false,
+      generation_metadata:{source:'generate-preview',preview_id:app.previewId,mode:'character_preview',test_mode:true}
+    };
+
+    const {error:referenceError}=await client
+      .from('character_references')
+      .upsert(referencePayload,{onConflict:'character_asset_id,style,view_type'});
+
+    if(referenceError) throw referenceError;
+
+    app.characterAssetId=asset.id;
+    document.getElementById('saved-note').classList.add('visible');
+    return asset.id;
+  }finally{
+    app.saving=false;
+    button.disabled=false;
+    button.textContent='Continua con questo personaggio →';
   }
 }
 
-async function listCurrentCharacters() {
-  const user = await ensureAnonymousUser();
-  const client = getSupabaseClient();
-
-  const { data, error } = await client
-    .from('character_assets')
-    .select(`
-      id,
-      name,
-      description,
-      traits,
-      default_style,
-      status,
-      created_at,
-      character_references (
-        id,
-        style,
-        view_type,
-        public_url,
-        status,
-        approved
-      )
-    `)
-    .eq('profile_id', user.id)
-    .neq('status', 'archived')
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return data || [];
-}
-
-
-function getCharacterPreviewUrl(character) {
-  const references = Array.isArray(character?.character_references)
-    ? character.character_references
-    : [];
-
-  const preferred = references.find(reference =>
-    reference.view_type === 'wow_preview' &&
-    reference.style === character.default_style &&
-    reference.public_url
-  ) || references.find(reference => reference.public_url);
-
-  return preferred?.public_url || null;
-}
-
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-
-function styleDisplayName(styleId) {
-  return STYLES.find(style => style.id === styleId)?.name || styleId || 'Stile';
-}
-
-function renderSavedCharacters(characters) {
-  const section = document.getElementById('saved-characters-section');
-  const grid = document.getElementById('saved-characters-grid');
-  if (!section || !grid) return;
-
-  if (!characters?.length) {
-    section.classList.remove('visible');
-    grid.innerHTML = '';
-    return;
-  }
-
-  grid.innerHTML = characters.map(character => {
-    const previewUrl = getCharacterPreviewUrl(character);
-    const safeName = escapeHtml(character.name || 'Personaggio');
-    const image = previewUrl
-      ? `<img src="${escapeHtml(previewUrl)}" alt="${safeName}">`
-      : `<span style="font-size:42px;">✨</span>`;
-
-    return `
-      <article class="saved-character-card">
-        <div class="saved-character-image">${image}</div>
-        <div class="saved-character-name">${safeName}</div>
-        <div class="saved-character-meta">${escapeHtml(styleDisplayName(character.default_style))}</div>
-        <button class="saved-character-use" type="button"
-                onclick="useSavedCharacter('${character.id}')">
-          Usa in una nuova storia
-        </button>
-      </article>`;
-  }).join('');
-
-  section.classList.add('visible');
-}
-
-async function loadSavedCharacters() {
-  try {
-    const client = getSupabaseClient();
-    const { data: sessionData, error: sessionError } = await client.auth.getSession();
-    if (sessionError) throw sessionError;
-
-    if (!sessionData.session?.user) {
-      renderSavedCharacters([]);
-      return [];
-    }
-
-    const characters = await listCurrentCharacters();
-    window.__dreamtailySavedCharacters = characters;
-    renderSavedCharacters(characters);
-    return characters;
-  } catch (error) {
-    console.warn('[DreamTaily] Impossibile caricare i personaggi salvati:', error);
-    return [];
+async function saveAndContinue(){
+  showError('wow-error',null);
+  try{
+    await saveCharacter();
+    document.getElementById('next-title').textContent=`${value('name')} è pronto per la sua prima avventura.`;
+    setTimeout(()=>showScreen('next'),350);
+  }catch(error){
+    console.error('[DreamTaily] Save error:',error);
+    showError('wow-error','Il personaggio è stato creato, ma non sono riuscito a salvarlo. Riprova.');
   }
 }
 
-function applyCharacterToForm(character) {
-  const traits = character?.traits || {};
-  const appearance = traits.appearance || {};
-  const outfit = appearance.default_outfit || {};
-
-  const type = traits.type || 'real_person';
-  selectProtagonistType(type);
-
-  const values = {
-    'input-name': traits.display_name || character.name || '',
-    'input-age': traits.age ?? '',
-    'input-age-group': traits.narrative_age_group || '',
-    'input-pronouns': traits.pronouns || '',
-    'input-hair-color': appearance.hair_color || '',
-    'input-hair-style': appearance.hair_style || '',
-    'input-eye-color': appearance.eye_color || '',
-    'input-skin-tone': appearance.skin_tone || '',
-    'input-species': appearance.species || '',
-    'input-body-color': appearance.body_color || '',
-    'input-body-shape': appearance.body_shape || '',
-    'input-outfit': outfit.top || outfit.accessory || '',
-    'input-personality': Array.isArray(traits.personality) ? traits.personality.join(', ') : '',
-    'input-desc': traits.short_description || character.description || ''
-  };
-
-  Object.entries(values).forEach(([id, value]) => {
-    const element = document.getElementById(id);
-    if (element) element.value = value;
-  });
-
-  state.styleId = character.default_style || 'water';
-  state.characterAssetId = character.id;
-  state.previewImageUrl = getCharacterPreviewUrl(character);
-  state.previewId = null;
-  state.companion = null;
-  state.choices = {};
-
-  document.querySelectorAll('.style-card').forEach(card => {
-    card.classList.toggle('selected', card.dataset.style === state.styleId);
-  });
-
-  updateState();
-  renderCompanions();
-  renderStations();
-  updateProceedBtn();
+function startAnother(){
+  app.style='water';app.type='real_person';app.previewId=null;app.previewUrl=null;app.characterAssetId=null;
+  document.querySelectorAll('input,textarea').forEach(el=>el.value='');
+  document.getElementById('age-group').value='';
+  document.getElementById('advanced').classList.remove('open');
+  document.getElementById('wow-details').classList.remove('open');
+  document.getElementById('saved-note').classList.remove('visible');
+  selectStyle('water');selectType('real_person');showScreen('creator');
 }
 
-function useSavedCharacter(characterId) {
-  const characters = window.__dreamtailySavedCharacters || [];
-  const character = characters.find(item => item.id === characterId);
-  if (!character) return;
-
-  applyCharacterToForm(character);
-  goTo('builder');
-
-  const title = document.querySelector('#screen-builder .section-label');
-  if (title) {
-    setTimeout(() => document.getElementById('input-name')?.scrollIntoView({
-      behavior:'smooth',
-      block:'center'
-    }), 250);
-  }
-}
-
-function startNewCharacter() {
-  resetAll();
-  goTo('builder');
-}
-
-function goToSavedCharacters() {
-  goTo('landing');
-  loadSavedCharacters().then(() => {
-    setTimeout(() => {
-      document.getElementById('saved-characters-section')?.scrollIntoView({
-        behavior:'smooth',
-        block:'start'
-      });
-    }, 150);
-  });
-}
-
-function showCharacterSaved(character) {
-  const box = document.getElementById('character-save-box');
-  const title = document.getElementById('character-save-title');
-  if (title) title.textContent = `${character.name || 'Il personaggio'} è stato salvato`;
-  if (box) box.classList.add('visible');
-}
-
-function showCharacterSaving() {
-  const box = document.getElementById('character-save-box');
-  const title = document.getElementById('character-save-title');
-  const copy = document.getElementById('character-save-copy');
-  if (title) title.textContent = 'Sto salvando il personaggio…';
-  if (copy) copy.textContent = 'La preview resta disponibile anche se il salvataggio richiede qualche secondo.';
-  if (box) box.classList.add('visible');
-}
-
-window.DreamTailyCharacters = Object.freeze({
-  saveCurrent: saveCurrentCharacter,
-  listCurrent: listCurrentCharacters,
-  getSavedFromSession: () => readSessionJson(SAVED_CHARACTER_KEY),
-  refreshLibrary: loadSavedCharacters,
-  use: useSavedCharacter
-});
-
-async function supabaseInsert(table, data) {
-  if (!SUPABASE_URL || SUPABASE_ANON_KEY === 'YOUR_ANON_KEY_HERE') {
-    throw new Error('SUPABASE_NOT_CONFIGURED');
-  }
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
-
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Prefer': 'return=minimal',
-      },
-      body: JSON.stringify(data),
-      signal: controller.signal,
-    });
-
-    if (!res.ok) {
-      const raw = await res.text();
-      let message = raw || `HTTP ${res.status}`;
-
-      try {
-        const payload = JSON.parse(raw);
-        message = payload.message || payload.details || payload.hint || message;
-      } catch (_) {
-        // The response is not JSON; keep the raw text.
-      }
-
-      const error = new Error(message);
-      error.status = res.status;
-      throw error;
-    }
-  } catch (error) {
-    if (error.name === 'AbortError') {
-      throw new Error('REQUEST_TIMEOUT');
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-
-
-// ══════════════════════════════════════
-// SUBMIT ORDER
-// ══════════════════════════════════════
-async function submitOrder() {
-  const email = document.getElementById('input-email')?.value?.trim();
-  if (!email) {
-    showOrderError('Inserisci la tua email per continuare.');
-    return;
-  }
-  if (!/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
-    showOrderError('Email non valida.');
-    return;
-  }
-
-  const btn = document.getElementById('btn-create');
-  if (!btn || btn.dataset.submitting === 'true') return;
-
-  btn.dataset.submitting = 'true';
-  btn.disabled = true;
-  btn.textContent = 'Invio in corso…';
-  hideOrderError();
-
-  if (state.previewImageUrl && !state.characterAssetId) {
-    try {
-      await saveCurrentCharacter();
-    } catch (characterError) {
-      console.warn('[DreamTaily] Ordine senza character_asset_id:', characterError);
-    }
-  }
-
-  const order = {
-    name:        state.name,
-    description: state.desc,
-    protagonist: state.protagonist,
-    style:       state.styleId,
-    companion:   state.companion,
-    choices:     state.choices,
-    plan:        state.plan,
-    email:       email.toLowerCase(),
-    status:      'new',
-    preview_id:  state.previewId,
-    preview_url: state.previewImageUrl,
-    character_asset_id: state.characterAssetId,
-  };
-
-  try {
-    await supabaseInsert('orders', order);
-    state.email = email.toLowerCase();
-    goTo('confirm');
-  } catch (err) {
-    console.error('Order error:', err);
-
-    if (err.message === 'SUPABASE_NOT_CONFIGURED') {
-      showOrderError('Il servizio ordini non è ancora configurato.');
-    } else if (err.message === 'REQUEST_TIMEOUT') {
-      showOrderError('La richiesta sta impiegando troppo tempo. Controlla la connessione e riprova.');
-    } else if (err.status === 409) {
-      state.email = email.toLowerCase();
-      goTo('confirm');
-      return;
-    } else if (err.status === 400 || err.status === 422) {
-      showOrderError('Controlla i dati inseriti e riprova.');
-    } else if (err.status === 401 || err.status === 403) {
-      showOrderError('Il servizio ordini non è configurato correttamente.');
-    } else {
-      showOrderError('Qualcosa è andato storto. Riprova tra un momento.');
-    }
-  } finally {
-    btn.dataset.submitting = 'false';
-
-    if (state.screen !== 'confirm') {
-      btn.disabled = false;
-      btn.innerHTML = 'Sblocca tutta la storia · <span id="price-label">€' +
-        (state.plan === 'print' ? '49' : '29') + '</span>';
-      updateCreateBtn();
-    }
-  }
-}
-
-
-function showOrderError(msg) {
-  const el = document.getElementById('order-error');
-  if (el) { el.textContent = msg; el.style.display = 'block'; }
-}
-
-function hideOrderError() {
-  const el = document.getElementById('order-error');
-  if (el) el.style.display = 'none';
-}
-
-function updateCreateBtn() {
-  const email = document.getElementById('input-email')?.value?.trim();
-  const btn = document.getElementById('btn-create');
-  if (btn) btn.disabled = !email || btn.dataset.submitting === 'true';
-}
-
-// ══════════════════════════════════════
-// FAIRYTALE MICRO-INTERACTIONS
-// ══════════════════════════════════════
-function initHeroParallax() {
-  const scene = document.getElementById('hero-scene');
-  if (!scene || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  const layers = [
-    [scene.querySelector('.hero-moon'), 5],
-    [scene.querySelector('.hero-hill'), 4],
-    [scene.querySelector('.hero-hill2'), 7],
-    [scene.querySelector('.hero-hill3'), 10],
-    [scene.querySelector('.hero-chars'), 13],
-  ];
-
-  scene.addEventListener('pointermove', (event) => {
-    const rect = scene.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width - .5) * 2;
-    const y = ((event.clientY - rect.top) / rect.height - .5) * 2;
-    layers.forEach(([layer, amount]) => {
-      if (!layer) return;
-      const base = layer.classList.contains('hero-chars') ? 'translateX(-50%) ' : '';
-      layer.style.transform = `${base}translate(${x * amount}px, ${y * amount * .55}px)`;
-    });
-    scene.style.transform = `perspective(900px) rotateX(${-y * .7}deg) rotateY(${x * .7}deg)`;
-  });
-
-  scene.addEventListener('pointerleave', () => {
-    layers.forEach(([layer]) => { if (layer) layer.style.transform = ''; });
-    scene.style.transform = '';
-  });
-}
-
-function initMagicClicks() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  document.addEventListener('click', (event) => {
-    const interactive = event.target.closest('.btn-primary,.style-card,.companion-card,.option-card:not(.locked)');
-    if (!interactive) return;
-    for (let i = 0; i < 4; i++) {
-      const spark = document.createElement('span');
-      spark.className = 'magic-spark';
-      spark.textContent = i % 2 ? '✧' : '✦';
-      spark.style.left = `${event.clientX + (Math.random() - .5) * 34}px`;
-      spark.style.top = `${event.clientY + (Math.random() - .5) * 16}px`;
-      spark.style.animationDelay = `${i * 45}ms`;
-      document.body.appendChild(spark);
-      setTimeout(() => spark.remove(), 1000);
-    }
-  });
-}
-
-function initVisibilityMotion() {
-  document.addEventListener('visibilitychange', () => {
-    document.documentElement.style.setProperty('--motion-state', document.hidden ? 'paused' : 'running');
-    document.querySelectorAll('.firefly,.hero-cloud,.hero-star,.hero-char').forEach(el => {
-      el.style.animationPlayState = document.hidden ? 'paused' : 'running';
-    });
-  });
-}
-
-// ══════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
-  initFireflies();
-  renderCompanions();
-  renderStations();
-  updateProceedBtn();
-  initHeroParallax();
-  initMagicClicks();
-  initVisibilityMotion();
-  loadSavedCharacters();
-});
+window.DreamTailyCharacterFlow={generate:generateCharacter,save:saveCharacter,state:app};
 </script>
 </body>
 </html>
