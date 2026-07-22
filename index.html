@@ -869,6 +869,144 @@ body{background:
     linear-gradient(210deg, transparent 46%, #31534b 47% 68%, transparent 69%);
 }
 
+
+/* ── PERSISTENT CHARACTERS — TEST MODE ── */
+.saved-characters-section{
+  display:none;
+  max-width:960px;
+  margin:28px auto 0;
+  padding:0 18px;
+}
+.saved-characters-section.visible{display:block;}
+.saved-characters-panel{
+  background:rgba(255,253,248,.9);
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:22px;
+  box-shadow:0 16px 38px rgba(61,43,31,.08);
+}
+.saved-characters-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:16px;
+}
+.saved-characters-title{
+  font-family:'Baloo 2',cursive;
+  font-size:22px;
+  font-weight:800;
+}
+.saved-characters-copy{
+  color:var(--warm-gray);
+  font-size:13px;
+  line-height:1.5;
+}
+.saved-characters-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+}
+.saved-character-card{
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:#fff;
+  padding:12px;
+  text-align:left;
+  box-shadow:0 5px 14px rgba(61,43,31,.05);
+}
+.saved-character-image{
+  width:100%;
+  aspect-ratio:4/3;
+  border-radius:13px;
+  background:#F4ECDD;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:10px;
+}
+.saved-character-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.saved-character-name{
+  font-family:'Baloo 2',cursive;
+  font-size:17px;
+  font-weight:800;
+}
+.saved-character-meta{
+  color:var(--warm-gray);
+  font-size:11.5px;
+  margin:2px 0 10px;
+}
+.saved-character-use{
+  width:100%;
+  border:0;
+  border-radius:11px;
+  padding:10px 12px;
+  background:var(--tint-teal);
+  color:#376f71;
+  font-weight:800;
+  cursor:pointer;
+}
+.saved-character-use:hover{transform:translateY(-1px);}
+.character-save-box{
+  display:none;
+  margin:0 0 18px;
+  padding:15px 16px;
+  border-radius:16px;
+  background:var(--tint-teal);
+  border:1px solid #C9E1E1;
+}
+.character-save-box.visible{display:block;}
+.character-save-row{
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+.character-save-icon{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:none;
+  background:var(--teal);
+  color:white;
+  font-weight:900;
+}
+.character-save-title{
+  font-weight:800;
+  color:#376f71;
+}
+.character-save-copy{
+  color:#537f80;
+  font-size:12px;
+  margin-top:2px;
+}
+.character-save-actions{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+  flex-wrap:wrap;
+}
+.btn-secondary-small{
+  border:1px solid #BFD8D8;
+  background:#fff;
+  color:#376f71;
+  border-radius:11px;
+  padding:9px 12px;
+  font-weight:800;
+  cursor:pointer;
+}
+@media(max-width:560px){
+  .saved-characters-head{display:block;}
+  .saved-characters-title{font-size:20px;}
+}
+
 </style>
 </head>
 <body>
@@ -933,7 +1071,21 @@ body{background:
           <button class="scroll-whisper" onclick="document.querySelector('.storybook-steps').scrollIntoView({behavior:'smooth'})">Scopri come nasce una storia <span>⌄</span></button>
         </section>
 
-        <!-- HOW IT WORKS -->
+
+        <section class="saved-characters-section" id="saved-characters-section" aria-live="polite">
+          <div class="saved-characters-panel">
+            <div class="saved-characters-head">
+              <div>
+                <div class="saved-characters-title">I tuoi personaggi</div>
+                <div class="saved-characters-copy">Sono disponibili su questo browser durante il test. Scegline uno per iniziare una nuova storia senza ricrearlo.</div>
+              </div>
+              <button class="btn-secondary-small" type="button" onclick="startNewCharacter()">+ Nuovo personaggio</button>
+            </div>
+            <div class="saved-characters-grid" id="saved-characters-grid"></div>
+          </div>
+        </section>
+
+                <!-- HOW IT WORKS -->
         <div class="storybook-steps" style="margin-top:54px;">
           <div class="section-label">Il viaggio in tre capitoli</div>
           <div class="steps">
@@ -1175,7 +1327,22 @@ body{background:
           <div id="summary-style-badge" style="display:inline-block;padding:5px 14px;border-radius:20px;background:var(--tint-coral);color:var(--coral-deep);font-weight:800;font-size:12px;"></div>
         </div>
 
-        <!-- BOOK PAGE 1 PREVIEW -->
+
+        <div class="character-save-box" id="character-save-box" aria-live="polite">
+          <div class="character-save-row">
+            <div class="character-save-icon">✓</div>
+            <div>
+              <div class="character-save-title" id="character-save-title">Il personaggio è stato salvato</div>
+              <div class="character-save-copy" id="character-save-copy">Potrai riutilizzarlo in una nuova storia da questo browser.</div>
+            </div>
+          </div>
+          <div class="character-save-actions">
+            <button class="btn-secondary-small" type="button" onclick="goToSavedCharacters()">Vedi i miei personaggi</button>
+            <button class="btn-secondary-small" type="button" onclick="startNewCharacter()">Crea un altro personaggio</button>
+          </div>
+        </div>
+
+                <!-- BOOK PAGE 1 PREVIEW -->
         <div class="book-page" style="margin-bottom:14px;">
           <div class="book-chapter-label">Capitolo 1 — Il Mondo Ordinario</div>
           <div class="book-illustration" id="book-illustration" style="display:none;">
@@ -1737,6 +1904,11 @@ function renderSummary() {
     if (!state.previewLoading) generatePreviewImage();
   }
 
+  const savedCharacter = readSessionJson(SAVED_CHARACTER_KEY);
+  if (savedCharacter?.id === state.characterAssetId) {
+    showCharacterSaved(savedCharacter);
+  }
+
   // Plan cards
   renderPlanCards();
 }
@@ -2015,6 +2187,7 @@ async function saveCurrentCharacter() {
   characterSavePromise = (async () => {
     const pending = buildPendingCharacter();
     writeSessionJson(PENDING_CHARACTER_KEY, pending);
+    showCharacterSaving();
 
     if (!pending.name) throw new Error('CHARACTER_NAME_REQUIRED');
     if (!pending.preview_url) throw new Error('CHARACTER_PREVIEW_REQUIRED');
@@ -2076,6 +2249,8 @@ async function saveCurrentCharacter() {
     sessionStorage.removeItem(PENDING_CHARACTER_KEY);
 
     console.info('[DreamTaily] Personaggio salvato:', asset.id);
+    showCharacterSaved(savedCharacter);
+    loadSavedCharacters();
     return savedCharacter;
   })();
 
@@ -2117,10 +2292,191 @@ async function listCurrentCharacters() {
   return data || [];
 }
 
+
+function getCharacterPreviewUrl(character) {
+  const references = Array.isArray(character?.character_references)
+    ? character.character_references
+    : [];
+
+  const preferred = references.find(reference =>
+    reference.view_type === 'wow_preview' &&
+    reference.style === character.default_style &&
+    reference.public_url
+  ) || references.find(reference => reference.public_url);
+
+  return preferred?.public_url || null;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function styleDisplayName(styleId) {
+  return STYLES.find(style => style.id === styleId)?.name || styleId || 'Stile';
+}
+
+function renderSavedCharacters(characters) {
+  const section = document.getElementById('saved-characters-section');
+  const grid = document.getElementById('saved-characters-grid');
+  if (!section || !grid) return;
+
+  if (!characters?.length) {
+    section.classList.remove('visible');
+    grid.innerHTML = '';
+    return;
+  }
+
+  grid.innerHTML = characters.map(character => {
+    const previewUrl = getCharacterPreviewUrl(character);
+    const safeName = escapeHtml(character.name || 'Personaggio');
+    const image = previewUrl
+      ? `<img src="${escapeHtml(previewUrl)}" alt="${safeName}">`
+      : `<span style="font-size:42px;">✨</span>`;
+
+    return `
+      <article class="saved-character-card">
+        <div class="saved-character-image">${image}</div>
+        <div class="saved-character-name">${safeName}</div>
+        <div class="saved-character-meta">${escapeHtml(styleDisplayName(character.default_style))}</div>
+        <button class="saved-character-use" type="button"
+                onclick="useSavedCharacter('${character.id}')">
+          Usa in una nuova storia
+        </button>
+      </article>`;
+  }).join('');
+
+  section.classList.add('visible');
+}
+
+async function loadSavedCharacters() {
+  try {
+    const client = getSupabaseClient();
+    const { data: sessionData, error: sessionError } = await client.auth.getSession();
+    if (sessionError) throw sessionError;
+
+    if (!sessionData.session?.user) {
+      renderSavedCharacters([]);
+      return [];
+    }
+
+    const characters = await listCurrentCharacters();
+    window.__dreamtailySavedCharacters = characters;
+    renderSavedCharacters(characters);
+    return characters;
+  } catch (error) {
+    console.warn('[DreamTaily] Impossibile caricare i personaggi salvati:', error);
+    return [];
+  }
+}
+
+function applyCharacterToForm(character) {
+  const traits = character?.traits || {};
+  const appearance = traits.appearance || {};
+  const outfit = appearance.default_outfit || {};
+
+  const type = traits.type || 'real_person';
+  selectProtagonistType(type);
+
+  const values = {
+    'input-name': traits.display_name || character.name || '',
+    'input-age': traits.age ?? '',
+    'input-age-group': traits.narrative_age_group || '',
+    'input-pronouns': traits.pronouns || '',
+    'input-hair-color': appearance.hair_color || '',
+    'input-hair-style': appearance.hair_style || '',
+    'input-eye-color': appearance.eye_color || '',
+    'input-skin-tone': appearance.skin_tone || '',
+    'input-species': appearance.species || '',
+    'input-body-color': appearance.body_color || '',
+    'input-body-shape': appearance.body_shape || '',
+    'input-outfit': outfit.top || outfit.accessory || '',
+    'input-personality': Array.isArray(traits.personality) ? traits.personality.join(', ') : '',
+    'input-desc': traits.short_description || character.description || ''
+  };
+
+  Object.entries(values).forEach(([id, value]) => {
+    const element = document.getElementById(id);
+    if (element) element.value = value;
+  });
+
+  state.styleId = character.default_style || 'water';
+  state.characterAssetId = character.id;
+  state.previewImageUrl = getCharacterPreviewUrl(character);
+  state.previewId = null;
+  state.companion = null;
+  state.choices = {};
+
+  document.querySelectorAll('.style-card').forEach(card => {
+    card.classList.toggle('selected', card.dataset.style === state.styleId);
+  });
+
+  updateState();
+  renderCompanions();
+  renderStations();
+  updateProceedBtn();
+}
+
+function useSavedCharacter(characterId) {
+  const characters = window.__dreamtailySavedCharacters || [];
+  const character = characters.find(item => item.id === characterId);
+  if (!character) return;
+
+  applyCharacterToForm(character);
+  goTo('builder');
+
+  const title = document.querySelector('#screen-builder .section-label');
+  if (title) {
+    setTimeout(() => document.getElementById('input-name')?.scrollIntoView({
+      behavior:'smooth',
+      block:'center'
+    }), 250);
+  }
+}
+
+function startNewCharacter() {
+  resetAll();
+  goTo('builder');
+}
+
+function goToSavedCharacters() {
+  goTo('landing');
+  loadSavedCharacters().then(() => {
+    setTimeout(() => {
+      document.getElementById('saved-characters-section')?.scrollIntoView({
+        behavior:'smooth',
+        block:'start'
+      });
+    }, 150);
+  });
+}
+
+function showCharacterSaved(character) {
+  const box = document.getElementById('character-save-box');
+  const title = document.getElementById('character-save-title');
+  if (title) title.textContent = `${character.name || 'Il personaggio'} è stato salvato`;
+  if (box) box.classList.add('visible');
+}
+
+function showCharacterSaving() {
+  const box = document.getElementById('character-save-box');
+  const title = document.getElementById('character-save-title');
+  const copy = document.getElementById('character-save-copy');
+  if (title) title.textContent = 'Sto salvando il personaggio…';
+  if (copy) copy.textContent = 'La preview resta disponibile anche se il salvataggio richiede qualche secondo.';
+  if (box) box.classList.add('visible');
+}
+
 window.DreamTailyCharacters = Object.freeze({
   saveCurrent: saveCurrentCharacter,
   listCurrent: listCurrentCharacters,
-  getSavedFromSession: () => readSessionJson(SAVED_CHARACTER_KEY)
+  getSavedFromSession: () => readSessionJson(SAVED_CHARACTER_KEY),
+  refreshLibrary: loadSavedCharacters,
+  use: useSavedCharacter
 });
 
 async function supabaseInsert(table, data) {
@@ -2336,6 +2692,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeroParallax();
   initMagicClicks();
   initVisibilityMotion();
+  loadSavedCharacters();
 });
 </script>
 </body>
