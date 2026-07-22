@@ -219,7 +219,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
       <p>DreamTaily trasforma un bambino o un personaggio inventato in un eroe illustrato, pronto a vivere storie sempre nuove e a diventare il cuore del suo libro.</p>
       <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:30px">
         <button class="btn btn-primary" onclick="showScreen('creator')">Crea il suo personaggio →</button>
-        <span style="font-size:13px;font-weight:700;color:#f7e9c8">Nessun account prima del primo incontro</span>
+        <span style="font-size:13px;font-weight:700;color:#f7e9c8">Il primo personaggio prende vita in pochi istanti</span>
       </div>
     </div>
     <div class="hero-art"><img src="assets/char/water/rabbit.png" alt="Personaggio DreamTaily"></div>
@@ -258,7 +258,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
     <div class="home-showcase-copy">
       <div class="phase">Il primo incontro</div>
       <h2>Prima si vede. Poi si salva.</h2>
-      <p>Nessuna registrazione prima del momento importante. Il personaggio prende vita, lo guardate insieme e solo dopo scegliete di continuare.</p>
+      <p>Il personaggio prende vita davanti a voi. Lo guardate insieme, aggiungete ciò che manca e poi scegliete la sua prima avventura.</p>
       <button class="btn btn-soft" onclick="showScreen('creator')">Inizia dal personaggio</button>
     </div>
     <div class="home-showcase-art">
@@ -296,7 +296,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
     <div>
       <div class="phase">Il primo passo</div>
       <h2>Comincia dal suo personaggio.</h2>
-      <p>Pochi dettagli. Nessun account. Poi il primo incontro.</p>
+      <p>Pochi dettagli. Poi il primo incontro.</p>
     </div>
     <button class="btn btn-primary" onclick="showScreen('creator')">Crea il suo personaggio →</button>
   </section>
@@ -435,7 +435,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
       <p class="small" style="margin-top:10px">Le modifiche aggiornano la scheda del personaggio. Per vederle nell’immagine usa “Rigenera”.</p>
     </div>
 
-    <div class="saved-note" id="saved-note">✓ Il personaggio è stato salvato nel profilo di test.</div>
+    <div class="saved-note" id="saved-note">✓ Il personaggio è pronto per le sue prossime avventure.</div>
     <div class="error" id="wow-error"></div>
   </div>
 </section>
@@ -446,7 +446,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
     <h2 id="next-title">Ora scegliamo la sua prima avventura.</h2>
     <p>La creazione del personaggio è completa. Il prossimo blocco di DreamTaily sarà il catalogo delle storie pronte e la composizione del libro.</p>
     <button class="btn btn-primary" onclick="startAnother()">Crea un altro personaggio</button>
-    <p class="small" style="margin-top:18px">Modalità test: nessun login visibile. Il profilo anonimo viene mantenuto su questo browser.</p>
+    <p class="small" style="margin-top:18px">Il personaggio resta disponibile su questo browser durante questa fase di prova.</p>
   </div>
 </section>
 
@@ -568,7 +568,7 @@ async function generateCharacter(force=false){
     const character=buildCharacter();
     const response=await fetch(`${SUPABASE_URL}/functions/v1/generate-preview`,{
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY},
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
       body:JSON.stringify({
         mode:'character_preview',
         preview_id:app.previewId,
