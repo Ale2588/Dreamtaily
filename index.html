@@ -1276,6 +1276,7 @@ body{background:
 
 </div><!-- end app -->
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="data.js"></script>
 <script>
 // ══════════════════════════════════════
@@ -1318,6 +1319,7 @@ let state = {
   previewId: null,
   previewImageUrl: null,
   previewLoading: false,
+  characterAssetId: null,
 };
 
 // ══════════════════════════════════════
@@ -1786,6 +1788,12 @@ async function generatePreviewImage() {
 
     state.previewImageUrl = json.url;
 
+    // Test mode: save the character automatically through an anonymous
+    // Supabase session. A save failure never blocks the visible preview.
+    saveCurrentCharacter().catch(error => {
+      console.error('[DreamTaily] Salvataggio personaggio fallito:', error);
+    });
+
     const illuBox = document.getElementById('book-illustration');
     const illuImg = document.getElementById('book-illu-img');
     const illuStatus = document.getElementById('illu-status');
@@ -1896,7 +1904,8 @@ function resetAll() {
     email:'',
     previewId:null,
     previewImageUrl:null,
-    previewLoading:false
+    previewLoading:false,
+    characterAssetId:null
   };
 
   [
@@ -1924,6 +1933,195 @@ function resetAll() {
 // ══════════════════════════════════════
 const SUPABASE_URL = 'https://hirzbtruxvjzmcnncvmv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_baZvlGyMLBkkiOwHina6CA_HB59Lclw'; // ← replace this
+
+const PENDING_CHARACTER_KEY = 'dreamtaily.pendingCharacter.v1';
+const SAVED_CHARACTER_KEY = 'dreamtaily.savedCharacter.v1';
+
+let supabaseClient = null;
+let characterSavePromise = null;
+
+function getSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+
+  if (!window.supabase?.createClient) {
+    throw new Error('SUPABASE_CLIENT_NOT_LOADED');
+  }
+
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  });
+
+  return supabaseClient;
+}
+
+function readSessionJson(key) {
+  try {
+    const raw = sessionStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    console.warn(`[DreamTaily] Dato sessione non valido: ${key}`, error);
+    sessionStorage.removeItem(key);
+    return null;
+  }
+}
+
+function writeSessionJson(key, value) {
+  sessionStorage.setItem(key, JSON.stringify(value));
+}
+
+async function ensureAnonymousUser() {
+  const client = getSupabaseClient();
+  const { data: sessionData, error: sessionError } = await client.auth.getSession();
+
+  if (sessionError) throw sessionError;
+  if (sessionData.session?.user) return sessionData.session.user;
+
+  const { data, error } = await client.auth.signInAnonymously();
+
+  if (error) throw error;
+  if (!data.user) throw new Error('ANONYMOUS_USER_NOT_CREATED');
+
+  return data.user;
+}
+
+function buildPendingCharacter() {
+  const existing = readSessionJson(PENDING_CHARACTER_KEY);
+  const samePreview = existing?.preview_id && existing.preview_id === state.previewId;
+
+  return {
+    version: 1,
+    client_request_id: samePreview
+      ? existing.client_request_id
+      : crypto.randomUUID(),
+    created_at: samePreview
+      ? existing.created_at
+      : new Date().toISOString(),
+    preview_id: state.previewId || null,
+    preview_url: state.previewImageUrl || null,
+    name: state.protagonist?.display_name || state.name || '',
+    description: state.protagonist?.short_description || state.desc || '',
+    traits: JSON.parse(JSON.stringify(state.protagonist || {})),
+    default_style: state.styleId || 'water'
+  };
+}
+
+async function saveCurrentCharacter() {
+  if (characterSavePromise) return characterSavePromise;
+
+  characterSavePromise = (async () => {
+    const pending = buildPendingCharacter();
+    writeSessionJson(PENDING_CHARACTER_KEY, pending);
+
+    if (!pending.name) throw new Error('CHARACTER_NAME_REQUIRED');
+    if (!pending.preview_url) throw new Error('CHARACTER_PREVIEW_REQUIRED');
+
+    const user = await ensureAnonymousUser();
+    const client = getSupabaseClient();
+
+    const { data: asset, error: assetError } = await client
+      .from('character_assets')
+      .upsert({
+        profile_id: user.id,
+        name: pending.name,
+        description: pending.description,
+        traits: pending.traits,
+        character_bible: {},
+        default_style: pending.default_style,
+        status: 'ready',
+        client_request_id: pending.client_request_id
+      }, {
+        onConflict: 'profile_id,client_request_id',
+        ignoreDuplicates: false
+      })
+      .select('id,profile_id,name,description,traits,default_style,status,created_at')
+      .single();
+
+    if (assetError) throw assetError;
+
+    const { error: referenceError } = await client
+      .from('character_references')
+      .upsert({
+        character_asset_id: asset.id,
+        style: pending.default_style,
+        view_type: 'wow_preview',
+        storage_path: null,
+        public_url: pending.preview_url,
+        status: 'ready',
+        approved: false,
+        generation_metadata: {
+          source: 'legacy_generate_preview',
+          preview_id: pending.preview_id,
+          test_mode: true
+        }
+      }, {
+        onConflict: 'character_asset_id,style,view_type',
+        ignoreDuplicates: false
+      });
+
+    if (referenceError) throw referenceError;
+
+    const savedCharacter = {
+      ...asset,
+      preview_url: pending.preview_url,
+      reference_style: pending.default_style,
+      saved_at: new Date().toISOString()
+    };
+
+    state.characterAssetId = asset.id;
+    writeSessionJson(SAVED_CHARACTER_KEY, savedCharacter);
+    sessionStorage.removeItem(PENDING_CHARACTER_KEY);
+
+    console.info('[DreamTaily] Personaggio salvato:', asset.id);
+    return savedCharacter;
+  })();
+
+  try {
+    return await characterSavePromise;
+  } finally {
+    characterSavePromise = null;
+  }
+}
+
+async function listCurrentCharacters() {
+  const user = await ensureAnonymousUser();
+  const client = getSupabaseClient();
+
+  const { data, error } = await client
+    .from('character_assets')
+    .select(`
+      id,
+      name,
+      description,
+      traits,
+      default_style,
+      status,
+      created_at,
+      character_references (
+        id,
+        style,
+        view_type,
+        public_url,
+        status,
+        approved
+      )
+    `)
+    .eq('profile_id', user.id)
+    .neq('status', 'archived')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+window.DreamTailyCharacters = Object.freeze({
+  saveCurrent: saveCurrentCharacter,
+  listCurrent: listCurrentCharacters,
+  getSavedFromSession: () => readSessionJson(SAVED_CHARACTER_KEY)
+});
 
 async function supabaseInsert(table, data) {
   if (!SUPABASE_URL || SUPABASE_ANON_KEY === 'YOUR_ANON_KEY_HERE') {
@@ -1995,6 +2193,14 @@ async function submitOrder() {
   btn.textContent = 'Invio in corso…';
   hideOrderError();
 
+  if (state.previewImageUrl && !state.characterAssetId) {
+    try {
+      await saveCurrentCharacter();
+    } catch (characterError) {
+      console.warn('[DreamTaily] Ordine senza character_asset_id:', characterError);
+    }
+  }
+
   const order = {
     name:        state.name,
     description: state.desc,
@@ -2007,6 +2213,7 @@ async function submitOrder() {
     status:      'new',
     preview_id:  state.previewId,
     preview_url: state.previewImageUrl,
+    character_asset_id: state.characterAssetId,
   };
 
   try {
