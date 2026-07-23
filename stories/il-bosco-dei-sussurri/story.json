@@ -186,12 +186,12 @@
         {
           "key": "notte",
           "label": "Di notte",
-          "image_ref": "setup/atmosfera_notte.svg"
+          "image_ref": "setup/atmosfera_notte.png"
         },
         {
           "key": "tramonto",
           "label": "Al tramonto",
-          "image_ref": "setup/atmosfera_tramonto.svg"
+          "image_ref": "setup/atmosfera_tramonto.png"
         }
       ]
     }
