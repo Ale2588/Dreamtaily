@@ -339,6 +339,23 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 .story-empty-state p{color:var(--muted);max-width:560px;margin:0 auto}
 .story-actions{flex-wrap:wrap}
 
+
+.composer-panel{max-width:820px;margin:auto;padding:clamp(24px,5vw,48px)}
+.composer-progress{font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--coral-dark)}
+.composer-protagonist{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff8ef;border:1px solid var(--line);border-radius:16px;margin:18px 0}
+.composer-protagonist img{width:58px;height:58px;object-fit:cover;border-radius:14px}
+.composer-protagonist span{display:block;font-size:11px;text-transform:uppercase;color:var(--muted);font-weight:800}
+.composer-protagonist strong{font-family:'Baloo 2';font-size:20px}
+.decision-box{margin:20px 0;padding:20px;border:1px solid var(--line);border-radius:20px;background:white}
+.decision-box h2{font-family:'Baloo 2';font-size:24px;margin-bottom:14px}
+.decision-options{display:grid;gap:10px}
+.decision-option{border:2px solid var(--line);border-radius:15px;background:#fff;padding:14px;text-align:left;font-weight:800}
+.decision-option.selected{border-color:var(--coral);background:#fff5f1}
+.cast-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.cast-option{border:2px solid var(--line);border-radius:16px;background:white;padding:12px;text-align:center}
+.cast-option.selected{border-color:var(--coral);background:#fff5f1}
+.cast-option img{width:72px;height:72px;object-fit:cover;border-radius:50%;margin-bottom:8px}
+
 </style>
 </head>
 <body>
@@ -661,6 +678,37 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
   </div>
 </section>
 
+
+<section class="screen composer-screen" id="screen-composer">
+  <div class="shell">
+    <div class="topbar">
+      <button class="brand-dark" onclick="showScreen('stories')">
+        <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
+      </button>
+      <div class="phase">4 · Componi la storia</div>
+    </div>
+
+    <div class="panel composer-panel">
+      <div class="composer-progress" id="composer-progress">Passo 1</div>
+      <h1 class="step-title" id="composer-step-title">La storia comincia</h1>
+      <p class="intro" id="composer-step-summary"></p>
+
+      <div class="composer-protagonist">
+        <img id="composer-protagonist-image" alt="">
+        <div><span>Protagonista</span><strong id="composer-protagonist-name">—</strong></div>
+      </div>
+
+      <div id="composer-decision"></div>
+      <div class="error" id="composer-error"></div>
+
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="goToBook()">Vai al mio libro</button>
+        <button class="btn btn-primary" id="composer-next" onclick="advanceComposer()">Continua →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="screen book-screen" id="screen-book">
   <div class="shell">
     <div class="topbar">
@@ -727,6 +775,11 @@ const app = {
   savedCharacters:[],
   bookId:null,
   bookStories:[],
+  storyCatalog:[],
+  activeStoryDefinition:null,
+  activeBookStoryId:null,
+  currentStepKey:null,
+  compositionChoices:{},
   saving:false
 };
 
@@ -1199,37 +1252,38 @@ function useSavedCharacter(characterId){
 }
 
 
-const STORY_TEMPLATES = [
-  {
-    id:'moon-garden',
-    title:'Il giardino della luna',
-    age:'3–6 anni',
-    tone:'Meraviglia e gentilezza',
-    length:'5 capitoli',
-    description:'Una luce smarrita conduce il protagonista in un giardino che si sveglia soltanto quando tutti dormono.',
-    image:'assets/char/water/rabbit.png'
-  },
-  {
-    id:'whispering-wood',
-    title:'Il bosco dei piccoli coraggi',
-    age:'4–8 anni',
-    tone:'Coraggio e fiducia',
-    length:'5 capitoli',
-    description:'Nel bosco ogni rumore sembra enorme, finché il protagonista scopre che il coraggio può parlare a voce bassa.',
-    image:'assets/char/water/bear.png'
-  },
-  {
-    id:'cloud-library',
-    title:'La biblioteca sopra le nuvole',
-    age:'5–9 anni',
-    tone:'Curiosità e immaginazione',
-    length:'6 capitoli',
-    description:'Un libro senza finale vola via tra le nuvole. Per riportarlo a casa serviranno domande, fantasia e un nuovo amico.',
-    image:'assets/char/crayon/fox.png'
-  }
-];
+let STORY_TEMPLATES = [];
 
-function prepareStories(){
+async function loadStoryCatalog(){
+  if(STORY_TEMPLATES.length) return STORY_TEMPLATES;
+
+  try{
+    const response=await fetch('stories/catalog.json',{cache:'no-store'});
+    if(!response.ok) throw new Error(`STORY_CATALOG_HTTP_${response.status}`);
+    const catalog=await response.json();
+    STORY_TEMPLATES=catalog.map(item=>({
+      id:item.slug,
+      ...item
+    }));
+  }catch(error){
+    console.error('[DreamTaily] Story catalog error:',error);
+    STORY_TEMPLATES=[];
+    showError('story-error','Non sono riuscito a caricare il catalogo delle storie.');
+  }
+
+  return STORY_TEMPLATES;
+}
+
+async function loadStoryDefinition(story){
+  if(story._definition) return story._definition;
+  const response=await fetch(story.definition,{cache:'no-store'});
+  if(!response.ok) throw new Error(`STORY_DEFINITION_HTTP_${response.status}`);
+  story._definition=await response.json();
+  return story._definition;
+}
+
+async function prepareStories(){
+  await loadStoryCatalog();
   const name=value('name')||'Il tuo personaggio';
   const hasStories=app.bookStories.length>0;
   document.getElementById('stories-title').textContent=hasStories
@@ -1350,6 +1404,7 @@ async function loadBookStories(){
       story_slug,
       position,
       status,
+      path_choices,
       created_at,
       story_cast_assignments (
         id,
@@ -1386,7 +1441,8 @@ async function persistSelectedStory(){
         book_id:bookId,
         story_slug:story.id,
         position:nextPosition,
-        status:'draft'
+        status:'draft',
+        path_choices:{}
       })
       .select('id')
       .single();
@@ -1417,7 +1473,7 @@ async function persistSelectedStory(){
   if(touchError) throw touchError;
 
   await loadBookStories();
-  return story;
+  return {story,bookStoryId};
 }
 
 async function continueWithStory(){
@@ -1433,9 +1489,8 @@ async function continueWithStory(){
   button.textContent='Salvataggio nel libro…';
 
   try{
-    await persistSelectedStory();
-    await renderBookSummary(story);
-    showScreen('book');
+    const persisted=await persistSelectedStory();
+    await startStoryComposer(persisted.story,persisted.bookStoryId);
   }catch(error){
     console.error('[DreamTaily] Book save error:',error);
     const detail=error?.message||error?.details||error?.hint||'Errore sconosciuto';
@@ -1444,6 +1499,230 @@ async function continueWithStory(){
     button.disabled=false;
     button.textContent='Aggiungi questa storia al libro →';
   }
+}
+
+
+const CATALOG_CHARACTERS={
+  briciola:{name:'Briciola',image:'assets/char/water/rabbit.png'},
+  etto:{name:'Etto',image:'assets/char/crayon/fox.png'},
+  fiamma:{name:'Fiamma',image:'assets/char/water/bear.png'},
+  ulivo:{name:'Ulivo',image:'assets/char/paper/rabbit.png'},
+  rubens:{name:'Rubens',image:'assets/char/paper/fox.png'}
+};
+
+async function startStoryComposer(story,bookStoryId){
+  try{
+    const definition=await loadStoryDefinition(story);
+    app.activeStoryDefinition=definition;
+    app.activeBookStoryId=bookStoryId;
+    app.currentStepKey=definition.start||definition.steps?.[0]?.key;
+    const current=app.bookStories.find(item=>item.id===bookStoryId);
+    app.compositionChoices={...(current?.path_choices||{})};
+
+    document.getElementById('composer-protagonist-name').textContent=value('name')||'Il tuo personaggio';
+    document.getElementById('composer-protagonist-image').src=app.previewUrl||story.image||'';
+    renderComposerStep();
+    showScreen('composer');
+  }catch(error){
+    console.error('[DreamTaily] Composer start error:',error);
+    showError('story-error','Non sono riuscito ad aprire la composizione della storia.');
+  }
+}
+
+function getCurrentComposerStep(){
+  return app.activeStoryDefinition?.steps?.find(step=>step.key===app.currentStepKey)||null;
+}
+
+function renderComposerStep(){
+  const step=getCurrentComposerStep();
+  if(!step){
+    finishStoryComposer();
+    return;
+  }
+
+  const steps=app.activeStoryDefinition.steps||[];
+  const index=Math.max(0,steps.findIndex(item=>item.key===step.key));
+  document.getElementById('composer-progress').textContent=`Capitolo ${step.chapter||index+1}`;
+  document.getElementById('composer-step-title').textContent=step.title||'La storia continua';
+  document.getElementById('composer-step-summary').textContent=
+    String(step.composer_summary||'').replaceAll('[Nome]',value('name')||'il protagonista');
+
+  const container=document.getElementById('composer-decision');
+  const nextButton=document.getElementById('composer-next');
+  showError('composer-error',null);
+
+  if(!step.decision){
+    container.innerHTML='';
+    nextButton.disabled=false;
+    nextButton.textContent=step.next?'Continua →':'Concludi la storia →';
+    return;
+  }
+
+  const decision=step.decision;
+  const saved=app.compositionChoices[decision.key]||null;
+  const prompt=String(decision.prompt||'Scegli').replaceAll('[Nome]',value('name')||'il protagonista');
+
+  if(decision.type==='branch'){
+    container.innerHTML=`
+      <div class="decision-box">
+        <h2>${escapeHtml(prompt)}</h2>
+        <div class="decision-options">
+          ${(decision.options||[]).map(option=>`
+            <button type="button"
+              class="decision-option ${saved===option.key?'selected':''}"
+              onclick="selectBranchChoice('${escapeHtml(decision.key)}','${escapeHtml(option.key)}')">
+              ${escapeHtml(option.label)}
+            </button>
+          `).join('')}
+        </div>
+      </div>`;
+    nextButton.disabled=!saved;
+    nextButton.textContent='Continua con questa scelta →';
+    return;
+  }
+
+  if(decision.type==='cast'){
+    const roster=decision.catalog_roster||[];
+    const allowsAssets=(decision.allowed_sources||[]).includes('character_asset');
+    const savedValue=saved?.value||null;
+    const savedSource=saved?.source||null;
+
+    const savedCharacters=allowsAssets?app.savedCharacters.filter(item=>item.id!==app.characterAssetId):[];
+    container.innerHTML=`
+      <div class="decision-box">
+        <h2>${escapeHtml(prompt)}</h2>
+        <div class="cast-options">
+          ${savedCharacters.map(character=>`
+            <button type="button"
+              class="cast-option ${savedSource==='character_asset'&&savedValue===character.id?'selected':''}"
+              onclick="selectCastChoice('${escapeHtml(decision.key)}','character_asset','${character.id}')">
+              <img src="${character.image_url||'assets/char/water/rabbit.png'}" alt="">
+              <strong>${escapeHtml(character.name)}</strong>
+            </button>
+          `).join('')}
+          ${roster.map(slug=>{
+            const character=CATALOG_CHARACTERS[slug]||{name:slug,image:'assets/char/water/rabbit.png'};
+            return `
+            <button type="button"
+              class="cast-option ${savedSource==='catalog_character'&&savedValue===slug?'selected':''}"
+              onclick="selectCastChoice('${escapeHtml(decision.key)}','catalog_character','${escapeHtml(slug)}')">
+              <img src="${character.image}" alt="">
+              <strong>${escapeHtml(character.name)}</strong>
+            </button>`;
+          }).join('')}
+          ${decision.required?'':`
+            <button type="button"
+              class="cast-option ${savedSource==='none'?'selected':''}"
+              onclick="selectCastChoice('${escapeHtml(decision.key)}','none','none')">
+              <div style="font-size:42px;margin:10px">—</div>
+              <strong>Nessun aiutante</strong>
+            </button>`}
+        </div>
+      </div>`;
+    nextButton.disabled=decision.required&&!saved;
+    nextButton.textContent='Continua →';
+  }
+}
+
+function selectBranchChoice(decisionKey,optionKey){
+  app.compositionChoices[decisionKey]=optionKey;
+  renderComposerStep();
+}
+
+function selectCastChoice(decisionKey,source,value){
+  app.compositionChoices[decisionKey]={source,value};
+  renderComposerStep();
+}
+
+async function saveComposerDecision(step){
+  if(!step?.decision) return;
+  const decision=step.decision;
+  const choice=app.compositionChoices[decision.key];
+  const client=getSupabase();
+
+  if(decision.type==='branch'){
+    const {error}=await client
+      .from('book_stories')
+      .update({
+        path_choices:app.compositionChoices,
+        updated_at:new Date().toISOString()
+      })
+      .eq('id',app.activeBookStoryId);
+    if(error) throw error;
+    return;
+  }
+
+  if(decision.type==='cast'){
+    if(choice?.source==='none'){
+      const {error}=await client
+        .from('story_cast_assignments')
+        .delete()
+        .eq('book_story_id',app.activeBookStoryId)
+        .eq('slot_key',decision.key);
+      if(error) throw error;
+      return;
+    }
+
+    const payload={
+      book_story_id:app.activeBookStoryId,
+      slot_key:decision.key,
+      character_asset_id:choice?.source==='character_asset'?choice.value:null,
+      catalog_character_id:choice?.source==='catalog_character'?choice.value:null
+    };
+    const {error}=await client
+      .from('story_cast_assignments')
+      .upsert(payload,{onConflict:'book_story_id,slot_key'});
+    if(error) throw error;
+  }
+}
+
+async function advanceComposer(){
+  const step=getCurrentComposerStep();
+  if(!step){
+    await finishStoryComposer();
+    return;
+  }
+
+  const decision=step.decision;
+  const choice=decision?app.compositionChoices[decision.key]:null;
+  if(decision?.required&&!choice){
+    showError('composer-error','Completa questa scelta per continuare.');
+    return;
+  }
+
+  const button=document.getElementById('composer-next');
+  button.disabled=true;
+  button.textContent='Salvataggio…';
+
+  try{
+    await saveComposerDecision(step);
+
+    let next=step.next??null;
+    if(decision?.type==='branch'){
+      const selected=(decision.options||[]).find(option=>option.key===choice);
+      next=selected?.next??null;
+    }
+
+    if(!next){
+      await finishStoryComposer();
+      return;
+    }
+
+    app.currentStepKey=next;
+    renderComposerStep();
+  }catch(error){
+    console.error('[DreamTaily] Composer save error:',error);
+    showError('composer-error','Non sono riuscito a salvare la scelta.');
+  }finally{
+    button.disabled=false;
+  }
+}
+
+async function finishStoryComposer(){
+  await loadBookStories();
+  const story=STORY_TEMPLATES.find(item=>item.id===app.activeStoryDefinition?.slug);
+  await renderBookSummary(story);
+  showScreen('book');
 }
 
 async function renderBookSummary(preferredStory=null){
@@ -1468,7 +1747,7 @@ async function renderBookSummary(preferredStory=null){
       <div class="book-story-item">
         <div>
           <h3>${index+1}. ${escapeHtml(story?.title||bookStory.story_slug)}</h3>
-          <p>${escapeHtml(story?.age||'')} · protagonista assegnato ${protagonist?'✓':'—'}</p>
+          <p>${escapeHtml(story?.age||'')} · protagonista ${protagonist?'✓':'—'} · scelte ${Object.keys(bookStory.path_choices||{}).length}</p>
         </div>
         <div class="book-story-item-actions">
           <button class="icon-btn" type="button" title="Rimuovi storia" onclick="removeBookStory('${bookStory.id}')">×</button>
@@ -1613,7 +1892,7 @@ function startAnother(){
   selectStyle('water');selectType('real_person');showScreen('creator');
 }
 
-document.addEventListener('DOMContentLoaded',()=>{detectDraftBook()});
+document.addEventListener('DOMContentLoaded',async()=>{await loadStoryCatalog();detectDraftBook()});
 window.DreamTailyCharacterFlow={
   generate:generateCharacter,
   save:saveCharacter,

@@ -1,0 +1,123 @@
+{
+  "slug": "il-bosco-dei-sussurri",
+  "version": 1,
+  "title": "Il bosco dei sussurri",
+  "age_range": "4–8 anni",
+  "tone": "Coraggio e ascolto",
+  "summary": "Una campanella suona oltre il sentiero. Per capire chi la sta cercando bisogna entrare nel bosco e ascoltare con calma.",
+  "cover_image": "assets/char/water/bear.png",
+  "max_decisions": 3,
+  "start": "s1",
+  "steps": [
+    {
+      "key": "s1",
+      "chapter": 1,
+      "title": "La campanella",
+      "composer_summary": "Al limitare del bosco, una piccola campanella suona anche se non c’è vento.",
+      "content_ref": "chapters/s1.md",
+      "decision": null,
+      "next": "s2"
+    },
+    {
+      "key": "s2",
+      "chapter": 2,
+      "title": "Il primo sentiero",
+      "composer_summary": "Il sentiero si divide: da una parte passa tra le felci, dall’altra costeggia il ruscello.",
+      "content_ref": "chapters/s2.md",
+      "decision": {
+        "type": "branch",
+        "key": "d_sentiero",
+        "prompt": "Da che parte prosegue [Nome]?",
+        "options": [
+          {
+            "key": "felci",
+            "label": "Tra le felci",
+            "next": "s3_felci"
+          },
+          {
+            "key": "ruscello",
+            "label": "Lungo il ruscello",
+            "next": "s3_ruscello"
+          }
+        ]
+      }
+    },
+    {
+      "key": "s3_felci",
+      "chapter": 3,
+      "title": "Qualcuno tra le foglie",
+      "composer_summary": "Tra le foglie si sente un fruscio. Qualcuno conosce la strada, ma non vuole camminare da solo.",
+      "content_ref": "chapters/s3_felci.md",
+      "decision": {
+        "type": "cast",
+        "key": "helper",
+        "prompt": "Chi accompagna [Nome]?",
+        "required": true,
+        "allowed_sources": [
+          "character_asset",
+          "catalog_character"
+        ],
+        "catalog_roster": [
+          "briciola",
+          "etto",
+          "fiamma"
+        ]
+      },
+      "next": "s4"
+    },
+    {
+      "key": "s3_ruscello",
+      "chapter": 3,
+      "title": "Le impronte nell’acqua",
+      "composer_summary": "Accanto al ruscello compaiono piccole impronte. Il loro proprietario sembra sapere dove porta il suono.",
+      "content_ref": "chapters/s3_ruscello.md",
+      "decision": {
+        "type": "cast",
+        "key": "helper",
+        "prompt": "Chi si unisce a [Nome]?",
+        "required": true,
+        "allowed_sources": [
+          "catalog_character"
+        ],
+        "catalog_roster": [
+          "ulivo",
+          "briciola"
+        ]
+      },
+      "next": "s4"
+    },
+    {
+      "key": "s4",
+      "chapter": 4,
+      "title": "La radura silenziosa",
+      "composer_summary": "Nella radura la campanella tace. Per ritrovarla serve smettere di correre e ascoltare davvero.",
+      "content_ref": "chapters/s4.md",
+      "decision": null,
+      "next": "s5"
+    },
+    {
+      "key": "s5",
+      "chapter": 5,
+      "title": "Il ritorno",
+      "composer_summary": "La campanella torna al suo posto. Resta da decidere come salutare il bosco.",
+      "content_ref": "chapters/s5.md",
+      "decision": {
+        "type": "branch",
+        "key": "d_finale",
+        "prompt": "Come termina l’avventura?",
+        "options": [
+          {
+            "key": "promessa",
+            "label": "Con la promessa di tornare",
+            "next": null
+          },
+          {
+            "key": "festa",
+            "label": "Con una piccola festa nella radura",
+            "next": null
+          }
+        ]
+      }
+    }
+  ]
+}

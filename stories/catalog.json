@@ -1,0 +1,22 @@
+[
+  {
+    "slug": "il-bosco-dei-sussurri",
+    "title": "Il bosco dei sussurri",
+    "age": "4–8 anni",
+    "tone": "Coraggio e ascolto",
+    "length": "5 capitoli",
+    "description": "Una campanella suona oltre il sentiero. Per capire chi la sta cercando bisogna entrare nel bosco e ascoltare con calma.",
+    "image": "assets/char/water/bear.png",
+    "definition": "stories/il-bosco-dei-sussurri/story.json"
+  },
+  {
+    "slug": "la-lanterna-sul-molo",
+    "title": "La lanterna sul molo",
+    "age": "5–9 anni",
+    "tone": "Curiosità e amicizia",
+    "length": "6 capitoli",
+    "description": "Una lanterna resta accesa sul vecchio molo anche quando il guardiano è già rientrato. Qualcuno, forse, sta aspettando un segnale.",
+    "image": "assets/char/crayon/fox.png",
+    "definition": "stories/la-lanterna-sul-molo/story.json"
+  }
+]
