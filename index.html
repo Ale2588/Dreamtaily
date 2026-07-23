@@ -788,11 +788,23 @@ function getSupabase(){
 
 async function ensureUser(){
   const client=getSupabase();
-  const {data:{user},error:userError}=await client.auth.getUser();
-  if(userError && userError.status!==401) throw userError;
-  if(user) return user;
+
+  const {data:{session},error:sessionError}=await client.auth.getSession();
+  if(!sessionError&&session?.user&&session?.access_token){
+    return session.user;
+  }
+
+  // A stale or missing local session must not block anonymous sign-in.
+  if(sessionError){
+    console.warn('[DreamTaily] Session reset:',sessionError);
+    try{ await client.auth.signOut({scope:'local'}); }catch(_error){}
+  }
+
   const {data,error}=await client.auth.signInAnonymously();
   if(error) throw error;
+  if(!data?.user||!data?.session?.access_token){
+    throw new Error('SESSIONE_ANONIMA_NON_CREATA');
+  }
   return data.user;
 }
 
@@ -815,7 +827,16 @@ async function generateCharacter(force=false){
   try{
     await ensureUser();
     const client=getSupabase();
-    const {data:{session},error:sessionError}=await client.auth.getSession();
+    let {data:{session},error:sessionError}=await client.auth.getSession();
+
+    if(sessionError||!session?.access_token){
+      await client.auth.signOut({scope:'local'}).catch(()=>{});
+      await ensureUser();
+      const refreshed=await client.auth.getSession();
+      session=refreshed.data.session;
+      sessionError=refreshed.error;
+    }
+
     if(sessionError) throw sessionError;
     if(!session?.access_token) throw new Error('SESSIONE_ANONIMA_NON_DISPONIBILE');
 
@@ -859,7 +880,9 @@ async function generateCharacter(force=false){
     clearTimeout(timeout);
     showError('creator-error',error.name==='AbortError'
       ?'La generazione sta impiegando troppo tempo. Riprova.'
-      :'Non sono riuscito a creare il personaggio. Riprova tra un momento.');
+      :(error?.name==='AuthSessionMissingError'||String(error?.message||'').includes('SESSIONE_ANONIMA')
+        ?'La sessione anonima non è disponibile. Ricarica la pagina e riprova.'
+        :'Non sono riuscito a creare il personaggio. Riprova tra un momento.'));
     console.error('[DreamTaily] Preview error:',error);
   }finally{
     loader.classList.remove('visible');
