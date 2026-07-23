@@ -761,6 +761,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 </section>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="story-validator.js"></script>
 <script>
 const SUPABASE_URL = 'https://hirzbtruxvjzmcnncvmv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_baZvlGyMLBkkiOwHina6CA_HB59Lclw';
@@ -1279,6 +1280,14 @@ async function loadStoryDefinition(story){
   const response=await fetch(story.definition,{cache:'no-store'});
   if(!response.ok) throw new Error(`STORY_DEFINITION_HTTP_${response.status}`);
   story._definition=await response.json();
+  const validation=window.DreamTailyStoryValidator?.validateStory(story._definition);
+  if(validation&&!validation.valid){
+    console.error('[DreamTaily] Story validation errors:',validation.errors);
+    throw new Error('STORY_DEFINITION_INVALID');
+  }
+  if(validation?.warnings?.length){
+    console.warn('[DreamTaily] Story validation warnings:',validation.warnings);
+  }
   return story._definition;
 }
 
@@ -1600,7 +1609,8 @@ function renderComposerStep(){
               <strong>${escapeHtml(character.name)}</strong>
             </button>
           `).join('')}
-          ${roster.map(slug=>{
+          ${roster.map(entry=>{
+            const slug=typeof entry==='string'?entry:entry.key;
             const character=CATALOG_CHARACTERS[slug]||{name:slug,image:'assets/char/water/rabbit.png'};
             return `
             <button type="button"
@@ -1630,7 +1640,14 @@ function selectBranchChoice(decisionKey,optionKey){
 }
 
 function selectCastChoice(decisionKey,source,value){
-  app.compositionChoices[decisionKey]={source,value};
+  const step=getCurrentComposerStep();
+  const roster=step?.decision?.catalog_roster||[];
+  const rosterEntry=roster.find(entry=>(typeof entry==='string'?entry:entry.key)===value);
+  app.compositionChoices[decisionKey]={
+    source,
+    value,
+    entrance_ref:typeof rosterEntry==='object'?rosterEntry.entrance_ref:null
+  };
   renderComposerStep();
 }
 
@@ -1644,7 +1661,9 @@ async function saveComposerDecision(step){
     const {error}=await client
       .from('book_stories')
       .update({
-        path_choices:app.compositionChoices,
+        path_choices:Object.fromEntries(
+          Object.entries(app.compositionChoices).filter(([,value])=>typeof value==='string')
+        ),
         updated_at:new Date().toISOString()
       })
       .eq('id',app.activeBookStoryId);
@@ -1716,6 +1735,36 @@ async function advanceComposer(){
   }finally{
     button.disabled=false;
   }
+}
+
+
+function resolveStoryText(text,replacements={}){
+  return String(text||'')
+    .replaceAll('[Nome]',replacements.name||value('name')||'il protagonista')
+    .replaceAll('[Aiutante]',replacements.helper||'l’aiutante')
+    .replaceAll('[ENTRATA_AIUTANTE]',replacements.helperEntrance||'');
+}
+
+function resolveStoryPath(definition,pathChoices={}){
+  const result=[];
+  const byKey=new Map((definition?.steps||[]).map(step=>[step.key,step]));
+  let key=definition?.start||null;
+  const visited=new Set();
+
+  while(key&&byKey.has(key)&&!visited.has(key)){
+    visited.add(key);
+    const step=byKey.get(key);
+    result.push(step.key);
+
+    if(step.decision?.type==='branch'){
+      const selected=pathChoices[step.decision.key];
+      const option=(step.decision.options||[]).find(item=>item.key===selected);
+      key=option?.next||null;
+    }else{
+      key=step.next||null;
+    }
+  }
+  return result;
 }
 
 async function finishStoryComposer(){

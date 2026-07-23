@@ -1,6 +1,6 @@
 {
   "slug": "la-lanterna-sul-molo",
-  "version": 1,
+  "version": 2,
   "title": "La lanterna sul molo",
   "age_range": "5–9 anni",
   "tone": "Curiosità e amicizia",
@@ -58,8 +58,14 @@
           "catalog_character"
         ],
         "catalog_roster": [
-          "rubens",
-          "fiamma"
+          {
+            "key": "rubens",
+            "entrance_ref": "entrances/s3_corda_rubens.md"
+          },
+          {
+            "key": "fiamma",
+            "entrance_ref": "entrances/s3_corda_fiamma.md"
+          }
         ]
       },
       "next": "s4"
@@ -80,9 +86,18 @@
           "catalog_character"
         ],
         "catalog_roster": [
-          "etto",
-          "ulivo",
-          "rubens"
+          {
+            "key": "etto",
+            "entrance_ref": "entrances/s3_foglio_etto.md"
+          },
+          {
+            "key": "ulivo",
+            "entrance_ref": "entrances/s3_foglio_ulivo.md"
+          },
+          {
+            "key": "rubens",
+            "entrance_ref": "entrances/s3_foglio_rubens.md"
+          }
         ]
       },
       "next": "s4"
@@ -143,20 +158,51 @@
           {
             "key": "guardiano",
             "label": "Dal guardiano del porto",
-            "next": null
+            "next": "s7_guardiano"
           },
           {
             "key": "casa",
             "label": "Nella Casa delle maree",
-            "next": null
+            "next": "s7_casa"
           },
           {
             "key": "museo",
             "label": "Nel piccolo museo del paese",
-            "next": null
+            "next": "s7_museo"
           }
         ]
       }
+    },
+    {
+      "key": "s7_guardiano",
+      "chapter": 7,
+      "title": "La chiave al guardiano",
+      "composer_summary": "[Nome] affida la chiave al guardiano del porto, che promette di custodirla con cura.",
+      "content_ref": "chapters/s7_guardiano.md",
+      "decision": null,
+      "next": null
+    },
+    {
+      "key": "s7_casa",
+      "chapter": 7,
+      "title": "La Casa delle maree",
+      "composer_summary": "[Nome] riporta la chiave nella Casa delle maree, dove finalmente torna al suo posto.",
+      "content_ref": "chapters/s7_casa.md",
+      "decision": null,
+      "next": null
+    },
+    {
+      "key": "s7_museo",
+      "chapter": 7,
+      "title": "Il piccolo museo",
+      "composer_summary": "[Nome] consegna la chiave al museo del paese, così tutti potranno conoscere la sua storia.",
+      "content_ref": "chapters/s7_museo.md",
+      "decision": null,
+      "next": null
     }
+  ],
+  "placeholders": [
+    "[Nome]",
+    "[Aiutante]"
   ]
 }
