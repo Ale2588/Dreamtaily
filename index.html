@@ -357,6 +357,27 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 .cast-option img{width:72px;height:72px;object-fit:cover;border-radius:50%;margin-bottom:8px}
 
 .setup-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:24px 0}.setup-option{border:2px solid var(--line);border-radius:18px;background:white;padding:10px;text-align:left}.setup-option.selected{border-color:var(--coral);background:#fff5f1}.setup-option img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:12px;display:block;margin-bottom:10px}.setup-option strong{display:block;font-family:'Baloo 2';font-size:20px;padding:0 4px 4px}
+
+.story-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:24px 0}
+.board-slot{min-height:220px;border:2px dashed var(--line);border-radius:20px;background:#fff;padding:16px;display:flex;flex-direction:column;gap:12px;transition:.2s ease}
+.board-slot.drag-over{border-color:var(--coral);background:#fff5f1;transform:translateY(-2px)}
+.board-slot.locked{background:#faf7f2;border-style:solid}
+.board-slot-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:900;color:var(--muted)}
+.board-slot-title{font-family:'Baloo 2';font-size:24px;line-height:1.1}
+.board-slot-help{font-size:13px;color:var(--muted)}
+.board-card{border:2px solid var(--line);border-radius:16px;background:#fff;padding:10px;cursor:grab;text-align:left}
+.board-card:active{cursor:grabbing}
+.board-card.selected{border-color:var(--coral);background:#fff5f1}
+.board-card img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:12px;display:block;margin-bottom:8px}
+.board-card strong{display:block;font-family:'Baloo 2';font-size:18px}
+.board-card small{display:block;color:var(--muted);margin-top:4px}
+.board-assigned{display:flex;align-items:center;gap:12px;border:2px solid var(--coral);border-radius:16px;background:#fff5f1;padding:12px}
+.board-assigned img{width:68px;height:68px;object-fit:cover;border-radius:14px}
+.board-assigned strong{font-family:'Baloo 2';font-size:20px}
+.board-pool{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:20px}
+.board-pool-title{font-family:'Baloo 2';font-size:22px;margin-top:20px}
+@media(max-width:760px){.story-board{grid-template-columns:1fr}.board-card{cursor:pointer}}
+
 </style>
 </head>
 <body>
@@ -681,7 +702,58 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 
 
 
-<section class="screen composer-screen" id="screen-setup"><div class="shell"><div class="topbar"><button class="brand-dark" onclick="showScreen('stories')"><img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span></button><div class="phase">4 · Prepara la storia</div></div><div class="panel composer-panel"><div class="composer-progress" id="setup-progress">Prima scelta</div><h1 class="step-title">Prima di cominciare</h1><p class="intro" id="setup-prompt"></p><div id="setup-options" class="setup-options"></div><div class="error" id="setup-error"></div><div class="form-actions"><button class="btn btn-ghost" onclick="goToBook()">Vai al mio libro</button><button class="btn btn-primary" id="setup-next" onclick="advanceSetup()">Continua →</button></div></div></div></section>
+
+<section class="screen composer-screen" id="screen-setup">
+  <div class="shell">
+    <div class="topbar">
+      <button class="brand-dark" onclick="showScreen('stories')">
+        <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
+      </button>
+      <div class="phase">4 · Prepara la storia</div>
+    </div>
+    <div class="panel composer-panel">
+      <div class="composer-progress" id="setup-progress">Preparazione</div>
+      <h1 class="step-title">Prepara la tua storia</h1>
+      <p class="intro">Trascina una carta nello slot oppure toccala e poi tocca lo slot.</p>
+
+      <div class="story-board">
+        <div class="board-slot locked">
+          <div class="board-slot-label">Personaggio</div>
+          <div class="board-slot-title">Protagonista</div>
+          <div id="board-protagonist"></div>
+          <div class="board-slot-help">È il personaggio scelto prima del catalogo.</div>
+        </div>
+
+        <div class="board-slot" id="board-slot-setup"
+          ondragover="handleBoardDragOver(event)"
+          ondragleave="handleBoardDragLeave(event)"
+          ondrop="handleBoardDrop(event)"
+          onclick="handleBoardSlotTap()">
+          <div class="board-slot-label">Atmosfera</div>
+          <div class="board-slot-title" id="board-setup-title">Scegli l’atmosfera</div>
+          <div id="board-setup-assigned"></div>
+          <div class="board-slot-help">Cambia luce e sensazioni, non gli eventi.</div>
+        </div>
+
+        <div class="board-slot locked">
+          <div class="board-slot-label">Aiutante</div>
+          <div class="board-slot-title">Durante la storia</div>
+          <div class="board-slot-help">Lo sceglierai quando entrerà davvero nella scena.</div>
+        </div>
+      </div>
+
+      <div class="board-pool-title">Carte disponibili</div>
+      <div id="board-card-pool" class="board-pool"></div>
+      <div class="error" id="setup-error"></div>
+
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="goToBook()">Vai al mio libro</button>
+        <button class="btn btn-primary" id="setup-next" onclick="advanceSetup()">Inizia la storia →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="screen composer-screen" id="screen-composer">
   <div class="shell">
     <div class="topbar">
@@ -786,6 +858,7 @@ const app = {
   currentStepKey:null,
   setupIndex:0,
   setupChoices:{},
+  boardSelectedCard:null,
   compositionChoices:{},
   saving:false
 };
@@ -1532,8 +1605,107 @@ const CATALOG_CHARACTERS={
 
 async function startStoryComposer(story,bookStoryId){try{const definition=await loadStoryDefinition(story);app.activeStoryDefinition=definition;app.activeBookStoryId=bookStoryId;const current=app.bookStories.find(item=>item.id===bookStoryId);app.compositionChoices={...(current?.path_choices||{})};app.setupChoices={};for(const item of definition.setup||[]){if(app.compositionChoices[item.key])app.setupChoices[item.key]=app.compositionChoices[item.key]}await ensureBookCharactersHydrated();const protagonist=getStoryProtagonistAssignment(current);const pc=getSavedCharacterById(protagonist?.character_asset_id);document.getElementById('composer-protagonist-name').textContent=pc?.name||value('name')||'Il tuo personaggio';document.getElementById('composer-protagonist-image').src=pc?.image_url||app.previewUrl||story.image||'';if((definition.setup||[]).length){app.setupIndex=0;renderSetupStep();showScreen('setup')}else{app.currentStepKey=resolveEffectiveStart(definition,{});renderComposerStep();showScreen('composer')}}catch(error){console.error('[DreamTaily] Composer start error:',error);showError('story-error','Non sono riuscito ad aprire la composizione della storia.')}}
 function resolveEffectiveStart(definition,choices={}){const sb=(definition?.setup||[]).find(x=>x.type==='branch');if(!sb)return definition?.start||definition?.steps?.[0]?.key||null;return (sb.options||[]).find(o=>o.key===choices[sb.key])?.start||definition?.start||null}
-function renderSetupStep(){const setup=app.activeStoryDefinition?.setup||[],item=setup[app.setupIndex];if(!item)return beginStoryAfterSetup();const current=app.setupChoices[item.key]||null;document.getElementById('setup-progress').textContent=`Scelta ${app.setupIndex+1} di ${setup.length}`;document.getElementById('setup-prompt').textContent=String(item.prompt||'Scegli').replaceAll('[Nome]',value('name')||'il protagonista');document.getElementById('setup-options').innerHTML=(item.options||[]).map(o=>`<button type="button" class="setup-option ${current===o.key?'selected':''}" onclick="selectSetupChoice('${escapeHtml(item.key)}','${escapeHtml(o.key)}')"><img src="${escapeHtml(o.image_ref||'')}" alt=""><strong>${escapeHtml(o.label)}</strong></button>`).join('');const b=document.getElementById('setup-next');b.disabled=!current;b.textContent=app.setupIndex===setup.length-1?'Inizia la storia →':'Continua →';showError('setup-error',null)}
-function selectSetupChoice(key,val){app.setupChoices[key]=val;app.compositionChoices[key]=val;renderSetupStep()}
+
+function renderSetupStep(){
+  const setup=app.activeStoryDefinition?.setup||[];
+  const item=setup[app.setupIndex];
+
+  const protagonistName=document.getElementById('composer-protagonist-name')?.textContent||value('name')||'Il tuo personaggio';
+  const protagonistImage=document.getElementById('composer-protagonist-image')?.src||app.previewUrl||'';
+  document.getElementById('board-protagonist').innerHTML=`
+    <div class="board-assigned">
+      <img src="${protagonistImage}" alt="">
+      <div><strong>${escapeHtml(protagonistName)}</strong><small>Protagonista assegnato</small></div>
+    </div>`;
+
+  const assigned=document.getElementById('board-setup-assigned');
+  const pool=document.getElementById('board-card-pool');
+  const button=document.getElementById('setup-next');
+
+  if(!item){
+    assigned.innerHTML='<div class="board-slot-help">Nessuna scelta iniziale richiesta.</div>';
+    pool.innerHTML='';
+    button.disabled=false;
+    return;
+  }
+
+  document.getElementById('setup-progress').textContent=`Scelta ${app.setupIndex+1} di ${setup.length}`;
+  document.getElementById('board-setup-title').textContent=item.prompt||'Scegli';
+  const selected=app.setupChoices[item.key]||null;
+  const selectedOption=(item.options||[]).find(option=>option.key===selected);
+
+  assigned.innerHTML=selectedOption?`
+    <div class="board-assigned">
+      <img src="${escapeHtml(selectedOption.image_ref||'')}" alt="">
+      <div><strong>${escapeHtml(selectedOption.label)}</strong><small>Scelta assegnata</small></div>
+    </div>`:'<div class="board-slot-help">Trascina qui una carta.</div>';
+
+  pool.innerHTML=(item.options||[]).map(option=>`
+    <button type="button"
+      class="board-card ${selected===option.key?'selected':''}"
+      draggable="true"
+      data-board-key="${escapeHtml(item.key)}"
+      data-board-value="${escapeHtml(option.key)}"
+      ondragstart="handleBoardDragStart(event,'${escapeHtml(item.key)}','${escapeHtml(option.key)}')"
+      onclick="selectBoardCard('${escapeHtml(item.key)}','${escapeHtml(option.key)}')">
+      <img src="${escapeHtml(option.image_ref||'')}" alt="">
+      <strong>${escapeHtml(option.label)}</strong>
+      <small>${item.type==='variant'?'Atmosfera':'Punto di partenza'}</small>
+    </button>
+  `).join('');
+
+  button.disabled=!selected;
+  button.textContent=app.setupIndex===setup.length-1?'Inizia la storia →':'Continua →';
+  showError('setup-error',null);
+}
+
+function selectBoardCard(key,value){
+  app.boardSelectedCard={key,value};
+  document.querySelectorAll('.board-card').forEach(card=>{
+    card.classList.toggle('selected',card.dataset.boardKey===key&&card.dataset.boardValue===value);
+  });
+}
+
+function handleBoardSlotTap(){
+  if(!app.boardSelectedCard) return;
+  assignBoardCard(app.boardSelectedCard.key,app.boardSelectedCard.value);
+}
+
+function handleBoardDragStart(event,key,value){
+  app.boardSelectedCard={key,value};
+  event.dataTransfer?.setData('application/json',JSON.stringify({key,value}));
+  if(event.dataTransfer) event.dataTransfer.effectAllowed='move';
+}
+
+function handleBoardDragOver(event){
+  event.preventDefault();
+  event.currentTarget.classList.add('drag-over');
+}
+
+function handleBoardDragLeave(event){
+  event.currentTarget.classList.remove('drag-over');
+}
+
+function handleBoardDrop(event){
+  event.preventDefault();
+  event.currentTarget.classList.remove('drag-over');
+  let payload=app.boardSelectedCard;
+  try{
+    const raw=event.dataTransfer?.getData('application/json');
+    if(raw) payload=JSON.parse(raw);
+  }catch(_error){}
+  if(payload) assignBoardCard(payload.key,payload.value);
+}
+
+function assignBoardCard(key,value){
+  const item=(app.activeStoryDefinition?.setup||[])[app.setupIndex];
+  if(!item||item.key!==key) return;
+  app.setupChoices[key]=value;
+  app.compositionChoices[key]=value;
+  app.boardSelectedCard=null;
+  renderSetupStep();
+}
+
 async function persistPathChoices(){const path=Object.fromEntries(Object.entries(app.compositionChoices).filter(([,v])=>typeof v==='string'));const{error}=await getSupabase().from('book_stories').update({path_choices:path,updated_at:new Date().toISOString()}).eq('id',app.activeBookStoryId);if(error)throw error}
 async function advanceSetup(){const setup=app.activeStoryDefinition?.setup||[],item=setup[app.setupIndex];if(!item)return beginStoryAfterSetup();if(!app.setupChoices[item.key])return showError('setup-error','Scegli un’opzione per continuare.');const b=document.getElementById('setup-next');b.disabled=true;b.textContent='Salvataggio…';try{await persistPathChoices();app.setupIndex+=1;if(app.setupIndex>=setup.length)await beginStoryAfterSetup();else renderSetupStep()}catch(error){console.error('[DreamTaily] Setup save error:',error);showError('setup-error','Non sono riuscito a salvare la scelta.')}finally{b.disabled=false}}
 async function beginStoryAfterSetup(){app.currentStepKey=resolveEffectiveStart(app.activeStoryDefinition,app.setupChoices);renderComposerStep();showScreen('composer')}
