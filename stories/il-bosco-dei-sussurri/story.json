@@ -186,12 +186,12 @@
         {
           "key": "notte",
           "label": "Di notte",
-          "image_ref": "stories/il-bosco-dei-sussurri/setup/atmosfera_notte.png"
+          "image_ref": "setup/atmosfera_notte.png"
         },
         {
           "key": "tramonto",
           "label": "Al tramonto",
-          "image_ref": "stories/il-bosco-dei-sussurri/setup/atmosfera_tramonto.png"
+          "image_ref": "atmosfera_tramonto.png"
         }
       ]
     }
