@@ -1,6 +1,6 @@
 {
   "slug": "la-lanterna-sul-molo",
-  "version": 2,
+  "version": 3,
   "title": "La lanterna sul molo",
   "age_range": "5–9 anni",
   "tone": "Curiosità e amicizia",
@@ -204,5 +204,6 @@
   "placeholders": [
     "[Nome]",
     "[Aiutante]"
-  ]
+  ],
+  "setup": []
 }

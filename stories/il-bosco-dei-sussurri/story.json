@@ -1,6 +1,6 @@
 {
   "slug": "il-bosco-dei-sussurri",
-  "version": 2,
+  "version": 3,
   "title": "Il bosco dei sussurri",
   "age_range": "4–8 anni",
   "tone": "Coraggio e ascolto",
@@ -8,7 +8,10 @@
   "cover_image": "assets/char/water/bear.png",
   "max_decisions": 3,
   "start": "s1",
-  "placeholders": ["[Nome]", "[Aiutante]"],
+  "placeholders": [
+    "[Nome]",
+    "[Aiutante]"
+  ],
   "steps": [
     {
       "key": "s1",
@@ -17,7 +20,13 @@
       "composer_summary": "Al limitare del bosco, una piccola campanella suona anche se non c'è vento.",
       "content_ref": "chapters/s1.md",
       "decision": null,
-      "next": "s2"
+      "next": "s2",
+      "variant_refs": {
+        "atmosfera": {
+          "notte": "chapters/s1.atmosfera.notte.md",
+          "tramonto": "chapters/s1.atmosfera.tramonto.md"
+        }
+      }
     },
     {
       "key": "s2",
@@ -30,9 +39,23 @@
         "key": "d_sentiero",
         "prompt": "Da che parte prosegue [Nome]?",
         "options": [
-          { "key": "felci", "label": "Tra le felci", "next": "s3_felci" },
-          { "key": "ruscello", "label": "Lungo il ruscello", "next": "s3_ruscello" }
+          {
+            "key": "felci",
+            "label": "Tra le felci",
+            "next": "s3_felci"
+          },
+          {
+            "key": "ruscello",
+            "label": "Lungo il ruscello",
+            "next": "s3_ruscello"
+          }
         ]
+      },
+      "variant_refs": {
+        "atmosfera": {
+          "notte": "chapters/s2.atmosfera.notte.md",
+          "tramonto": "chapters/s2.atmosfera.tramonto.md"
+        }
       }
     },
     {
@@ -46,11 +69,23 @@
         "key": "helper",
         "prompt": "Chi accompagna [Nome]?",
         "required": true,
-        "allowed_sources": ["character_asset", "catalog_character"],
+        "allowed_sources": [
+          "character_asset",
+          "catalog_character"
+        ],
         "catalog_roster": [
-          { "key": "etto", "entrance_ref": "entrances/s3_felci_etto.md" },
-          { "key": "briciola", "entrance_ref": "entrances/s3_felci_briciola.md" },
-          { "key": "fiamma", "entrance_ref": "entrances/s3_felci_fiamma.md" }
+          {
+            "key": "etto",
+            "entrance_ref": "entrances/s3_felci_etto.md"
+          },
+          {
+            "key": "briciola",
+            "entrance_ref": "entrances/s3_felci_briciola.md"
+          },
+          {
+            "key": "fiamma",
+            "entrance_ref": "entrances/s3_felci_fiamma.md"
+          }
         ]
       },
       "next": "s4"
@@ -66,10 +101,19 @@
         "key": "helper",
         "prompt": "Chi si unisce a [Nome]?",
         "required": true,
-        "allowed_sources": ["character_asset", "catalog_character"],
+        "allowed_sources": [
+          "character_asset",
+          "catalog_character"
+        ],
         "catalog_roster": [
-          { "key": "ulivo", "entrance_ref": "entrances/s3_ruscello_ulivo.md" },
-          { "key": "briciola", "entrance_ref": "entrances/s3_ruscello_briciola.md" }
+          {
+            "key": "ulivo",
+            "entrance_ref": "entrances/s3_ruscello_ulivo.md"
+          },
+          {
+            "key": "briciola",
+            "entrance_ref": "entrances/s3_ruscello_briciola.md"
+          }
         ]
       },
       "next": "s4"
@@ -81,7 +125,13 @@
       "composer_summary": "Nella radura la campanella tace. Per ritrovarla serve smettere di correre e ascoltare davvero.",
       "content_ref": "chapters/s4.md",
       "decision": null,
-      "next": "s5"
+      "next": "s5",
+      "variant_refs": {
+        "atmosfera": {
+          "notte": "chapters/s4.atmosfera.notte.md",
+          "tramonto": "chapters/s4.atmosfera.tramonto.md"
+        }
+      }
     },
     {
       "key": "s5",
@@ -94,8 +144,16 @@
         "key": "d_finale",
         "prompt": "Come termina l'avventura?",
         "options": [
-          { "key": "promessa", "label": "Con la promessa di tornare", "next": "s6_promessa" },
-          { "key": "festa", "label": "Con una piccola festa nella radura", "next": "s6_festa" }
+          {
+            "key": "promessa",
+            "label": "Con la promessa di tornare",
+            "next": "s6_promessa"
+          },
+          {
+            "key": "festa",
+            "label": "Con una piccola festa nella radura",
+            "next": "s6_festa"
+          }
         ]
       }
     },
@@ -116,6 +174,26 @@
       "content_ref": "chapters/s6_festa.md",
       "decision": null,
       "next": null
+    }
+  ],
+  "setup": [
+    {
+      "key": "atmosfera",
+      "type": "variant",
+      "prompt": "Quando comincia la storia?",
+      "presentation": "visual",
+      "options": [
+        {
+          "key": "notte",
+          "label": "Di notte",
+          "image_ref": "setup/atmosfera_notte.svg"
+        },
+        {
+          "key": "tramonto",
+          "label": "Al tramonto",
+          "image_ref": "setup/atmosfera_tramonto.svg"
+        }
+      ]
     }
   ]
 }

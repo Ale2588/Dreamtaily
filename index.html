@@ -356,6 +356,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 .cast-option.selected{border-color:var(--coral);background:#fff5f1}
 .cast-option img{width:72px;height:72px;object-fit:cover;border-radius:50%;margin-bottom:8px}
 
+.setup-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:24px 0}.setup-option{border:2px solid var(--line);border-radius:18px;background:white;padding:10px;text-align:left}.setup-option.selected{border-color:var(--coral);background:#fff5f1}.setup-option img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:12px;display:block;margin-bottom:10px}.setup-option strong{display:block;font-family:'Baloo 2';font-size:20px;padding:0 4px 4px}
 </style>
 </head>
 <body>
@@ -679,6 +680,8 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 </section>
 
 
+
+<section class="screen composer-screen" id="screen-setup"><div class="shell"><div class="topbar"><button class="brand-dark" onclick="showScreen('stories')"><img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span></button><div class="phase">4 · Prepara la storia</div></div><div class="panel composer-panel"><div class="composer-progress" id="setup-progress">Prima scelta</div><h1 class="step-title">Prima di cominciare</h1><p class="intro" id="setup-prompt"></p><div id="setup-options" class="setup-options"></div><div class="error" id="setup-error"></div><div class="form-actions"><button class="btn btn-ghost" onclick="goToBook()">Vai al mio libro</button><button class="btn btn-primary" id="setup-next" onclick="advanceSetup()">Continua →</button></div></div></div></section>
 <section class="screen composer-screen" id="screen-composer">
   <div class="shell">
     <div class="topbar">
@@ -772,6 +775,7 @@ const app = {
   previewId:null,
   previewUrl:null,
   characterAssetId:null,
+  candidateCharacterAssetId:null,
   selectedStoryId:null,
   savedCharacters:[],
   bookId:null,
@@ -780,6 +784,8 @@ const app = {
   activeStoryDefinition:null,
   activeBookStoryId:null,
   currentStepKey:null,
+  setupIndex:0,
+  setupChoices:{},
   compositionChoices:{},
   saving:false
 };
@@ -1242,6 +1248,7 @@ function useSavedCharacter(characterId){
 
   applyCharacterToForm(character);
   app.characterAssetId=character.id;
+  app.candidateCharacterAssetId=character.id;
   app.previewId=null;
   app.previewUrl=character.image_url;
   app.selectedStoryId=null;
@@ -1433,39 +1440,38 @@ async function loadBookStories(){
 async function persistSelectedStory(){
   const story=STORY_TEMPLATES.find(item=>item.id===app.selectedStoryId);
   if(!story) throw new Error('STORY_REQUIRED');
-  if(!app.characterAssetId) throw new Error('CHARACTER_ASSET_REQUIRED');
+  const candidateCharacterId=app.candidateCharacterAssetId||app.characterAssetId;
+  if(!candidateCharacterId) throw new Error('CHARACTER_ASSET_REQUIRED');
 
   const client=getSupabase();
   const bookId=await getOrCreateDraftBook();
   await loadBookStories();
 
   const existing=app.bookStories.find(item=>item.story_slug===story.id);
-  let bookStoryId=existing?.id;
+  if(existing) throw new Error('STORY_ALREADY_IN_BOOK');
 
-  if(!bookStoryId){
-    const nextPosition=(app.bookStories.at(-1)?.position||0)+1;
-    const {data:created,error:createError}=await client
-      .from('book_stories')
-      .insert({
-        book_id:bookId,
-        story_slug:story.id,
-        position:nextPosition,
-        status:'draft',
-        path_choices:{}
-      })
-      .select('id')
-      .single();
+  const nextPosition=(app.bookStories.at(-1)?.position||0)+1;
+  const {data:created,error:createError}=await client
+    .from('book_stories')
+    .insert({
+      book_id:bookId,
+      story_slug:story.id,
+      position:nextPosition,
+      status:'draft',
+      path_choices:{}
+    })
+    .select('id')
+    .single();
 
-    if(createError) throw createError;
-    bookStoryId=created.id;
-  }
+  if(createError) throw createError;
+  const bookStoryId=created.id;
 
   const {error:castError}=await client
     .from('story_cast_assignments')
     .upsert({
       book_story_id:bookStoryId,
       slot_key:'protagonist',
-      character_asset_id:app.characterAssetId,
+      character_asset_id:candidateCharacterId,
       catalog_character_id:null
     },{onConflict:'book_story_id,slot_key'});
 
@@ -1503,7 +1509,12 @@ async function continueWithStory(){
   }catch(error){
     console.error('[DreamTaily] Book save error:',error);
     const detail=error?.message||error?.details||error?.hint||'Errore sconosciuto';
-    showError('story-error',`Non sono riuscito a salvare la storia nel libro: ${detail}`);
+    showError(
+      'story-error',
+      detail==='STORY_ALREADY_IN_BOOK'
+        ?'Questa storia è già presente nel libro. Scegline un’altra.'
+        :`Non sono riuscito a salvare la storia nel libro: ${detail}`
+    );
   }finally{
     button.disabled=false;
     button.textContent='Aggiungi questa storia al libro →';
@@ -1519,24 +1530,13 @@ const CATALOG_CHARACTERS={
   rubens:{name:'Rubens',image:'assets/char/paper/fox.png'}
 };
 
-async function startStoryComposer(story,bookStoryId){
-  try{
-    const definition=await loadStoryDefinition(story);
-    app.activeStoryDefinition=definition;
-    app.activeBookStoryId=bookStoryId;
-    app.currentStepKey=definition.start||definition.steps?.[0]?.key;
-    const current=app.bookStories.find(item=>item.id===bookStoryId);
-    app.compositionChoices={...(current?.path_choices||{})};
-
-    document.getElementById('composer-protagonist-name').textContent=value('name')||'Il tuo personaggio';
-    document.getElementById('composer-protagonist-image').src=app.previewUrl||story.image||'';
-    renderComposerStep();
-    showScreen('composer');
-  }catch(error){
-    console.error('[DreamTaily] Composer start error:',error);
-    showError('story-error','Non sono riuscito ad aprire la composizione della storia.');
-  }
-}
+async function startStoryComposer(story,bookStoryId){try{const definition=await loadStoryDefinition(story);app.activeStoryDefinition=definition;app.activeBookStoryId=bookStoryId;const current=app.bookStories.find(item=>item.id===bookStoryId);app.compositionChoices={...(current?.path_choices||{})};app.setupChoices={};for(const item of definition.setup||[]){if(app.compositionChoices[item.key])app.setupChoices[item.key]=app.compositionChoices[item.key]}await ensureBookCharactersHydrated();const protagonist=getStoryProtagonistAssignment(current);const pc=getSavedCharacterById(protagonist?.character_asset_id);document.getElementById('composer-protagonist-name').textContent=pc?.name||value('name')||'Il tuo personaggio';document.getElementById('composer-protagonist-image').src=pc?.image_url||app.previewUrl||story.image||'';if((definition.setup||[]).length){app.setupIndex=0;renderSetupStep();showScreen('setup')}else{app.currentStepKey=resolveEffectiveStart(definition,{});renderComposerStep();showScreen('composer')}}catch(error){console.error('[DreamTaily] Composer start error:',error);showError('story-error','Non sono riuscito ad aprire la composizione della storia.')}}
+function resolveEffectiveStart(definition,choices={}){const sb=(definition?.setup||[]).find(x=>x.type==='branch');if(!sb)return definition?.start||definition?.steps?.[0]?.key||null;return (sb.options||[]).find(o=>o.key===choices[sb.key])?.start||definition?.start||null}
+function renderSetupStep(){const setup=app.activeStoryDefinition?.setup||[],item=setup[app.setupIndex];if(!item)return beginStoryAfterSetup();const current=app.setupChoices[item.key]||null;document.getElementById('setup-progress').textContent=`Scelta ${app.setupIndex+1} di ${setup.length}`;document.getElementById('setup-prompt').textContent=String(item.prompt||'Scegli').replaceAll('[Nome]',value('name')||'il protagonista');document.getElementById('setup-options').innerHTML=(item.options||[]).map(o=>`<button type="button" class="setup-option ${current===o.key?'selected':''}" onclick="selectSetupChoice('${escapeHtml(item.key)}','${escapeHtml(o.key)}')"><img src="${escapeHtml(o.image_ref||'')}" alt=""><strong>${escapeHtml(o.label)}</strong></button>`).join('');const b=document.getElementById('setup-next');b.disabled=!current;b.textContent=app.setupIndex===setup.length-1?'Inizia la storia →':'Continua →';showError('setup-error',null)}
+function selectSetupChoice(key,val){app.setupChoices[key]=val;app.compositionChoices[key]=val;renderSetupStep()}
+async function persistPathChoices(){const path=Object.fromEntries(Object.entries(app.compositionChoices).filter(([,v])=>typeof v==='string'));const{error}=await getSupabase().from('book_stories').update({path_choices:path,updated_at:new Date().toISOString()}).eq('id',app.activeBookStoryId);if(error)throw error}
+async function advanceSetup(){const setup=app.activeStoryDefinition?.setup||[],item=setup[app.setupIndex];if(!item)return beginStoryAfterSetup();if(!app.setupChoices[item.key])return showError('setup-error','Scegli un’opzione per continuare.');const b=document.getElementById('setup-next');b.disabled=true;b.textContent='Salvataggio…';try{await persistPathChoices();app.setupIndex+=1;if(app.setupIndex>=setup.length)await beginStoryAfterSetup();else renderSetupStep()}catch(error){console.error('[DreamTaily] Setup save error:',error);showError('setup-error','Non sono riuscito a salvare la scelta.')}finally{b.disabled=false}}
+async function beginStoryAfterSetup(){app.currentStepKey=resolveEffectiveStart(app.activeStoryDefinition,app.setupChoices);renderComposerStep();showScreen('composer')}
 
 function getCurrentComposerStep(){
   return app.activeStoryDefinition?.steps?.find(step=>step.key===app.currentStepKey)||null;
@@ -1658,16 +1658,7 @@ async function saveComposerDecision(step){
   const client=getSupabase();
 
   if(decision.type==='branch'){
-    const {error}=await client
-      .from('book_stories')
-      .update({
-        path_choices:Object.fromEntries(
-          Object.entries(app.compositionChoices).filter(([,value])=>typeof value==='string')
-        ),
-        updated_at:new Date().toISOString()
-      })
-      .eq('id',app.activeBookStoryId);
-    if(error) throw error;
+    await persistPathChoices();
     return;
   }
 
@@ -1745,10 +1736,13 @@ function resolveStoryText(text,replacements={}){
     .replaceAll('[ENTRATA_AIUTANTE]',replacements.helperEntrance||'');
 }
 
+async function fetchStoryText(storySlug,ref){if(!ref)return '';const response=await fetch(`stories/${storySlug}/${ref}`,{cache:'no-store'});if(!response.ok)throw new Error(`STORY_TEXT_HTTP_${response.status}:${ref}`);return response.text()}
+async function resolveChapterContent(step,{definition,pathChoices={},helperChoice=null,protagonistName='',helperName=''}={}){let content=await fetchStoryText(definition.slug,step.content_ref);for(const[setupKey,variants]of Object.entries(step.variant_refs||{})){const selected=pathChoices[setupKey],ref=selected?variants?.[selected]:null,txt=ref?await fetchStoryText(definition.slug,ref):'';content=content.replaceAll(`[VARIANTE:${setupKey}]`,txt)}let entrance='';if(step.decision?.type==='cast'&&helperChoice?.entrance_ref)entrance=await fetchStoryText(definition.slug,helperChoice.entrance_ref);content=content.replaceAll('[ENTRATA_AIUTANTE]',entrance);return resolveStoryText(content,{name:protagonistName||value('name')||'il protagonista',helper:helperName||'l’aiutante',helperEntrance:entrance})}
 function resolveStoryPath(definition,pathChoices={}){
   const result=[];
   const byKey=new Map((definition?.steps||[]).map(step=>[step.key,step]));
-  let key=definition?.start||null;
+  const setupChoices=Object.fromEntries((definition?.setup||[]).map(item=>[item.key,pathChoices[item.key]]).filter(([,v])=>v));
+  let key=resolveEffectiveStart(definition,setupChoices);
   const visited=new Set();
 
   while(key&&byKey.has(key)&&!visited.has(key)){
@@ -1774,29 +1768,70 @@ async function finishStoryComposer(){
   showScreen('book');
 }
 
+
+function getStoryProtagonistAssignment(bookStory){
+  return bookStory?.story_cast_assignments?.find(item=>item.slot_key==='protagonist')||null;
+}
+
+function getSavedCharacterById(characterAssetId){
+  return app.savedCharacters.find(item=>item.id===characterAssetId)||null;
+}
+
+async function ensureBookCharactersHydrated(){
+  const protagonistIds=new Set(
+    app.bookStories
+      .map(getStoryProtagonistAssignment)
+      .map(item=>item?.character_asset_id)
+      .filter(Boolean)
+  );
+
+  const missing=[...protagonistIds].some(id=>!getSavedCharacterById(id));
+  if(missing||!app.savedCharacters.length){
+    await loadSavedCharacters();
+  }
+}
+
 async function renderBookSummary(preferredStory=null){
   await loadBookStories();
+  await ensureBookCharactersHydrated();
 
-  const latest=preferredStory||
-    STORY_TEMPLATES.find(item=>item.id===app.bookStories.at(-1)?.story_slug)||
+  const latestBookStory=
+    (preferredStory&&app.bookStories.find(item=>item.story_slug===preferredStory.id))||
+    app.bookStories.at(-1)||
+    null;
+
+  const latest=
+    preferredStory||
+    STORY_TEMPLATES.find(item=>item.id===latestBookStory?.story_slug)||
     STORY_TEMPLATES[0];
 
-  const name=value('name')||'Il tuo personaggio';
+  const latestAssignment=getStoryProtagonistAssignment(latestBookStory);
+  const latestCharacter=getSavedCharacterById(latestAssignment?.character_asset_id);
+  const persistedName=latestCharacter?.name||'Protagonista assegnato';
+  const persistedImage=latestCharacter?.image_url||latest?.image||'';
+
   document.getElementById('book-cover-title').textContent=latest?.title||'Il tuo libro';
-  document.getElementById('book-cover-character').textContent=name;
-  document.getElementById('book-cover-image').src=app.previewUrl||latest?.image||'';
-  document.getElementById('summary-character').textContent=name;
+  document.getElementById('book-cover-character').textContent=persistedName;
+  document.getElementById('book-cover-image').src=persistedImage;
+  document.getElementById('summary-character').textContent=persistedName;
   document.getElementById('summary-story-count').textContent=String(app.bookStories.length);
 
   const list=document.getElementById('book-story-list');
   list.innerHTML=app.bookStories.map((bookStory,index)=>{
     const story=STORY_TEMPLATES.find(item=>item.id===bookStory.story_slug);
-    const protagonist=bookStory.story_cast_assignments?.find(item=>item.slot_key==='protagonist');
+    const protagonist=getStoryProtagonistAssignment(bookStory);
+    const character=getSavedCharacterById(protagonist?.character_asset_id);
+    const protagonistLabel=character?.name||(
+      protagonist?.catalog_character_id
+        ?CATALOG_CHARACTERS[protagonist.catalog_character_id]?.name||protagonist.catalog_character_id
+        :'Non assegnato'
+    );
+
     return `
       <div class="book-story-item">
         <div>
           <h3>${index+1}. ${escapeHtml(story?.title||bookStory.story_slug)}</h3>
-          <p>${escapeHtml(story?.age||'')} · protagonista ${protagonist?'✓':'—'} · scelte ${Object.keys(bookStory.path_choices||{}).length}</p>
+          <p>${escapeHtml(story?.age||'')} · protagonista: ${escapeHtml(protagonistLabel)} · scelte ${Object.keys(bookStory.path_choices||{}).length}</p>
         </div>
         <div class="book-story-item-actions">
           <button class="icon-btn" type="button" title="Rimuovi storia" onclick="removeBookStory('${bookStory.id}')">×</button>
@@ -1918,6 +1953,7 @@ async function resumeDraftBook(){
       if(character){
         applyCharacterToForm(character);
         app.characterAssetId=character.id;
+        app.candidateCharacterAssetId=null;
         app.previewUrl=character.image_url;
       }
     }
@@ -1932,7 +1968,7 @@ async function resumeDraftBook(){
 
 
 function startAnother(){
-  app.style='water';app.type='real_person';app.previewId=null;app.previewUrl=null;app.characterAssetId=null;app.selectedStoryId=null;
+  app.style='water';app.type='real_person';app.previewId=null;app.previewUrl=null;app.characterAssetId=null;app.candidateCharacterAssetId=null;app.selectedStoryId=null;
   document.querySelectorAll('input,textarea').forEach(el=>el.value='');
   document.getElementById('age-group').value='';
   document.getElementById('advanced').classList.remove('open');
