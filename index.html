@@ -804,7 +804,9 @@ function getSupabase(){
   return supabaseClient;
 }
 
-async function ensureUser(){
+let authInFlight = null;
+
+async function _ensureUser(){
   const client=getSupabase();
 
   const {data:{session},error:sessionError}=await client.auth.getSession();
@@ -812,10 +814,9 @@ async function ensureUser(){
     return session.user;
   }
 
-  // A stale or missing local session must not block anonymous sign-in.
   if(sessionError){
     console.warn('[DreamTaily] Session reset:',sessionError);
-    try{ await client.auth.signOut({scope:'local'}); }catch(_error){}
+    try{await client.auth.signOut({scope:'local'})}catch(_error){}
   }
 
   const {data,error}=await client.auth.signInAnonymously();
@@ -824,6 +825,35 @@ async function ensureUser(){
     throw new Error('SESSIONE_ANONIMA_NON_CREATA');
   }
   return data.user;
+}
+
+function ensureUser(){
+  if(!authInFlight){
+    authInFlight=_ensureUser().catch(error=>{
+      authInFlight=null;
+      throw error;
+    });
+  }
+  return authInFlight;
+}
+
+async function getAccessToken(){
+  await ensureUser();
+  const client=getSupabase();
+  let {data:{session},error}=await client.auth.getSession();
+
+  if(error||!session?.access_token){
+    authInFlight=null;
+    try{await client.auth.signOut({scope:'local'})}catch(_error){}
+    await ensureUser();
+    const refreshed=await client.auth.getSession();
+    session=refreshed.data.session;
+    error=refreshed.error;
+  }
+
+  if(error) throw error;
+  if(!session?.access_token) throw new Error('SESSIONE_ANONIMA_NON_DISPONIBILE');
+  return session.access_token;
 }
 
 async function generateCharacter(force=false){
@@ -843,20 +873,7 @@ async function generateCharacter(force=false){
   const timeout=setTimeout(()=>controller.abort(),90000);
 
   try{
-    await ensureUser();
-    const client=getSupabase();
-    let {data:{session},error:sessionError}=await client.auth.getSession();
-
-    if(sessionError||!session?.access_token){
-      await client.auth.signOut({scope:'local'}).catch(()=>{});
-      await ensureUser();
-      const refreshed=await client.auth.getSession();
-      session=refreshed.data.session;
-      sessionError=refreshed.error;
-    }
-
-    if(sessionError) throw sessionError;
-    if(!session?.access_token) throw new Error('SESSIONE_ANONIMA_NON_DISPONIBILE');
+    const accessToken=await getAccessToken();
 
     const character=buildCharacter();
     const response=await fetch(`${SUPABASE_URL}/functions/v1/generate-preview`,{
@@ -864,7 +881,7 @@ async function generateCharacter(force=false){
       headers:{
         'Content-Type':'application/json',
         'apikey':SUPABASE_ANON_KEY,
-        'Authorization':`Bearer ${session.access_token}`
+        'Authorization':`Bearer ${accessToken}`
       },
       body:JSON.stringify({
         mode:'character_preview',
@@ -911,17 +928,14 @@ async function generateCharacter(force=false){
 function regenerateCharacter(){generateCharacter(true)}
 
 async function callPrivateReferenceCanonicalizer(assetId){
-  const client=getSupabase();
-  const {data:{session},error:sessionError}=await client.auth.getSession();
-  if(sessionError) throw sessionError;
-  if(!session?.access_token) throw new Error('SESSION_REQUIRED');
+  const accessToken=await getAccessToken();
 
   const response=await fetch(`${SUPABASE_URL}/functions/v1/canonicalize-character-reference`,{
     method:'POST',
     headers:{
       'Content-Type':'application/json',
       'apikey':SUPABASE_ANON_KEY,
-      'Authorization':`Bearer ${session.access_token}`
+      'Authorization':`Bearer ${accessToken}`
     },
     body:JSON.stringify({
       character_asset_id:assetId,
@@ -1606,6 +1620,8 @@ window.DreamTailyCharacterFlow={
   openLibrary:openCharacterLibrary,
   resumeDraftBook,
   goToBook,
+  ensureUser,
+  getAccessToken,
   state:app
 };
 </script>
