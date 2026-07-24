@@ -123,14 +123,14 @@ def validate(story_path: Path) -> tuple[list[str], list[str]]:
                 errors.append(f"decision key mancante: {key}")
             elif decision_key in setup_keys:
                 errors.append(f"collisione setup/decision: {decision_key}")
-            elif decision_key in decision_keys:
-                errors.append(f"decision key duplicata: {decision_key}")
-            else:
-                decision_keys.add(decision_key)
 
             decision_type = decision.get("type")
             options = decision.get("options", []) if decision_type == "branch" else []
             if decision_type == "branch":
+                if decision_key in decision_keys:
+                    errors.append(f"decision key duplicata: {decision_key}")
+                elif decision_key:
+                    decision_keys.add(decision_key)
                 option_keys = [option.get("key") for option in options if isinstance(option, dict)]
                 duplicates = [value for value, count in Counter(option_keys).items() if value and count > 1]
                 for value in duplicates:
@@ -230,6 +230,48 @@ def validate(story_path: Path) -> tuple[list[str], list[str]]:
                     f"testo base non neutro: {key}/{setup_key} → {', '.join(hits)}"
                 )
 
+    # Cast keys may repeat in mutually exclusive branches, but not on one path.
+    def check_cast_keys_per_path(start_key: str | None) -> None:
+        def walk(
+            key: str | None,
+            cast_seen: dict[str, str],
+            visited: frozenset[str],
+        ) -> None:
+            if not key or key not in steps_by_key or key in visited:
+                return
+
+            step = steps_by_key[key]
+            decision = step.get("decision")
+            next_seen = dict(cast_seen)
+            next_visited = visited | {key}
+
+            if decision and decision.get("type") == "cast":
+                cast_key = decision.get("key")
+                if cast_key:
+                    if cast_key in next_seen:
+                        errors.append(
+                            "cast key duplicata sullo stesso percorso: "
+                            f"{cast_key} ({next_seen[cast_key]} → {key})"
+                        )
+                    else:
+                        next_seen[cast_key] = key
+
+            if decision and decision.get("type") == "branch":
+                for option in decision.get("options", []):
+                    if isinstance(option, dict):
+                        walk(option.get("next"), next_seen, next_visited)
+            else:
+                walk(step.get("next"), next_seen, next_visited)
+
+        walk(start_key, {}, frozenset())
+
+    check_cast_keys_per_path(start)
+    for item in setup:
+        if isinstance(item, dict) and item.get("type") == "branch":
+            for option in item.get("options", []):
+                if isinstance(option, dict):
+                    check_cast_keys_per_path(option.get("start"))
+
     # max_decisions is the maximum number encountered on one playable path,
     # not the total number of decision nodes in the graph.
     declared_max = story.get("max_decisions")
@@ -275,12 +317,17 @@ def validate(story_path: Path) -> tuple[list[str], list[str]]:
             for option in item.get("options", [])
             if isinstance(option, dict)
         )
-        actual_max = max((max_decisions_from(key) for key in path_starts), default=0)
+        step_decision_max = max(
+            (max_decisions_from(key) for key in path_starts),
+            default=0,
+        )
+        actual_max = len(setup) + step_decision_max
 
         if actual_max > declared_max:
             errors.append(
                 f"max_decisions superato: dichiarato {declared_max}, "
-                f"massimo per percorso {actual_max}"
+                f"totale percepito massimo {actual_max} "
+                f"({len(setup)} setup + {step_decision_max} nel percorso)"
             )
 
     # Reachability and terminal path.

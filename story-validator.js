@@ -67,8 +67,11 @@
       if(!decision) continue;
       if(!decision.key) fail("DECISION_KEY_MISSING",step.key);
       else if(setupKeys.has(decision.key)) fail("KEY_COLLISION",decision.key);
-      else if(decisionKeys.has(decision.key)) fail("DECISION_KEY_DUPLICATE",decision.key);
-      else decisionKeys.add(decision.key);
+      else if(decision.type==="branch"&&decisionKeys.has(decision.key)){
+        fail("DECISION_KEY_DUPLICATE",decision.key);
+      }else if(decision.type==="branch"){
+        decisionKeys.add(decision.key);
+      }
 
       if(decision.type==="branch"){
         const optionKeys=new Set();
@@ -148,6 +151,45 @@
       }
     }
 
+    function checkCastKeysPerPath(startKey){
+      function walk(key,castSeen,visited){
+        if(!key||!stepByKey.has(key)||visited.has(key)) return;
+
+        const nextVisited=new Set(visited);
+        nextVisited.add(key);
+
+        const step=stepByKey.get(key);
+        const decision=step?.decision;
+        const nextCastSeen=new Map(castSeen);
+
+        if(decision?.type==="cast"&&decision.key){
+          if(nextCastSeen.has(decision.key)){
+            fail(
+              "CAST_KEY_DUPLICATE_ON_PATH",
+              `${decision.key}: ${nextCastSeen.get(decision.key)} → ${key}`
+            );
+          }else{
+            nextCastSeen.set(decision.key,key);
+          }
+        }
+
+        if(decision?.type==="branch"){
+          for(const option of decision.options||[]){
+            walk(option.next,nextCastSeen,nextVisited);
+          }
+        }else if(step?.next){
+          walk(step.next,nextCastSeen,nextVisited);
+        }
+      }
+
+      walk(startKey,new Map(),new Set());
+    }
+
+    checkCastKeysPerPath(story?.start);
+    for(const item of setup.filter(item=>item?.type==="branch")){
+      for(const option of item.options||[]) checkCastKeysPerPath(option.start);
+    }
+
     if(Number.isInteger(story?.max_decisions)){
       const memo=new Map();
       const visiting=new Set();
@@ -183,15 +225,17 @@
         for(const option of item.options||[]) pathStarts.push(option.start);
       }
 
-      const actualMax=Math.max(
+      const stepDecisionMax=Math.max(
         0,
         ...pathStarts.filter(Boolean).map(maxDecisionsFrom)
       );
+      const actualMax=setup.length+stepDecisionMax;
 
       if(actualMax>story.max_decisions){
         fail(
           "MAX_DECISIONS_EXCEEDED",
-          `Dichiarato ${story.max_decisions}, massimo per percorso ${actualMax}.`
+          `Dichiarato ${story.max_decisions}, totale percepito massimo ${actualMax} `+
+          `(${setup.length} setup + ${stepDecisionMax} nel percorso).`
         );
       }
     }
