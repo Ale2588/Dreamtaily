@@ -155,6 +155,12 @@
             "next": "s6_festa"
           }
         ]
+      },
+      "variant_refs": {
+        "atmosfera": {
+          "notte": "chapters/s5.atmosfera.notte.md",
+          "tramonto": "chapters/s5.atmosfera.tramonto.md"
+        }
       }
     },
     {
@@ -164,7 +170,13 @@
       "composer_summary": "[Nome] lascia la campanella a chi lo ha accompagnato, e promette di tornare.",
       "content_ref": "chapters/s6_promessa.md",
       "decision": null,
-      "next": null
+      "next": null,
+      "variant_refs": {
+        "atmosfera": {
+          "notte": "chapters/s6_promessa.atmosfera.notte.md",
+          "tramonto": "chapters/s6_promessa.atmosfera.tramonto.md"
+        }
+      }
     },
     {
       "key": "s6_festa",
@@ -173,7 +185,13 @@
       "composer_summary": "Prima di tornare a casa, il bosco intero festeggia nella radura.",
       "content_ref": "chapters/s6_festa.md",
       "decision": null,
-      "next": null
+      "next": null,
+      "variant_refs": {
+        "atmosfera": {
+          "notte": "chapters/s6_festa.atmosfera.notte.md",
+          "tramonto": "chapters/s6_festa.atmosfera.tramonto.md"
+        }
+      }
     }
   ],
   "setup": [

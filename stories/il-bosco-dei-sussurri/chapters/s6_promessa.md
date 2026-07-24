@@ -1,5 +1,7 @@
 # La promessa
 
+[VARIANTE:atmosfera]
+
 [Nome] si inginocchiò nell'erba, per essere della stessa altezza.
 
 «Io torno» disse.
@@ -20,6 +22,6 @@ Da lontano, piccolo tra l'erba alta, [Aiutante] alzò una zampa.
 
 *Din.*
 
-Quella notte [Nome] si addormentò subito, con le scarpe ancora accanto al letto, sporche di bosco.
+Quando [Nome] si coricò, le scarpe erano ancora accanto al letto, sporche di bosco.
 
 E in sogno, ogni tanto, sentiva suonare.

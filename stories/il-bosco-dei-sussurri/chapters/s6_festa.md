@@ -1,5 +1,7 @@
 # La piccola festa
 
+[VARIANTE:atmosfera]
+
 «Aspetta» disse [Nome]. «Non ancora.»
 
 Si tolse la giacca, la stese sull'erba come si fa con le tovaglie, e ci mise sopra tutto quello che aveva in tasca: due caramelle, una ghianda, un sasso liscio che aveva raccolto vicino al ruscello.
@@ -24,6 +26,6 @@ E allora successe una cosa che [Nome] non seppe mai spiegare bene a nessuno: tut
 
 Sembrava una musica.
 
-Ballarono così, in mezzo al bosco, mentre il cielo si schiariva in un angolo.
+Ballarono così, in mezzo al bosco.
 
-E quando [Nome] tornò a casa, aveva l'erba nei capelli e la giacca sporca e non gli importava per niente.
+Quando [Nome] tornò a casa, aveva l'erba nei capelli e la giacca sporca e non gli importava per niente.
