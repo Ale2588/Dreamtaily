@@ -88,7 +88,7 @@
           }
         ]
       },
-      "next": "s4"
+      "next": "s4_felci"
     },
     {
       "key": "s3_ruscello",
@@ -116,11 +116,29 @@
           }
         ]
       },
+      "next": "s4_ruscello"
+    },
+    {
+      "key": "s4_felci",
+      "chapter": 4,
+      "title": "Il passaggio sotto le radici",
+      "composer_summary": "Tra le felci, [Nome] e [Aiutante] trovano un passaggio basso che conduce verso il cuore del bosco.",
+      "content_ref": "chapters/s4_felci.md",
+      "decision": null,
+      "next": "s4"
+    },
+    {
+      "key": "s4_ruscello",
+      "chapter": 4,
+      "title": "Il ponte di pietre",
+      "composer_summary": "Il ruscello si allarga. [Nome] e [Aiutante] devono attraversarlo seguendo il ritmo della campanella.",
+      "content_ref": "chapters/s4_ruscello.md",
+      "decision": null,
       "next": "s4"
     },
     {
       "key": "s4",
-      "chapter": 4,
+      "chapter": 5,
       "title": "La radura silenziosa",
       "composer_summary": "Nella radura la campanella tace. Per ritrovarla serve smettere di correre e ascoltare davvero.",
       "content_ref": "chapters/s4.md",
@@ -135,7 +153,7 @@
     },
     {
       "key": "s5",
-      "chapter": 5,
+      "chapter": 6,
       "title": "Il ritorno",
       "composer_summary": "La campanella torna libera. Resta da decidere come salutare il bosco.",
       "content_ref": "chapters/s5.md",
@@ -165,7 +183,7 @@
     },
     {
       "key": "s6_promessa",
-      "chapter": 6,
+      "chapter": 7,
       "title": "La promessa",
       "composer_summary": "[Nome] lascia la campanella a chi lo ha accompagnato, e promette di tornare.",
       "content_ref": "chapters/s6_promessa.md",
@@ -180,7 +198,7 @@
     },
     {
       "key": "s6_festa",
-      "chapter": 6,
+      "chapter": 7,
       "title": "La piccola festa",
       "composer_summary": "Prima di tornare a casa, il bosco intero festeggia nella radura.",
       "content_ref": "chapters/s6_festa.md",

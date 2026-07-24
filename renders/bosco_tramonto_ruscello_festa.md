@@ -110,6 +110,58 @@ E adesso erano in due.
 
 ---
 
+# Il ponte di pietre
+
+Il ruscello si allargò senza preavviso.
+
+L'acqua, prima bassa e tranquilla, correva adesso tra pietre scure e lisce. Il sentiero continuava dall'altra parte, ma non c'era un ponte.
+
+*Din.*
+
+La campanella suonò oltre l'acqua.
+
+Lia osservò i sassi che spuntavano dalla corrente. Alcuni erano vicini. Altri lasciavano tra loro uno spazio abbastanza grande da far venire voglia di tornare indietro.
+
+Briciola mise una zampa sulla prima pietra, poi la ritirò.
+
+«Aspetta» disse Lia.
+
+Rimasero ad ascoltare.
+
+Il ruscello aveva un ritmo: acqua veloce, acqua lenta, una pausa breve contro il sasso più grande. E dentro quel ritmo, ogni tanto, arrivava la campanella.
+
+*Din.*
+
+Quando il suono arrivava, sembrava indicare la pietra successiva.
+
+Lia salì sulla prima. Briciola lo seguì.
+
+Aspettarono.
+
+*Din.*
+
+Seconda pietra.
+
+Poi la terza.
+
+A metà del ruscello l'acqua spruzzò sulle scarpe di Lia, e Briciola scivolò con una zampa. Lia si chinò appena in tempo e lo aiutò a ritrovare l'equilibrio.
+
+Rimasero fermi un momento, vicini, mentre l'acqua passava sotto di loro.
+
+Poi ripartirono insieme.
+
+Sull'ultima pietra trovarono un filo di nastro impigliato in una crepa. Lia lo liberò con due dita.
+
+La campanella era passata di lì.
+
+Dall'altra parte del ruscello gli alberi si facevano più radi. Oltre i tronchi si intravedeva uno spazio aperto.
+
+Lia tenne il filo di nastro nel palmo.
+
+Ora avevano una traccia da seguire.
+
+---
+
 # La radura silenziosa
 
 L'ultima luce del tramonto entrava nella radura tra i tronchi e lasciava sull'erba strisce color rame.
