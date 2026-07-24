@@ -95,7 +95,6 @@ def validate(story_path: Path) -> tuple[list[str], list[str]]:
                     errors.append(f"setup branch start mancante: {key}/{option.get('key')}")
 
     # Steps and decisions.
-    actual_decision_count = 0
     for step in steps:
         if not isinstance(step, dict):
             errors.append("step non valido")
@@ -119,7 +118,6 @@ def validate(story_path: Path) -> tuple[list[str], list[str]]:
 
         decision = step.get("decision")
         if decision:
-            actual_decision_count += 1
             decision_key = decision.get("key")
             if not decision_key:
                 errors.append(f"decision key mancante: {key}")
@@ -180,11 +178,6 @@ def validate(story_path: Path) -> tuple[list[str], list[str]]:
             if marker not in base_text:
                 warnings.append(f"marker variante mancante: {key}/{setup_key}")
 
-    declared_max = story.get("max_decisions")
-    if isinstance(declared_max, int) and actual_decision_count > declared_max:
-        errors.append(
-            f"max_decisions superato: dichiarato {declared_max}, presenti {actual_decision_count}"
-        )
 
     # References.
     start = story.get("start")
@@ -236,6 +229,59 @@ def validate(story_path: Path) -> tuple[list[str], list[str]]:
                 warnings.append(
                     f"testo base non neutro: {key}/{setup_key} → {', '.join(hits)}"
                 )
+
+    # max_decisions is the maximum number encountered on one playable path,
+    # not the total number of decision nodes in the graph.
+    declared_max = story.get("max_decisions")
+    if isinstance(declared_max, int):
+        memo: dict[str, int] = {}
+        visiting: set[str] = set()
+
+        def max_decisions_from(key: str | None) -> int:
+            if not key or key not in steps_by_key:
+                return 0
+            if key in memo:
+                return memo[key]
+            if key in visiting:
+                return 0
+
+            visiting.add(key)
+            step = steps_by_key[key]
+            decision = step.get("decision")
+            own = 1 if decision else 0
+
+            if decision and decision.get("type") == "branch":
+                child_max = max(
+                    (
+                        max_decisions_from(option.get("next"))
+                        for option in decision.get("options", [])
+                        if isinstance(option, dict)
+                    ),
+                    default=0,
+                )
+            else:
+                child_max = max_decisions_from(step.get("next"))
+
+            visiting.remove(key)
+            total = own + child_max
+            memo[key] = total
+            return total
+
+        path_starts = [start]
+        path_starts.extend(
+            option.get("start")
+            for item in setup
+            if isinstance(item, dict) and item.get("type") == "branch"
+            for option in item.get("options", [])
+            if isinstance(option, dict)
+        )
+        actual_max = max((max_decisions_from(key) for key in path_starts), default=0)
+
+        if actual_max > declared_max:
+            errors.append(
+                f"max_decisions superato: dichiarato {declared_max}, "
+                f"massimo per percorso {actual_max}"
+            )
 
     # Reachability and terminal path.
     starts = {start}

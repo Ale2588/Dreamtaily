@@ -19,7 +19,6 @@
     const setupByKey=new Map();
     const stepByKey=new Map();
     const decisionKeys=new Set();
-    let decisionCount=0;
 
     for(const item of setup){
       if(!item?.key){
@@ -66,8 +65,6 @@
 
       const decision=step.decision;
       if(!decision) continue;
-      decisionCount+=1;
-
       if(!decision.key) fail("DECISION_KEY_MISSING",step.key);
       else if(setupKeys.has(decision.key)) fail("KEY_COLLISION",decision.key);
       else if(decisionKeys.has(decision.key)) fail("DECISION_KEY_DUPLICATE",decision.key);
@@ -94,12 +91,6 @@
       }
     }
 
-    if(Number.isInteger(story?.max_decisions)&&decisionCount>story.max_decisions){
-      fail(
-        "MAX_DECISIONS_EXCEEDED",
-        `Dichiarato ${story.max_decisions}, presenti ${decisionCount}.`
-      );
-    }
 
     if(!stepByKey.has(story?.start)) fail("START_INVALID",story?.start||"—");
 
@@ -154,6 +145,54 @@
     for(const item of setup.filter(item=>item?.type==="variant")){
       if(!steps.some(step=>step.variant_refs?.[item.key])){
         warn("SETUP_VARIANT_UNUSED",item.key);
+      }
+    }
+
+    if(Number.isInteger(story?.max_decisions)){
+      const memo=new Map();
+      const visiting=new Set();
+
+      function maxDecisionsFrom(key){
+        if(!stepByKey.has(key)) return 0;
+        if(memo.has(key)) return memo.get(key);
+        if(visiting.has(key)) return 0;
+
+        visiting.add(key);
+        const step=stepByKey.get(key);
+        const decision=step?.decision;
+        const own=decision?1:0;
+        let childMax=0;
+
+        if(decision?.type==="branch"){
+          childMax=Math.max(
+            0,
+            ...(decision.options||[]).map(option=>maxDecisionsFrom(option.next))
+          );
+        }else if(step?.next){
+          childMax=maxDecisionsFrom(step.next);
+        }
+
+        visiting.delete(key);
+        const total=own+childMax;
+        memo.set(key,total);
+        return total;
+      }
+
+      const pathStarts=[story?.start];
+      for(const item of setup.filter(item=>item?.type==="branch")){
+        for(const option of item.options||[]) pathStarts.push(option.start);
+      }
+
+      const actualMax=Math.max(
+        0,
+        ...pathStarts.filter(Boolean).map(maxDecisionsFrom)
+      );
+
+      if(actualMax>story.max_decisions){
+        fail(
+          "MAX_DECISIONS_EXCEEDED",
+          `Dichiarato ${story.max_decisions}, massimo per percorso ${actualMax}.`
+        );
       }
     }
 
