@@ -256,6 +256,33 @@
     .stepper .dash{min-width:12px}
   }
 
+
+  /* Real composed-book overlay */
+  .dt-composed-book-overlay{
+    position:fixed;inset:0;z-index:10000;background:var(--cream);
+    overflow:auto;animation:floatIn .25s ease both
+  }
+  .dt-composed-book-loading,
+  .dt-composed-book-error{
+    min-height:100svh;display:grid;place-items:center;padding:24px;
+    background:linear-gradient(160deg,#f7f0e5,#efe5d5)
+  }
+  .dt-composed-book-message{
+    width:min(560px,100%);padding:32px;border-radius:28px;background:var(--paper);
+    border:1px solid var(--line);box-shadow:var(--shadow-md);text-align:center
+  }
+  .dt-composed-book-message h2{
+    font-family:'Baloo 2';font-size:30px;margin-bottom:10px
+  }
+  .dt-composed-book-message p{color:var(--muted);line-height:1.65}
+  .dt-composed-book-spinner{
+    width:48px;height:48px;margin:0 auto 18px;border-radius:50%;
+    border:5px solid var(--line);border-top-color:var(--coral);
+    animation:dtBookSpin .8s linear infinite
+  }
+  @keyframes dtBookSpin{to{transform:rotate(360deg)}}
+  body.dt-composed-book-open{overflow:hidden}
+
 </style>
 </head>
 <body>
@@ -753,7 +780,7 @@ function configureScreen(){
             il testo e le illustrazioni che vedi qui sono esattamente ciò che riceverai. Puoi sfogliare
             tutto il libro prima di pagare.</div>
           <button class="btn block" ${canBrowse?"":"disabled"}
-            onclick="set({screen:'book',page:0})">Sfoglia il libro →</button>
+            onclick="openComposedBook()">Sfoglia il libro →</button>
           <p class="hint" style="text-align:center">${canBrowse
             ? "testo risolto + scene composte, all'istante"
             : "scegli eroe, compagno e completa i bivi per continuare"}</p>
@@ -861,6 +888,51 @@ function reset(){ set({
   copied:false
 }); }
 
+
+/* ---------------- REAL COMPOSE → READ BRIDGE ---------------- */
+function dreamTailyCompositionSnapshot(){
+  const protagonistCharacter=char(S.protagonist);
+  const protagonistArt=
+    protagonistCharacter?.art?.[S.style]?.in_piedi||
+    protagonistCharacter?.art?.papercut?.in_piedi||
+    "";
+
+  const catalog={};
+  STORY.catalog.filter(item=>!item.external).forEach(item=>{
+    catalog[item.id]={
+      name:item.name,
+      image:resolveAsset(
+        item.art?.[S.style]?.in_piedi||
+        item.art?.papercut?.in_piedi||
+        ""
+      )
+    };
+  });
+
+  return {
+    choices:{
+      story:"il-bosco-dei-sussurri",
+      style:S.style,
+      protagonist:{
+        name:S.protagName.trim()||roleName("protagonist")||"Il protagonista",
+        asset_ref:resolveAsset(protagonistArt)
+      },
+      cast:{helper:S.cast.helper||null},
+      setup:{...S.setup},
+      branches:{...S.branch}
+    },
+    catalog
+  };
+}
+
+function openComposedBook(){
+  window.dispatchEvent(new CustomEvent(
+    "dreamtaily:compose-and-open-book",
+    {detail:dreamTailyCompositionSnapshot()}
+  ));
+}
+
+
 /* ------------------------------- RENDER ----------------------------------- */
 function screenHTML(){
   if(S.screen==="book") return bookScreen();
@@ -928,5 +1000,164 @@ auditStory();
 render();
 notifyDreamTailyParent();
 </script>
+
+<script type="module">
+import { composeStory } from "./src/story-composer.js";
+import { renderBook } from "./src/book-reader.js";
+
+const STORY_ROOT="stories/il-bosco-dei-sussurri";
+let composedBookCache=null;
+let activeReader=null;
+
+function createBookOverlay(){
+  document.getElementById("dt-composed-book-overlay")?.remove();
+
+  const overlay=document.createElement("div");
+  overlay.id="dt-composed-book-overlay";
+  overlay.className="dt-composed-book-overlay";
+  overlay.innerHTML=`
+    <div class="dt-composed-book-loading">
+      <div class="dt-composed-book-message">
+        <div class="dt-composed-book-spinner" aria-hidden="true"></div>
+        <h2>Sto componendo il libro…</h2>
+        <p>Risolvo il percorso, preparo le pagine e dispongo i personaggi nelle scene.</p>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+  document.body.classList.add("dt-composed-book-open");
+  return overlay;
+}
+
+function closeComposedBook(){
+  activeReader?.destroy();
+  activeReader=null;
+  document.getElementById("dt-composed-book-overlay")?.remove();
+  document.body.classList.remove("dt-composed-book-open");
+}
+
+async function fetchJson(path){
+  const response=await fetch(path,{cache:"no-store"});
+  if(!response.ok) throw new Error(`Non riesco a caricare ${path} (${response.status}).`);
+  return response.json();
+}
+
+async function fetchText(path){
+  const response=await fetch(path,{cache:"no-store"});
+  if(!response.ok) throw new Error(`Non riesco a caricare ${path} (${response.status}).`);
+  return response.text();
+}
+
+function collectContentRefs(story){
+  const refs=new Set();
+
+  for(const step of story.steps||[]){
+    if(step.content_ref) refs.add(step.content_ref);
+
+    for(const variants of Object.values(step.variant_refs||{})){
+      for(const ref of Object.values(variants||{})){
+        if(ref) refs.add(ref);
+      }
+    }
+
+    for(const entry of step.decision?.catalog_roster||[]){
+      if(entry.entrance_ref) refs.add(entry.entrance_ref);
+    }
+  }
+
+  return [...refs];
+}
+
+async function loadCompositionSource(){
+  if(composedBookCache) return composedBookCache;
+
+  const [story,rawScenes]=await Promise.all([
+    fetchJson(`${STORY_ROOT}/story.json`),
+    fetchJson(`${STORY_ROOT}/scene-pilot.json`)
+  ]);
+
+  const contentByRef={};
+  await Promise.all(
+    collectContentRefs(story).map(async ref=>{
+      contentByRef[ref]=await fetchText(`${STORY_ROOT}/${ref}`);
+    })
+  );
+
+  const prefixStoryAsset=ref=>{
+    if(!ref||/^(?:https?:|data:|blob:|\/)/.test(ref)) return ref;
+    return `${STORY_ROOT}/${ref}`;
+  };
+
+  const scenes=structuredClone(rawScenes);
+
+  const prefixDefinition=definition=>{
+    if(!definition) return;
+    definition.background_ref=prefixStoryAsset(definition.background_ref);
+
+    for(const variants of Object.values(definition.variant_backgrounds||{})){
+      for(const key of Object.keys(variants||{})){
+        variants[key]=prefixStoryAsset(variants[key]);
+      }
+    }
+  };
+
+  prefixDefinition(scenes.cover);
+  Object.values(scenes.scenes||{}).forEach(prefixDefinition);
+
+  composedBookCache={story,scenes,contentByRef};
+  return composedBookCache;
+}
+
+function showCompositionError(overlay,error){
+  console.error("[DreamTaily] Real book composition error:",error);
+
+  const detail=
+    error?.code==="HELPER_NOT_ALLOWED"
+      ?"Il compagno scelto non è disponibile lungo questo sentiero. Torna alle scelte e selezionane uno compatibile."
+      :error?.message||"Errore sconosciuto.";
+
+  overlay.innerHTML=`
+    <div class="dt-composed-book-error">
+      <div class="dt-composed-book-message">
+        <h2>Non riesco ancora ad aprire il libro</h2>
+        <p>${String(detail)
+          .replaceAll("&","&amp;")
+          .replaceAll("<","&lt;")
+          .replaceAll(">","&gt;")}</p>
+        <button class="btn primary" id="dt-close-composition-error" type="button"
+          style="margin-top:20px">Torna alle scelte</button>
+      </div>
+    </div>`;
+
+  overlay
+    .querySelector("#dt-close-composition-error")
+    ?.addEventListener("click",closeComposedBook);
+}
+
+window.addEventListener("dreamtaily:compose-and-open-book",async event=>{
+  const overlay=createBookOverlay();
+
+  try{
+    const {story,scenes,contentByRef}=await loadCompositionSource();
+    const {choices,catalog}=event.detail||{};
+
+    const book=composeStory({
+      story,
+      choices,
+      catalog,
+      scenes,
+      contentByRef
+    });
+
+    overlay.innerHTML="";
+    activeReader=renderBook(overlay,book,{
+      onClose:closeComposedBook
+    });
+  }catch(error){
+    showCompositionError(overlay,error);
+  }
+});
+</script>
+
 </body>
 </html>
