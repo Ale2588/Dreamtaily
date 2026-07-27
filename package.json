@@ -1,0 +1,9 @@
+{
+  "name": "dreamtaily-story-composer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:composer": "node --test tests/story-composer.test.mjs",
+    "test:golden": "node tools/test_story_composer_golden.mjs ."
+  }
+}
