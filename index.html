@@ -378,6 +378,20 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 .board-pool-title{font-family:'Baloo 2';font-size:22px;margin-top:20px}
 @media(max-width:760px){.story-protagonist-header{align-items:flex-start;flex-direction:column}.story-board{grid-template-columns:1fr}}
 
+
+/* DreamTaily integrated story configurator */
+.dreamtaily-configurator-overlay{
+  position:fixed;inset:0;z-index:10000;background:#f3ead9;
+  display:grid;grid-template-rows:1fr
+}
+.dreamtaily-configurator-frame{
+  width:100%;height:100%;border:0;background:#f3ead9
+}
+body.dreamtaily-configurator-open{overflow:hidden}
+@media (prefers-reduced-motion:reduce){
+  .dreamtaily-configurator-overlay{scroll-behavior:auto}
+}
+
 </style>
 </head>
 <body>
@@ -1601,7 +1615,155 @@ const CATALOG_CHARACTERS={
   rubens:{name:'Rubens',image:'assets/char/paper/fox.png'}
 };
 
-async function startStoryComposer(story,bookStoryId){try{const definition=await loadStoryDefinition(story);app.activeStoryDefinition=definition;app.activeBookStoryId=bookStoryId;const current=app.bookStories.find(item=>item.id===bookStoryId);app.compositionChoices={...(current?.path_choices||{})};app.setupChoices={};for(const item of definition.setup||[]){if(app.compositionChoices[item.key])app.setupChoices[item.key]=app.compositionChoices[item.key]}await ensureBookCharactersHydrated();const protagonist=getStoryProtagonistAssignment(current);const pc=getSavedCharacterById(protagonist?.character_asset_id);document.getElementById('composer-protagonist-name').textContent=pc?.name||value('name')||'Il tuo personaggio';document.getElementById('composer-protagonist-image').src=pc?.image_url||app.previewUrl||story.image||'';if((definition.setup||[]).length){app.setupIndex=0;renderSetupStep();showScreen('setup')}else{app.currentStepKey=resolveEffectiveStart(definition,{});renderComposerStep();showScreen('composer')}}catch(error){console.error('[DreamTaily] Composer start error:',error);showError('story-error','Non sono riuscito ad aprire la composizione della storia.')}}
+
+function closeIntegratedStoryConfigurator(){
+  document.getElementById('dreamtaily-configurator-overlay')?.remove();
+  document.body.classList.remove('dreamtaily-configurator-open');
+}
+
+function openIntegratedStoryConfigurator({
+  story,
+  bookStoryId,
+  protagonistName,
+  protagonistImage
+}){
+  closeIntegratedStoryConfigurator();
+
+  const overlay=document.createElement('div');
+  overlay.id='dreamtaily-configurator-overlay';
+  overlay.className='dreamtaily-configurator-overlay';
+
+  const params=new URLSearchParams({
+    embedded:'1',
+    story:story?.id||story?.slug||'',
+    bookStoryId:bookStoryId||'',
+    protagonistName:protagonistName||'Il tuo personaggio',
+    protagonistImage:protagonistImage||''
+  });
+
+  const frame=document.createElement('iframe');
+  frame.className='dreamtaily-configurator-frame';
+  frame.title='Configura la storia';
+  frame.src=`configuratore.html?${params.toString()}`;
+  frame.setAttribute('allow','clipboard-write');
+
+  overlay.appendChild(frame);
+  document.body.appendChild(overlay);
+  document.body.classList.add('dreamtaily-configurator-open');
+}
+
+async function persistIntegratedConfiguratorState(payload){
+  if(!payload?.bookStoryId||payload.bookStoryId!==app.activeBookStoryId) return;
+
+  const pathChoices={
+    ...(payload.setup||{}),
+    ...(payload.branch||{})
+  };
+
+  app.setupChoices={...(payload.setup||{})};
+  app.compositionChoices={...pathChoices};
+
+  const client=getSupabase();
+  const {error:pathError}=await client
+    .from('book_stories')
+    .update({
+      path_choices:pathChoices,
+      updated_at:new Date().toISOString()
+    })
+    .eq('id',payload.bookStoryId);
+
+  if(pathError) throw pathError;
+
+  if(payload.helperId){
+    const {error:helperError}=await client
+      .from('story_cast_assignments')
+      .upsert({
+        book_story_id:payload.bookStoryId,
+        slot_key:'helper',
+        character_asset_id:null,
+        catalog_character_id:payload.helperId
+      },{onConflict:'book_story_id,slot_key'});
+
+    if(helperError) throw helperError;
+  }else{
+    const {error:deleteError}=await client
+      .from('story_cast_assignments')
+      .delete()
+      .eq('book_story_id',payload.bookStoryId)
+      .eq('slot_key','helper');
+
+    if(deleteError) throw deleteError;
+  }
+}
+
+let integratedConfiguratorSaveTimer=null;
+window.addEventListener('message',event=>{
+  if(event.origin!==location.origin) return;
+  const message=event.data||{};
+
+  if(message.type==='dreamtaily:configurator-state'){
+    clearTimeout(integratedConfiguratorSaveTimer);
+    integratedConfiguratorSaveTimer=setTimeout(async()=>{
+      try{
+        await persistIntegratedConfiguratorState(message);
+      }catch(error){
+        console.error('[DreamTaily] Configurator persistence error:',error);
+        alert('Non sono riuscito a salvare le scelte della storia.');
+      }
+    },180);
+    return;
+  }
+
+  if(message.type==='dreamtaily:configurator-close'){
+    closeIntegratedStoryConfigurator();
+    loadBookStories()
+      .then(()=>renderBookSummary())
+      .then(()=>showScreen('book'))
+      .catch(error=>{
+        console.error('[DreamTaily] Configurator close error:',error);
+        showScreen('stories');
+      });
+  }
+});
+
+async function startStoryComposer(story,bookStoryId){
+  try{
+    const definition=await loadStoryDefinition(story);
+    app.activeStoryDefinition=definition;
+    app.activeBookStoryId=bookStoryId;
+
+    const current=app.bookStories.find(item=>item.id===bookStoryId);
+    app.compositionChoices={...(current?.path_choices||{})};
+    app.setupChoices={};
+
+    for(const item of definition.setup||[]){
+      if(app.compositionChoices[item.key]){
+        app.setupChoices[item.key]=app.compositionChoices[item.key];
+      }
+    }
+
+    await ensureBookCharactersHydrated();
+
+    const protagonist=getStoryProtagonistAssignment(current);
+    const savedCharacter=getSavedCharacterById(protagonist?.character_asset_id);
+    const protagonistName=savedCharacter?.name||value('name')||'Il tuo personaggio';
+    const protagonistImage=savedCharacter?.image_url||app.previewUrl||story.image||'';
+
+    openIntegratedStoryConfigurator({
+      story,
+      bookStoryId,
+      protagonistName,
+      protagonistImage
+    });
+  }catch(error){
+    console.error('[DreamTaily] Configurator start error:',error);
+    const detail=error?.message||'Errore sconosciuto';
+    showError(
+      'story-error',
+      `Non sono riuscito ad aprire il configuratore della storia: ${detail}`
+    );
+  }
+}
 function resolveEffectiveStart(definition,choices={}){const sb=(definition?.setup||[]).find(x=>x.type==='branch');if(!sb)return definition?.start||definition?.steps?.[0]?.key||null;return (sb.options||[]).find(o=>o.key===choices[sb.key])?.start||definition?.start||null}
 
 function renderSetupStep(){
