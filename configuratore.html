@@ -163,9 +163,20 @@
   .stage.asset-error{background:repeating-linear-gradient(135deg,#eadfc9,#eadfc9 14px,#f4ead8 14px,#f4ead8 28px)}
   .stage.asset-error::before{content:"Asset immagine non trovato";position:absolute;inset:0;display:grid;place-items:center;z-index:4;color:var(--coral);font-weight:800}
 
+
+  body.dt-embedded #app{max-width:1120px}
+  body.dt-embedded .embed-close{display:inline-flex}
+  .embed-close{display:none;padding:8px 13px;border-radius:10px;background:var(--cream);color:var(--muted);border:1px solid var(--line);font-weight:800}
+  body.dt-embedded .hero-selection{display:none}
+  body.dt-embedded .topbar{position:sticky;top:0;z-index:30;background:rgba(243,234,217,.94);padding:10px 0;backdrop-filter:blur(8px)}
 </style>
 </head>
 <body>
+<script>
+const DT_EMBED_PARAMS=new URLSearchParams(location.search);
+const DT_EMBEDDED=DT_EMBED_PARAMS.get("embedded")==="1";
+if(DT_EMBEDDED) document.body.classList.add("dt-embedded");
+</script>
 <div id="app"></div>
 
 <script>
@@ -367,10 +378,55 @@ const STORY = {
   ],
 };
 
+
+/* ---------------------- EMBEDDED PRODUCT INTEGRATION ---------------------- */
+const DT_EXTERNAL_PROTAGONIST_ID="__dreamtaily_protagonist__";
+const DT_EXTERNAL_NAME=DT_EMBED_PARAMS.get("protagonistName")||"";
+const DT_EXTERNAL_IMAGE=DT_EMBED_PARAMS.get("protagonistImage")||"";
+const DT_BOOK_STORY_ID=DT_EMBED_PARAMS.get("bookStoryId")||"";
+
+if(DT_EMBEDDED&&DT_EXTERNAL_IMAGE){
+  STORY.catalog.unshift({
+    id:DT_EXTERNAL_PROTAGONIST_ID,
+    name:DT_EXTERNAL_NAME||"Il tuo personaggio",
+    color:"#cf6338",
+    external:true,
+    art:{papercut:{
+      in_piedi:DT_EXTERNAL_IMAGE,
+      cammina:DT_EXTERNAL_IMAGE,
+      seduto:DT_EXTERNAL_IMAGE,
+      si_china:DT_EXTERNAL_IMAGE,
+      di_spalle:DT_EXTERNAL_IMAGE
+    }}
+  });
+}
+
+function notifyDreamTailyParent(){
+  if(!DT_EMBEDDED||window.parent===window) return;
+  window.parent.postMessage({
+    type:"dreamtaily:configurator-state",
+    bookStoryId:DT_BOOK_STORY_ID,
+    setup:{...S.setup},
+    branch:{...S.branch},
+    helperId:S.cast.helper||null,
+    protagonistName:S.protagName||DT_EXTERNAL_NAME||""
+  },location.origin);
+}
+
+function closeDreamTailyConfigurator(){
+  if(DT_EMBEDDED&&window.parent!==window){
+    window.parent.postMessage({
+      type:"dreamtaily:configurator-close",
+      bookStoryId:DT_BOOK_STORY_ID
+    },location.origin);
+  }
+}
+
 /* --------------------------------- STATE ---------------------------------- */
 let S = {
   screen:"configure",       // configure | book | checkout | delivered
-  protagonist:null, protagName:"",
+  protagonist:DT_EMBEDDED&&DT_EXTERNAL_IMAGE?DT_EXTERNAL_PROTAGONIST_ID:null,
+  protagName:DT_EMBEDDED?(DT_EXTERNAL_NAME||"Il tuo personaggio"):"",
   cast:{},                  // role -> characterId  (e.g. { helper:"gufo" })
   style:"papercut",
   setup:{ atmosfera:"tramonto" },
@@ -378,7 +434,7 @@ let S = {
   plan:"digital",
   page:0, email:"", copied:false,
 };
-function set(patch){ Object.assign(S, patch); render(); }
+function set(patch){ Object.assign(S, patch); render(); notifyDreamTailyParent(); }
 
 /* --------------------------- LOOKUP HELPERS ------------------------------- */
 const char = id => STORY.catalog.find(c=>c.id===id);
@@ -515,7 +571,7 @@ function configureScreen(){
 
   // helper chips, excluding current protagonist
   const helperSlot=STORY.cast.find(c=>c.role==="helper");
-  const helperChips = STORY.catalog.filter(c=>c.id!==S.protagonist).map(c=>`
+  const helperChips = STORY.catalog.filter(c=>c.id!==S.protagonist&&!c.external).map(c=>`
       <button class="chip ${S.cast.helper===c.id?"sel":""}"
         onclick="set({cast:Object.assign({},S.cast,{helper:'${c.id}'})})">
         <span class="sw" style="background:${c.color}"></span>${c.name}</button>`).join("");
@@ -568,7 +624,7 @@ function configureScreen(){
         <h1>Componi la tua storia</h1>
         <p class="hint">${esc(STORY.title)}</p>
 
-        <div class="sec">
+        <div class="sec hero-selection">
           <h2>${STORY.cast[0].label}<span class="req">obbligatorio</span></h2>
           <div class="chips">${heroChips}</div>
           <label class="field">Come si chiama?</label>
@@ -695,7 +751,18 @@ function deliveredScreen(){
   </div></div>`;
 }
 
-function reset(){ set({screen:"configure",protagonist:null,protagName:"",cast:{},setup:{atmosfera:"tramonto"},branch:{},plan:"digital",page:0,email:"",copied:false}); }
+function reset(){ set({
+  screen:"configure",
+  protagonist:DT_EMBEDDED&&DT_EXTERNAL_IMAGE?DT_EXTERNAL_PROTAGONIST_ID:null,
+  protagName:DT_EMBEDDED?(DT_EXTERNAL_NAME||"Il tuo personaggio"):"",
+  cast:{},
+  setup:{atmosfera:"tramonto"},
+  branch:{},
+  plan:"digital",
+  page:0,
+  email:"",
+  copied:false
+}); }
 
 /* ------------------------------- RENDER ----------------------------------- */
 function screenHTML(){
@@ -706,7 +773,7 @@ function screenHTML(){
 }
 function render(){
   document.getElementById("app").innerHTML =
-    `<div class="topbar"><div class="brand">DreamTaily <span class="mvp">MVP</span></div>${stepperHTML()}</div>`+
+    `<div class="topbar"><div class="brand">DreamTaily <span class="mvp">MVP</span></div>${stepperHTML()}<button class="embed-close" type="button" onclick="closeDreamTailyConfigurator()">Chiudi</button></div>`+
     screenHTML();
 }
 /* lightweight partial refreshers so typing in inputs doesn't lose focus */
@@ -755,6 +822,7 @@ function auditStory(){
 
 auditStory();
 render();
+notifyDreamTailyParent();
 </script>
 </body>
 </html>
