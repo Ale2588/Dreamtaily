@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DreamTaily — Demo lettore</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Lora:ital@0;1&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>html,body,#reader{min-height:100%;margin:0}</style>
+</head>
+<body>
+<main id="reader"></main>
+<script type="module">
+import { renderBook } from "../src/book-reader.js";
+const protagonist="../assets/char/water/bear.png";
+const book={
+ meta:{title:"Il bosco dei sussurri",protagonist:"Lia"},
+ cover:{title:"Il bosco dei sussurri",subtitle:"Un’avventura di Lia",
+ scene:{bg:"../stories/il-bosco-dei-sussurri/scenes/cover.png",
+ layers:[{src:protagonist,role:"protagonist",x:.5,y:.92,scale:.56,z:2}]}},
+ pages:[
+ {id:"p1",chapter:1,title:"La campanella",
+ text:"Al limitare del bosco, una piccola campanella suonava anche se non c’era vento.",
+ scene:{bg:"../stories/il-bosco-dei-sussurri/scenes/s1.notte.png",
+ layers:[{src:protagonist,role:"protagonist",x:.42,y:.91,scale:.38,z:2}]}},
+ {id:"p2",chapter:2,title:"Il primo sentiero",
+ text:"Il sentiero si divideva. A sinistra le felci; a destra il ruscello.",
+ scene:{bg:"../stories/il-bosco-dei-sussurri/scenes/s2.notte.png",
+ layers:[{src:protagonist,role:"protagonist",x:.5,y:.92,scale:.35,z:2}]}}
+ ]};
+renderBook(document.getElementById("reader"),book,{onClose(){alert("Qui tornerà il configuratore.");}});
+</script>
+</body></html>
