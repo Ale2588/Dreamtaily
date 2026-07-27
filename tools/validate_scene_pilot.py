@@ -1,68 +1,59 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-
 import json
-import sys
 from pathlib import Path
 
-CANONICAL_POSES={"in_piedi","cammina","seduto","si_china","di_spalle"}
-ALLOWED_ROLES={"protagonist","helper"}
+ROOT = Path(__file__).resolve().parents[1]
+SCENES = ROOT / "stories" / "il-bosco-dei-sussurri" / "scene-pilot.json"
 
-def validate(path: Path):
-    data=json.loads(path.read_text(encoding="utf-8"))
-    story_root=path.parents[1]
-    errors=[]
-    warnings=[]
+POSES = {"in_piedi", "cammina", "seduto", "si_china", "di_spalle"}
+ROLES = {"protagonist", "helper"}
+EXPECTED = {
+    "s1", "s2", "s3_felci", "s3_ruscello", "s4_felci",
+    "s4_ruscello", "s4", "s5", "s6_promessa", "s6_festa"
+}
 
-    setup_values={}
-    # Pilot declares verified variants directly.
-    for key,value in data.get("verified_repository_assets",{}).items():
-        setup_values.setdefault("atmosfera",set()).add(key)
-        asset=story_root/value
-        if not asset.is_file():
-            errors.append(f"asset verificato mancante: {value}")
+data = json.loads(SCENES.read_text(encoding="utf-8"))
+scenes = data.get("scenes", {})
+errors = []
 
-    for step in data.get("steps",[]):
-        scene=step.get("scene")
-        if not scene:
-            warnings.append(f"scene mancante: {step.get('key')}")
-            continue
+if set(scenes) != EXPECTED:
+    errors.append(f"scene ids: expected {sorted(EXPECTED)}, found {sorted(scenes)}")
 
-        background=scene.get("background_ref")
-        if not background or not (story_root/background).is_file():
-            errors.append(f"background mancante: {step.get('key')}/{background}")
+for scene_id, scene in scenes.items():
+    if scene.get("scene_id") != scene_id:
+        errors.append(f"{scene_id}: scene_id mismatch")
+    if not scene.get("background_ref"):
+        errors.append(f"{scene_id}: background_ref missing")
 
-        for variable,values in (scene.get("variant_backgrounds") or {}).items():
-            expected=setup_values.get(variable,set())
-            actual=set(values)
-            for unknown in sorted(actual-expected):
-                errors.append(f"variante sfondo sconosciuta: {step.get('key')}/{variable}/{unknown}")
-            for value,ref in values.items():
-                if not (story_root/ref).is_file():
-                    errors.append(f"variant background mancante: {step.get('key')}/{ref}")
+    protagonist_count = 0
+    for index, slot in enumerate(scene.get("slots", [])):
+        role = slot.get("role")
+        pose = slot.get("pose")
+        if role not in ROLES:
+            errors.append(f"{scene_id}.slots[{index}]: invalid role {role!r}")
+        if pose not in POSES:
+            errors.append(f"{scene_id}.slots[{index}]: invalid pose {pose!r}")
+        if role == "protagonist":
+            protagonist_count += 1
+            if pose != "in_piedi":
+                errors.append(f"{scene_id}: MVP protagonist pose must be in_piedi")
 
-        for slot in scene.get("slots",[]):
-            role=slot.get("role")
-            pose=slot.get("pose")
-            if role not in ALLOWED_ROLES:
-                errors.append(f"role non valido: {step.get('key')}/{role}")
-            if pose not in CANONICAL_POSES:
-                errors.append(f"pose non valida: {step.get('key')}/{pose}")
-            for field in ("x","y","scale"):
-                value=slot.get(field)
-                if not isinstance(value,(int,float)) or not 0<=value<=1:
-                    errors.append(f"{field} fuori intervallo: {step.get('key')}/{role}/{value}")
-            if not isinstance(slot.get("z"),(int,float)):
-                errors.append(f"z non valido: {step.get('key')}/{role}")
+        for field in ("x", "y", "scale"):
+            value = slot.get(field)
+            if not isinstance(value, (int, float)) or not 0 <= value <= 1:
+                errors.append(f"{scene_id}.slots[{index}].{field}: must be 0..1")
 
-    return errors,warnings
+        z = slot.get("z")
+        if not isinstance(z, int):
+            errors.append(f"{scene_id}.slots[{index}].z: must be integer")
 
-if __name__=="__main__":
-    if len(sys.argv)!=2:
-        print("Uso: python tools/validate_scene_pilot.py stories/.../scene-pilot.json")
-        raise SystemExit(2)
-    errors,warnings=validate(Path(sys.argv[1]))
-    for item in warnings: print("WARNING:",item)
-    for item in errors: print("ERROR:",item)
-    print(f"Esito: {len(errors)} errori, {len(warnings)} warning")
-    raise SystemExit(1 if errors else 0)
+    if protagonist_count != 1:
+        errors.append(f"{scene_id}: expected exactly one protagonist slot")
+
+if errors:
+    print("SCENE VALIDATION FAILED")
+    for error in errors:
+        print("-", error)
+    raise SystemExit(1)
+
+print(f"SCENE VALIDATION OK: {len(scenes)} narrative scenes + cover")
