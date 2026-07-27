@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DreamTaily — Configuratore (reference)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DESIGN TOKENS  (derived from the approved Claude Design look)
+     ============================================================ */
+  :root{
+    --cream:#f3ead9;
+    --cream-card:#fff8ec;
+    --ink:#2e2a24;
+    --muted:#6b6152;
+    --faint:#a89a7f;
+    --teal:#2f7d78;        /* primary accent */
+    --coral:#cf6338;       /* hover / protagonist */
+    --green:#4f7a45;       /* success / "clean" */
+    --line:rgba(46,42,36,0.12);
+    --radius:14px;
+    --shadow-sm:0 2px 6px rgba(0,0,0,.05);
+    --shadow-md:0 8px 20px rgba(0,0,0,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--cream);
+    background-image:radial-gradient(rgba(46,42,36,.035) 1px,transparent 1px);
+    background-size:4px 4px;
+    color:var(--ink);
+    font-family:'Baloo 2',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  #app{max-width:1040px;margin:0 auto;padding:22px 18px 80px}
+  input{font-family:inherit;font-size:15px}
+  input:focus{outline:2px solid var(--teal);outline-offset:1px}
+  button{font-family:inherit;border:none;cursor:pointer}
+  @keyframes floatIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .screen{animation:floatIn .35s ease both}
+
+  /* header + stepper */
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+  .brand{display:flex;align-items:baseline;gap:8px;font-weight:800;font-size:22px}
+  .brand .mvp{font-size:11px;font-weight:700;color:var(--faint);background:#e9dcc4;padding:2px 7px;border-radius:6px}
+  .stepper{display:flex;align-items:center;gap:4px}
+  .stepper .st{display:flex;align-items:center;gap:6px}
+  .stepper .n{width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:#e0d3ba;color:var(--faint)}
+  .stepper .n.active{background:var(--teal);color:#fff}
+  .stepper .n.done{background:var(--green);color:#fff}
+  .stepper .lbl{font-size:13px;color:var(--faint);font-weight:500}
+  .stepper .lbl.active{color:var(--ink);font-weight:700}
+  .stepper .dash{width:16px;height:2px;background:var(--line);margin:0 2px}
+
+  /* layout */
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  @media(max-width:820px){.cols{grid-template-columns:1fr}}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow-sm)}
+  h1{font-size:26px;font-weight:800;margin-bottom:4px}
+  h2{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .req{font-size:11px;font-weight:700;color:var(--coral);background:rgba(207,99,56,.12);padding:2px 7px;border-radius:6px}
+  .opt{font-size:11px;font-weight:600;color:var(--faint)}
+  .tag{font-family:ui-monospace,monospace;font-size:10px;color:var(--faint);background:#e9dcc4;padding:2px 6px;border-radius:5px}
+  .sec{margin-top:20px}
+  .sec:first-child{margin-top:0}
+  .hint{font-size:13px;color:var(--muted);margin-top:6px}
+
+  /* chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{display:inline-flex;align-items:center;gap:9px;padding:11px 13px;border-radius:12px;
+    background:var(--cream);border:2px solid var(--line);box-shadow:var(--shadow-sm);
+    font-size:14px;color:var(--ink);text-align:left;transition:all .15s}
+  .chip.full{width:100%}
+  .chip.sel{background:var(--cream-card);border-color:var(--teal);box-shadow:0 6px 16px rgba(47,125,120,.22)}
+  .chip.dis{opacity:.4;cursor:not-allowed}
+  .chip.col{flex-direction:column;align-items:flex-start;gap:3px}
+  .chip .desc{font-size:12px;color:var(--muted);font-weight:500}
+  .sw{width:22px;height:22px;border-radius:7px;border:2px solid var(--cream);box-shadow:0 2px 5px rgba(0,0,0,.2);flex-shrink:0;transform:rotate(-4deg)}
+  .sw.sm{width:16px;height:16px;border-radius:5px}
+
+  label.field{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-top:12px;margin-bottom:5px}
+  input.text{width:100%;padding:11px 13px;border-radius:12px;border:2px solid var(--line);background:var(--cream)}
+  .locked{opacity:.42;pointer-events:none;filter:saturate(.3)}
+
+  /* preview stage */
+  .stage-wrap{position:sticky;top:18px}
+  .stage{position:relative;width:100%;aspect-ratio:4/3;border-radius:16px;overflow:hidden;
+    background:#e9dcc4;border:1px solid var(--line);box-shadow:var(--shadow-md)}
+  .stage .bgtag{position:absolute;top:8px;left:8px;z-index:5;font-family:ui-monospace,monospace;
+    font-size:10px;color:var(--muted);background:rgba(243,234,217,.85);padding:3px 7px;border-radius:6px}
+  .wash{position:absolute;inset:0;pointer-events:none}
+  .fig{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center}
+  .fig .head{width:62%;aspect-ratio:1;border-radius:50%;border:3px solid var(--cream);box-shadow:0 6px 14px rgba(0,0,0,.22);flex-shrink:0}
+  .fig .body{width:100%;flex:1;margin-top:-8%;border-radius:44% 44% 32% 32%/34% 34% 24% 24%;border:3px solid var(--cream);box-shadow:0 10px 18px rgba(0,0,0,.22);filter:brightness(.9)}
+  .fig .figtag{position:absolute;bottom:-19px;left:50%;transform:translateX(-50%);font-family:ui-monospace,monospace;
+    font-size:10px;white-space:nowrap;color:var(--muted);background:var(--cream);padding:2px 7px;border-radius:5px;border:1px solid var(--line)}
+  .fig img{height:100%;width:auto;filter:drop-shadow(0 8px 12px rgba(0,0,0,.22))}
+
+  .preview-cap{display:flex;align-items:center;justify-content:space-between;margin:10px 2px 8px;font-size:12px;color:var(--muted)}
+  .previewtext{font-size:15px;color:var(--ink);background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-height:64px}
+  .notice{margin-top:12px;font-size:12.5px;color:var(--muted);background:rgba(47,125,120,.08);
+    border:1px solid rgba(47,125,120,.22);border-radius:12px;padding:10px 12px;line-height:1.45}
+  .notice b{color:var(--teal)}
+  .empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--faint);font-size:14px;text-align:center;padding:20px}
+
+  /* buttons */
+  .btn{font-weight:700;border-radius:12px;transition:all .15s}
+  .btn.primary{padding:12px 22px;background:var(--teal);color:#fff;box-shadow:0 6px 16px rgba(47,125,120,.3);font-size:15px}
+  .btn.block{display:block;width:100%;margin-top:16px;padding:14px;background:var(--teal);color:#fff;box-shadow:0 8px 20px rgba(47,125,120,.32);font-size:16px}
+  .btn.ghost{padding:9px 16px;background:transparent;color:var(--muted);border:2px solid var(--line);font-size:14px}
+  .btn:disabled{background:#cdbfa2;color:#fff;box-shadow:none;opacity:.55;cursor:not-allowed}
+
+  /* book */
+  .book-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+  .marker{font-family:ui-monospace,monospace;font-size:11px;font-weight:600;padding:5px 10px;border-radius:7px}
+  .marker.ok{background:rgba(79,122,69,.14);color:var(--green);border:1px solid rgba(79,122,69,.3)}
+  .marker.bad{background:rgba(207,99,56,.18);color:var(--coral);border:1px solid rgba(207,99,56,.4)}
+  .chapterlbl{font-family:ui-monospace,monospace;font-size:11px;color:var(--faint)}
+  .dots{display:flex;gap:6px;justify-content:center;margin:14px 0}
+  .dot{height:9px;border-radius:5px;background:rgba(46,42,36,.18);cursor:pointer;transition:all .2s;padding:0}
+  .navrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+
+  /* checkout */
+  .sumrow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
+  .sumrow .k{color:var(--muted)}
+  .sumrow .v{font-weight:700}
+  .plan{display:flex;align-items:center;justify-content:space-between;padding:14px;border-radius:14px;border:2px solid var(--line);margin-top:10px;background:var(--cream)}
+  .plan.sel{border-color:var(--teal);background:var(--cream-card)}
+  .plan.soon{opacity:.55}
+  .price{font-size:26px;font-weight:800;color:var(--teal)}
+  .perma{display:flex;align-items:center;gap:8px;background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-family:ui-monospace,monospace;font-size:13px;margin-top:12px;word-break:break-all}
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{
+      animation-duration:.01ms!important;
+      animation-iteration-count:1!important;
+      transition-duration:.01ms!important;
+      scroll-behavior:auto!important;
+    }
+  }
+  .stage.has-real-bg .bgtag{background:rgba(255,248,236,.88)}
+  .stage-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============================================================================
+   DreamTaily — CONFIGURATORE (reference implementation, vanilla JS, no build)
+   ----------------------------------------------------------------------------
+   This is a faithful + generalized rewrite of the Claude Design prototype.
+   Everything narrative for this static integration lives in the STORY object below (shaped like the
+   story.json v2 format). The engine is generic: N cast slots, N branches,
+   N setup variables. To build a bigger/different story you edit DATA, not code.
+   Nothing here calls an AI. The preview is the deterministic real book.
+============================================================================ */
+
+/* ------------------------------- STORY DATA ------------------------------- */
+/* One demo story ("La radura silenziosa"). Placeholder art = colored blobs;
+   drop real PNGs into catalog[].art[style][pose] and scene bg paths to go live. */
+const STORY = {
+  id: "il-bosco-dei-sussurri",
+  title: "Il bosco dei sussurri",
+  subtitle: "Un'avventura di",
+  price: "€14,90",
+  assetRoot: "",
+
+  styles: [
+    { id:"papercut", label:"Paper Cut", active:true },
+    { id:"acquerello", label:"Acquerello", active:false },
+    { id:"pastello", label:"Pastelli", active:false },
+  ],
+
+  cast: [
+    { role:"protagonist", label:"Il tuo eroe", required:true, nameToken:"Nome" },
+    { role:"helper", label:"Un compagno di viaggio", required:true, nameToken:"Aiutante", entranceToken:"ENTRATA_AIUTANTE" },
+  ],
+
+  catalog: [
+    { id:"etto", name:"Etto", color:"#cf6338", art:{ papercut:{
+      in_piedi:"assets/char/crayon/fox.png", cammina:"assets/char/crayon/fox.png",
+      seduto:"assets/char/crayon/fox.png", si_china:"assets/char/crayon/fox.png", di_spalle:"assets/char/crayon/fox.png"
+    }}},
+    { id:"briciola", name:"Briciola", color:"#8a6a42", art:{ papercut:{
+      in_piedi:"assets/char/water/rabbit.png", cammina:"assets/char/water/rabbit.png",
+      seduto:"assets/char/water/rabbit.png", si_china:"assets/char/water/rabbit.png", di_spalle:"assets/char/water/rabbit.png"
+    }}},
+    { id:"fiamma", name:"Fiamma", color:"#9c6b3f", art:{ papercut:{
+      in_piedi:"assets/char/water/bear.png", cammina:"assets/char/water/bear.png",
+      seduto:"assets/char/water/bear.png", si_china:"assets/char/water/bear.png", di_spalle:"assets/char/water/bear.png"
+    }}},
+    { id:"ulivo", name:"Ulivo", color:"#4f7a45", art:{ papercut:{
+      in_piedi:"assets/char/paper/rabbit.png", cammina:"assets/char/paper/rabbit.png",
+      seduto:"assets/char/paper/rabbit.png", si_china:"assets/char/paper/rabbit.png", di_spalle:"assets/char/paper/rabbit.png"
+    }}},
+  ],
+
+  setup: [
+    { id:"atmosfera", kind:"variant", label:"Quando comincia?", note:"variant_backgrounds", options:[
+      { id:"tramonto", label:"Al tramonto", swatch:"#cf6338", wash:"rgba(207,99,56,0.18)",
+        image:"stories/il-bosco-dei-sussurri/setup/atmosfera_tramonto.png" },
+      { id:"notte", label:"Di notte", swatch:"#28345a", wash:"rgba(40,52,84,0.20)",
+        image:"stories/il-bosco-dei-sussurri/setup/atmosfera_notte.png" },
+    ]},
+  ],
+
+  branches: [
+    { id:"d_sentiero", label:"Il primo sentiero", note:"path_choices",
+      prompt:"Da che parte prosegue [protag]?",
+      options:[
+        { id:"felci", label:"Tra le felci", desc:"Un passaggio fitto tra foglie e radici" },
+        { id:"ruscello", label:"Lungo il ruscello", desc:"Una traccia che segue il suono dell'acqua" },
+      ]},
+    { id:"d_finale", label:"Il saluto al bosco", note:"path_choices",
+      prompt:"Come termina l'avventura?",
+      options:[
+        { id:"promessa", label:"Con una promessa", desc:"Il protagonista promette di tornare" },
+        { id:"festa", label:"Con una piccola festa", desc:"La radura si riempie di gioia" },
+      ]},
+  ],
+
+  previewStepId: "s4",
+
+  steps: [
+    { id:"s1", chapter:1, title:"La campanella",
+      scene:{ bgBySetup:"atmosfera", slots:[
+        {role:"protagonist",pose:"in_piedi",x:.72,y:.94,scale:.38,z:2}
+      ]},
+      content:{
+        base:"Al limitare del bosco, una piccola campanella suona anche se non c'è vento. [Nome] decide di seguirla.",
+        variants:{
+          notte:"Nella quiete della notte, una piccola campanella suona oltre il sentiero. [Nome] decide di seguirla.",
+          tramonto:"Nell'ultima luce del tramonto, una piccola campanella suona oltre il sentiero. [Nome] decide di seguirla."
+        },
+        entrance:null
+      } },
+
+    { id:"s2", chapter:2, title:"Il primo sentiero",
+      scene:{ bgBySetup:"atmosfera", slots:[
+        {role:"protagonist",pose:"si_china",x:.67,y:.95,scale:.38,z:2}
+      ]},
+      content:{
+        base:"Il sentiero si divide: da una parte passa tra le felci, dall'altra costeggia il ruscello. [Nome] deve scegliere.",
+        variants:{},
+        entrance:null
+      } },
+
+    { id:"s3_felci", chapter:3, title:"Qualcuno tra le foglie",
+      gate:{branch:"d_sentiero",option:"felci"},
+      scene:{ bgBySetup:"atmosfera", slots:[
+        {role:"protagonist",pose:"cammina",x:.42,y:.95,scale:.37,z:2},
+        {role:"helper",pose:"in_piedi",x:.67,y:.94,scale:.28,z:1}
+      ]},
+      content:{
+        base:"Tra le foglie si sente un fruscio. [ENTRATA_AIUTANTE] [Nome] e [Aiutante] decidono di proseguire insieme.",
+        variants:{},
+        entrance:{role:"helper",text:"[Aiutante] compare tra le felci e mostra di conoscere il bosco."}
+      } },
+
+    { id:"s3_ruscello", chapter:3, title:"Le impronte nell'acqua",
+      gate:{branch:"d_sentiero",option:"ruscello"},
+      scene:{ bgBySetup:"atmosfera", slots:[
+        {role:"protagonist",pose:"cammina",x:.42,y:.95,scale:.37,z:2},
+        {role:"helper",pose:"in_piedi",x:.67,y:.94,scale:.28,z:1}
+      ]},
+      content:{
+        base:"Accanto al ruscello compaiono piccole impronte. [ENTRATA_AIUTANTE] [Nome] e [Aiutante] seguono insieme il suono.",
+        variants:{},
+        entrance:{role:"helper",text:"Le impronte conducono a [Aiutante], che sembra sapere dove porta la campanella."}
+      } },
+
+    { id:"s4_felci", chapter:4, title:"Il passaggio sotto le radici",
+      gate:{branch:"d_sentiero",option:"felci"},
+      scene:{ bgBySetup:"atmosfera", slots:[
+        {role:"protagonist",pose:"si_china",x:.43,y:.96,scale:.36,z:2},
+        {role:"helper",pose:"si_china",x:.65,y:.95,scale:.27,z:1}
+      ]},
+      content:{
+        base:"Tra le felci, [Nome] e [Aiutante] trovano un passaggio basso che conduce verso il cuore del bosco.",
+        variants:{},
+        entrance:null
+      } },
+
+    { id:"s4_ruscello", chapter:4, title:"Il ponte di pietre",
+      gate:{branch:"d_sentiero",option:"ruscello"},
+      scene:{ bgBySetup:"atmosfera", slots:[
+        {role:"protagonist",pose:"cammina",x:.43,y:.95,scale:.36,z:2},
+        {role:"helper",pose:"cammina",x:.66,y:.94,scale:.27,z:1}
+      ]},
+      content:{
+        base:"Il ruscello si allarga. [Nome] e [Aiutante] lo attraversano seguendo il ritmo della campanella.",
+        variants:{},
+        entrance:null
+      } },
+
+    { id:"s4", chapter:5, title:"La radura silenziosa",
+      scene:{ bgBySetup:"atmosfera", slots:[
+        {role:"protagonist",pose:"seduto",x:.43,y:.95,scale:.36,z:2},
+        {role:"helper",pose:"seduto",x:.65,y:.95,scale:.27,z:1}
+      ]},
+      content:{
+        base:"Nella radura la campanella tace. [Nome] e [Aiutante] smettono di correre e ascoltano davvero.",
+        variants:{
+          notte:"Nella radura immersa nella notte, la campanella tace. [Nome] e [Aiutante] si fermano sotto il cielo scuro e ascoltano davvero.",
+          tramonto:"Nella radura accesa dal tramonto, la campanella tace. [Nome] e [Aiutante] si fermano nella luce arancione e ascoltano davvero."
+        },
+        entrance:null
+      } },
+
+    { id:"s5", chapter:6, title:"Il ritorno",
+      scene:{ bgBySetup:"atmosfera", slots:[
+        {role:"protagonist",pose:"in_piedi",x:.44,y:.95,scale:.37,z:2},
+        {role:"helper",pose:"in_piedi",x:.66,y:.94,scale:.28,z:1}
+      ]},
+      content:{
+        base:"La campanella torna libera. Ora [Nome] deve decidere come salutare il bosco insieme a [Aiutante].",
+        variants:{},
+        entrance:null
+      } },
+
+    { id:"s6_promessa", chapter:7, title:"La promessa",
+      gate:{branch:"d_finale",option:"promessa"},
+      scene:{ bgBySetup:"atmosfera", slots:[
+        {role:"protagonist",pose:"di_spalle",x:.47,y:.96,scale:.39,z:2},
+        {role:"helper",pose:"di_spalle",x:.65,y:.95,scale:.28,z:1}
+      ]},
+      content:{
+        base:"[Nome] lascia la campanella a [Aiutante] e promette di tornare. Il bosco conserva quel piccolo suono come un saluto.",
+        variants:{},
+        entrance:null
+      } },
+
+    { id:"s6_festa", chapter:7, title:"La piccola festa",
+      gate:{branch:"d_finale",option:"festa"},
+      scene:{ bgBySetup:"atmosfera", slots:[
+        {role:"protagonist",pose:"in_piedi",x:.43,y:.95,scale:.38,z:2},
+        {role:"helper",pose:"in_piedi",x:.65,y:.94,scale:.28,z:1}
+      ]},
+      content:{
+        base:"Prima di tornare a casa, [Nome], [Aiutante] e gli animali del bosco festeggiano nella radura.",
+        variants:{},
+        entrance:null
+      } },
+  ],
+};
+
+/* --------------------------------- STATE ---------------------------------- */
+let S = {
+  screen:"configure",       // configure | book | checkout | delivered
+  protagonist:null, protagName:"",
+  cast:{},                  // role -> characterId  (e.g. { helper:"gufo" })
+  style:"papercut",
+  setup:{ atmosfera:"tramonto" },
+  branch:{},                // branchId -> optionId
+  plan:"digital",
+  page:0, email:"", copied:false,
+};
+function set(patch){ Object.assign(S, patch); render(); }
+
+/* --------------------------- LOOKUP HELPERS ------------------------------- */
+const char = id => STORY.catalog.find(c=>c.id===id);
+const filled = role => role==="protagonist" ? S.protagonist : S.cast[role];
+const roleName = role => { const id=filled(role); return id ? char(id).name : ""; };
+const atmos = () => STORY.setup.find(s=>s.id==="atmosfera");
+const atmosOpt = () => atmos().options.find(o=>o.id===S.setup.atmosfera);
+
+/* ------------------------- CORE: TEXT RESOLUTION -------------------------- */
+/* Order: base -> variant[activeSetup] -> entrances (per role, only if filled)
+   -> name tokens ([Nome], [Aiutante], ...). Deterministic, no AI. */
+function resolveText(step){
+  const at = S.setup.atmosfera;
+  let t = (step.content.variants && step.content.variants[at]) || step.content.base;
+
+  // entrance token(s): keyed by cast role, injected only when that role is filled
+  const ent = step.content.entrance;
+  if (ent){
+    const slot = STORY.cast.find(c=>c.role===ent.role);
+    const token = "["+slot.entranceToken+"]";
+    t = t.split(token).join(filled(ent.role) ? ent.text : "");
+  }
+  // name tokens for every cast role
+  const protagTok = STORY.cast.find(c=>c.role==="protagonist").nameToken;
+  t = t.split("["+protagTok+"]").join(S.protagName.trim() || "["+protagTok+"]");
+  STORY.cast.filter(c=>c.role!=="protagonist").forEach(c=>{
+    t = t.split("["+c.nameToken+"]").join(roleName(c.role));
+  });
+  return t.replace(/\s+/g," ").trim();
+}
+const hasRawMarkers = t => /\[[^\]]+\]/.test(t);
+
+/* ---------------------- CORE: SCENE COMPOSITION --------------------------- */
+/* bg (+ variantBg per atmosfera) + character layers positioned by x/y/scale/z,
+   filtered by whether the referenced cast role is filled, sorted by z. */
+function resolveAsset(ref){
+  if(!ref) return "";
+  if(/^(?:https?:|data:|blob:|\/)/.test(ref)) return ref;
+  return `${STORY.assetRoot||""}${ref}`;
+}
+function buildScene(step){
+  const at = S.setup.atmosfera;
+  const setupOption = atmos().options.find(o=>o.id===at);
+  const bg = step.scene.bgBySetup==="atmosfera"
+    ? setupOption.image
+    : ((step.scene.variantBg && step.scene.variantBg[at]) || step.scene.bg);
+  const layers = step.scene.slots
+    .filter(s => !!filled(s.role))
+    .sort((a,b)=>a.z-b.z)
+    .map(s=>{
+      const c = char(filled(s.role));
+      const artRef = c.art && c.art[S.style] && c.art[S.style][s.pose];
+      return { role:s.role, pose:s.pose, color:c.color, art:resolveAsset(artRef), x:s.x, y:s.y, scale:s.scale, z:s.z,
+               rot: s.role==="helper" ? 2 : -1.5 };
+    });
+  return { bg:resolveAsset(bg), wash:setupOption.wash, layers };
+}
+
+/* ----------------------- CORE: PAGE ASSEMBLY ------------------------------ */
+/* Include ungated steps always; include a gated step only if its branch option
+   is the chosen one. Then order by chapter. */
+function pages(){
+  return STORY.steps
+    .filter(st => !st.gate || S.branch[st.gate.branch]===st.gate.option);
+}
+
+/* --------------------------- RENDER HELPERS ------------------------------- */
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function figHTML(l, showTag){
+  const inner = l.art
+    ? `<img src="${esc(l.art)}" alt="">`
+    : `<div class="head" style="background:${l.color}"></div><div class="body" style="background:${l.color}"></div>`;
+  return `<div class="fig" style="left:${l.x*100}%;top:${l.y*100}%;height:${l.scale*100}%;z-index:${l.z+2};
+    transform:translate(-50%,-100%) rotate(${l.rot}deg);aspect-ratio:.52">
+    ${inner}${showTag?`<div class="figtag">${l.role} · ${l.pose}</div>`:""}</div>`;
+}
+function stageHTML(step, showTag){
+  const sc = buildScene(step);
+  const figs = sc.layers.map(l=>figHTML(l,showTag)).join("");
+  return `<div class="stage has-real-bg">
+    <img class="stage-bg" src="${esc(sc.bg)}" alt="">
+    <div class="bgtag">bg: ${esc(sc.bg)}</div>
+    <div class="wash" style="background:${sc.wash};z-index:1"></div>
+    ${figs}
+  </div>`;
+}
+
+/* ------------------------------- SCREENS ---------------------------------- */
+function stepperHTML(){
+  const order=["configure","book","checkout","delivered"];
+  const labels={configure:"Configura",book:"Sfoglia",checkout:"Checkout",delivered:"Consegna"};
+  const cur=order.indexOf(S.screen);
+  return `<div class="stepper">`+order.map((k,i)=>{
+    const active=i===cur, done=i<cur;
+    return `<div class="st"><div class="n ${active?"active":done?"done":""}">${done?"✓":i+1}</div>
+      <span class="lbl ${active?"active":""}">${labels[k]}</span></div>`+
+      (i<order.length-1?`<div class="dash"></div>`:"");
+  }).join("")+`</div>`;
+}
+
+function configureScreen(){
+  const hasProtag=!!S.protagonist;
+  const locked = hasProtag ? "" : "locked";
+
+  // hero chips
+  const heroChips = STORY.catalog.map(c=>`
+    <button class="chip full ${S.protagonist===c.id?"sel":""}"
+      onclick="set({protagonist:'${c.id}',protagName: S.protagName||'${c.name}'})">
+      <span class="sw" style="background:${c.color}"></span>${c.name}</button>`).join("");
+
+  // helper chips (Nessuno + others, excluding current protagonist)
+  const helperSlot=STORY.cast.find(c=>c.role==="helper");
+  const helperChips = STORY.catalog.filter(c=>c.id!==S.protagonist).map(c=>`
+      <button class="chip ${S.cast.helper===c.id?"sel":""}"
+        onclick="set({cast:Object.assign({},S.cast,{helper:'${c.id}'})})">
+        <span class="sw" style="background:${c.color}"></span>${c.name}</button>`).join("");
+
+  // style chips
+  const styleChips = STORY.styles.map(st=>`
+    <button class="chip ${S.style===st.id?"sel":""} ${st.active?"":"dis"}"
+      ${st.active?`onclick="set({style:'${st.id}'})"`:""}>
+      ${st.label}<span class="tag">${st.active?"attivo":"presto"}</span></button>`).join("");
+
+  // atmosfera chips
+  const at=atmos();
+  const atChips = at.options.map(o=>`
+    <button class="chip ${S.setup.atmosfera===o.id?"sel":""}"
+      onclick="set({setup:Object.assign({},S.setup,{atmosfera:'${o.id}'})})">
+      <span class="sw sm" style="background:${o.swatch}"></span>${o.label}</button>`).join("");
+
+  // branch blocks (one per branch)
+  const protagLbl = S.protagName || "il protagonista";
+  const branchBlocks = STORY.branches.map(b=>`
+    <div class="sec">
+      <h2>${b.label}<span class="tag">${b.note}</span></h2>
+      <p class="hint" data-branch-prompt="${b.id}">${esc(b.prompt.replace("[protag]",protagLbl))}</p>
+      <div class="chips">${b.options.map(o=>`
+        <button class="chip full col ${S.branch[b.id]===o.id?"sel":""}"
+          onclick="set({branch:Object.assign({},S.branch,{${b.id}:'${o.id}'})})">
+          <span>${o.label}</span><span class="desc">${o.desc}</span></button>`).join("")}</div>
+    </div>`).join("");
+
+  // preview
+  const previewStep = STORY.steps.find(s=>s.id===STORY.previewStepId);
+  const previewHTML = hasProtag
+    ? `${stageHTML(previewStep,true)}
+       <div class="preview-cap"><span>Anteprima composta</span><span>Cap. ${previewStep.chapter} · ${previewStep.title}</span></div>
+       <div class="previewtext" id="live-preview-text">${esc(resolveText(previewStep))}</div>`
+    : `<div class="stage"><div class="empty">Scegli il tuo eroe per vedere l'anteprima del libro.</div></div>`;
+
+  const allBranchesChosen = STORY.branches.every(b=>!!S.branch[b.id]);
+  const requiredCastReady=STORY.cast
+    .filter(slot=>slot.required&&slot.role!=="protagonist")
+    .every(slot=>!!S.cast[slot.role]);
+  const canBrowse = hasProtag && requiredCastReady && allBranchesChosen;
+
+  return `<div class="screen">
+    <div class="cols">
+      <div class="panel">
+        <h1>Componi la tua storia</h1>
+        <p class="hint">${esc(STORY.title)}</p>
+
+        <div class="sec">
+          <h2>${STORY.cast[0].label}<span class="req">obbligatorio</span></h2>
+          <div class="chips">${heroChips}</div>
+          <label class="field">Come si chiama?</label>
+          <input class="text" value="${esc(S.protagName)}" placeholder="Il nome del tuo eroe"
+            oninput="S.protagName=this.value;updateNameDependentUI()">
+        </div>
+
+        <div class="${locked}">
+          <div class="sec">
+            <h2>${helperSlot.label}<span class="opt">facoltativo · slot helper</span></h2>
+            <div class="chips">${helperChips}</div>
+          </div>
+          <div class="sec">
+            <h2>Lo stile<span class="tag">3 stili</span></h2>
+            <div class="chips">${styleChips}</div>
+          </div>
+          <div class="sec">
+            <h2>${at.label}<span class="tag">${at.note}</span></h2>
+            <div class="chips">${atChips}</div>
+          </div>
+          ${branchBlocks}
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="stage-wrap">
+          ${previewHTML}
+          <div class="notice"><b>Questa è l'anteprima reale del libro.</b> Nessuna intelligenza artificiale:
+            il testo e le illustrazioni che vedi qui sono esattamente ciò che riceverai. Puoi sfogliare
+            tutto il libro prima di pagare.</div>
+          <button class="btn block" ${canBrowse?"":"disabled"}
+            onclick="set({screen:'book',page:0})">Sfoglia il libro →</button>
+          <p class="hint" style="text-align:center">${canBrowse
+            ? "testo risolto + scene composte, all'istante"
+            : "scegli eroe, compagno e completa i bivi per continuare"}</p>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bookScreen(){
+  const pgs=pages();
+  const idx=Math.min(S.page,pgs.length-1);
+  const step=pgs[idx];
+  const text=resolveText(step);
+  const clean=!hasRawMarkers(text);
+  const dots=pgs.map((p,i)=>`<button class="dot" style="width:${i===idx?22:9}px;background:${i===idx?"var(--teal)":"rgba(46,42,36,.18)"}" onclick="set({page:${i}})"></button>`).join("");
+  const last=idx===pgs.length-1;
+  return `<div class="screen"><div class="panel" style="max-width:640px;margin:0 auto">
+    <div class="book-top">
+      <button class="btn ghost" onclick="set({screen:'configure'})">← Modifica</button>
+      <span class="chapterlbl">Pagina ${idx+1} di ${pgs.length}</span>
+      <span class="marker ${clean?"ok":"bad"}">${clean?"✓ nessun marcatore grezzo":"⚠ marcatore residuo"}</span>
+    </div>
+    <div class="chapterlbl" style="margin-bottom:6px">Capitolo ${step.chapter}</div>
+    <h2 style="font-size:20px;margin-bottom:10px">${esc(step.title)}</h2>
+    ${stageHTML(step,false)}
+    <p style="margin-top:14px;font-size:16px">${esc(text)}</p>
+    <div class="dots">${dots}</div>
+    <div class="navrow">
+      <button class="btn ghost" style="opacity:${idx===0?.35:1};pointer-events:${idx===0?"none":"auto"}" onclick="set({page:${Math.max(0,idx-1)}})">← Indietro</button>
+      ${last
+        ? `<button class="btn primary" onclick="set({screen:'checkout'})">Ordina il libro →</button>`
+        : `<button class="btn primary" onclick="set({page:${idx+1}})">Avanti →</button>`}
+    </div>
+  </div></div>`;
+}
+
+function checkoutScreen(){
+  const pgs=pages();
+  const summary=[
+    ["Protagonista", S.protagName||"—"],
+    ["Compagno", roleName("helper")||"—"],
+    ["Stile", STORY.styles.find(s=>s.id===S.style).label],
+    ["Atmosfera", atmosOpt().label],
+  ].concat(STORY.branches.map(b=>{
+    const o=b.options.find(x=>x.id===S.branch[b.id]);
+    return [b.label, o?o.label:"—"];
+  })).concat([["Pagine", String(pgs.length)]]);
+
+  const emailValid=/\S+@\S+\.\S+/.test(S.email);
+  return `<div class="screen"><div class="panel" style="max-width:560px;margin:0 auto">
+    <button class="btn ghost" onclick="set({screen:'book'})">← Torna al libro</button>
+    <h1 style="margin-top:12px">Il tuo libro</h1>
+    <p class="hint">Checkout dimostrativo. Nessun pagamento reale.</p>
+    <div style="background:var(--cream);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px">
+      <div style="font-weight:800;font-size:18px">${esc(STORY.title)}</div>
+      <div class="hint">${esc(STORY.subtitle)} ${esc(S.protagName||"—")}</div>
+    </div>
+    <div style="margin-top:14px">${summary.map(r=>`<div class="sumrow"><span class="k">${r[0]}</span><span class="v">${esc(r[1])}</span></div>`).join("")}</div>
+
+    <div class="plan ${S.plan==="digital"?"sel":""}" onclick="set({plan:'digital'})">
+      <div><div style="font-weight:800">Libro digitale</div><div class="hint">link permanente · pronto subito</div></div>
+      <div class="price">${STORY.price}</div>
+    </div>
+    <div class="plan soon">
+      <div><span style="font-weight:800">Libro stampato e spedito</span> <span class="tag">presto</span></div>
+    </div>
+
+    <label class="field">La tua email</label>
+    <input class="text" type="email" value="${esc(S.email)}" placeholder="dove ricevere il libro"
+      oninput="S.email=this.value;renderPayBtnOnly()">
+    <button id="paybtn" class="btn block" ${emailValid?"":"disabled"}
+      onclick="set({screen:'delivered'})">Paga ${STORY.price} (finto)</button>
+    <p class="hint" style="text-align:center">Nessuna coda, nessun "il tuo libro si sta creando". È già pronto.</p>
+  </div></div>`;
+}
+
+function deliveredScreen(){
+  const slug=(S.protagName||"eroe").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+  const perma=`dreamtaily.app/libro/${STORY.id}-${slug}`;
+  return `<div class="screen"><div class="panel" style="max-width:520px;margin:0 auto;text-align:center">
+    <h1>Il tuo libro è pronto 🎉</h1>
+    <p class="hint">link permanente</p>
+    <div class="perma"><span style="flex:1">${esc(perma)}</span>
+      <button class="btn ghost" style="font-family:ui-monospace,monospace;font-size:12px"
+        onclick="navigator.clipboard&&navigator.clipboard.writeText('https://${perma}');set({copied:true});setTimeout(()=>set({copied:false}),1500)">
+        ${S.copied?"copiato ✓":"copia"}</button></div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:18px">
+      <button class="btn primary" onclick="set({screen:'book',page:0})">Apri il libro</button>
+      <button class="btn ghost" onclick="reset()">Ricomincia</button>
+    </div>
+  </div></div>`;
+}
+
+function reset(){ set({screen:"configure",protagonist:null,protagName:"",cast:{},setup:{atmosfera:"tramonto"},branch:{},plan:"digital",page:0,email:"",copied:false}); }
+
+/* ------------------------------- RENDER ----------------------------------- */
+function screenHTML(){
+  if(S.screen==="book") return bookScreen();
+  if(S.screen==="checkout") return checkoutScreen();
+  if(S.screen==="delivered") return deliveredScreen();
+  return configureScreen();
+}
+function render(){
+  document.getElementById("app").innerHTML =
+    `<div class="topbar"><div class="brand">DreamTaily <span class="mvp">MVP</span></div>${stepperHTML()}</div>`+
+    screenHTML();
+}
+/* lightweight partial refreshers so typing in inputs doesn't lose focus */
+function updateNameDependentUI(){
+  if(S.screen!=="configure") return;
+  const previewStep=STORY.steps.find(s=>s.id===STORY.previewStepId);
+  const preview=document.getElementById("live-preview-text");
+  if(preview) preview.textContent=resolveText(previewStep);
+  document.querySelectorAll("[data-branch-prompt]").forEach(node=>{
+    const branch=STORY.branches.find(item=>item.id===node.dataset.branchPrompt);
+    if(branch) node.textContent=branch.prompt.replace("[protag]",S.protagName||"il protagonista");
+  });
+}
+function renderPayBtnOnly(){ const b=document.getElementById("paybtn"); if(b) b.disabled=!/\S+@\S+\.\S+/.test(S.email); }
+
+render();
+</script>
+</body>
+</html>
