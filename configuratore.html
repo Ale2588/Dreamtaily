@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DreamTaily — Configuratore (reference)</title>
+<title>DreamTaily — Il bosco dei sussurri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -81,6 +81,22 @@
   .chip .desc{font-size:12px;color:var(--muted);font-weight:500}
   .sw{width:22px;height:22px;border-radius:7px;border:2px solid var(--cream);box-shadow:0 2px 5px rgba(0,0,0,.2);flex-shrink:0;transform:rotate(-4deg)}
   .sw.sm{width:16px;height:16px;border-radius:5px}
+  .atmos-card{position:relative;overflow:hidden;min-width:150px;min-height:72px;padding:0}
+  .atmos-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .atmos-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(30,24,18,.68))}
+  .atmos-card .atmos-label{position:relative;z-index:2;align-self:flex-end;color:#fff;padding:36px 12px 9px;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.45)}
+  .atmos-card.sel{box-shadow:0 7px 18px rgba(47,125,120,.28)}
+  .stage::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none}
+  .stage[data-tone="opening"]::after{background:linear-gradient(90deg,rgba(255,248,236,.08),transparent 50%)}
+  .stage[data-tone="crossroads"]::after{background:linear-gradient(130deg,rgba(46,42,36,.12),transparent 55%)}
+  .stage[data-tone="foliage"]::after{background:linear-gradient(90deg,rgba(53,89,47,.22),transparent 60%)}
+  .stage[data-tone="water"]::after{background:linear-gradient(270deg,rgba(45,100,130,.20),transparent 58%)}
+  .stage[data-tone="roots"]::after{background:linear-gradient(0deg,rgba(72,47,29,.24),transparent 62%)}
+  .stage[data-tone="stones"]::after{background:linear-gradient(0deg,rgba(55,78,90,.20),transparent 65%)}
+  .stage[data-tone="clearing"]::after{background:radial-gradient(circle at 50% 42%,rgba(255,248,210,.20),transparent 48%)}
+  .stage[data-tone="return"]::after{background:linear-gradient(180deg,transparent,rgba(46,42,36,.16))}
+  .stage[data-tone="promise"]::after{background:linear-gradient(180deg,transparent 55%,rgba(30,40,55,.22))}
+  .stage[data-tone="celebration"]::after{background:radial-gradient(circle at 55% 52%,rgba(255,215,115,.22),transparent 48%)}
 
   label.field{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-top:12px;margin-bottom:5px}
   input.text{width:100%;padding:11px 13px;border-radius:12px;border:2px solid var(--line);background:var(--cream)}
@@ -143,7 +159,9 @@
     }
   }
   .stage.has-real-bg .bgtag{background:rgba(255,248,236,.88)}
-  .stage-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+  .stage-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;transition:transform .3s ease}
+  .stage.asset-error{background:repeating-linear-gradient(135deg,#eadfc9,#eadfc9 14px,#f4ead8 14px,#f4ead8 28px)}
+  .stage.asset-error::before{content:"Asset immagine non trovato";position:absolute;inset:0;display:grid;place-items:center;z-index:4;color:var(--coral);font-weight:800}
 
 </style>
 </head>
@@ -154,7 +172,7 @@
 /* ============================================================================
    DreamTaily — CONFIGURATORE (reference implementation, vanilla JS, no build)
    ----------------------------------------------------------------------------
-   This is a faithful + generalized rewrite of the Claude Design prototype.
+   Production-oriented static integration based on the approved UX reference.
    Everything narrative for this static integration lives in the STORY object below (shaped like the
    story.json v2 format). The engine is generic: N cast slots, N branches,
    N setup variables. To build a bigger/different story you edit DATA, not code.
@@ -162,8 +180,7 @@
 ============================================================================ */
 
 /* ------------------------------- STORY DATA ------------------------------- */
-/* One demo story ("La radura silenziosa"). Placeholder art = colored blobs;
-   drop real PNGs into catalog[].art[style][pose] and scene bg paths to go live. */
+/* Integrazione statica del Bosco. Gli asset finali di scena non sono ancora completi. */
 const STORY = {
   id: "il-bosco-dei-sussurri",
   title: "Il bosco dei sussurri",
@@ -229,7 +246,7 @@ const STORY = {
 
   steps: [
     { id:"s1", chapter:1, title:"La campanella",
-      scene:{ bgBySetup:"atmosfera", slots:[
+      scene:{ focus:"72% 46%",zoom:1.00,tone:"opening", bgBySetup:"atmosfera", slots:[
         {role:"protagonist",pose:"in_piedi",x:.72,y:.94,scale:.38,z:2}
       ]},
       content:{
@@ -242,7 +259,7 @@ const STORY = {
       } },
 
     { id:"s2", chapter:2, title:"Il primo sentiero",
-      scene:{ bgBySetup:"atmosfera", slots:[
+      scene:{ focus:"48% 52%",zoom:1.08,tone:"crossroads", bgBySetup:"atmosfera", slots:[
         {role:"protagonist",pose:"si_china",x:.67,y:.95,scale:.38,z:2}
       ]},
       content:{
@@ -253,7 +270,7 @@ const STORY = {
 
     { id:"s3_felci", chapter:3, title:"Qualcuno tra le foglie",
       gate:{branch:"d_sentiero",option:"felci"},
-      scene:{ bgBySetup:"atmosfera", slots:[
+      scene:{ focus:"28% 50%",zoom:1.16,tone:"foliage", bgBySetup:"atmosfera", slots:[
         {role:"protagonist",pose:"cammina",x:.42,y:.95,scale:.37,z:2},
         {role:"helper",pose:"in_piedi",x:.67,y:.94,scale:.28,z:1}
       ]},
@@ -265,7 +282,7 @@ const STORY = {
 
     { id:"s3_ruscello", chapter:3, title:"Le impronte nell'acqua",
       gate:{branch:"d_sentiero",option:"ruscello"},
-      scene:{ bgBySetup:"atmosfera", slots:[
+      scene:{ focus:"78% 55%",zoom:1.13,tone:"water", bgBySetup:"atmosfera", slots:[
         {role:"protagonist",pose:"cammina",x:.42,y:.95,scale:.37,z:2},
         {role:"helper",pose:"in_piedi",x:.67,y:.94,scale:.28,z:1}
       ]},
@@ -277,7 +294,7 @@ const STORY = {
 
     { id:"s4_felci", chapter:4, title:"Il passaggio sotto le radici",
       gate:{branch:"d_sentiero",option:"felci"},
-      scene:{ bgBySetup:"atmosfera", slots:[
+      scene:{ focus:"34% 68%",zoom:1.22,tone:"roots", bgBySetup:"atmosfera", slots:[
         {role:"protagonist",pose:"si_china",x:.43,y:.96,scale:.36,z:2},
         {role:"helper",pose:"si_china",x:.65,y:.95,scale:.27,z:1}
       ]},
@@ -289,7 +306,7 @@ const STORY = {
 
     { id:"s4_ruscello", chapter:4, title:"Il ponte di pietre",
       gate:{branch:"d_sentiero",option:"ruscello"},
-      scene:{ bgBySetup:"atmosfera", slots:[
+      scene:{ focus:"70% 62%",zoom:1.18,tone:"stones", bgBySetup:"atmosfera", slots:[
         {role:"protagonist",pose:"cammina",x:.43,y:.95,scale:.36,z:2},
         {role:"helper",pose:"cammina",x:.66,y:.94,scale:.27,z:1}
       ]},
@@ -300,7 +317,7 @@ const STORY = {
       } },
 
     { id:"s4", chapter:5, title:"La radura silenziosa",
-      scene:{ bgBySetup:"atmosfera", slots:[
+      scene:{ focus:"50% 44%",zoom:1.03,tone:"clearing", bgBySetup:"atmosfera", slots:[
         {role:"protagonist",pose:"seduto",x:.43,y:.95,scale:.36,z:2},
         {role:"helper",pose:"seduto",x:.65,y:.95,scale:.27,z:1}
       ]},
@@ -314,7 +331,7 @@ const STORY = {
       } },
 
     { id:"s5", chapter:6, title:"Il ritorno",
-      scene:{ bgBySetup:"atmosfera", slots:[
+      scene:{ focus:"54% 50%",zoom:1.10,tone:"return", bgBySetup:"atmosfera", slots:[
         {role:"protagonist",pose:"in_piedi",x:.44,y:.95,scale:.37,z:2},
         {role:"helper",pose:"in_piedi",x:.66,y:.94,scale:.28,z:1}
       ]},
@@ -326,7 +343,7 @@ const STORY = {
 
     { id:"s6_promessa", chapter:7, title:"La promessa",
       gate:{branch:"d_finale",option:"promessa"},
-      scene:{ bgBySetup:"atmosfera", slots:[
+      scene:{ focus:"46% 42%",zoom:1.04,tone:"promise", bgBySetup:"atmosfera", slots:[
         {role:"protagonist",pose:"di_spalle",x:.47,y:.96,scale:.39,z:2},
         {role:"helper",pose:"di_spalle",x:.65,y:.95,scale:.28,z:1}
       ]},
@@ -338,7 +355,7 @@ const STORY = {
 
     { id:"s6_festa", chapter:7, title:"La piccola festa",
       gate:{branch:"d_finale",option:"festa"},
-      scene:{ bgBySetup:"atmosfera", slots:[
+      scene:{ focus:"58% 48%",zoom:1.06,tone:"celebration", bgBySetup:"atmosfera", slots:[
         {role:"protagonist",pose:"in_piedi",x:.43,y:.95,scale:.38,z:2},
         {role:"helper",pose:"in_piedi",x:.65,y:.94,scale:.28,z:1}
       ]},
@@ -408,6 +425,11 @@ function buildScene(step){
   const bg = step.scene.bgBySetup==="atmosfera"
     ? setupOption.image
     : ((step.scene.variantBg && step.scene.variantBg[at]) || step.scene.bg);
+  const frame={
+    focus:step.scene.focus||"50% 50%",
+    zoom:Number.isFinite(step.scene.zoom)?step.scene.zoom:1,
+    tone:step.scene.tone||"default"
+  };
   const layers = step.scene.slots
     .filter(s => !!filled(s.role))
     .sort((a,b)=>a.z-b.z)
@@ -417,7 +439,7 @@ function buildScene(step){
       return { role:s.role, pose:s.pose, color:c.color, art:resolveAsset(artRef), x:s.x, y:s.y, scale:s.scale, z:s.z,
                rot: s.role==="helper" ? 2 : -1.5 };
     });
-  return { bg:resolveAsset(bg), wash:setupOption.wash, layers };
+  return { bg:resolveAsset(bg), wash:setupOption.wash, layers, frame };
 }
 
 /* ----------------------- CORE: PAGE ASSEMBLY ------------------------------ */
@@ -432,7 +454,8 @@ function pages(){
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function figHTML(l, showTag){
   const inner = l.art
-    ? `<img src="${esc(l.art)}" alt="">`
+    ? `<img src="${esc(l.art)}" alt="${esc(roleName(l.role)||l.role)}"
+         onerror="this.remove()">`
     : `<div class="head" style="background:${l.color}"></div><div class="body" style="background:${l.color}"></div>`;
   return `<div class="fig" style="left:${l.x*100}%;top:${l.y*100}%;height:${l.scale*100}%;z-index:${l.z+2};
     transform:translate(-50%,-100%) rotate(${l.rot}deg);aspect-ratio:.52">
@@ -441,10 +464,12 @@ function figHTML(l, showTag){
 function stageHTML(step, showTag){
   const sc = buildScene(step);
   const figs = sc.layers.map(l=>figHTML(l,showTag)).join("");
-  return `<div class="stage has-real-bg">
-    <img class="stage-bg" src="${esc(sc.bg)}" alt="">
-    <div class="bgtag">bg: ${esc(sc.bg)}</div>
-    <div class="wash" style="background:${sc.wash};z-index:1"></div>
+  return `<div class="stage has-real-bg" data-tone="${esc(sc.frame.tone)}">
+    <img class="stage-bg" src="${esc(sc.bg)}" alt=""
+      style="object-position:${esc(sc.frame.focus)};transform:scale(${sc.frame.zoom})"
+      onerror="this.closest('.stage').classList.add('asset-error');this.remove()">
+    <div class="bgtag">scena temporanea · ${esc(step.id)}</div>
+    <div class="wash" style="background:${sc.wash};z-index:2"></div>
     ${figs}
   </div>`;
 }
@@ -462,6 +487,22 @@ function stepperHTML(){
   }).join("")+`</div>`;
 }
 
+function selectProtagonist(id,name){
+  const nextCast={...S.cast};
+  if(nextCast.helper===id) delete nextCast.helper;
+  set({
+    protagonist:id,
+    protagName:S.protagName||name,
+    cast:nextCast
+  });
+}
+function getPreviewStep(){
+  const path=S.branch.d_sentiero;
+  if(path==="felci") return STORY.steps.find(step=>step.id==="s4_felci");
+  if(path==="ruscello") return STORY.steps.find(step=>step.id==="s4_ruscello");
+  return STORY.steps.find(step=>step.id===STORY.previewStepId);
+}
+
 function configureScreen(){
   const hasProtag=!!S.protagonist;
   const locked = hasProtag ? "" : "locked";
@@ -469,10 +510,10 @@ function configureScreen(){
   // hero chips
   const heroChips = STORY.catalog.map(c=>`
     <button class="chip full ${S.protagonist===c.id?"sel":""}"
-      onclick="set({protagonist:'${c.id}',protagName: S.protagName||'${c.name}'})">
+      onclick="selectProtagonist('${c.id}','${c.name}')">
       <span class="sw" style="background:${c.color}"></span>${c.name}</button>`).join("");
 
-  // helper chips (Nessuno + others, excluding current protagonist)
+  // helper chips, excluding current protagonist
   const helperSlot=STORY.cast.find(c=>c.role==="helper");
   const helperChips = STORY.catalog.filter(c=>c.id!==S.protagonist).map(c=>`
       <button class="chip ${S.cast.helper===c.id?"sel":""}"
@@ -488,9 +529,10 @@ function configureScreen(){
   // atmosfera chips
   const at=atmos();
   const atChips = at.options.map(o=>`
-    <button class="chip ${S.setup.atmosfera===o.id?"sel":""}"
+    <button class="chip atmos-card ${S.setup.atmosfera===o.id?"sel":""}"
       onclick="set({setup:Object.assign({},S.setup,{atmosfera:'${o.id}'})})">
-      <span class="sw sm" style="background:${o.swatch}"></span>${o.label}</button>`).join("");
+      <img src="${esc(resolveAsset(o.image))}" alt="" loading="lazy">
+      <span class="atmos-label">${o.label}</span></button>`).join("");
 
   // branch blocks (one per branch)
   const protagLbl = S.protagName || "il protagonista";
@@ -505,11 +547,13 @@ function configureScreen(){
     </div>`).join("");
 
   // preview
-  const previewStep = STORY.steps.find(s=>s.id===STORY.previewStepId);
+  const previewStep = getPreviewStep();
   const previewHTML = hasProtag
     ? `${stageHTML(previewStep,true)}
        <div class="preview-cap"><span>Anteprima composta</span><span>Cap. ${previewStep.chapter} · ${previewStep.title}</span></div>
-       <div class="previewtext" id="live-preview-text">${esc(resolveText(previewStep))}</div>`
+       <div class="previewtext" id="live-preview-text">${S.cast.helper
+         ? esc(resolveText(previewStep))
+         : "Scegli un compagno per completare questa pagina."}</div>`
     : `<div class="stage"><div class="empty">Scegli il tuo eroe per vedere l'anteprima del libro.</div></div>`;
 
   const allBranchesChosen = STORY.branches.every(b=>!!S.branch[b.id]);
@@ -534,7 +578,7 @@ function configureScreen(){
 
         <div class="${locked}">
           <div class="sec">
-            <h2>${helperSlot.label}<span class="opt">facoltativo · slot helper</span></h2>
+            <h2>${helperSlot.label}<span class="req">obbligatorio</span></h2>
             <div class="chips">${helperChips}</div>
           </div>
           <div class="sec">
@@ -668,9 +712,11 @@ function render(){
 /* lightweight partial refreshers so typing in inputs doesn't lose focus */
 function updateNameDependentUI(){
   if(S.screen!=="configure") return;
-  const previewStep=STORY.steps.find(s=>s.id===STORY.previewStepId);
+  const previewStep=getPreviewStep();
   const preview=document.getElementById("live-preview-text");
-  if(preview) preview.textContent=resolveText(previewStep);
+  if(preview) preview.textContent=S.cast.helper
+    ?resolveText(previewStep)
+    :"Scegli un compagno per completare questa pagina.";
   document.querySelectorAll("[data-branch-prompt]").forEach(node=>{
     const branch=STORY.branches.find(item=>item.id===node.dataset.branchPrompt);
     if(branch) node.textContent=branch.prompt.replace("[protag]",S.protagName||"il protagonista");
@@ -678,6 +724,36 @@ function updateNameDependentUI(){
 }
 function renderPayBtnOnly(){ const b=document.getElementById("paybtn"); if(b) b.disabled=!/\S+@\S+\.\S+/.test(S.email); }
 
+
+function auditStory(){
+  const errors=[];
+  const ids=new Set();
+  for(const step of STORY.steps){
+    if(ids.has(step.id)) errors.push(`step duplicato: ${step.id}`);
+    ids.add(step.id);
+    for(const slot of step.scene?.slots||[]){
+      if(!STORY.cast.some(item=>item.role===slot.role)) errors.push(`role sconosciuto: ${step.id}/${slot.role}`);
+      if(!["in_piedi","cammina","seduto","si_china","di_spalle"].includes(slot.pose)){
+        errors.push(`posa sconosciuta: ${step.id}/${slot.pose}`);
+      }
+      for(const field of ["x","y","scale"]){
+        if(typeof slot[field]!=="number"||slot[field]<0||slot[field]>1){
+          errors.push(`${field} non valido: ${step.id}/${slot.role}`);
+        }
+      }
+    }
+  }
+  for(const branch of STORY.branches){
+    if(!branch.options?.length) errors.push(`bivio senza opzioni: ${branch.id}`);
+  }
+  if(errors.length){
+    console.error("DreamTaily configurator audit",errors);
+    document.documentElement.dataset.configError="true";
+  }
+  return errors;
+}
+
+auditStory();
 render();
 </script>
 </body>
