@@ -3087,7 +3087,157 @@ window.startStoryComposer=async function(story,bookStoryId){
   }
 };
 
-/* Riprendi: se il libro è in memoria riapre il lettore, altrimenti torna alle scelte. */
+async function dtComposeFromCurrentState(){
+  await dtLoadSceneContract();
+  const [{composeStory},contentByRef]=await Promise.all([
+    import("./src/story-composer.js"),
+    dtLoadContent()
+  ]);
+
+  const protagonist=dtProtagonist();
+  const helperId=dtHelperChoice()?.value;
+  const catalog=Object.fromEntries(
+    Object.entries(DT_HELPERS).map(([key,item])=>[key,{name:item.name,image:item.image}])
+  );
+
+  const book=composeStory({
+    story:app.activeStoryDefinition,
+    scenes:dtPrefixedSceneContract(),
+    contentByRef,
+    catalog,
+    choices:{
+      story:app.activeStoryDefinition.slug,
+      style:app.style,
+      protagonist:{name:protagonist.name,asset_ref:protagonist.image},
+      cast:{helper:helperId},
+      setup:{atmosfera:app.setupChoices.atmosfera},
+      branches:{
+        d_sentiero:app.compositionChoices.d_sentiero,
+        d_finale:app.compositionChoices.d_finale
+      }
+    }
+  });
+
+  const bad=book.pages.filter(page=>/\[[^\]]+\]/.test(page.text||""));
+  if(bad.length){
+    console.error("[DreamTaily] Marker residui nel libro ripristinato:",bad);
+    throw new Error("MARKER_IRRISOLTI");
+  }
+
+  return book;
+}
+
+async function dtRestorePersistedBook(){
+  await loadBookStories();
+  if(!app.bookStories.length) return false;
+
+  await ensureBookCharactersHydrated();
+
+  const preferred=
+    app.bookStories.find(item=>item.status==="ready")||
+    app.bookStories.at(-1)||
+    null;
+  if(!preferred) return false;
+
+  const story=STORY_TEMPLATES.find(item=>item.id===preferred.story_slug);
+  if(!story) throw new Error(`STORY_TEMPLATE_MISSING:${preferred.story_slug}`);
+
+  app.activeStoryDefinition=await loadStoryDefinition(story);
+  app.activeBookStoryId=preferred.id;
+  app.compositionChoices={...(preferred.path_choices||{})};
+  app.setupChoices={
+    atmosfera:preferred.path_choices?.atmosfera||""
+  };
+
+  const helper=preferred.story_cast_assignments?.find(item=>item.slot_key==="helper");
+  if(helper?.catalog_character_id){
+    const helperStep=(app.activeStoryDefinition.steps||[])
+      .find(step=>(step.decision?.catalog_roster||[])
+        .some(entry=>entry.key===helper.catalog_character_id));
+    const entry=helperStep?.decision?.catalog_roster
+      ?.find(item=>item.key===helper.catalog_character_id);
+
+    app.compositionChoices.helper={
+      source:"catalog_character",
+      value:helper.catalog_character_id,
+      entrance_ref:entry?.entrance_ref||null
+    };
+  }
+
+  const complete=Boolean(
+    app.setupChoices.atmosfera&&
+    app.compositionChoices.d_sentiero&&
+    dtHelperChoice()?.value&&
+    app.compositionChoices.d_finale
+  );
+
+  if(!complete){
+    dtComposedBook=null;
+    renderSetupStep();
+    showScreen("setup");
+    return true;
+  }
+
+  dtContentByRef=null;
+  dtComposedBook=await dtComposeFromCurrentState();
+  dtBookPage=0;
+  renderBookSummary();
+  showScreen("book");
+  return true;
+}
+
+/*
+ * Il codice originale cercava esclusivamente status=draft.
+ * Dopo il checkout il libro diventa ready e spariva dalla landing.
+ */
+window.detectDraftBook=async function(){
+  try{
+    await ensureUser();
+    const client=getSupabase();
+    const {data,error}=await client
+      .from("books")
+      .select("id,status,updated_at")
+      .in("status",["draft","ready"])
+      .order("updated_at",{ascending:false})
+      .limit(1)
+      .maybeSingle();
+
+    if(error) throw error;
+
+    const button=document.getElementById("resume-book-btn");
+    if(data?.id){
+      app.bookId=data.id;
+      if(button){
+        button.style.display="";
+        button.textContent=data.status==="ready"
+          ?"Apri il tuo libro →"
+          :"Riprendi il tuo libro →";
+      }
+    }else if(button){
+      button.style.display="none";
+    }
+  }catch(error){
+    console.warn("[DreamTaily] Book detection skipped:",error);
+  }
+};
+
+window.resumeDraftBook=async function(){
+  try{
+    if(!app.bookId) await window.detectDraftBook();
+    if(!app.bookId){
+      showScreen("stories");
+      return;
+    }
+
+    const restored=await dtRestorePersistedBook();
+    if(!restored) showScreen("stories");
+  }catch(error){
+    console.error("[DreamTaily] Restore book error:",error);
+    alert("Non sono riuscito a riaprire il libro salvato.");
+  }
+};
+
+/* Riapre anche dopo refresh: ricostruisce il book dalle scelte persistite. */
 const dtOriginalGoToBook=window.goToBook;
 window.goToBook=async function(){
   if(dtComposedBook){
@@ -3095,13 +3245,43 @@ window.goToBook=async function(){
     showScreen("book");
     return;
   }
+
   if(app.activeStoryDefinition&&app.activeBookStoryId){
+    const complete=Boolean(
+      app.setupChoices.atmosfera&&
+      app.compositionChoices.d_sentiero&&
+      dtHelperChoice()?.value&&
+      app.compositionChoices.d_finale
+    );
+
+    if(complete){
+      try{
+        dtComposedBook=await dtComposeFromCurrentState();
+        dtBookPage=0;
+        renderBookSummary();
+        showScreen("book");
+        return;
+      }catch(error){
+        console.error("[DreamTaily] Recompose book error:",error);
+      }
+    }
+
     renderSetupStep();
     showScreen("setup");
     return;
   }
+
+  try{
+    if(await dtRestorePersistedBook()) return;
+  }catch(error){
+    console.error("[DreamTaily] Persisted book restore error:",error);
+  }
+
   return dtOriginalGoToBook?.();
 };
+
+/* Aggiorna il pulsante anche quando il DOM era già pronto/cached. */
+window.addEventListener("pageshow",()=>window.detectDraftBook());
 
 })();
 </script>
