@@ -1720,35 +1720,19 @@ function closeIntegratedStoryConfigurator(){
   document.body.classList.remove('dreamtaily-configurator-open');
 }
 
-function openIntegratedStoryConfigurator({
-  story,
-  bookStoryId,
-  protagonistName,
-  protagonistImage
-}){
-  closeIntegratedStoryConfigurator();
+function openIntegratedStoryConfigurator(){
+  console.warn(
+    "[DreamTaily] Configuratore legacy disabilitato: uso del funnel integrato in index.html."
+  );
 
-  const overlay=document.createElement('div');
-  overlay.id='dreamtaily-configurator-overlay';
-  overlay.className='dreamtaily-configurator-overlay';
-
-  const params=new URLSearchParams({
-    embedded:'1',
-    story:story?.id||story?.slug||'',
-    bookStoryId:bookStoryId||'',
-    protagonistName:protagonistName||'Il tuo personaggio',
-    protagonistImage:protagonistImage||''
-  });
-
-  const frame=document.createElement('iframe');
-  frame.className='dreamtaily-configurator-frame';
-  frame.title='Configura la storia';
-  frame.src=`configuratore.html?${params.toString()}`;
-  frame.setAttribute('allow','clipboard-write');
-
-  overlay.appendChild(frame);
-  document.body.appendChild(overlay);
-  document.body.classList.add('dreamtaily-configurator-open');
+  if(app.activeStoryDefinition){
+    app.currentStepKey=app.activeStoryDefinition.start;
+    app.setupIndex=0;
+    dtTrail=[];
+    dtTrailIndex=0;
+    renderSetupStep();
+    showScreen("setup");
+  }
 }
 
 async function persistIntegratedConfiguratorState(payload){
@@ -1848,12 +1832,18 @@ async function startStoryComposer(story,bookStoryId){
     const protagonistName=savedCharacter?.name||value('name')||'Il tuo personaggio';
     const protagonistImage=savedCharacter?.image_url||app.previewUrl||story.image||'';
 
-    openIntegratedStoryConfigurator({
-      story,
-      bookStoryId,
-      protagonistName,
-      protagonistImage
-    });
+    /*
+     * Avvio canonico del funnel MVP dentro index.html.
+     * Nessun iframe e nessuna pagina parallela.
+     */
+    app.previewUrl=protagonistImage;
+    app.currentStepKey=definition.start;
+    app.setupIndex=0;
+    dtTrail=[];
+    dtTrailIndex=0;
+
+    renderSetupStep();
+    showScreen("setup");
   }catch(error){
     console.error('[DreamTaily] Configurator start error:',error);
     const detail=error?.message||'Errore sconosciuto';
