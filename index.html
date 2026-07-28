@@ -962,6 +962,7 @@ const app = {
   setupIndex:0,
   setupChoices:{},
   compositionChoices:{},
+  forceNewBook:false,
   saving:false
 };
 
@@ -1435,6 +1436,7 @@ function useSavedCharacter(characterId){
   app.setupChoices={};
   app.compositionChoices={};
   app.selectedStoryId=null;
+  app.forceNewBook=true;
   dtComposedBook=null;
   dtBookPage=0;
   dtTrail=[];
@@ -1556,29 +1558,33 @@ function selectStory(storyId){
 async function getOrCreateDraftBook(){
   await ensureUser();
   const client=getSupabase();
+  const forceNew=app.forceNewBook===true;
 
-  if(app.bookId){
+  if(!forceNew&&app.bookId){
     const {data:existing,error}=await client
       .from('books')
       .select('id,status')
       .eq('id',app.bookId)
       .maybeSingle();
+
     if(!error&&existing?.status==='draft') return existing.id;
     app.bookId=null;
   }
 
-  const {data:current,error:currentError}=await client
-    .from('books')
-    .select('id,status')
-    .eq('status','draft')
-    .order('updated_at',{ascending:false})
-    .limit(1)
-    .maybeSingle();
+  if(!forceNew){
+    const {data:current,error:currentError}=await client
+      .from('books')
+      .select('id,status')
+      .eq('status','draft')
+      .order('updated_at',{ascending:false})
+      .limit(1)
+      .maybeSingle();
 
-  if(currentError) throw currentError;
-  if(current){
-    app.bookId=current.id;
-    return current.id;
+    if(currentError) throw currentError;
+    if(current){
+      app.bookId=current.id;
+      return current.id;
+    }
   }
 
   const title=value('name')?`Il libro di ${value('name')}`:'Il mio libro DreamTaily';
@@ -1597,7 +1603,9 @@ async function getOrCreateDraftBook(){
     .single();
 
   if(createError) throw createError;
+
   app.bookId=created.id;
+  app.forceNewBook=false;
   return created.id;
 }
 
@@ -3423,6 +3431,7 @@ function dtRenderSavedBooks(){
 }
 
 function dtClearOnlyActiveBook(){
+  app.forceNewBook=false;
   app.bookId=null;
   app.bookStories=[];
   app.activeStoryDefinition=null;
@@ -3722,6 +3731,7 @@ window.detectDraftBook=async function(){
 };
 
 window.resumeDraftBook=async function(){
+  app.forceNewBook=false;
   try{
     if(!app.bookId) await window.detectDraftBook();
     if(!app.bookId){
