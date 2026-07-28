@@ -438,6 +438,25 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dt-summary-row{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--line)}
 .dt-delivery-link{display:flex;gap:8px;align-items:center;margin-top:18px;padding:13px;border:1px solid var(--line);border-radius:14px;background:#fff}
 .dt-delivery-link code{flex:1;overflow-wrap:anywhere}
+.dt-library-section{margin-bottom:34px}
+.dt-library-section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:16px}
+.dt-library-section-head h2{font-family:'Baloo 2';font-size:clamp(27px,4vw,38px);line-height:1.05}
+.dt-library-section-head p{color:var(--muted);line-height:1.55;margin-top:5px}
+.dt-book-library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.dt-book-card{display:grid;grid-template-columns:130px 1fr;background:var(--paper);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 10px 28px rgba(61,43,31,.08)}
+.dt-book-cover-mini{position:relative;min-height:180px;background:linear-gradient(160deg,#29465a,#7d9474);overflow:hidden}
+.dt-book-cover-mini img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.dt-book-cover-mini::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent,rgba(28,34,30,.55))}
+.dt-book-status{position:absolute;z-index:2;left:10px;bottom:10px;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.9);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+.dt-book-card-body{padding:18px;display:flex;flex-direction:column}
+.dt-book-card-body h3{font-family:'Baloo 2';font-size:23px;line-height:1.05}
+.dt-book-card-meta{color:var(--muted);font-size:13px;line-height:1.5;margin:7px 0 16px}
+.dt-book-card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.dt-book-card-actions .btn{padding:10px 13px;border-radius:12px;font-size:13px}
+.dt-library-empty{padding:24px;border:1px dashed #d8cab5;border-radius:20px;background:rgba(255,253,248,.65);text-align:center;color:var(--muted)}
+.dt-library-divider{height:1px;background:var(--line);margin:34px 0}
+@media(max-width:760px){.dt-book-library-grid{grid-template-columns:1fr}.dt-book-card{grid-template-columns:105px 1fr}}
+
 .dt-loading{padding:14px;border-radius:13px;background:#e4f0ef;color:#356f70;font-weight:800;margin-top:12px}
 .dt-decision-option.asset-error{background:#f8f3ea;min-height:110px}
 .dt-decision-option.asset-error::before{content:"Anteprima immagine non disponibile";display:block;color:var(--muted);font-size:12px;margin-bottom:8px}
@@ -463,7 +482,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
       <p>DreamTaily trasforma un bambino o un personaggio inventato in un eroe illustrato, pronto a vivere storie sempre nuove e a diventare il cuore del suo libro.</p>
       <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:30px">
         <button class="btn btn-primary" onclick="showScreen('creator')">Crea il suo personaggio →</button>
-        <button class="btn btn-soft" id="resume-book-btn" onclick="resumeDraftBook()" style="display:none">Riprendi il tuo libro</button>
+        <button class="btn btn-soft" id="resume-book-btn" onclick="openCharacterLibrary()" style="display:none">Apri la tua libreria</button>
         <span style="font-size:13px;font-weight:700;color:#f7e9c8">Il primo personaggio prende vita in pochi istanti</span>
       </div>
     </div>
@@ -701,25 +720,44 @@ body.dreamtaily-configurator-open{overflow:hidden}
       <button class="brand-dark" onclick="showScreen('landing')">
         <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
       </button>
-      <div class="phase">I tuoi personaggi</div>
+      <div class="phase">La tua libreria</div>
     </div>
 
-    <div class="library-heading">
-      <div>
-        <div class="phase">Il cast della famiglia</div>
-        <h1 class="step-title">Chi parte per la prossima avventura?</h1>
-        <p class="intro">Scegli un personaggio già creato oppure dai vita a qualcuno di nuovo.</p>
+    <section class="dt-library-section">
+      <div class="dt-library-section-head">
+        <div>
+          <div class="phase">Le storie che hai creato</div>
+          <h1 class="step-title">I tuoi libri</h1>
+          <p>Riapri un libro concluso, riprendi una bozza oppure eliminalo.</p>
+        </div>
+        <button class="btn btn-primary" onclick="startFreshBook()">+ Nuovo libro</button>
       </div>
-      <button class="btn btn-primary" onclick="startAnother()">+ Crea un nuovo personaggio</button>
-    </div>
 
-    <div class="library-status" id="library-status">Caricamento dei personaggi…</div>
-    <div class="character-library-grid" id="character-library-grid"></div>
+      <div class="library-status" id="book-library-status">Caricamento dei libri…</div>
+      <div class="dt-book-library-grid" id="book-library-grid"></div>
+      <div class="error" id="book-library-error"></div>
+    </section>
+
+    <div class="dt-library-divider"></div>
+
+    <section class="dt-library-section">
+      <div class="library-heading">
+        <div>
+          <div class="phase">Il cast della famiglia</div>
+          <h2 class="step-title">I tuoi personaggi</h2>
+          <p class="intro">Scegli un personaggio per iniziare un nuovo libro oppure creane uno.</p>
+        </div>
+        <button class="btn btn-soft" onclick="startAnother()">+ Crea un personaggio</button>
+      </div>
+
+      <div class="library-status" id="library-status">Caricamento dei personaggi…</div>
+      <div class="character-library-grid" id="character-library-grid"></div>
+      <div class="error" id="library-error"></div>
+    </section>
 
     <div class="story-actions">
-      <button class="btn btn-ghost" onclick="showScreen('creator')">Torna alla creazione</button>
+      <button class="btn btn-ghost" onclick="showScreen('landing')">← Torna alla home</button>
     </div>
-    <div class="error" id="library-error"></div>
   </div>
 </section>
 
@@ -919,6 +957,7 @@ const app = {
   candidateCharacterAssetId:null,
   selectedStoryId:null,
   savedCharacters:[],
+  savedBooks:[],
   bookId:null,
   bookStories:[],
   storyCatalog:[],
@@ -1304,6 +1343,7 @@ async function loadSavedCharacters(){
 
     app.savedCharacters=hydrated;
     renderSavedCharacters();
+    if(app.savedBooks.length) renderSavedBooks();
   }catch(error){
     console.error('[DreamTaily] Character library error:',error);
     status.textContent='';
@@ -1354,9 +1394,239 @@ function escapeHtml(value){
 }
 
 async function openCharacterLibrary(){
-  showScreen('library');
-  await loadSavedCharacters();
+  showScreen("library");
+  await Promise.allSettled([
+    loadSavedBooks(),
+    loadSavedCharacters()
+  ]);
 }
+
+
+async function loadSavedBooks(){
+  const status=document.getElementById("book-library-status");
+  const grid=document.getElementById("book-library-grid");
+  showError("book-library-error",null);
+
+  if(status) status.textContent="Caricamento dei libri…";
+  if(grid) grid.innerHTML="";
+
+  try{
+    await ensureUser();
+    const client=getSupabase();
+    const {data,error}=await client
+      .from("books")
+      .select(`
+        id,
+        title,
+        status,
+        current_style,
+        created_at,
+        updated_at,
+        book_stories (
+          id,
+          story_slug,
+          position,
+          status,
+          path_choices,
+          story_cast_assignments (
+            id,
+            slot_key,
+            character_asset_id,
+            catalog_character_id
+          )
+        )
+      `)
+      .in("status",["draft","ready"])
+      .order("updated_at",{ascending:false});
+
+    if(error) throw error;
+    app.savedBooks=data||[];
+    renderSavedBooks();
+  }catch(error){
+    console.error("[DreamTaily] Book library error:",error);
+    if(status) status.textContent="";
+    showError("book-library-error","Non sono riuscito a recuperare i libri salvati.");
+  }
+}
+
+function renderSavedBooks(){
+  const status=document.getElementById("book-library-status");
+  const grid=document.getElementById("book-library-grid");
+  if(!status||!grid) return;
+
+  if(!app.savedBooks.length){
+    status.textContent="";
+    grid.innerHTML=`
+      <div class="dt-library-empty" style="grid-column:1/-1">
+        <div style="font-size:38px;margin-bottom:8px">📚</div>
+        <strong>Non hai ancora creato nessun libro.</strong>
+        <p style="margin-top:5px">Scegli un personaggio qui sotto e comincia la prima avventura.</p>
+      </div>`;
+    return;
+  }
+
+  status.textContent="";
+  grid.innerHTML=app.savedBooks.map(book=>{
+    const stories=(book.book_stories||[]).slice().sort((a,b)=>(a.position||0)-(b.position||0));
+    const latest=stories.at(-1)||null;
+    const story=STORY_TEMPLATES.find(item=>item.id===latest?.story_slug);
+    const protagonistAssignment=latest?.story_cast_assignments
+      ?.find(item=>item.slot_key==="protagonist");
+    const protagonist=app.savedCharacters
+      .find(item=>item.id===protagonistAssignment?.character_asset_id);
+    const image=protagonist?.image_url||story?.image||"assets/char/water/rabbit.png";
+    const ready=book.status==="ready";
+    const date=new Date(book.updated_at||book.created_at||Date.now())
+      .toLocaleDateString("it-IT",{day:"2-digit",month:"short",year:"numeric"});
+    const title=book.title||story?.title||"Il tuo libro";
+
+    return `
+      <article class="dt-book-card">
+        <div class="dt-book-cover-mini">
+          <img src="${escapeHtml(image)}" alt="" onerror="this.src='assets/char/water/rabbit.png'">
+          <span class="dt-book-status">${ready?"Pronto":"Bozza"}</span>
+        </div>
+        <div class="dt-book-card-body">
+          <h3>${escapeHtml(title)}</h3>
+          <div class="dt-book-card-meta">
+            ${escapeHtml(protagonist?.name||"Protagonista")} ·
+            ${stories.length} ${stories.length===1?"storia":"storie"} ·
+            aggiornato ${escapeHtml(date)}
+          </div>
+          <div class="dt-book-card-actions">
+            <button class="btn btn-primary" onclick="openSavedBook('${book.id}')">
+              ${ready?"Apri il libro":"Riprendi"}
+            </button>
+            ${ready?`<button class="btn btn-soft" onclick="editSavedBook('${book.id}')">Modifica</button>`:""}
+            <button class="btn btn-ghost" style="color:#a8402e"
+              onclick="deleteSavedBook('${book.id}')">Elimina</button>
+          </div>
+        </div>
+      </article>`;
+  }).join("");
+}
+
+function resetActiveBookState(){
+  app.bookId=null;
+  app.bookStories=[];
+  app.activeStoryDefinition=null;
+  app.activeBookStoryId=null;
+  app.currentStepKey=null;
+  app.setupIndex=0;
+  app.setupChoices={};
+  app.compositionChoices={};
+  app.selectedStoryId=null;
+  dtComposedBook=null;
+  dtBookPage=0;
+  dtTrail=[];
+  dtTrailIndex=0;
+  dtContentByRef=null;
+}
+
+window.startFreshBook=function(){
+  resetActiveBookState();
+  if(app.savedCharacters.length){
+    renderSavedCharacters();
+    showScreen("library");
+  }else{
+    startAnother();
+  }
+};
+
+window.openSavedBook=async function(bookId){
+  try{
+    resetActiveBookState();
+    app.bookId=bookId;
+    const restored=await dtRestorePersistedBook();
+    if(!restored) throw new Error("BOOK_EMPTY");
+  }catch(error){
+    console.error("[DreamTaily] Open saved book error:",error);
+    showError("book-library-error","Non sono riuscito ad aprire questo libro.");
+    showScreen("library");
+  }
+};
+
+window.editSavedBook=async function(bookId){
+  try{
+    resetActiveBookState();
+    app.bookId=bookId;
+    await loadBookStories();
+    if(!app.bookStories.length) throw new Error("BOOK_EMPTY");
+    await ensureBookCharactersHydrated();
+
+    const preferred=
+      app.bookStories.find(item=>item.status==="ready")||
+      app.bookStories.at(-1);
+    const story=STORY_TEMPLATES.find(item=>item.id===preferred.story_slug);
+    if(!story) throw new Error("STORY_NOT_FOUND");
+
+    app.activeStoryDefinition=await loadStoryDefinition(story);
+    app.activeBookStoryId=preferred.id;
+    app.compositionChoices={...(preferred.path_choices||{})};
+    app.setupChoices={atmosfera:preferred.path_choices?.atmosfera||""};
+
+    const helper=preferred.story_cast_assignments?.find(item=>item.slot_key==="helper");
+    const helperKey=helper?.catalog_character_id||preferred.path_choices?.helper||null;
+    if(helperKey){
+      const helperStep=(app.activeStoryDefinition.steps||[])
+        .find(step=>(step.decision?.catalog_roster||[]).some(entry=>entry.key===helperKey));
+      const entry=helperStep?.decision?.catalog_roster?.find(item=>item.key===helperKey);
+      app.compositionChoices.helper={
+        source:"catalog_character",
+        value:helperKey,
+        entrance_ref:entry?.entrance_ref||null
+      };
+    }
+
+    await dtLoadSceneContract();
+    dtBuildTrail();
+    dtTrailIndex=Math.max(0,dtTrail.length-1);
+    app.currentStepKey=dtTrail[dtTrailIndex]||app.activeStoryDefinition.start;
+    renderComposerStep();
+    showScreen("composer");
+  }catch(error){
+    console.error("[DreamTaily] Edit saved book error:",error);
+    showError("book-library-error","Non sono riuscito a riaprire il funnel di questo libro.");
+    showScreen("library");
+  }
+};
+
+window.deleteSavedBook=async function(bookId){
+  const book=app.savedBooks.find(item=>item.id===bookId);
+  if(!confirm(`Eliminare "${book?.title||"questo libro"}"? I personaggi resteranno nella libreria.`)) return;
+
+  try{
+    const client=getSupabase();
+    const storyIds=(book?.book_stories||[]).map(item=>item.id);
+
+    if(storyIds.length){
+      const {error:castError}=await client
+        .from("story_cast_assignments")
+        .delete()
+        .in("book_story_id",storyIds);
+      if(castError) console.warn("[DreamTaily] Cast cleanup skipped:",castError);
+
+      const {error:storiesError}=await client
+        .from("book_stories")
+        .delete()
+        .in("id",storyIds);
+      if(storiesError) throw storiesError;
+    }
+
+    const {error:bookError}=await client
+      .from("books")
+      .delete()
+      .eq("id",bookId);
+    if(bookError) throw bookError;
+
+    if(app.bookId===bookId) resetActiveBookState();
+    await loadSavedBooks();
+    await detectDraftBook();
+  }catch(error){
+    console.error("[DreamTaily] Delete saved book error:",error);
+    showError("book-library-error","Non sono riuscito a eliminare questo libro.");
+  }
+};
 
 function applyCharacterToForm(character){
   const traits=character.traits||{};
@@ -3229,11 +3499,9 @@ window.renderDtDelivered=function(){
         <button class="btn btn-soft" onclick="copyDtLink()">Copia</button>
       </div>
       <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="dtBookPage=0;renderBookSummary();showScreen('book')">Apri il libro</button>
-        <button class="btn btn-ghost" onclick="openCharacterLibrary()">Torna alla libreria</button>
+        <button class="btn btn-primary" onclick="openCharacterLibrary()">Vai alla libreria</button>
+        <button class="btn btn-ghost" onclick="dtBookPage=0;renderBookSummary();showScreen('book')">Apri il libro</button>
         <button class="btn btn-soft" onclick="showScreen('landing')">Torna alla home</button>
-        <button class="btn btn-ghost" style="border-color:#d76a55;color:#a8402e"
-          onclick="deleteCurrentBookAndRestart()">Elimina il libro e ricomincia</button>
       </div>
     </div>
   </div>`;
@@ -3409,9 +3677,7 @@ window.detectDraftBook=async function(){
       app.bookId=data.id;
       if(button){
         button.style.display="";
-        button.textContent=data.status==="ready"
-          ?"Apri il tuo libro →"
-          :"Riprendi il tuo libro →";
+        button.textContent="Apri la tua libreria →";
       }
     }else if(button){
       button.style.display="none";
