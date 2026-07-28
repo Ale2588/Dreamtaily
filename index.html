@@ -1421,12 +1421,31 @@ function useSavedCharacter(characterId){
   const character=app.savedCharacters.find(item=>item.id===characterId);
   if(!character) return;
 
+  /*
+   * Scegliere un personaggio dalla libreria significa iniziare un nuovo libro.
+   * I libri esistenti restano salvati su Supabase, ma non devono contaminare
+   * il nuovo funnel attraverso app.bookId/app.bookStories.
+   */
+  app.bookId=null;
+  app.bookStories=[];
+  app.activeStoryDefinition=null;
+  app.activeBookStoryId=null;
+  app.currentStepKey=null;
+  app.setupIndex=0;
+  app.setupChoices={};
+  app.compositionChoices={};
+  app.selectedStoryId=null;
+  dtComposedBook=null;
+  dtBookPage=0;
+  dtTrail=[];
+  dtTrailIndex=0;
+  dtContentByRef=null;
+
   applyCharacterToForm(character);
   app.characterAssetId=character.id;
   app.candidateCharacterAssetId=character.id;
   app.previewId=null;
   app.previewUrl=character.image_url;
-  app.selectedStoryId=null;
 
   document.getElementById('wow-image').src=app.previewUrl||'';
   document.getElementById('wow-title').textContent=`Ecco ${character.name}.`;
