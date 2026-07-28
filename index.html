@@ -482,6 +482,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
       <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:30px">
         <button class="btn btn-primary" onclick="showScreen('creator')">Crea il suo personaggio →</button>
         <button class="btn btn-soft" id="resume-book-btn" onclick="resumeDraftBook()" style="display:none">Riprendi il tuo libro</button>
+          <button class="btn btn-ghost" onclick="openCharacterLibrary()">Apri la libreria</button>
         <span style="font-size:13px;font-weight:700;color:#f7e9c8">Il primo personaggio prende vita in pochi istanti</span>
       </div>
     </div>
@@ -1443,10 +1444,12 @@ async function loadStoryCatalog(){
     const response=await fetch('stories/catalog.json',{cache:'no-store'});
     if(!response.ok) throw new Error(`STORY_CATALOG_HTTP_${response.status}`);
     const catalog=await response.json();
-    STORY_TEMPLATES=catalog.map(item=>({
-      id:item.slug,
-      ...item
-    }));
+    STORY_TEMPLATES=catalog
+      .filter(item=>item.slug==="il-bosco-dei-sussurri")
+      .map(item=>({
+        id:item.slug,
+        ...item
+      }));
   }catch(error){
     console.error('[DreamTaily] Story catalog error:',error);
     STORY_TEMPLATES=[];
@@ -1666,6 +1669,13 @@ async function persistSelectedStory(){
 }
 
 async function continueWithStory(){
+  if(app.selectedStoryId!=="il-bosco-dei-sussurri"){
+    app.selectedStoryId=null;
+    showError("story-error","Per questo MVP è disponibile solo Il bosco dei sussurri.");
+    prepareStories();
+    return;
+  }
+
   const story=STORY_TEMPLATES.find(item=>item.id===app.selectedStoryId);
   if(!story){
     showError('story-error','Scegli una storia per continuare.');
@@ -3049,6 +3059,15 @@ window.renderBookSummary=function(){
     </div>
 
     <div class="dt-reader-shell">
+      <div class="dt-reader-nav" style="margin:0 0 16px">
+        <button class="btn btn-ghost" ${dtBookPage===0?"disabled":""}
+          onclick="goToDtBookPage(${dtBookPage-1})">← Indietro</button>
+        <button class="btn btn-soft" onclick="openCharacterLibrary()">Libreria</button>
+        ${last
+          ?`<button class="btn btn-primary" onclick="openDtCheckout()">Ordina il libro →</button>`
+          :`<button class="btn btn-primary" onclick="goToDtBookPage(${dtBookPage+1})">Avanti →</button>`}
+      </div>
+
       <div class="dt-reader-card">
         ${dtBookScene(page.scene)}
         <div class="dt-reader-copy">
@@ -3071,8 +3090,9 @@ window.renderBookSummary=function(){
           :`<button class="btn btn-primary" onclick="goToDtBookPage(${dtBookPage+1})">Avanti →</button>`}
       </div>
 
-      <div class="form-actions" style="justify-content:center">
+      <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
         <button class="btn btn-soft" onclick="modifyDtBook()">← Modifica il libro</button>
+        <button class="btn btn-ghost" onclick="openCharacterLibrary()">Vai alla libreria</button>
       </div>
     </div>
   </div>`;
