@@ -418,6 +418,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dt-walk-progress span.active{width:26px;border-radius:8px;background:var(--coral)}
 .dt-scene{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:20px;background:linear-gradient(160deg,#dce8df,#526d65);box-shadow:0 14px 34px rgba(61,43,31,.15)}
 .dt-scene-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.dt-scene-bg[data-atmosphere-fallback="1"]{filter:saturate(.92) brightness(.92)}
 .dt-scene-wash{position:absolute;inset:0;z-index:1;pointer-events:none}
 .dt-scene-layer{position:absolute;transform:translate(-50%,-100%);width:auto;object-fit:contain;filter:drop-shadow(0 10px 12px rgba(0,0,0,.24))}
 .dt-scene-cameo{position:absolute;right:12px;bottom:12px;width:110px;height:140px;z-index:6;border-radius:18px;object-fit:contain;background:rgba(255,253,248,.9);border:3px solid white;box-shadow:0 10px 22px rgba(0,0,0,.2)}
@@ -2473,6 +2474,34 @@ window.dtAtmosphereImageFallback=function(image,key){
   image.src=fallback;
 };
 
+function dtAtmosphereFallbackUrl(){
+  const atmosphere=app.setupChoices.atmosfera||app.compositionChoices.atmosfera;
+  const map={
+    notte:`${DT_STORY_ROOT}/setup/atmosfera_notte.png`,
+    tramonto:`${DT_STORY_ROOT}/setup/atmosfera_tramonto.png`
+  };
+  return map[atmosphere]||"";
+}
+
+window.dtSceneBackgroundFallback=function(image){
+  const fallback=dtAtmosphereFallbackUrl();
+
+  if(!fallback){
+    console.warn("[DreamTaily] Nessun fallback atmosfera disponibile per:",image.src);
+    image.remove();
+    return;
+  }
+
+  if(image.dataset.atmosphereFallback==="1"){
+    console.error("[DreamTaily] Anche il fallback atmosfera non è stato caricato:",image.src);
+    image.remove();
+    return;
+  }
+
+  image.dataset.atmosphereFallback="1";
+  image.src=`${fallback}?v=20260728-book-fallback`;
+};
+
 function dtSceneDefinition(stepKey){
   return dtSceneContract?.scenes?.[stepKey]||null;
 }
@@ -2514,7 +2543,7 @@ function dtPreviewScene(step){
   }).join("");
 
   return `<div class="dt-scene">
-    ${bg?`<img class="dt-scene-bg" src="${escapeHtml(bg)}" alt="" onerror="this.remove()">`:""}
+    ${bg?`<img class="dt-scene-bg" src="${escapeHtml(bg)}" alt="" onerror="dtSceneBackgroundFallback(this)">`:""}
     ${layers}
   </div>`;
 }
@@ -2896,7 +2925,14 @@ function dtBookSequence(){
 }
 
 function dtBookScene(scene){
-  const bg=scene?.bg?`<img class="dt-scene-bg" src="${escapeHtml(scene.bg)}" alt="" onerror="this.remove()">`:"";
+  const bg=scene?.bg
+    ?`<img class="dt-scene-bg" src="${escapeHtml(scene.bg)}" alt="" onerror="dtSceneBackgroundFallback(this)">`
+    :(() => {
+        const fallback=dtAtmosphereFallbackUrl();
+        return fallback
+          ?`<img class="dt-scene-bg" src="${escapeHtml(fallback)}?v=20260728-book-empty" alt="">`
+          :"";
+      })();
   const wash=scene?.wash?`<div class="dt-scene-wash" style="background:${escapeHtml(scene.wash)}"></div>`:"";
   const layers=[...(scene?.layers||[])].sort((a,b)=>a.z-b.z).map(layer=>`
     <img class="dt-scene-layer" src="${escapeHtml(layer.src)}" alt=""
