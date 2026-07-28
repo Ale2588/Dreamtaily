@@ -438,6 +438,8 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dt-delivery-link{display:flex;gap:8px;align-items:center;margin-top:18px;padding:13px;border:1px solid var(--line);border-radius:14px;background:#fff}
 .dt-delivery-link code{flex:1;overflow-wrap:anywhere}
 .dt-loading{padding:14px;border-radius:13px;background:#e4f0ef;color:#356f70;font-weight:800;margin-top:12px}
+.dt-decision-option.asset-error{background:#f8f3ea;min-height:110px}
+.dt-decision-option.asset-error::before{content:"Anteprima immagine non disponibile";display:block;color:var(--muted);font-size:12px;margin-bottom:8px}
 @media(max-width:820px){.dt-walk-layout,.dt-checkout-grid{grid-template-columns:1fr}.dt-walk-preview{position:static;order:-1}}
 @media(max-width:560px){.dt-decision-options{grid-template-columns:1fr}.dt-reader-nav{display:grid;grid-template-columns:1fr 1fr}.dt-reader-dots{grid-column:1/-1;grid-row:1}.dt-reader-nav .btn{width:100%;padding:12px}.dt-scene-cameo{width:82px;height:105px}}
 
@@ -2429,9 +2431,47 @@ async function dtLoadSceneContract(){
 }
 
 function dtPrefixStoryRef(ref){
-  if(!ref||/^(?:https?:|data:|blob:|\/)/.test(ref)) return ref;
+  if(!ref) return "";
+  if(/^(?:https?:|data:|blob:|\/)/.test(ref)) return ref;
+
+  /* Accetta entrambe le convenzioni:
+     - setup/atmosfera_notte.png
+     - stories/il-bosco-dei-sussurri/setup/atmosfera_notte.png */
+  if(ref.startsWith("stories/")) return ref;
   return `${DT_STORY_ROOT}/${ref}`;
 }
+
+function dtAtmosphereImage(option){
+  const canonical={
+    notte:`${DT_STORY_ROOT}/setup/atmosfera_notte.png`,
+    tramonto:`${DT_STORY_ROOT}/setup/atmosfera_tramonto.png`
+  };
+  const resolved=canonical[option?.key]||dtPrefixStoryRef(option?.image_ref||"");
+  return resolved ? `${resolved}?v=20260728-2` : "";
+}
+
+window.dtAtmosphereImageFallback=function(image,key){
+  const direct={
+    notte:"stories/il-bosco-dei-sussurri/setup/atmosfera_notte.png",
+    tramonto:"stories/il-bosco-dei-sussurri/setup/atmosfera_tramonto.png"
+  }[key];
+
+  if(!direct){
+    image.remove();
+    return;
+  }
+
+  const fallback=`${direct}?v=20260728-3`;
+  if(image.dataset.fallbackTried==="1"||image.src.endsWith(fallback)){
+    image.style.display="none";
+    image.closest(".dt-decision-option")?.classList.add("asset-error");
+    console.error("[DreamTaily] Immagine atmosfera non caricata:",image.src);
+    return;
+  }
+
+  image.dataset.fallbackTried="1";
+  image.src=fallback;
+};
 
 function dtSceneDefinition(stepKey){
   return dtSceneContract?.scenes?.[stepKey]||null;
@@ -2706,7 +2746,8 @@ window.renderSetupStep=function(){
             ${(atmosphere?.options||[]).map(option=>`
               <button type="button" class="dt-decision-option ${selected===option.key?"selected":""}"
                 onclick="selectDtAtmosphere('${escapeHtml(option.key)}')">
-                ${option.image_ref?`<img src="${escapeHtml(dtPrefixStoryRef(option.image_ref))}" alt="" onerror="this.remove()">`:""}
+                ${option.image_ref?`<img src="${escapeHtml(dtAtmosphereImage(option))}" alt="${escapeHtml(option.label)}"
+                onerror="dtAtmosphereImageFallback(this,'${escapeHtml(option.key)}')">`:""}
                 <strong>${escapeHtml(option.label)}</strong>
                 <small>La stessa avventura, con una luce e una sensazione diverse.</small>
               </button>`).join("")}
