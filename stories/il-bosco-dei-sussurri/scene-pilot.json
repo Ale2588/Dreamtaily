@@ -50,8 +50,8 @@
       "background_ref": "scenes/s1.png",
       "variant_backgrounds": {
         "atmosfera": {
-          "notte": "scenes/s1.notte.png",
-          "tramonto": "scenes/s1.tramonto.png"
+          "notte": "scenes/s1_notte.png",
+          "tramonto": "scenes/s1_tramonto.png"
         }
       },
       "slots": [
@@ -71,8 +71,8 @@
       "background_ref": "scenes/s2.png",
       "variant_backgrounds": {
         "atmosfera": {
-          "notte": "scenes/s2.notte.png",
-          "tramonto": "scenes/s2.tramonto.png"
+          "notte": "scenes/s2_notte.png",
+          "tramonto": "scenes/s2_tramonto.png"
         }
       },
       "slots": [
@@ -188,8 +188,8 @@
       "background_ref": "scenes/s4.png",
       "variant_backgrounds": {
         "atmosfera": {
-          "notte": "scenes/s4.notte.png",
-          "tramonto": "scenes/s4.tramonto.png"
+          "notte": "scenes/s4_notte.png",
+          "tramonto": "scenes/s4_tramonto.png"
         }
       },
       "slots": [
@@ -217,8 +217,8 @@
       "background_ref": "scenes/s5.png",
       "variant_backgrounds": {
         "atmosfera": {
-          "notte": "scenes/s5.notte.png",
-          "tramonto": "scenes/s5.tramonto.png"
+          "notte": "scenes/s5_notte.png",
+          "tramonto": "scenes/s5_tramonto.png"
         }
       },
       "slots": [
