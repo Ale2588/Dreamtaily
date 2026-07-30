@@ -467,7 +467,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 </style>
 </head>
 <body>
-<div class="dt-build-badge">Build: Book-Creation 2026-07-30 fix-3</div>
+<div class="dt-build-badge">Build: Book-Creation 2026-07-30 fix-5</div>
 
 <section class="screen active" id="screen-landing">
   <nav class="nav">
@@ -1268,7 +1268,28 @@ async function saveAndContinue(){
   showError('wow-error',null);
   try{
     await saveCharacter();
-    prepareStories();
+
+    /*
+     * Entrare nel funnel da un personaggio appena creato deve equivalere
+     * all'avvio di un nuovo libro pulito, esattamente come dalla libreria.
+     * Questo evita che bozzE/libri precedenti contaminino il nuovo percorso.
+     */
+    app.bookId=null;
+    app.bookStories=[];
+    app.activeStoryDefinition=null;
+    app.activeBookStoryId=null;
+    app.currentStepKey=null;
+    app.setupIndex=0;
+    app.setupChoices={};
+    app.compositionChoices={};
+    app.selectedStoryId=null;
+    dtComposedBook=null;
+    dtBookPage=0;
+    dtTrail=[];
+    dtTrailIndex=0;
+    dtContentByRef=null;
+
+    await prepareStories();
     setTimeout(()=>showScreen('stories'),350);
   }catch(error){
     console.error('[DreamTaily] Save error:',error);
@@ -1733,8 +1754,7 @@ const CATALOG_CHARACTERS={
   briciola:{name:'Briciola',image:'assets/char/paper/briciola_in_piedi.png'},
   etto:{name:'Etto',image:'assets/char/paper/etto_in_piedi.png'},
   fiamma:{name:'Fiamma',image:'assets/char/paper/fiamma_in_piedi.png'},
-  ulivo:{name:'Ulivo',image:'assets/char/paper/ulivo_in_piedi.png'},
-  rubens:{name:'Rubens',image:'assets/char/paper/fox.png'}
+  ulivo:{name:'Ulivo',image:'assets/char/paper/ulivo_in_piedi.png'}
 };
 
 
@@ -2532,7 +2552,7 @@ function dtOptionConsequences(decisionKey,optionKey){
 
 async function dtLoadSceneContract(){
   if(dtSceneContract) return dtSceneContract;
-  const response=await fetch(`${DT_STORY_ROOT}/scene-pilot.json?v=20260730-fix3`,{cache:"no-store"});
+  const response=await fetch(`${DT_STORY_ROOT}/scene-pilot.json?v=20260730-fix5`,{cache:"no-store"});
   if(!response.ok) throw new Error(`SCENE_HTTP_${response.status}`);
   dtSceneContract=await response.json();
   return dtSceneContract;
@@ -2612,7 +2632,7 @@ function dtResolvedBackground(definition){
   const atmosphere=app.setupChoices.atmosfera||app.compositionChoices.atmosfera;
   const ref=definition.variant_backgrounds?.atmosfera?.[atmosphere]||definition.background_ref;
   const resolved=dtPrefixStoryRef(ref);
-  return resolved?`${resolved}?v=20260730-fix3`:"";
+  return resolved?`${resolved}?v=20260730-fix5`:"";
 }
 
 function dtHelperImage(pose="in_piedi"){
@@ -2620,7 +2640,7 @@ function dtHelperImage(pose="in_piedi"){
   if(!helper) return "";
   const styleArt=helper.art?.[app.style]||helper.art?.papercut||helper.art?.paper||helper.art;
   const resolved=styleArt?.[pose]||styleArt?.in_piedi||helper.image||"";
-  return resolved?`${resolved}?v=20260730-fix3`:"";
+  return resolved?`${resolved}?v=20260730-fix5`:"";
 }
 
 function dtPreviewScene(step){
@@ -2732,7 +2752,7 @@ function dtDecisionHtml(step){
           if(!helper) return "";
           return `<button type="button" class="dt-decision-option ${selected===entry.key?"selected":""}"
             onclick="selectDtHelper('${escapeHtml(entry.key)}','${escapeHtml(entry.entrance_ref)}')">
-            <img src="${escapeHtml((helper.image||"")+"?v=20260730-fix3")}" alt="">
+            <img src="${escapeHtml((helper.image||"")+"?v=20260730-fix5")}" alt="">
             <strong>${escapeHtml(helper.name)}</strong>
             <small>Avrà una propria entrata in scena lungo questo ramo.</small>
           </button>`;

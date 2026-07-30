@@ -90,7 +90,12 @@
     "s3_felci": {
       "scene_id": "s3_felci",
       "background_ref": "scenes/s3_felci.png",
-      "variant_backgrounds": {},
+      "variant_backgrounds": {
+        "atmosfera": {
+          "notte": "scenes/s3_felci_notte.png",
+          "tramonto": "scenes/s3_felci_tramonto.png"
+        }
+      },
       "slots": [
         {
           "role": "protagonist",
@@ -114,7 +119,12 @@
     "s3_ruscello": {
       "scene_id": "s3_ruscello",
       "background_ref": "scenes/s3_ruscello.png",
-      "variant_backgrounds": {},
+      "variant_backgrounds": {
+        "atmosfera": {
+          "notte": "scenes/s3_ruscello_notte.png",
+          "tramonto": "scenes/s3_ruscello_tramonto.png"
+        }
+      },
       "slots": [
         {
           "role": "protagonist",
@@ -138,7 +148,12 @@
     "s4_felci": {
       "scene_id": "s4_felci",
       "background_ref": "scenes/s4_felci.png",
-      "variant_backgrounds": {},
+      "variant_backgrounds": {
+        "atmosfera": {
+          "notte": "scenes/s4_felci_notte.png",
+          "tramonto": "scenes/s4_felci_tramonto.png"
+        }
+      },
       "slots": [
         {
           "role": "protagonist",
@@ -162,7 +177,12 @@
     "s4_ruscello": {
       "scene_id": "s4_ruscello",
       "background_ref": "scenes/s4_ruscello.png",
-      "variant_backgrounds": {},
+      "variant_backgrounds": {
+        "atmosfera": {
+          "notte": "scenes/s4_ruscello_notte.png",
+          "tramonto": "scenes/s4_ruscello_tramonto.png"
+        }
+      },
       "slots": [
         {
           "role": "protagonist",
