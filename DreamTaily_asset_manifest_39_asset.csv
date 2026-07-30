@@ -1,0 +1,40 @@
+order,file,type,atmos,path,reference,qa
+1,cover.png,sfondo,fissa,stories/il-bosco-dei-sussurri/scenes/cover.png,,Campanella calda e leggibile; sentiero d’ingresso; terzo superiore calmo; nessun titolo.
+2,s1.png,sfondo,giorno/unica,stories/il-bosco-dei-sussurri/scenes/s1.png,,Passaggio erba tagliata → erba alta → bosco; campanella visibile; fascia bassa libera.
+3,s2.png,sfondo,giorno/unica,stories/il-bosco-dei-sussurri/scenes/s2.png,,"Bivio leggibile: felci a sinistra, ruscello a destra; basso centrale libero."
+4,s3_felci.png,sfondo,giorno/unica,stories/il-bosco-dei-sussurri/scenes/s3_felci.png,,Stanza verde intima; apertura tra le fronde leggibile; pavimento basso libero.
+5,s3_ruscello.png,sfondo,giorno/unica,stories/il-bosco-dei-sussurri/scenes/s3_ruscello.png,,Impronte verso il sasso; ramo basso sopra l’acqua; fascia bassa praticabile.
+6,s4_felci.png,sfondo,giorno/unica,stories/il-bosco-dei-sussurri/scenes/s4_felci.png,,Radici come dita; passaggio basso; nastro piccolo visibile; spazio per posa chinata.
+7,s4_ruscello.png,sfondo,giorno/unica,stories/il-bosco-dei-sussurri/scenes/s4_ruscello.png,,Pietre come percorso chiaro; acqua leggibile; primo piano stabile per personaggi.
+8,s4.png,sfondo,giorno/unica,stories/il-bosco-dei-sussurri/scenes/s4.png,,Radura tonda ordinata; due rami incrociati con campanella; spazio per due personaggi seduti.
+9,s5.png,sfondo,giorno/unica,stories/il-bosco-dei-sussurri/scenes/s5.png,,Rami incrociati vuoti; radice-spalla riconoscibile; uscita verso il campo.
+10,s6_promessa.png,sfondo,giorno/unica,stories/il-bosco-dei-sussurri/scenes/s6_promessa.png,,"Bordo bosco/campo, cancello e casa lontani; patch d’erba per campanella; NON radura."
+11,s6_festa.png,sfondo,giorno/unica,stories/il-bosco-dei-sussurri/scenes/s6_festa.png,,Festa senza creature; luci e festoni piccoli; centro basso libero.
+12,s1.notte.png,sfondo,notte,stories/il-bosco-dei-sussurri/scenes/s1.notte.png,s1.png,Notte leggibile e non nera; una sola finestra accesa; campanella con piccolo riflesso caldo.
+13,s1.tramonto.png,sfondo,tramonto,stories/il-bosco-dei-sussurri/scenes/s1.tramonto.png,s1.png,"Passaggio erba tagliata → erba alta → bosco; campanella visibile; fascia bassa libera. Variante tramonto: luce corallo/albicocca, geometria invariata."
+14,s2.notte.png,sfondo,notte,stories/il-bosco-dei-sussurri/scenes/s2.notte.png,s2.png,"Bivio leggibile: felci a sinistra, ruscello a destra; basso centrale libero."
+15,s2.tramonto.png,sfondo,tramonto,stories/il-bosco-dei-sussurri/scenes/s2.tramonto.png,s2.png,"Bivio leggibile: felci a sinistra, ruscello a destra; basso centrale libero. Variante tramonto: luce corallo/albicocca, geometria invariata."
+16,s4.notte.png,sfondo,notte,stories/il-bosco-dei-sussurri/scenes/s4.notte.png,s4.png,Radura tonda ordinata; due rami incrociati con campanella; spazio per due personaggi seduti.
+17,s4.tramonto.png,sfondo,tramonto,stories/il-bosco-dei-sussurri/scenes/s4.tramonto.png,s4.png,"Radura tonda ordinata; due rami incrociati con campanella; spazio per due personaggi seduti. Variante tramonto: luce corallo/albicocca, geometria invariata."
+18,s5.notte.png,sfondo,notte,stories/il-bosco-dei-sussurri/scenes/s5.notte.png,s5.png,Rami incrociati vuoti; radice-spalla riconoscibile; uscita verso il campo.
+19,s5.tramonto.png,sfondo,tramonto,stories/il-bosco-dei-sussurri/scenes/s5.tramonto.png,s5.png,"Rami incrociati vuoti; radice-spalla riconoscibile; uscita verso il campo. Variante tramonto: luce corallo/albicocca, geometria invariata."
+20,s6_promessa.notte.png,sfondo,notte,stories/il-bosco-dei-sussurri/scenes/s6_promessa.notte.png,s6_promessa.png,"Bordo bosco/campo, cancello e casa lontani; patch d’erba per campanella; NON radura."
+21,s6_promessa.tramonto.png,sfondo,tramonto,stories/il-bosco-dei-sussurri/scenes/s6_promessa.tramonto.png,s6_promessa.png,"Bordo bosco/campo, cancello e casa lontani; patch d’erba per campanella; NON radura. Variante tramonto: luce corallo/albicocca, geometria invariata."
+22,s6_festa.notte.png,sfondo,notte,stories/il-bosco-dei-sussurri/scenes/s6_festa.notte.png,s6_festa.png,Festa senza creature; luci e festoni piccoli; centro basso libero.
+23,s6_festa.tramonto.png,sfondo,tramonto,stories/il-bosco-dei-sussurri/scenes/s6_festa.tramonto.png,s6_festa.png,"Festa senza creature; luci e festoni piccoli; centro basso libero. Variante tramonto: luce corallo/albicocca, geometria invariata."
+24,etto_in_piedi.png,aiutante,trasparente,assets/char/paper/etto_in_piedi.png,same helper previous approved poses,"Orecchie basse, naso a bottone, toppa azzurro polvere sul ginocchio sinistro."
+25,etto_seduto.png,aiutante,trasparente,assets/char/paper/etto_seduto.png,same helper previous approved poses,"Orecchie basse, naso a bottone, toppa azzurro polvere sul ginocchio sinistro."
+26,etto_cammina.png,aiutante,trasparente,assets/char/paper/etto_cammina.png,same helper previous approved poses,"Orecchie basse, naso a bottone, toppa azzurro polvere sul ginocchio sinistro."
+27,etto_si_china.png,aiutante,trasparente,assets/char/paper/etto_si_china.png,same helper previous approved poses,"Orecchie basse, naso a bottone, toppa azzurro polvere sul ginocchio sinistro."
+28,briciola_in_piedi.png,aiutante,trasparente,assets/char/paper/briciola_in_piedi.png,same helper previous approved poses,"Deve sembrare un topolino, il più piccolo; orecchie rotonde avanti; macchiolina vicino a un baffo."
+29,briciola_seduto.png,aiutante,trasparente,assets/char/paper/briciola_seduto.png,same helper previous approved poses,"Deve sembrare un topolino, il più piccolo; orecchie rotonde avanti; macchiolina vicino a un baffo."
+30,briciola_cammina.png,aiutante,trasparente,assets/char/paper/briciola_cammina.png,same helper previous approved poses,"Deve sembrare un topolino, il più piccolo; orecchie rotonde avanti; macchiolina vicino a un baffo."
+31,briciola_si_china.png,aiutante,trasparente,assets/char/paper/briciola_si_china.png,same helper previous approved poses,"Deve sembrare un topolino, il più piccolo; orecchie rotonde avanti; macchiolina vicino a un baffo."
+32,fiamma_in_piedi.png,aiutante,trasparente,assets/char/paper/fiamma_in_piedi.png,same helper previous approved poses,Volpetta arancio-ruggine; zampe bianche; coda lunga bassa; un orecchio dritto e uno piegato.
+33,fiamma_seduto.png,aiutante,trasparente,assets/char/paper/fiamma_seduto.png,same helper previous approved poses,Volpetta arancio-ruggine; zampe bianche; coda lunga bassa; un orecchio dritto e uno piegato.
+34,fiamma_cammina.png,aiutante,trasparente,assets/char/paper/fiamma_cammina.png,same helper previous approved poses,Volpetta arancio-ruggine; zampe bianche; coda lunga bassa; un orecchio dritto e uno piegato.
+35,fiamma_si_china.png,aiutante,trasparente,assets/char/paper/fiamma_si_china.png,same helper previous approved poses,Volpetta arancio-ruggine; zampe bianche; coda lunga bassa; un orecchio dritto e uno piegato.
+36,ulivo_in_piedi.png,aiutante,trasparente,assets/char/paper/ulivo_in_piedi.png,same helper previous approved poses,Gufetto bruno; occhi enormi a bottone; piuma ribelle dalla parte sbagliata; mai in volo.
+37,ulivo_seduto.png,aiutante,trasparente,assets/char/paper/ulivo_seduto.png,same helper previous approved poses,Gufetto bruno; occhi enormi a bottone; piuma ribelle dalla parte sbagliata; mai in volo.
+38,ulivo_cammina.png,aiutante,trasparente,assets/char/paper/ulivo_cammina.png,same helper previous approved poses,Gufetto bruno; occhi enormi a bottone; piuma ribelle dalla parte sbagliata; mai in volo.
+39,ulivo_si_china.png,aiutante,trasparente,assets/char/paper/ulivo_si_china.png,same helper previous approved poses,Gufetto bruno; occhi enormi a bottone; piuma ribelle dalla parte sbagliata; mai in volo.
