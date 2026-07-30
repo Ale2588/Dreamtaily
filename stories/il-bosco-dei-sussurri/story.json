@@ -1,0 +1,235 @@
+{
+  "slug": "il-bosco-dei-sussurri",
+  "version": 3,
+  "title": "Il bosco dei sussurri",
+  "age_range": "4–8 anni",
+  "tone": "Coraggio e ascolto",
+  "summary": "Una campanella suona oltre il sentiero. Per capire chi la sta cercando bisogna entrare nel bosco e ascoltare con calma.",
+  "cover_image": "assets/char/water/bear.png",
+  "max_decisions": 4,
+  "start": "s1",
+  "placeholders": [
+    "[Nome]",
+    "[Aiutante]"
+  ],
+  "steps": [
+    {
+      "key": "s1",
+      "chapter": 1,
+      "title": "La campanella",
+      "composer_summary": "Al limitare del bosco, una piccola campanella suona anche se non c'è vento.",
+      "content_ref": "chapters/s1.md",
+      "decision": null,
+      "next": "s2",
+      "variant_refs": {
+        "atmosfera": {
+          "notte": "chapters/s1.atmosfera.notte.md",
+          "tramonto": "chapters/s1.atmosfera.tramonto.md"
+        }
+      }
+    },
+    {
+      "key": "s2",
+      "chapter": 2,
+      "title": "Il primo sentiero",
+      "composer_summary": "Il sentiero si divide: da una parte passa tra le felci, dall'altra costeggia il ruscello.",
+      "content_ref": "chapters/s2.md",
+      "decision": {
+        "type": "branch",
+        "key": "d_sentiero",
+        "prompt": "Da che parte prosegue [Nome]?",
+        "options": [
+          {
+            "key": "felci",
+            "label": "Tra le felci",
+            "next": "s3_felci"
+          },
+          {
+            "key": "ruscello",
+            "label": "Lungo il ruscello",
+            "next": "s3_ruscello"
+          }
+        ]
+      },
+      "variant_refs": {
+        "atmosfera": {
+          "notte": "chapters/s2.atmosfera.notte.md",
+          "tramonto": "chapters/s2.atmosfera.tramonto.md"
+        }
+      }
+    },
+    {
+      "key": "s3_felci",
+      "chapter": 3,
+      "title": "Qualcuno tra le foglie",
+      "composer_summary": "Tra le foglie si sente un fruscio. Qualcuno conosce il bosco, ma non vuole attraversarlo da solo.",
+      "content_ref": "chapters/s3_felci.md",
+      "decision": {
+        "type": "cast",
+        "key": "helper",
+        "prompt": "Chi accompagna [Nome]?",
+        "required": true,
+        "allowed_sources": [
+          "character_asset",
+          "catalog_character"
+        ],
+        "catalog_roster": [
+          {
+            "key": "etto",
+            "entrance_ref": "entrances/s3_felci_etto.md"
+          },
+          {
+            "key": "briciola",
+            "entrance_ref": "entrances/s3_felci_briciola.md"
+          },
+          {
+            "key": "fiamma",
+            "entrance_ref": "entrances/s3_felci_fiamma.md"
+          }
+        ]
+      },
+      "next": "s4_felci"
+    },
+    {
+      "key": "s3_ruscello",
+      "chapter": 3,
+      "title": "Le impronte nell'acqua",
+      "composer_summary": "Accanto al ruscello compaiono piccole impronte. Il loro proprietario sembra sapere dove porta il suono.",
+      "content_ref": "chapters/s3_ruscello.md",
+      "decision": {
+        "type": "cast",
+        "key": "helper",
+        "prompt": "Chi si unisce a [Nome]?",
+        "required": true,
+        "allowed_sources": [
+          "character_asset",
+          "catalog_character"
+        ],
+        "catalog_roster": [
+          {
+            "key": "ulivo",
+            "entrance_ref": "entrances/s3_ruscello_ulivo.md"
+          },
+          {
+            "key": "briciola",
+            "entrance_ref": "entrances/s3_ruscello_briciola.md"
+          }
+        ]
+      },
+      "next": "s4_ruscello"
+    },
+    {
+      "key": "s4_felci",
+      "chapter": 4,
+      "title": "Il passaggio sotto le radici",
+      "composer_summary": "Tra le felci, [Nome] e [Aiutante] trovano un passaggio basso che conduce verso il cuore del bosco.",
+      "content_ref": "chapters/s4_felci.md",
+      "decision": null,
+      "next": "s4"
+    },
+    {
+      "key": "s4_ruscello",
+      "chapter": 4,
+      "title": "Il ponte di pietre",
+      "composer_summary": "Il ruscello si allarga. [Nome] e [Aiutante] devono attraversarlo seguendo il ritmo della campanella.",
+      "content_ref": "chapters/s4_ruscello.md",
+      "decision": null,
+      "next": "s4"
+    },
+    {
+      "key": "s4",
+      "chapter": 5,
+      "title": "La radura silenziosa",
+      "composer_summary": "Nella radura la campanella tace. Per ritrovarla serve smettere di correre e ascoltare davvero.",
+      "content_ref": "chapters/s4.md",
+      "decision": null,
+      "next": "s5",
+      "variant_refs": {
+        "atmosfera": {
+          "notte": "chapters/s4.atmosfera.notte.md",
+          "tramonto": "chapters/s4.atmosfera.tramonto.md"
+        }
+      }
+    },
+    {
+      "key": "s5",
+      "chapter": 6,
+      "title": "Il ritorno",
+      "composer_summary": "La campanella torna libera. Resta da decidere come salutare il bosco.",
+      "content_ref": "chapters/s5.md",
+      "decision": {
+        "type": "branch",
+        "key": "d_finale",
+        "prompt": "Come termina l'avventura?",
+        "options": [
+          {
+            "key": "promessa",
+            "label": "Con la promessa di tornare",
+            "next": "s6_promessa"
+          },
+          {
+            "key": "festa",
+            "label": "Con una piccola festa nella radura",
+            "next": "s6_festa"
+          }
+        ]
+      },
+      "variant_refs": {
+        "atmosfera": {
+          "notte": "chapters/s5.atmosfera.notte.md",
+          "tramonto": "chapters/s5.atmosfera.tramonto.md"
+        }
+      }
+    },
+    {
+      "key": "s6_promessa",
+      "chapter": 7,
+      "title": "La promessa",
+      "composer_summary": "[Nome] lascia la campanella a chi lo ha accompagnato, e promette di tornare.",
+      "content_ref": "chapters/s6_promessa.md",
+      "decision": null,
+      "next": null,
+      "variant_refs": {
+        "atmosfera": {
+          "notte": "chapters/s6_promessa.atmosfera.notte.md",
+          "tramonto": "chapters/s6_promessa.atmosfera.tramonto.md"
+        }
+      }
+    },
+    {
+      "key": "s6_festa",
+      "chapter": 7,
+      "title": "La piccola festa",
+      "composer_summary": "Prima di tornare a casa, il bosco intero festeggia nella radura.",
+      "content_ref": "chapters/s6_festa.md",
+      "decision": null,
+      "next": null,
+      "variant_refs": {
+        "atmosfera": {
+          "notte": "chapters/s6_festa.atmosfera.notte.md",
+          "tramonto": "chapters/s6_festa.atmosfera.tramonto.md"
+        }
+      }
+    }
+  ],
+  "setup": [
+    {
+      "key": "atmosfera",
+      "type": "variant",
+      "prompt": "Quando comincia la storia?",
+      "presentation": "visual",
+      "options": [
+        {
+          "key": "notte",
+          "label": "Di notte",
+          "image_ref": "setup/atmosfera_notte.png"
+        },
+        {
+          "key": "tramonto",
+          "label": "Al tramonto",
+          "image_ref": "setup/atmosfera_tramonto.png"
+        }
+      ]
+    }
+  ]
+}

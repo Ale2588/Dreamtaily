@@ -1,0 +1,374 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dreamtaily.example/schemas/story.schema.v2.json",
+  "title": "DreamTaily Story Schema v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slug",
+    "version",
+    "title",
+    "age_range",
+    "summary",
+    "max_decisions",
+    "start",
+    "placeholders",
+    "setup",
+    "steps"
+  ],
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 3
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "age_range": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tone": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cover_image": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "max_decisions": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "start": {
+      "type": "string",
+      "minLength": 1
+    },
+    "placeholders": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "setup": {
+      "type": "array",
+      "maxItems": 2,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/setupVariant"
+          },
+          {
+            "$ref": "#/$defs/setupBranch"
+          }
+        ]
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    }
+  },
+  "$defs": {
+    "setupVariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "type",
+        "prompt",
+        "presentation",
+        "options"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "variant"
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "presentation": {
+          "const": "visual"
+        },
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "key",
+              "label",
+              "image_ref"
+            ],
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "image_ref": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "setupBranch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "type",
+        "prompt",
+        "presentation",
+        "options"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "branch"
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "presentation": {
+          "const": "visual"
+        },
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "key",
+              "label",
+              "start",
+              "image_ref"
+            ],
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "start": {
+                "type": "string"
+              },
+              "image_ref": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "rosterEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "entrance_ref"
+      ],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "entrance_ref": {
+          "type": "string",
+          "pattern": "^entrances/.+\\.md$"
+        }
+      }
+    },
+    "branchOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "label",
+        "next"
+      ],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "image_ref": {
+          "type": "string"
+        },
+        "next": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "branchDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "key",
+        "prompt",
+        "options"
+      ],
+      "properties": {
+        "type": {
+          "const": "branch"
+        },
+        "key": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/branchOption"
+          }
+        }
+      }
+    },
+    "castDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "key",
+        "prompt",
+        "required",
+        "allowed_sources",
+        "catalog_roster"
+      ],
+      "properties": {
+        "type": {
+          "const": "cast"
+        },
+        "key": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "allowed_sources": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "character_asset",
+              "catalog_character"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "catalog_roster": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rosterEntry"
+          }
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "chapter",
+        "title",
+        "content_ref",
+        "decision",
+        "next"
+      ],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "chapter": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "title": {
+          "type": "string"
+        },
+        "composer_summary": {
+          "type": "string"
+        },
+        "content_ref": {
+          "type": "string",
+          "pattern": "^chapters/.+\\.md$"
+        },
+        "variant_refs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^chapters/.+\\.md$"
+            }
+          }
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/branchDecision"
+            },
+            {
+              "$ref": "#/$defs/castDecision"
+            }
+          ]
+        },
+        "next": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        }
+      }
+    }
+  }
+}

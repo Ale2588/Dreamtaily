@@ -1,0 +1,54 @@
+{
+  "slug": "setup-branch-demo",
+  "version": 3,
+  "title": "Setup branch demo",
+  "age_range": "4–8 anni",
+  "summary": "Fixture tecnica.",
+  "max_decisions": 1,
+  "start": "s1_casa",
+  "placeholders": [
+    "[Nome]"
+  ],
+  "setup": [
+    {
+      "key": "percorso",
+      "type": "branch",
+      "prompt": "Da dove comincia [Nome]?",
+      "presentation": "visual",
+      "options": [
+        {
+          "key": "casa",
+          "label": "Da casa",
+          "start": "s1_casa",
+          "image_ref": "setup/casa.svg"
+        },
+        {
+          "key": "scuola",
+          "label": "Da scuola",
+          "start": "s1_scuola",
+          "image_ref": "setup/scuola.svg"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "key": "s1_casa",
+      "chapter": 1,
+      "title": "Da casa",
+      "composer_summary": "[Nome] parte da casa.",
+      "content_ref": "chapters/s1_casa.md",
+      "decision": null,
+      "next": null
+    },
+    {
+      "key": "s1_scuola",
+      "chapter": 1,
+      "title": "Da scuola",
+      "composer_summary": "[Nome] parte da scuola.",
+      "content_ref": "chapters/s1_scuola.md",
+      "decision": null,
+      "next": null
+    }
+  ]
+}

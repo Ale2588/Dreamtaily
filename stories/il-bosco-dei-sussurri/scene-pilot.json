@@ -1,0 +1,303 @@
+{
+  "story_slug": "il-bosco-dei-sussurri",
+  "version": 1,
+  "status": "authoring_contract",
+  "coordinate_system": {
+    "unit": "normalized",
+    "range": [
+      0,
+      1
+    ],
+    "anchor": "feet_center",
+    "scale_meaning": "character_height_as_fraction_of_scene_height"
+  },
+  "canonical_roles": [
+    "protagonist",
+    "helper"
+  ],
+  "canonical_poses": [
+    "in_piedi",
+    "cammina",
+    "seduto",
+    "si_china",
+    "di_spalle"
+  ],
+  "mvp_constraints": {
+    "user_protagonist_pose": "in_piedi",
+    "catalog_characters_may_use_multiple_poses": true,
+    "missing_optional_role_is_omitted": true,
+    "background_paths_are_relative_to_story_folder": true
+  },
+  "cover": {
+    "scene_id": "cover",
+    "background_ref": "scenes/cover.png",
+    "variant_backgrounds": {},
+    "slots": [
+      {
+        "role": "protagonist",
+        "pose": "in_piedi",
+        "x": 0.5,
+        "y": 0.92,
+        "scale": 0.56,
+        "z": 2
+      }
+    ],
+    "authoring_note": "Copertina separata dalle 10 scene narrative. Per ora fissa; atmosfera e aiutante non la modificano."
+  },
+  "scenes": {
+    "s1": {
+      "scene_id": "s1",
+      "background_ref": "scenes/s1.png",
+      "variant_backgrounds": {
+        "atmosfera": {
+          "notte": "scenes/s1.notte.png",
+          "tramonto": "scenes/s1.tramonto.png"
+        }
+      },
+      "slots": [
+        {
+          "role": "protagonist",
+          "pose": "in_piedi",
+          "x": 0.42,
+          "y": 0.91,
+          "scale": 0.38,
+          "z": 2
+        }
+      ],
+      "authoring_note": "Il protagonista osserva la campanella al limitare del bosco."
+    },
+    "s2": {
+      "scene_id": "s2",
+      "background_ref": "scenes/s2.png",
+      "variant_backgrounds": {
+        "atmosfera": {
+          "notte": "scenes/s2.notte.png",
+          "tramonto": "scenes/s2.tramonto.png"
+        }
+      },
+      "slots": [
+        {
+          "role": "protagonist",
+          "pose": "in_piedi",
+          "x": 0.5,
+          "y": 0.92,
+          "scale": 0.35,
+          "z": 2
+        }
+      ],
+      "authoring_note": "Bivio leggibile: felci a sinistra, ruscello a destra."
+    },
+    "s3_felci": {
+      "scene_id": "s3_felci",
+      "background_ref": "scenes/s3_felci.png",
+      "variant_backgrounds": {},
+      "slots": [
+        {
+          "role": "protagonist",
+          "pose": "in_piedi",
+          "x": 0.38,
+          "y": 0.92,
+          "scale": 0.36,
+          "z": 2
+        },
+        {
+          "role": "helper",
+          "pose": "in_piedi",
+          "x": 0.66,
+          "y": 0.91,
+          "scale": 0.3,
+          "z": 1
+        }
+      ],
+      "authoring_note": "Primo incontro con l'aiutante tra le foglie."
+    },
+    "s3_ruscello": {
+      "scene_id": "s3_ruscello",
+      "background_ref": "scenes/s3_ruscello.png",
+      "variant_backgrounds": {},
+      "slots": [
+        {
+          "role": "protagonist",
+          "pose": "in_piedi",
+          "x": 0.41,
+          "y": 0.91,
+          "scale": 0.36,
+          "z": 2
+        },
+        {
+          "role": "helper",
+          "pose": "in_piedi",
+          "x": 0.67,
+          "y": 0.89,
+          "scale": 0.29,
+          "z": 1
+        }
+      ],
+      "authoring_note": "Primo incontro accanto alle impronte nell'acqua."
+    },
+    "s4_felci": {
+      "scene_id": "s4_felci",
+      "background_ref": "scenes/s4_felci.png",
+      "variant_backgrounds": {},
+      "slots": [
+        {
+          "role": "protagonist",
+          "pose": "in_piedi",
+          "x": 0.4,
+          "y": 0.93,
+          "scale": 0.34,
+          "z": 2
+        },
+        {
+          "role": "helper",
+          "pose": "si_china",
+          "x": 0.63,
+          "y": 0.92,
+          "scale": 0.27,
+          "z": 1
+        }
+      ],
+      "authoring_note": "Passaggio basso sotto le radici; protagonista sempre compatibile con posa singola."
+    },
+    "s4_ruscello": {
+      "scene_id": "s4_ruscello",
+      "background_ref": "scenes/s4_ruscello.png",
+      "variant_backgrounds": {},
+      "slots": [
+        {
+          "role": "protagonist",
+          "pose": "in_piedi",
+          "x": 0.42,
+          "y": 0.88,
+          "scale": 0.34,
+          "z": 2
+        },
+        {
+          "role": "helper",
+          "pose": "cammina",
+          "x": 0.63,
+          "y": 0.9,
+          "scale": 0.27,
+          "z": 1
+        }
+      ],
+      "authoring_note": "Attraversamento sulle pietre; composizione stabile senza richiedere una nuova posa protagonista."
+    },
+    "s4": {
+      "scene_id": "s4",
+      "background_ref": "scenes/s4.png",
+      "variant_backgrounds": {
+        "atmosfera": {
+          "notte": "scenes/s4.notte.png",
+          "tramonto": "scenes/s4.tramonto.png"
+        }
+      },
+      "slots": [
+        {
+          "role": "protagonist",
+          "pose": "in_piedi",
+          "x": 0.43,
+          "y": 0.91,
+          "scale": 0.34,
+          "z": 2
+        },
+        {
+          "role": "helper",
+          "pose": "seduto",
+          "x": 0.64,
+          "y": 0.9,
+          "scale": 0.25,
+          "z": 1
+        }
+      ],
+      "authoring_note": "Radura silenziosa; scena condivisa dopo la convergenza."
+    },
+    "s5": {
+      "scene_id": "s5",
+      "background_ref": "scenes/s5.png",
+      "variant_backgrounds": {
+        "atmosfera": {
+          "notte": "scenes/s5.notte.png",
+          "tramonto": "scenes/s5.tramonto.png"
+        }
+      },
+      "slots": [
+        {
+          "role": "protagonist",
+          "pose": "in_piedi",
+          "x": 0.44,
+          "y": 0.91,
+          "scale": 0.35,
+          "z": 2
+        },
+        {
+          "role": "helper",
+          "pose": "in_piedi",
+          "x": 0.64,
+          "y": 0.91,
+          "scale": 0.28,
+          "z": 1
+        }
+      ],
+      "authoring_note": "La campanella è libera; preparazione del bivio finale."
+    },
+    "s6_promessa": {
+      "scene_id": "s6_promessa",
+      "background_ref": "scenes/s6_promessa.png",
+      "variant_backgrounds": {
+        "atmosfera": {
+          "notte": "scenes/s6_promessa.notte.png",
+          "tramonto": "scenes/s6_promessa.tramonto.png"
+        }
+      },
+      "slots": [
+        {
+          "role": "protagonist",
+          "pose": "in_piedi",
+          "x": 0.4,
+          "y": 0.91,
+          "scale": 0.36,
+          "z": 2
+        },
+        {
+          "role": "helper",
+          "pose": "in_piedi",
+          "x": 0.63,
+          "y": 0.9,
+          "scale": 0.29,
+          "z": 1
+        }
+      ],
+      "authoring_note": "Finale intimo: promessa di tornare."
+    },
+    "s6_festa": {
+      "scene_id": "s6_festa",
+      "background_ref": "scenes/s6_festa.png",
+      "variant_backgrounds": {
+        "atmosfera": {
+          "notte": "scenes/s6_festa.notte.png",
+          "tramonto": "scenes/s6_festa.tramonto.png"
+        }
+      },
+      "slots": [
+        {
+          "role": "protagonist",
+          "pose": "in_piedi",
+          "x": 0.43,
+          "y": 0.91,
+          "scale": 0.35,
+          "z": 2
+        },
+        {
+          "role": "helper",
+          "pose": "cammina",
+          "x": 0.64,
+          "y": 0.9,
+          "scale": 0.28,
+          "z": 1
+        }
+      ],
+      "authoring_note": "Finale corale nella radura; eventuali comparse restano parte dello sfondo."
+    }
+  }
+}

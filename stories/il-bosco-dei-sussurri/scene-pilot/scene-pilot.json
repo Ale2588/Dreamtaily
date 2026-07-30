@@ -1,0 +1,50 @@
+{
+  "format": "dreamtaily-scene-pilot-v0",
+  "story_slug": "il-bosco-dei-sussurri",
+  "canonical_poses": [
+    "in_piedi",
+    "cammina",
+    "seduto",
+    "si_china",
+    "di_spalle"
+  ],
+  "asset_path_rule": "Tutti i riferimenti sono relativi alla cartella della storia.",
+  "verified_repository_assets": {
+    "notte": "setup/atmosfera_notte.png",
+    "tramonto": "setup/atmosfera_tramonto.png"
+  },
+  "steps": [
+    {
+      "key": "s1",
+      "chapter": 1,
+      "title": "La campanella",
+      "scene": {
+        "background_ref": "setup/atmosfera_notte.png",
+        "variant_backgrounds": {
+          "atmosfera": {
+            "notte": "setup/atmosfera_notte.png",
+            "tramonto": "setup/atmosfera_tramonto.png"
+          }
+        },
+        "slots": [
+          {
+            "role": "protagonist",
+            "pose": "in_piedi",
+            "x": 0.72,
+            "y": 0.92,
+            "scale": 0.34,
+            "z": 2
+          }
+        ]
+      }
+    }
+  ],
+  "demo_cast": {
+    "protagonist": {
+      "name": "Personaggio demo",
+      "poses": {
+        "in_piedi": "../../assets/char/water/bear.png"
+      }
+    }
+  }
+}

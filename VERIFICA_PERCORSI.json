@@ -1,0 +1,46 @@
+{
+  "combinations_tested": 20,
+  "all_paths_have_7_pages": true,
+  "all_paths_zero_markers": true,
+  "all_paths_include_helper": true,
+  "all_trails_have_7_moments": true,
+  "trails": {
+    "felci/promessa": [
+      "s1",
+      "s2",
+      "s3_felci",
+      "s4_felci",
+      "s4",
+      "s5",
+      "s6_promessa"
+    ],
+    "felci/festa": [
+      "s1",
+      "s2",
+      "s3_felci",
+      "s4_felci",
+      "s4",
+      "s5",
+      "s6_festa"
+    ],
+    "ruscello/promessa": [
+      "s1",
+      "s2",
+      "s3_ruscello",
+      "s4_ruscello",
+      "s4",
+      "s5",
+      "s6_promessa"
+    ],
+    "ruscello/festa": [
+      "s1",
+      "s2",
+      "s3_ruscello",
+      "s4_ruscello",
+      "s4",
+      "s5",
+      "s6_festa"
+    ]
+  },
+  "inline_scripts_checked": 2
+}

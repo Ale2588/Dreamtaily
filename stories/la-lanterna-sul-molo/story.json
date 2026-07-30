@@ -1,0 +1,209 @@
+{
+  "slug": "la-lanterna-sul-molo",
+  "version": 3,
+  "title": "La lanterna sul molo",
+  "age_range": "5–9 anni",
+  "tone": "Curiosità e amicizia",
+  "summary": "Una lanterna resta accesa sul vecchio molo anche quando il guardiano è già rientrato. Qualcuno, forse, sta aspettando un segnale.",
+  "cover_image": "assets/char/crayon/fox.png",
+  "max_decisions": 4,
+  "start": "s1",
+  "steps": [
+    {
+      "key": "s1",
+      "chapter": 1,
+      "title": "Una luce fuori orario",
+      "composer_summary": "Dalla finestra si vede una lanterna accesa in fondo al molo.",
+      "content_ref": "chapters/s1.md",
+      "decision": null,
+      "next": "s2"
+    },
+    {
+      "key": "s2",
+      "chapter": 2,
+      "title": "Il molo",
+      "composer_summary": "Sul legno bagnato ci sono una corda sciolta e un foglio piegato.",
+      "content_ref": "chapters/s2.md",
+      "decision": {
+        "type": "branch",
+        "key": "d_indizio",
+        "prompt": "Cosa guarda per prima cosa [Nome]?",
+        "options": [
+          {
+            "key": "corda",
+            "label": "La corda sciolta",
+            "next": "s3_corda"
+          },
+          {
+            "key": "foglio",
+            "label": "Il foglio piegato",
+            "next": "s3_foglio"
+          }
+        ]
+      }
+    },
+    {
+      "key": "s3_corda",
+      "chapter": 3,
+      "title": "Un nodo semplice",
+      "composer_summary": "La corda non è spezzata: qualcuno l’ha sciolta in fretta e ha lasciato un nodo facile da riconoscere.",
+      "content_ref": "chapters/s3_corda.md",
+      "decision": {
+        "type": "cast",
+        "key": "helper",
+        "prompt": "Chi aiuta [Nome] a seguire l’indizio?",
+        "required": false,
+        "allowed_sources": [
+          "character_asset",
+          "catalog_character"
+        ],
+        "catalog_roster": [
+          {
+            "key": "rubens",
+            "entrance_ref": "entrances/s3_corda_rubens.md"
+          },
+          {
+            "key": "fiamma",
+            "entrance_ref": "entrances/s3_corda_fiamma.md"
+          }
+        ]
+      },
+      "next": "s4"
+    },
+    {
+      "key": "s3_foglio",
+      "chapter": 3,
+      "title": "Tre parole storte",
+      "composer_summary": "Sul foglio ci sono tre parole scritte di corsa: luna, barca, casa.",
+      "content_ref": "chapters/s3_foglio.md",
+      "decision": {
+        "type": "cast",
+        "key": "helper",
+        "prompt": "Chi legge il messaggio insieme a [Nome]?",
+        "required": false,
+        "allowed_sources": [
+          "character_asset",
+          "catalog_character"
+        ],
+        "catalog_roster": [
+          {
+            "key": "etto",
+            "entrance_ref": "entrances/s3_foglio_etto.md"
+          },
+          {
+            "key": "ulivo",
+            "entrance_ref": "entrances/s3_foglio_ulivo.md"
+          },
+          {
+            "key": "rubens",
+            "entrance_ref": "entrances/s3_foglio_rubens.md"
+          }
+        ]
+      },
+      "next": "s4"
+    },
+    {
+      "key": "s4",
+      "chapter": 4,
+      "title": "La barca piccola",
+      "composer_summary": "Dietro i pali del molo dondola una barca senza remi. Dentro c’è una scatola di latta.",
+      "content_ref": "chapters/s4.md",
+      "decision": {
+        "type": "branch",
+        "key": "d_scatola",
+        "prompt": "Come si avvicina [Nome]?",
+        "options": [
+          {
+            "key": "sale",
+            "label": "Sale con attenzione sulla barca",
+            "next": "s5_barca"
+          },
+          {
+            "key": "chiama",
+            "label": "Chiama il guardiano del porto",
+            "next": "s5_guardiano"
+          }
+        ]
+      }
+    },
+    {
+      "key": "s5_barca",
+      "chapter": 5,
+      "title": "La scatola di latta",
+      "composer_summary": "Nella scatola c’è una chiave con un’etichetta: Casa delle maree.",
+      "content_ref": "chapters/s5_barca.md",
+      "decision": null,
+      "next": "s6"
+    },
+    {
+      "key": "s5_guardiano",
+      "chapter": 5,
+      "title": "Il guardiano torna",
+      "composer_summary": "Il guardiano riconosce la scatola: apparteneva a una vecchia casa vicino alla scogliera.",
+      "content_ref": "chapters/s5_guardiano.md",
+      "decision": null,
+      "next": "s6"
+    },
+    {
+      "key": "s6",
+      "chapter": 6,
+      "title": "Il segnale",
+      "composer_summary": "La lanterna era un segnale per indicare che la chiave era stata ritrovata.",
+      "content_ref": "chapters/s6.md",
+      "decision": {
+        "type": "branch",
+        "key": "d_finale",
+        "prompt": "Dove viene custodita la chiave?",
+        "options": [
+          {
+            "key": "guardiano",
+            "label": "Dal guardiano del porto",
+            "next": "s7_guardiano"
+          },
+          {
+            "key": "casa",
+            "label": "Nella Casa delle maree",
+            "next": "s7_casa"
+          },
+          {
+            "key": "museo",
+            "label": "Nel piccolo museo del paese",
+            "next": "s7_museo"
+          }
+        ]
+      }
+    },
+    {
+      "key": "s7_guardiano",
+      "chapter": 7,
+      "title": "La chiave al guardiano",
+      "composer_summary": "[Nome] affida la chiave al guardiano del porto, che promette di custodirla con cura.",
+      "content_ref": "chapters/s7_guardiano.md",
+      "decision": null,
+      "next": null
+    },
+    {
+      "key": "s7_casa",
+      "chapter": 7,
+      "title": "La Casa delle maree",
+      "composer_summary": "[Nome] riporta la chiave nella Casa delle maree, dove finalmente torna al suo posto.",
+      "content_ref": "chapters/s7_casa.md",
+      "decision": null,
+      "next": null
+    },
+    {
+      "key": "s7_museo",
+      "chapter": 7,
+      "title": "Il piccolo museo",
+      "composer_summary": "[Nome] consegna la chiave al museo del paese, così tutti potranno conoscere la sua storia.",
+      "content_ref": "chapters/s7_museo.md",
+      "decision": null,
+      "next": null
+    }
+  ],
+  "placeholders": [
+    "[Nome]",
+    "[Aiutante]"
+  ],
+  "setup": []
+}

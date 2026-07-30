@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dreamtaily.example/schemas/story.schema.v1.json",
+  "title": "DreamTaily Story Schema v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slug",
+    "version",
+    "title",
+    "age_range",
+    "summary",
+    "max_decisions",
+    "start",
+    "placeholders",
+    "steps"
+  ],
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "age_range": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tone": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cover_image": {
+      "type": "string"
+    },
+    "max_decisions": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "start": {
+      "type": "string",
+      "minLength": 1
+    },
+    "placeholders": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^\\[[A-ZÀ-Ýa-zà-ÿ_]+\\]$"
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    }
+  },
+  "$defs": {
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "chapter",
+        "title",
+        "content_ref",
+        "decision",
+        "next"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_]+$"
+        },
+        "chapter": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "composer_summary": {
+          "type": "string"
+        },
+        "content_ref": {
+          "type": "string",
+          "pattern": "^chapters/.+\\.md$"
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/branchDecision"
+            },
+            {
+              "$ref": "#/$defs/castDecision"
+            }
+          ]
+        },
+        "next": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        }
+      }
+    },
+    "branchDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "key",
+        "prompt",
+        "options"
+      ],
+      "properties": {
+        "type": {
+          "const": "branch"
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/branchOption"
+          }
+        }
+      }
+    },
+    "branchOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "label",
+        "next"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "image_ref": {
+          "type": "string"
+        },
+        "next": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "castDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "key",
+        "prompt",
+        "required",
+        "allowed_sources",
+        "catalog_roster"
+      ],
+      "properties": {
+        "type": {
+          "const": "cast"
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "allowed_sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "character_asset",
+              "catalog_character"
+            ]
+          }
+        },
+        "catalog_roster": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rosterEntry"
+          }
+        }
+      }
+    },
+    "rosterEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "entrance_ref"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entrance_ref": {
+          "type": "string",
+          "pattern": "^entrances/.+\\.md$"
+        }
+      }
+    }
+  }
+}
