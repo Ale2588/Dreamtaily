@@ -462,9 +462,12 @@ body.dreamtaily-configurator-open{overflow:hidden}
 @media(max-width:820px){.dt-walk-layout,.dt-checkout-grid{grid-template-columns:1fr}.dt-walk-preview{position:static;order:-1}}
 @media(max-width:560px){.dt-decision-options{grid-template-columns:1fr}.dt-reader-nav{display:grid;grid-template-columns:1fr 1fr}.dt-reader-dots{grid-column:1/-1;grid-row:1}.dt-reader-nav .btn{width:100%;padding:12px}.dt-scene-cameo{width:82px;height:105px}}
 
+.dt-build-badge{position:fixed;left:10px;bottom:10px;z-index:30000;padding:5px 8px;border-radius:999px;background:rgba(61,43,31,.86);color:#fff;font-size:10px;font-weight:800;letter-spacing:.35px;box-shadow:0 4px 14px rgba(0,0,0,.18);pointer-events:none}
+.dt-asset-error{position:absolute;inset:0;z-index:20;display:grid;place-items:center;padding:24px;background:#fff3ef;color:#9a3f2d;text-align:center;font-weight:800;line-height:1.5}
 </style>
 </head>
 <body>
+<div class="dt-build-badge">Build: Book-Creation 2026-07-30 fix-3</div>
 
 <section class="screen active" id="screen-landing">
   <nav class="nav">
@@ -1708,6 +1711,7 @@ async function continueWithStory(){
 
   try{
     const persisted=await persistSelectedStory();
+    if(typeof window.startStoryComposer!=="function") throw new Error("CANONICAL_FUNNEL_MISSING");
     await window.startStoryComposer(persisted.story,persisted.bookStoryId);
   }catch(error){
     console.error('[DreamTaily] Book save error:',error);
@@ -1828,7 +1832,7 @@ window.addEventListener('message',event=>{
   }
 });
 
-async function startStoryComposer(story,bookStoryId){
+async function legacyStartStoryComposerDisabled(story,bookStoryId){
   try{
     const definition=await loadStoryDefinition(story);
     app.activeStoryDefinition=definition;
@@ -2528,7 +2532,7 @@ function dtOptionConsequences(decisionKey,optionKey){
 
 async function dtLoadSceneContract(){
   if(dtSceneContract) return dtSceneContract;
-  const response=await fetch(`${DT_STORY_ROOT}/scene-pilot.json`,{cache:"no-store"});
+  const response=await fetch(`${DT_STORY_ROOT}/scene-pilot.json?v=20260730-fix3`,{cache:"no-store"});
   if(!response.ok) throw new Error(`SCENE_HTTP_${response.status}`);
   dtSceneContract=await response.json();
   return dtSceneContract;
@@ -2587,22 +2591,16 @@ function dtAtmosphereFallbackUrl(){
 }
 
 window.dtSceneBackgroundFallback=function(image){
-  const fallback=dtAtmosphereFallbackUrl();
-
-  if(!fallback){
-    console.warn("[DreamTaily] Nessun fallback atmosfera disponibile per:",image.src);
-    image.remove();
-    return;
+  const failed=image.getAttribute("src")||"asset sconosciuto";
+  const scene=image.closest(".dt-scene");
+  image.remove();
+  if(scene&&!scene.querySelector(".dt-asset-error")){
+    const box=document.createElement("div");
+    box.className="dt-asset-error";
+    box.textContent=`Scena non caricata: ${failed}`;
+    scene.appendChild(box);
   }
-
-  if(image.dataset.atmosphereFallback==="1"){
-    console.error("[DreamTaily] Anche il fallback atmosfera non è stato caricato:",image.src);
-    image.remove();
-    return;
-  }
-
-  image.dataset.atmosphereFallback="1";
-  image.src=`${fallback}?v=20260728-book-fallback`;
+  console.error("[DreamTaily] Scena non caricata:",failed);
 };
 
 function dtSceneDefinition(stepKey){
@@ -2612,17 +2610,17 @@ function dtSceneDefinition(stepKey){
 function dtResolvedBackground(definition){
   if(!definition) return "";
   const atmosphere=app.setupChoices.atmosfera||app.compositionChoices.atmosfera;
-  return dtPrefixStoryRef(
-    definition.variant_backgrounds?.atmosfera?.[atmosphere]||
-    definition.background_ref
-  );
+  const ref=definition.variant_backgrounds?.atmosfera?.[atmosphere]||definition.background_ref;
+  const resolved=dtPrefixStoryRef(ref);
+  return resolved?`${resolved}?v=20260730-fix3`:"";
 }
 
 function dtHelperImage(pose="in_piedi"){
   const helper=DT_HELPERS[dtHelperChoice()?.value];
   if(!helper) return "";
   const styleArt=helper.art?.[app.style]||helper.art?.papercut||helper.art?.paper||helper.art;
-  return styleArt?.[pose]||styleArt?.in_piedi||helper.image||"";
+  const resolved=styleArt?.[pose]||styleArt?.in_piedi||helper.image||"";
+  return resolved?`${resolved}?v=20260730-fix3`:"";
 }
 
 function dtPreviewScene(step){
@@ -2734,7 +2732,7 @@ function dtDecisionHtml(step){
           if(!helper) return "";
           return `<button type="button" class="dt-decision-option ${selected===entry.key?"selected":""}"
             onclick="selectDtHelper('${escapeHtml(entry.key)}','${escapeHtml(entry.entrance_ref)}')">
-            <img src="${escapeHtml(helper.image)}" alt="">
+            <img src="${escapeHtml((helper.image||"")+"?v=20260730-fix3")}" alt="">
             <strong>${escapeHtml(helper.name)}</strong>
             <small>Avrà una propria entrata in scena lungo questo ramo.</small>
           </button>`;
