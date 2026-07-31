@@ -1,0 +1,15 @@
+{
+  "assets_verified_from_pr": 39,
+  "backgrounds": 23,
+  "helpers": 16,
+  "filename_mismatches_fixed_in_contract": [
+    "s1",
+    "s2",
+    "s4",
+    "s5"
+  ],
+  "helper_standard_pose": "in_piedi",
+  "helper_pose_map_enabled": true,
+  "composer_modified": false,
+  "inline_scripts_valid": true
+}

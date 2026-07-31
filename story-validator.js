@@ -99,15 +99,8 @@
 
   globalObject.DreamTailyStoryValidator={validateStory};
 
-  /* Load the MVP closure only after index.html has declared its app state/functions. */
-  if(typeof document!=="undefined"){
-    document.addEventListener("DOMContentLoaded",()=>{
-      if(document.querySelector('script[data-dreamtaily-mvp-flow]')) return;
-      const script=document.createElement("script");
-      script.src="mvp-flow.js";
-      script.defer=true;
-      script.dataset.dreamtailyMvpFlow="1";
-      document.body.appendChild(script);
-    },{once:true});
-  }
+  /* [rimosso] Il loader di mvp-flow.js iniettava un funnel concorrente
+     che sovrascriveva window.startStoryComposer dopo gli script inline.
+     Il funnel canonico vive in index.html (blocco dt*). */
+
 })(typeof window!=="undefined"?window:globalThis);
