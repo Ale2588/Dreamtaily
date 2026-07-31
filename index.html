@@ -811,56 +811,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 
 <section class="screen composer-screen" id="screen-composer"><!-- render da JS (blocco dt*) --></section>
 
-<section class="screen book-screen" id="screen-book">
-  <div class="shell">
-    <div class="topbar">
-      <button class="brand-dark" onclick="showScreen('landing')">
-        <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
-      </button>
-      <div class="phase">4 · Il libro inizia qui</div>
-    </div>
-
-    <div class="book-layout">
-      <div class="book-preview">
-        <div class="book-cover">
-          <div class="book-cover-glow"></div>
-          <div class="book-cover-copy">
-            <span>Una storia DreamTaily</span>
-            <h2 id="book-cover-title">La prima avventura</h2>
-            <p>con <strong id="book-cover-character">il tuo personaggio</strong></p>
-          </div>
-          <img id="book-cover-image" alt="">
-        </div>
-      </div>
-
-      <div class="panel book-summary">
-        <div class="phase">Il tuo libro</div>
-        <h1 class="step-title">La prima storia è pronta.</h1>
-        <p class="intro">Hai scelto il protagonista e la sua prima avventura. Nel prossimo passo aggiungeremo il cast e la preview della storia.</p>
-
-        <div class="summary-row">
-          <span>Protagonista attuale</span>
-          <strong id="summary-character">—</strong>
-        </div>
-        <div class="summary-row">
-          <span>Storie nel libro</span>
-          <strong id="summary-story-count">0</strong>
-        </div>
-
-        <div class="book-story-list" id="book-story-list"></div>
-
-        <div class="book-note">
-          La bozza è salvata. Puoi aggiungere un’altra storia senza perdere quelle già scelte.
-        </div>
-
-        <div class="form-actions">
-          <button class="btn btn-ghost" onclick="addAnotherStory()">Continua a comporre →</button>
-          <button class="btn btn-primary" onclick="openCharacterLibrary()">Scegli o crea un personaggio</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+<section class="screen book-screen" id="screen-book"><!-- render da JS (renderBookSummary) --></section>
 
 
 <section class="screen" id="screen-checkout"></section>
@@ -2642,6 +2593,7 @@ window.goToDtBookPage=function(index){
 };
 
 window.renderBookSummary=function(){
+  try{
   if(!dtComposedBook){
     return;
   }
@@ -2696,6 +2648,15 @@ window.renderBookSummary=function(){
       </div>
     </div>
   </div>`;
+  }catch(error){
+    console.error("[DreamTaily] renderBookSummary error:",error);
+    const s=document.getElementById("screen-book");
+    if(s) s.innerHTML='<div class="shell"><div class="panel">'
+      +'<h1 class="step-title">Un momento…</h1>'
+      +'<p class="intro">Non sono riuscito a comporre il libro. Torna alle scelte e riprova.</p>'
+      +'<div class="form-actions"><button class="btn btn-primary" onclick="showScreen(\'composer\')">← Torna alle scelte</button></div>'
+      +'</div></div>';
+  }
 };
 
 window.modifyDtBook=function(){
