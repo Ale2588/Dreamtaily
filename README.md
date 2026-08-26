@@ -1,16 +1,10 @@
-# DreamTaily — DT-RE-030 → DT-RE-033
+# DreamTaily — DT-RE-010
 
-Pacchetto schema costruito sull'audit Supabase reale del 26/08/2026.
+Sovrascrivere:
+- `index.html`
 
-## File
-- `db/migrations/20260826_render_engine_v1.sql`
-- `db/verify_render_engine_v1.sql`
-- `docs/render-schema-v1.md`
+Aggiungere:
+- `tests/identity-persistence.test.mjs`
+- `docs/identity-persistence.md`
 
-## Atteso dopo la migration
-- `identity_prompt_exists = true`
-- `book_renders_exists = true`
-- `book_renders_rls_enabled = true`
-- `anonymous_policies_count = 0`
-
-Non modifica `books`, `book_stories`, `story-composer.js` o la preview.
+Richiede che la migration `20260826_render_engine_v1.sql` sia già stata applicata.
