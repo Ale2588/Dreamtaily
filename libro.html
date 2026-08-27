@@ -9,165 +9,116 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
-:root{--cream:#f8f0e4;--paper:#fffdf8;--coral:#e66850;--brown:#3a281d;--muted:#877466;--line:#eadbc5;--teal:#4d8b8b}
+:root{--cream:#f8f0e4;--paper:#fffdf8;--coral:#e66850;--brown:#3a281d;--muted:#877466;--line:#eadbc5}
 html,body{margin:0;min-height:100%;background:var(--cream);color:var(--brown);font-family:Nunito,system-ui,sans-serif}
-body{padding:18px 14px 92px}
-.shell{width:min(940px,100%);margin:0 auto}
-.brand{display:flex;justify-content:center;align-items:center;gap:8px;margin:4px 0 16px;font-family:"Baloo 2",sans-serif;font-size:20px;font-weight:800}
+body{padding:14px 14px 92px}
+.shell{width:min(1180px,100%);margin:0 auto}
+.brand{display:flex;justify-content:center;align-items:center;gap:8px;margin:4px 0 14px;font-family:"Baloo 2",sans-serif;font-size:20px;font-weight:800}
 .brand i{width:25px;height:25px;border-radius:50%;background:var(--coral);display:inline-block;position:relative}
 .brand i:after{content:"";position:absolute;width:10px;height:10px;border-radius:50% 50% 50% 0;background:#f4c75d;left:7px;top:7px;transform:rotate(45deg)}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:24px;box-shadow:0 18px 42px rgba(58,40,29,.10);overflow:hidden}
-.illustration{position:relative;background:#eee5d8;aspect-ratio:3/2;overflow:hidden}
-.illustration img{width:100%;height:100%;object-fit:cover;display:block}
-.copy{padding:26px clamp(22px,5vw,52px) 34px}
-.eyebrow{text-align:center;text-transform:uppercase;letter-spacing:.08em;color:var(--coral);font-weight:800;font-size:12px;margin-bottom:9px}
-h1,h2{font-family:"Baloo 2",sans-serif;margin:0;text-align:center;line-height:1.1}
-h1{font-size:clamp(34px,7vw,60px)} h2{font-size:clamp(25px,5vw,38px)}
-.subtitle{text-align:center;font-family:Lora,serif;font-style:italic;color:var(--muted);font-size:17px;margin-top:8px}
-.story{font-family:Lora,serif;font-size:clamp(17px,2.4vw,21px);line-height:1.85;white-space:pre-line;max-width:720px;margin:22px auto 0}
+.spread{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);min-height:calc(100vh - 150px)}
+.visual{background:#eee5d8;min-height:520px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.visual img{width:100%;height:100%;object-fit:cover;display:block}
+.copy{padding:30px clamp(24px,4vw,48px);overflow:auto;max-height:calc(100vh - 150px);align-self:stretch}
+.eyebrow{text-transform:uppercase;letter-spacing:.08em;color:var(--coral);font-weight:800;font-size:12px;margin-bottom:8px}
+h1,h2{font-family:"Baloo 2",sans-serif;margin:0;line-height:1.1}
+h1{font-size:clamp(34px,5vw,58px)} h2{font-size:clamp(27px,3vw,38px)}
+.subtitle{font-family:Lora,serif;font-style:italic;color:var(--muted);font-size:17px;margin-top:10px}
+.story{font-family:Lora,serif;font-size:18px;line-height:1.72;white-space:pre-line;margin-top:20px}
 .page-number{text-align:center;color:#b09b88;font-family:Lora,serif;font-style:italic;margin-top:22px}
-.cover .copy{padding-top:30px}.cover h1{color:var(--brown)}
-.state{padding:70px 28px;text-align:center}.state h2{margin-bottom:10px}.state p{color:var(--muted);line-height:1.6}
+.cover .copy{display:flex;flex-direction:column;justify-content:center;text-align:center}
+.cover .eyebrow{text-align:center}
+.state{padding:70px 28px;text-align:center}
+.state h2{font-family:"Baloo 2";font-size:30px;margin:0 0 10px}
+.state p{color:var(--muted);line-height:1.6}
 .nav{position:fixed;left:0;right:0;bottom:0;background:rgba(248,240,228,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:20}
-.nav-in{width:min(940px,100%);margin:auto;display:flex;align-items:center;gap:12px}
+.nav-in{width:min(1180px,100%);margin:auto;display:flex;align-items:center;gap:12px}
 button{font:800 14px Nunito,sans-serif;border-radius:13px;padding:12px 18px;border:2px solid var(--line);background:#fff;color:var(--brown);cursor:pointer}
 button.primary{background:var(--coral);border-color:var(--coral);color:#fff}
-button:disabled{opacity:.35;cursor:default}.count{flex:1;text-align:center;color:var(--muted);font-size:13px;font-weight:800}
+button:disabled{opacity:.35;cursor:default}
+.count{flex:1;text-align:center;color:var(--muted);font-size:13px;font-weight:800}
 .end{text-align:center;padding:74px 26px}.end .big{font:800 44px "Baloo 2",sans-serif;color:var(--coral)}.end p{font-family:Lora,serif;color:var(--muted);line-height:1.7}
-.print{margin-top:18px}
-@media(max-width:650px){body{padding:10px 8px 86px}.card{border-radius:18px}.illustration{aspect-ratio:4/3}.copy{padding:22px 20px 28px}}
-@media print{body{background:white;padding:0}.brand,.nav{display:none!important}.shell{width:100%}.card{border:0;box-shadow:none;border-radius:0;page-break-after:always;min-height:100vh}.slide{display:block!important}.illustration{aspect-ratio:3/2}.end{page-break-after:auto}}
+#print-book{display:none}
+@media(max-width:780px){
+  body{padding:8px 8px 86px}.card{border-radius:18px}.spread{display:block;min-height:0}
+  .visual{min-height:0;aspect-ratio:4/3}.copy{max-height:none;padding:24px 21px 30px}.story{font-size:17px;line-height:1.75}
+}
+@media print{
+  @page{size:A4 landscape;margin:8mm}
+  html,body{background:#fff!important;padding:0!important}
+  .brand,#book,.nav{display:none!important}
+  #print-book{display:block!important}
+  .print-page{width:100%;height:190mm;display:grid;grid-template-columns:58% 42%;background:#fff;page-break-after:always;break-after:page;overflow:hidden}
+  .print-page:last-child{page-break-after:auto;break-after:auto}
+  .print-visual{overflow:hidden;background:#eee5d8}.print-visual img{width:100%;height:100%;object-fit:cover}
+  .print-copy{padding:12mm 10mm;overflow:hidden}.print-copy .story{font-size:11.5pt;line-height:1.42;margin-top:5mm}
+  .print-copy h1{font-size:30pt}.print-copy h2{font-size:22pt}
+  .print-cover .print-copy{display:flex;flex-direction:column;justify-content:center;text-align:center}
+}
 </style>
 </head>
 <body>
 <div class="shell">
-  <div class="brand"><i></i>DreamTaily</div>
+  <div class="brand"><i></i>Dream<span style="color:var(--coral)">Taily</span></div>
   <main id="book"><div class="card state"><h2>Carico il tuo libro…</h2><p>Un momento.</p></div></main>
 </div>
+<div id="print-book"></div>
 <div class="nav" id="nav" hidden>
   <div class="nav-in">
     <button id="prev">← Indietro</button>
     <div class="count" id="count"></div>
+    <button id="print">Stampa PDF</button>
     <button class="primary" id="next">Avanti →</button>
   </div>
 </div>
 <script>
 const DELIVERY_URL="https://hirzbtruxvjzmcnncvmv.supabase.co/functions/v1/deliver-book";
 let slides=[], current=0;
-
-const esc=(value)=>String(value??"")
-  .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-  .replaceAll('"',"&quot;").replaceAll("'","&#039;");
-
-function state(title,body){
-  document.getElementById("nav").hidden=true;
-  document.getElementById("book").innerHTML=`<div class="card state"><h2>${esc(title)}</h2><p>${esc(body)}</p></div>`;
-}
-
-function imageBlock(url){
-  return `<div class="illustration"><img src="${esc(url)}" alt="" loading="eager"></div>`;
-}
-
-function buildSlides(book){
+const esc=(value)=>String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+function state(title,body){document.getElementById("nav").hidden=true;document.getElementById("book").innerHTML=`<div class="card state"><h2>${esc(title)}</h2><p>${esc(body)}</p></div>`;}
+function spread(page,isCover=false){return `<article class="card spread ${isCover?"cover":""}"><div class="visual"><img src="${esc(page.image_url)}" alt=""></div><div class="copy"><div class="eyebrow">${isCover?"DreamTaily":`Capitolo ${esc(page.chapter??"")}`}</div>${isCover?`<h1>${esc(page.title||"")}</h1><div class="subtitle">${esc(page.text||"")}</div>`:`<h2>${esc(page.title||"")}</h2><div class="story">${esc(page.text||"")}</div><div class="page-number">— ${esc(page.chapter??"")} —</div>`}</div></article>`;}
+function printPage(page,isCover=false){return `<section class="print-page ${isCover?"print-cover":""}"><div class="print-visual"><img src="${esc(page.image_url)}" alt=""></div><div class="print-copy"><div class="eyebrow">${isCover?"DreamTaily":`Capitolo ${esc(page.chapter??"")}`}</div>${isCover?`<h1>${esc(page.title||"")}</h1><div class="subtitle">${esc(page.text||"")}</div>`:`<h2>${esc(page.title||"")}</h2><div class="story">${esc(page.text||"")}</div>`}</div></section>`;}
+function build(book){
   const pages=Array.isArray(book.pages)?book.pages:[];
-  const cover=pages.find(p=>p.kind==="cover");
-  const storyPages=pages.filter(p=>p.kind!=="cover");
-
-  slides=[];
-  if(cover){
-    slides.push(`<article class="card slide cover">
-      ${imageBlock(cover.image_url)}
-      <div class="copy">
-        <div class="eyebrow">DreamTaily</div>
-        <h1>${esc(cover.title||book.title)}</h1>
-        <div class="subtitle">${esc(cover.text||"")}</div>
-      </div>
-    </article>`);
-  }
-
-  storyPages.forEach((page,index)=>{
-    slides.push(`<article class="card slide">
-      ${imageBlock(page.image_url)}
-      <div class="copy">
-        <div class="eyebrow">Capitolo ${esc(page.chapter??index+1)}</div>
-        <h2>${esc(page.title||"")}</h2>
-        <div class="story">${esc(page.text||"")}</div>
-        <div class="page-number">— ${index+1} —</div>
-      </div>
-    </article>`);
-  });
-
-  slides.push(`<article class="card slide end">
-    <div class="big">Fine ✨</div>
-    <p>Questa storia appartiene a ${esc(book.protagonist||"te")}.<br>Puoi rileggerla tutte le volte che vuoi.</p>
-    <button class="print" onclick="window.print()">🖨 Stampa il libro</button>
-  </article>`);
+  const cover=pages.find(p=>p.kind==="cover"); const storyPages=pages.filter(p=>p.kind!=="cover");
+  slides=[]; const printPages=[];
+  if(cover){slides.push(spread(cover,true));printPages.push(printPage(cover,true));}
+  storyPages.forEach(p=>{slides.push(spread(p,false));printPages.push(printPage(p,false));});
+  slides.push(`<article class="card end"><div class="big">Fine ✨</div><p>Questa storia appartiene a ${esc(book.protagonist||"te")}.<br>Puoi rileggerla tutte le volte che vuoi.</p><button onclick="printWholeBook()">🖨 Stampa il libro</button></article>`);
+  document.getElementById("print-book").innerHTML=printPages.join("");
 }
-
 function render(){
-  const host=document.getElementById("book");
-  host.innerHTML=slides[current]||"";
+  document.getElementById("book").innerHTML=slides[current]||"";
   document.getElementById("count").textContent=`${current+1} / ${slides.length}`;
   document.getElementById("prev").disabled=current===0;
-  const next=document.getElementById("next");
-  next.disabled=current===slides.length-1;
-  next.textContent=current===slides.length-1?"✓":"Avanti →";
+  document.getElementById("next").disabled=current===slides.length-1;
+  document.getElementById("next").textContent=current===slides.length-1?"✓":"Avanti →";
   window.scrollTo({top:0,behavior:"instant"});
 }
-
-function go(delta){
-  const next=current+delta;
-  if(next<0||next>=slides.length)return;
-  current=next;render();
+function go(delta){const n=current+delta;if(n<0||n>=slides.length)return;current=n;render();}
+function printWholeBook(){
+  const imgs=[...document.querySelectorAll("#print-book img")];
+  Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(r=>{img.onload=r;img.onerror=r;}))).then(()=>window.print());
 }
-
 async function load(){
   const slug=new URLSearchParams(location.search).get("slug")||"";
-  if(!/^[a-f0-9]{48,96}$/i.test(slug)){
-    state("Libro non trovato","Il link non è valido o è incompleto.");
-    return;
-  }
-
+  if(!/^[a-f0-9]{48,96}$/i.test(slug)){state("Libro non trovato","Il link non è valido o è incompleto.");return;}
   try{
-    const response=await fetch(`${DELIVERY_URL}?slug=${encodeURIComponent(slug)}`,{
-      method:"GET",headers:{"Accept":"application/json"},cache:"no-store"
-    });
+    const response=await fetch(`${DELIVERY_URL}?slug=${encodeURIComponent(slug)}&v=3`,{method:"GET",headers:{"Accept":"application/json"},cache:"no-store"});
     const payload=await response.json().catch(()=>null);
-    if(response.status===404){
-      state("Libro non trovato","Questo libro non è disponibile.");
-      return;
-    }
-    if(!response.ok||!payload){
-      throw new Error(payload?.error||`HTTP_${response.status}`);
-    }
-    if(!Array.isArray(payload.pages)||!payload.pages.length){
-      throw new Error("BOOK_EMPTY");
-    }
-    buildSlides(payload);
-    render();
-    document.getElementById("nav").hidden=false;
-    document.title=`${payload.title||"DreamTaily"} — DreamTaily`;
-  }catch(error){
-    console.error(error);
-    state("Qualcosa è andato storto","Ricarica la pagina tra un momento.");
-  }
+    if(response.status===404){state("Libro non trovato","Questo libro non è disponibile.");return;}
+    if(!response.ok||!payload)throw new Error(payload?.error||`HTTP_${response.status}`);
+    if(!Array.isArray(payload.pages)||!payload.pages.length)throw new Error("BOOK_EMPTY");
+    const missing=payload.pages.filter(p=>p.kind!=="cover"&&!String(p.text||"").trim());
+    if(missing.length)throw new Error(`BOOK_TEXT_MISSING:${missing.map(p=>p.page_id).join(",")}`);
+    build(payload);render();document.getElementById("nav").hidden=false;document.title=`${payload.title||"DreamTaily"} — DreamTaily`;
+  }catch(error){console.error(error);state("Qualcosa è andato storto","Ricarica la pagina tra un momento.");}
 }
-
 document.getElementById("prev").onclick=()=>go(-1);
 document.getElementById("next").onclick=()=>go(1);
-document.addEventListener("keydown",e=>{
-  if(e.key==="ArrowRight")go(1);
-  if(e.key==="ArrowLeft")go(-1);
-});
-let touchX=null;
-document.addEventListener("touchstart",e=>touchX=e.touches[0].clientX,{passive:true});
-document.addEventListener("touchend",e=>{
-  if(touchX===null)return;
-  const dx=e.changedTouches[0].clientX-touchX;
-  if(Math.abs(dx)>55)go(dx<0?1:-1);
-  touchX=null;
-},{passive:true});
-
+document.getElementById("print").onclick=printWholeBook;
+document.addEventListener("keydown",e=>{if(e.key==="ArrowRight")go(1);if(e.key==="ArrowLeft")go(-1);});
 load();
 </script>
 </body>
