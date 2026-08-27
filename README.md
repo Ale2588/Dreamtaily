@@ -1,10 +1,18 @@
-# DreamTaily — DT-RE-010
+# DreamTaily — Render Book v1
 
-Sovrascrivere:
-- `index.html`
+Backlog chiuso nel pacchetto: DT-RE-040 → DT-RE-047.
 
-Aggiungere:
-- `tests/identity-persistence.test.mjs`
-- `docs/identity-persistence.md`
+## Aggiungere
+- `src/render-job.js`
+- `supabase/functions/render-book/index.ts`
+- `tests/render-job.test.mjs`
+- `docs/render-book.md`
 
-Richiede che la migration `20260826_render_engine_v1.sql` sia già stata applicata.
+## Integrare
+- `index.html`: vedere `docs/index-snapshot-integration.js`
+
+## Non modificato
+- `src/story-composer.js`
+- preview deterministica
+- `src/render-prompts.js`
+- `src/scene-mask.js`
