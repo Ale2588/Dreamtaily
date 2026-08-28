@@ -1,13 +1,6 @@
-# DreamTaily prompt pack completo
+# DreamTaily — chiusura flow MVP
 
-Contiene:
-- `DreamTaily_prompt_pack_completo_39_asset.md`: tutti i prompt copiabili.
-- `DreamTaily_asset_manifest_39_asset.csv`: checklist con nomi file e path.
+Sostituire solo `index.html` su `Book-Creation`.
 
-Caricare le immagini generate sulla branch `book-creation`.
-
-Sfondi:
-`stories/il-bosco-dei-sussurri/scenes/`
-
-Aiutanti:
-`assets/char/paper/`
+Flow: preview deterministica → checkout dimostrativo → snapshot → render AI a batch/resume → ready → permalink `libro.html?slug=...`.
+I libri ready nella libreria riaprono direttamente il render finale.

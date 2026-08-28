@@ -1,0 +1,6 @@
+{
+  "scripts_to_add": {
+    "test:prompts": "node --test tests/render-prompts.test.mjs",
+    "test:render-engine": "npm run test:identity && npm run test:mask && npm run test:prompts"
+  }
+}

@@ -6,6 +6,9 @@
     "test:composer": "node --test tests/story-composer.test.mjs",
     "test:reader": "node --test tests/book-reader.test.mjs",
     "test:golden": "node tools/test_story_composer_golden.mjs .",
-    "test": "npm run test:composer && npm run test:reader"
+    "test:identity": "node --test tests/identity-prompt.test.mjs",
+    "test:mask": "node --test tests/scene-mask.test.mjs",
+    "test:render-engine": "npm run test:identity && npm run test:mask",
+    "test": "npm run test:composer && npm run test:reader && npm run test:render-engine"
   }
 }
