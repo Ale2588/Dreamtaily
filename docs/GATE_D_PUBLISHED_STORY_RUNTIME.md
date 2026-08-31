@@ -43,3 +43,21 @@ non lo consuma ancora. Va eliminato nella fase successiva, insieme alla generali
 del visual prompt.
 
 Questo adapter è un ponte di test, non l'architettura finale del backoffice.
+
+## Collaudo runtime conclusivo — 31 agosto 2026
+
+Gate D runtime: **PASSATO** sulla branch `backoffice`.
+
+- catalogo e contratto caricati dalla Edge Function live `published-story`;
+- header sintetico `X-DreamTaily-Story-Source: published-story-db` verificato;
+- StoryVersion `43068bf8-ab56-4027-915d-3aa088718659`, v3, usata dal test;
+- definition, 10/10 scene e 27/27 riferimenti testuali caricati tramite l'adapter;
+- percorso completo `notte -> felci -> Etto -> promessa` composto in 7 pagine;
+- nessun marker irrisolto e background presente in tutte le pagine;
+- una sola chiamata live al catalogo e una sola al contratto versionato (cache adapter verificata).
+
+Test ripetibile:
+
+```bash
+npm run test:gate-d-live
+```
