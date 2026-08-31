@@ -58,3 +58,16 @@ test("rejects a branch-only slot after convergence", () => {
     [{ code: "CAST_SLOT_USED_BEFORE_ASSIGNMENT", step: "end", slot: "friend" }]
   );
 });
+
+test("rejects missing cast entrance content", () => {
+  const input = contract();
+  input.story.steps[1].decision.catalog_roster = [
+    { key: "etto", entrance_ref: "missing-etto-entry.md" },
+  ];
+  const result = validateAuthoringContract(input);
+  assert.equal(result.valid, false);
+  assert.deepEqual(
+    result.errors.filter((error) => error.code === "CONTENT_MISSING"),
+    [{ code: "CONTENT_MISSING", step: "left", ref: "missing-etto-entry.md" }]
+  );
+});
