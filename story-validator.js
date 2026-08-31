@@ -99,8 +99,154 @@
 
   globalObject.DreamTailyStoryValidator={validateStory};
 
-  /* [rimosso] Il loader di mvp-flow.js iniettava un funnel concorrente
-     che sovrascriveva window.startStoryComposer dopo gli script inline.
-     Il funnel canonico vive in index.html (blocco dt*). */
+  /*
+   * GATE D TEMPORARY ADAPTER
+   * ------------------------
+   * index.html still asks for stories/catalog.json, story.json,
+   * scene-pilot.json and markdown refs. For Gate D we deliberately
+   * intercept ONLY those reads and serve them from the immutable
+   * PublishedStoryVersion contract.
+   *
+   * IMPORTANT: there is intentionally NO repository fallback.
+   * If the DB/API fails, the story flow fails visibly. This makes
+   * the Gate D test meaningful instead of silently using old files.
+   */
+  const NATIVE_FETCH=globalObject.fetch.bind(globalObject);
+  const PUBLISHED_STORY_URL=
+    "https://hirzbtruxvjzmcnncvmv.supabase.co/functions/v1/published-story";
+  const contractCache=new Map();
+  let catalogPromise=null;
+
+  function jsonResponse(value,status=200){
+    return new Response(JSON.stringify(value),{
+      status,
+      headers:{
+        "Content-Type":"application/json; charset=utf-8",
+        "Cache-Control":"no-store",
+        "X-DreamTaily-Story-Source":"published-story-db"
+      }
+    });
+  }
+
+  function textResponse(value,status=200){
+    return new Response(String(value??""),{
+      status,
+      headers:{
+        "Content-Type":"text/plain; charset=utf-8",
+        "Cache-Control":"no-store",
+        "X-DreamTaily-Story-Source":"published-story-db"
+      }
+    });
+  }
+
+  async function requestJson(url){
+    const response=await NATIVE_FETCH(url,{cache:"no-store"});
+    const payload=await response.json().catch(()=>null);
+    if(!response.ok||!payload){
+      throw new Error(payload?.error||`PUBLISHED_STORY_HTTP_${response.status}`);
+    }
+    return payload;
+  }
+
+  async function loadCatalog(){
+    if(!catalogPromise){
+      catalogPromise=requestJson(PUBLISHED_STORY_URL)
+        .then(payload=>{
+          const stories=Array.isArray(payload.stories)?payload.stories:[];
+          return stories.map(item=>({
+            slug:item.slug,
+            title:item.title||item.slug,
+            age:item.age||"",
+            tone:item.tone||"",
+            length:item.length||"Percorso dinamico",
+            description:item.description||"",
+            image:item.image||"assets/char/water/bear.png",
+            definition:`stories/${item.slug}/story.json`,
+            published_version:item.version||null
+          }));
+        })
+        .catch(error=>{
+          catalogPromise=null;
+          throw error;
+        });
+    }
+    return catalogPromise;
+  }
+
+  async function loadContract(slug){
+    if(contractCache.has(slug)) return contractCache.get(slug);
+    const promise=requestJson(`${PUBLISHED_STORY_URL}?slug=${encodeURIComponent(slug)}`)
+      .then(payload=>{
+        if(!payload.contract?.story||!payload.contract?.scenes||!payload.contract?.contentByRef){
+          throw new Error(`PUBLISHED_STORY_CONTRACT_INVALID:${slug}`);
+        }
+        return payload;
+      })
+      .catch(error=>{
+        contractCache.delete(slug);
+        throw error;
+      });
+    contractCache.set(slug,promise);
+    return promise;
+  }
+
+  function requestPath(input){
+    try{
+      const raw=typeof input==="string"?input:input?.url;
+      return new URL(raw,globalObject.location?.href||"https://dreamtaily.invalid/").pathname;
+    }catch(_error){
+      return "";
+    }
+  }
+
+  globalObject.fetch=async function dreamTailyGateDFetch(input,init){
+    const path=requestPath(input);
+
+    if(/\/stories\/catalog\.json$/.test(path)){
+      return jsonResponse(await loadCatalog());
+    }
+
+    const storyMatch=path.match(/\/stories\/([^/]+)\/(.+)$/);
+    if(!storyMatch){
+      return NATIVE_FETCH(input,init);
+    }
+
+    const slug=decodeURIComponent(storyMatch[1]);
+    const ref=decodeURIComponent(storyMatch[2]);
+
+    // Do not intercept visual assets; only authoring/runtime source files.
+    const isDefinition=ref==="story.json";
+    const isSceneContract=ref==="scene-pilot.json";
+    const isTextRef=ref.startsWith("chapters/")||ref.startsWith("entrances/");
+    if(!isDefinition&&!isSceneContract&&!isTextRef){
+      return NATIVE_FETCH(input,init);
+    }
+
+    const payload=await loadContract(slug);
+    const contract=payload.contract;
+
+    if(isDefinition){
+      return jsonResponse(contract.story);
+    }
+    if(isSceneContract){
+      return jsonResponse(contract.scenes);
+    }
+
+    if(!Object.prototype.hasOwnProperty.call(contract.contentByRef,ref)){
+      return textResponse(`Missing published story ref: ${ref}`,404);
+    }
+    return textResponse(contract.contentByRef[ref]);
+  };
+
+  globalObject.DreamTailyPublishedStorySource={
+    mode:"published-story-db",
+    endpoint:PUBLISHED_STORY_URL,
+    loadCatalog,
+    loadContract,
+    clearCache(){
+      catalogPromise=null;
+      contractCache.clear();
+    }
+  };
 
 })(typeof window!=="undefined"?window:globalThis);
