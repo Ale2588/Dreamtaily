@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DreamTaily — Collaudo runtime B1</title>
+  <style>
+    body{font:16px/1.5 system-ui,sans-serif;max-width:760px;margin:48px auto;padding:0 20px;color:#1f2937}
+    button{font:inherit;padding:12px 18px;border:0;border-radius:10px;background:#6d4aff;color:white;cursor:pointer}
+    button:disabled{opacity:.55}.ok{color:#087443}.ko{color:#b42318}li{margin:.45rem 0}code{font-size:.9em}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>Collaudo runtime B1</h1>
+  <p>Questa pagina usa la sessione DreamTaily già presente nel browser. Non mostra né trasmette il token.</p>
+  <button id="run">Avvia collaudo</button>
+  <ol id="results"></ol>
+  <p id="final"></p>
+<script>
+const URL="https://hirzbtruxvjzmcnncvmv.supabase.co";
+const KEY="sb_publishable_baZvlGyMLBkkiOwHina6CA_HB59Lclw";
+const API=`${URL}/functions/v1/authoring-admin`;
+const client=supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const results=document.getElementById("results"), final=document.getElementById("final"), run=document.getElementById("run");
+function row(label,ok,detail=""){const li=document.createElement("li");li.className=ok?"ok":"ko";li.textContent=`${ok?"✓":"✗"} ${label}${detail?` — ${detail}`:""}`;results.append(li)}
+async function call(path,method="GET",body){
+  const {data:{session}}=await client.auth.getSession();
+  if(!session?.access_token) throw new Error("SESSIONE_ASSENTE");
+  const response=await fetch(`${API}${path}`,{method,headers:{apikey:KEY,Authorization:`Bearer ${session.access_token}`,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});
+  const data=await response.json().catch(()=>({}));
+  return {status:response.status,data};
+}
+async function expect(label,path,method,body,status){const r=await call(path,method,body);const ok=r.status===status;row(label,ok,`HTTP ${r.status}`);if(!ok)throw new Error(`${label}: ${r.data.error||r.status}`);return r.data}
+run.onclick=async()=>{
+  run.disabled=true;results.textContent="";final.textContent="";
+  try{
+    const {data:{session}}=await client.auth.getSession();
+    if(!session?.user||session.user.is_anonymous)throw new Error("SESSIONE_EMAIL_ASSENTE");
+    row("Sessione email autenticata",true);
+    const slug=`runtime-b1-${Date.now()}`;
+    const created=await expect("Creazione progetto e bozza v1","/projects","POST",{slug,internal_title:"Collaudo runtime B1",public_title:"Collaudo runtime B1"},201);
+    const id=created.version.id;
+    const loaded=await expect("Lettura bundle proprietario",`/versions/${id}`,"GET",null,200);
+    const bundle=loaded.version;
+    bundle.source_story.title="Collaudo runtime B1 aggiornato";
+    const saved=await expect("Salvataggio con revisione corretta",`/versions/${id}`,"PUT",{expected_updated_at:bundle.updated_at,source_story:bundle.source_story,source_scenes:bundle.source_scenes,content_by_ref:bundle.content_by_ref},200);
+    await expect("Conflitto su revisione obsoleta",`/versions/${id}`,"PUT",{expected_updated_at:bundle.updated_at,source_story:bundle.source_story,source_scenes:bundle.source_scenes,content_by_ref:bundle.content_by_ref},409);
+    await expect("Validazione server-side",`/versions/${id}/validate`,"POST",{},200);
+    await expect("Clonazione nuova versione","/versions","POST",{story_project_id:created.project.id},201);
+    await expect("Elenco progetti proprietario","","GET",null,200);
+    final.className="ok";final.textContent=`COLLAUDO B1 SUPERATO — ${slug}`;
+  }catch(error){final.className="ko";final.textContent=`COLLAUDO NON SUPERATO — ${error.message}`}
+  finally{run.disabled=false}
+};
+</script>
+</body>
+</html>
