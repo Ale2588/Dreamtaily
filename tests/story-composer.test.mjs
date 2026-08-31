@@ -176,3 +176,77 @@ test("rejects a helper unavailable on the chosen branch", () => {
       error.code === "HELPER_NOT_ALLOWED"
   );
 });
+
+test("composes named cast slots from user and catalog sources", () => {
+  const namedStory = {
+    slug: "playtime",
+    title: "Giochiamo",
+    start: "s1",
+    cast_slots: [
+      { key: "protagonist", introduced_at: "start" },
+      { key: "playmate", introduced_at: "s1" },
+    ],
+    steps: [
+      {
+        key: "s1",
+        content_ref: "play.md",
+        decision: {
+          type: "cast",
+          key: "choose_playmate",
+          slot: "playmate",
+          allowed_sources: ["user_character", "catalog_character"],
+          catalog_roster: [{ key: "etto", entrance_ref: "etto-entry.md" }],
+          user_character_entrance_ref: "user-entry.md",
+        },
+        next: null,
+      },
+    ],
+  };
+  const namedScenes = {
+    scenes: {
+      s1: {
+        background_ref: "play.png",
+        slots: [
+          { role: "protagonist", pose: "in_piedi", x: 0.3, y: 0.9, scale: 0.3, z: 1 },
+          { role: "playmate", pose: "in_piedi", x: 0.7, y: 0.9, scale: 0.3, z: 2 },
+        ],
+      },
+    },
+  };
+  const namedContent = {
+    "play.md": "[ENTRATA:playmate] [PERSONAGGIO:protagonist] gioca con [PERSONAGGIO:playmate].",
+    "etto-entry.md": "Etto arriva.",
+    "user-entry.md": "Arriva qualcuno di speciale.",
+  };
+
+  const personal = composeStory({
+    story: namedStory,
+    scenes: namedScenes,
+    contentByRef: namedContent,
+    catalog,
+    choices: {
+      story: "playtime",
+      cast: {
+        protagonist: { source: "user_character", name: "Anna", asset_ref: "anna.png" },
+        playmate: { source: "user_character", name: "Luca", asset_ref: "luca.png" },
+      },
+    },
+  });
+  assert.equal(personal.pages[0].text, "Arriva qualcuno di speciale. Anna gioca con Luca.");
+  assert.deepEqual(personal.pages[0].scene.layers.map((layer) => layer.role), ["protagonist", "playmate"]);
+
+  const dreamtaily = composeStory({
+    story: namedStory,
+    scenes: namedScenes,
+    contentByRef: namedContent,
+    catalog,
+    choices: {
+      story: "playtime",
+      cast: {
+        protagonist: { source: "user_character", name: "Anna", asset_ref: "anna.png" },
+        playmate: { source: "catalog_character", character_id: "etto" },
+      },
+    },
+  });
+  assert.equal(dreamtaily.pages[0].text, "Etto arriva. Anna gioca con Etto.");
+});

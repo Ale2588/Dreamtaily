@@ -28,30 +28,60 @@ function clone(value) {
   return value == null ? value : JSON.parse(JSON.stringify(value));
 }
 
+function normalizeCastAssignment(value, fallback = {}) {
+  if (value == null || value === "") return null;
+  if (typeof value === "string") {
+    return { source: "catalog_character", character_id: value };
+  }
+
+  const characterId = value.character_id || value.id || value.value || fallback.character_id || null;
+  const assetRef =
+    value.asset_ref || value.image_url || value.image || fallback.asset_ref || null;
+  const source =
+    value.source ||
+    fallback.source ||
+    (assetRef ? "user_character" : characterId ? "catalog_character" : null);
+
+  return {
+    source,
+    character_id: characterId,
+    name: value.name || fallback.name || null,
+    asset_ref: assetRef,
+  };
+}
+
 function normalizeChoices(raw = {}) {
   const branches = raw.branches || raw.branch || {};
   const setup = raw.setup || {};
-  const cast = raw.cast || {};
+  const rawCast = raw.cast || {};
   const protagonist = raw.protagonist || {};
+
+  const normalizedCast = Object.fromEntries(
+    Object.entries(rawCast)
+      .map(([slot, value]) => [slot, normalizeCastAssignment(value)])
+      .filter(([, value]) => value)
+  );
+  const protagonistAssignment = normalizeCastAssignment(rawCast.protagonist || protagonist, {
+    source: "user_character",
+    name: raw.protagonistName || raw.name || "Il protagonista",
+    asset_ref: raw.protagonistAssetRef || raw.protagonistImage || null,
+  }) || {
+    source: "user_character",
+    character_id: null,
+    name: raw.protagonistName || raw.name || "Il protagonista",
+    asset_ref: raw.protagonistAssetRef || raw.protagonistImage || null,
+  };
+
+  if (!normalizedCast.protagonist) normalizedCast.protagonist = protagonistAssignment;
+  if (!normalizedCast.helper && raw.helper) {
+    normalizedCast.helper = normalizeCastAssignment(raw.helper);
+  }
 
   return {
     story: raw.story || raw.story_slug || null,
     style: raw.style || "papercut",
-    protagonist: {
-      name: protagonist.name || raw.protagonistName || raw.name || "Il protagonista",
-      asset_ref:
-        protagonist.asset_ref ||
-        protagonist.image_url ||
-        raw.protagonistAssetRef ||
-        raw.protagonistImage ||
-        null,
-    },
-    cast: {
-      helper:
-        typeof cast.helper === "string"
-          ? cast.helper
-          : cast.helper?.value || raw.helper || null,
-    },
+    protagonist: normalizedCast.protagonist,
+    cast: normalizedCast,
     setup: { ...setup },
     branches: { ...branches },
   };
@@ -113,15 +143,28 @@ function contentFor(contentByRef, ref) {
   return String(contentByRef[ref]).trim();
 }
 
-function helperEntryFor(step, helperId) {
+function catalogEntryFor(step, characterId) {
   if (step.decision?.type !== "cast") return null;
-  return (step.decision.catalog_roster || []).find((entry) => entry.key === helperId) || null;
+  return (step.decision.catalog_roster || []).find((entry) => entry.key === characterId) || null;
+}
+
+function slotName(assignment, catalog = {}) {
+  return (
+    assignment?.name ||
+    catalog[assignment?.character_id]?.name ||
+    assignment?.character_id ||
+    null
+  );
+}
+
+function castErrorCode(slot, suffix) {
+  return slot === "helper" ? `HELPER_${suffix}` : `CAST_SLOT_${suffix}`;
 }
 
 export function resolveStepText({ step, choices: rawChoices, contentByRef, catalog = {} }) {
   const choices = normalizeChoices(rawChoices);
   const decisions = mergedDecisionMap(choices);
-  const helperId = choices.cast.helper;
+  const helperAssignment = choices.cast.helper;
 
   let value = contentFor(contentByRef, step.content_ref);
 
@@ -135,30 +178,53 @@ export function resolveStepText({ step, choices: rawChoices, contentByRef, catal
   }
 
   if (step.decision?.type === "cast") {
+    const slot = step.decision.slot || step.decision.key || "helper";
+    const assignment = choices.cast[slot];
     invariant(
-      helperId,
-      "HELPER_REQUIRED",
-      `A helper is required at step: ${step.key}`,
-      { step: step.key }
+      assignment,
+      castErrorCode(slot, "REQUIRED"),
+      `A cast assignment for ${slot} is required at step: ${step.key}`,
+      { step: step.key, slot }
     );
-    const entry = helperEntryFor(step, helperId);
-    invariant(
-      entry,
-      "HELPER_NOT_ALLOWED",
-      `Helper ${helperId} is not available at step: ${step.key}`,
-      { step: step.key, helperId }
-    );
-    value = value.replaceAll(
-      "[ENTRATA_AIUTANTE]",
-      entry.entrance_ref ? contentFor(contentByRef, entry.entrance_ref) : ""
-    );
+    const allowedSources = step.decision.allowed_sources || [];
+    if (allowedSources.length) {
+      invariant(
+        allowedSources.includes(assignment.source),
+        castErrorCode(slot, "SOURCE_NOT_ALLOWED"),
+        `Source ${assignment.source} is not available for ${slot} at step: ${step.key}`,
+        { step: step.key, slot, source: assignment.source }
+      );
+    }
+
+    let entranceRef = null;
+    if (assignment.source === "catalog_character") {
+      const entry = catalogEntryFor(step, assignment.character_id);
+      invariant(
+        entry,
+        castErrorCode(slot, "NOT_ALLOWED"),
+        `Character ${assignment.character_id} is not available for ${slot} at step: ${step.key}`,
+        { step: step.key, slot, characterId: assignment.character_id }
+      );
+      entranceRef = entry.entrance_ref || null;
+    } else {
+      entranceRef = step.decision.user_character_entrance_ref || null;
+    }
+
+    const entrance = entranceRef ? contentFor(contentByRef, entranceRef) : "";
+    value = value.replaceAll(`[ENTRATA:${slot}]`, entrance);
+    if (slot === "helper") value = value.replaceAll("[ENTRATA_AIUTANTE]", entrance);
   } else {
     value = value.replaceAll("[ENTRATA_AIUTANTE]", "");
   }
 
-  const helperName = catalog[helperId]?.name || helperId || "l’aiutante";
+  for (const [slot, assignment] of Object.entries(choices.cast)) {
+    const name = slotName(assignment, catalog);
+    if (name) value = value.replaceAll(`[PERSONAGGIO:${slot}]`, name);
+  }
+
+  const helperName = slotName(helperAssignment, catalog) || "l’aiutante";
   value = value
-    .replaceAll("[Nome]", choices.protagonist.name)
+    .replaceAll("[Nome]", slotName(choices.protagonist, catalog) || "Il protagonista")
     .replaceAll("[Aiutante]", helperName)
     .trim();
 
@@ -216,34 +282,30 @@ export function resolveScene({
     stepKey,
   });
 
-  const helperId = choices.cast.helper;
   const layers = [];
 
   for (const slot of definition.slots || []) {
     let src = null;
     let characterId = null;
+    const assignment = choices.cast[slot.role];
+    invariant(
+      assignment,
+      castErrorCode(slot.role, "REQUIRED"),
+      `A cast assignment for scene role ${slot.role} is required.`,
+      { stepKey, slot: slot.role }
+    );
 
-    if (slot.role === "protagonist") {
-      src = choices.protagonist.asset_ref;
-      characterId = "protagonist";
-      invariant(
-        src,
-        "PROTAGONIST_ASSET_REQUIRED",
-        "The protagonist asset_ref is required for visual composition."
-      );
-    } else if (slot.role === "helper") {
-      if (!helperId) continue;
-      characterId = helperId;
-      src = resolveCatalogAsset(catalog[helperId], choices.style, slot.pose);
-      invariant(
-        src,
-        "HELPER_ASSET_MISSING",
-        `No asset found for helper ${helperId}, style ${choices.style}, pose ${slot.pose}.`,
-        { helperId, style: choices.style, pose: slot.pose }
-      );
-    } else {
-      continue;
+    characterId = assignment.character_id || slot.role;
+    src = assignment.asset_ref;
+    if (!src && assignment.source === "catalog_character") {
+      src = resolveCatalogAsset(catalog[assignment.character_id], choices.style, slot.pose);
     }
+    invariant(
+      src,
+      slot.role === "protagonist" ? "PROTAGONIST_ASSET_REQUIRED" : castErrorCode(slot.role, "ASSET_MISSING"),
+      `No asset found for ${slot.role}, style ${choices.style}, pose ${slot.pose}.`,
+      { stepKey, slot: slot.role, characterId, style: choices.style, pose: slot.pose }
+    );
 
     layers.push({
       src,
@@ -298,8 +360,8 @@ export function composeStory({
     meta: {
       story_slug: story.slug,
       title: story.title,
-      protagonist: choices.protagonist.name,
-      helper: choices.cast.helper,
+      protagonist: slotName(choices.protagonist, catalog),
+      helper: choices.cast.helper?.character_id || null,
       style: choices.style,
       choices: clone({
         setup: choices.setup,
@@ -310,7 +372,7 @@ export function composeStory({
     cover: scenes?.cover
       ? {
           title: story.title,
-          subtitle: `Un’avventura di ${choices.protagonist.name}`,
+          subtitle: `Un’avventura di ${slotName(choices.protagonist, catalog) || "Il protagonista"}`,
           scene: {
             bg: resolveBackground(scenes.cover, mergedDecisionMap(choices)),
             wash: scenes.cover.wash || null,
