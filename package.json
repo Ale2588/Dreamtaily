@@ -7,12 +7,13 @@
     "test:reader": "node --test tests/book-reader.test.mjs",
     "test:golden": "node tools/test_story_composer_golden.mjs .",
     "test:gate-d-live": "node --test tests/gate-d-runtime-live.test.mjs",
+    "test:book-instances": "node --test tests/book-instances.test.mjs",
     "test:authoring-validator": "node --test tests/story-authoring-validator.test.mjs",
     "test:authoring-api": "node --test tests/authoring-admin-api.test.mjs",
     "test:backoffice-shell": "node --test tests/backoffice-shell.test.mjs",
     "test:identity": "node --test tests/identity-prompt.test.mjs",
     "test:mask": "node --test tests/scene-mask.test.mjs",
     "test:render-engine": "npm run test:identity && npm run test:mask",
-    "test": "npm run test:composer && npm run test:authoring-validator && npm run test:authoring-api && npm run test:reader && npm run test:render-engine"
+    "test": "npm run test:composer && npm run test:authoring-validator && npm run test:authoring-api && npm run test:reader && npm run test:book-instances && npm run test:render-engine"
   }
 }

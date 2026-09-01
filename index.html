@@ -495,8 +495,8 @@ body.dreamtaily-configurator-open{overflow:hidden}
   <section class="home-section">
     <div class="home-heading">
       <div class="phase">Come funziona</div>
-      <h2>Un personaggio, tante avventure, un solo libro.</h2>
-      <p>Il cuore di DreamTaily non è compilare un ordine. È creare un personaggio che può tornare, crescere e vivere storie diverse.</p>
+      <h2>Un personaggio, tante avventure, tutti i libri che vuoi.</h2>
+      <p>Il cuore di DreamTaily non è compilare un ordine. È creare un personaggio che può tornare, crescere e vivere storie diverse, anche partendo più volte dallo stesso canovaccio.</p>
     </div>
 
     <div class="home-steps">
@@ -1274,6 +1274,7 @@ async function saveAndContinue(){
   showError('wow-error',null);
   try{
     await saveCharacter();
+    resetActiveBookState();
     prepareStories();
     setTimeout(()=>showScreen('stories'),350);
   }catch(error){
@@ -1436,20 +1437,7 @@ function useSavedCharacter(characterId){
    * I libri esistenti restano salvati su Supabase, ma non devono contaminare
    * il nuovo funnel attraverso app.bookId/app.bookStories.
    */
-  app.bookId=null;
-  app.bookStories=[];
-  app.activeStoryDefinition=null;
-  app.activeBookStoryId=null;
-  app.currentStepKey=null;
-  app.setupIndex=0;
-  app.setupChoices={};
-  app.compositionChoices={};
-  app.selectedStoryId=null;
-  dtComposedBook=null;
-  dtBookPage=0;
-  dtTrail=[];
-  dtTrailIndex=0;
-  dtContentByRef=null;
+  resetActiveBookState();
 
   applyCharacterToForm(character);
   app.characterAssetId=character.id;
@@ -1575,20 +1563,6 @@ async function getOrCreateDraftBook(){
       .maybeSingle();
     if(!error&&existing?.status==='draft') return existing.id;
     app.bookId=null;
-  }
-
-  const {data:current,error:currentError}=await client
-    .from('books')
-    .select('id,status')
-    .eq('status','draft')
-    .order('updated_at',{ascending:false})
-    .limit(1)
-    .maybeSingle();
-
-  if(currentError) throw currentError;
-  if(current){
-    app.bookId=current.id;
-    return current.id;
   }
 
   const title=value('name')?`Il libro di ${value('name')}`:'Il mio libro DreamTaily';
@@ -3262,64 +3236,9 @@ window.completeDtCheckout=async function(){
   }
 };
 
-window.deleteCurrentBookAndRestart=async function(){
-  if(!app.bookId) return;
-
-  const confirmed=confirm(
-    "Eliminare questo libro e ricominciare da capo? Il personaggio resterà nella libreria."
-  );
-  if(!confirmed) return;
-
-  try{
-    const client=getSupabase();
-    await loadBookStories();
-
-    const storyIds=(app.bookStories||[]).map(item=>item.id);
-
-    if(storyIds.length){
-      const {error:castError}=await client
-        .from("story_cast_assignments")
-        .delete()
-        .in("book_story_id",storyIds);
-      if(castError) console.warn("[DreamTaily] Cast cleanup skipped:",castError);
-
-      const {error:storiesError}=await client
-        .from("book_stories")
-        .delete()
-        .in("id",storyIds);
-      if(storiesError) throw storiesError;
-    }
-
-    const {error:bookError}=await client
-      .from("books")
-      .delete()
-      .eq("id",app.bookId);
-    if(bookError) throw bookError;
-
-    app.bookId=null;
-    app.bookStories=[];
-    app.activeStoryDefinition=null;
-    app.activeBookStoryId=null;
-    app.currentStepKey=null;
-    app.setupIndex=0;
-    app.setupChoices={};
-    app.compositionChoices={};
-    app.selectedStoryId=null;
-    dtComposedBook=null;
-    dtBookPage=0;
-    dtTrail=[];
-    dtTrailIndex=0;
-    dtContentByRef=null;
-
-    const resumeButton=document.getElementById("resume-book-btn");
-    if(resumeButton) resumeButton.style.display="none";
-
-    prepareStories();
-    showScreen("stories");
-  }catch(error){
-    console.error("[DreamTaily] Delete book error:",error);
-    alert("Non sono riuscito a eliminare il libro. Riprova.");
-  }
+window.startNewBook=async function(){
+  resetActiveBookState();
+  await openCharacterLibrary();
 };
 
 window.renderDtDelivered=function(){
@@ -3468,6 +3387,10 @@ function dtRenderSavedBooks(){
 }
 
 function dtClearOnlyActiveBook(){
+  resetActiveBookState();
+}
+
+function resetActiveBookState(){
   app.bookId=null;
   app.bookStories=[];
   app.activeStoryDefinition=null;
