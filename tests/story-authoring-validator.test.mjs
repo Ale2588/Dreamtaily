@@ -29,6 +29,8 @@ function contract(afterLeftText = "Il viaggio continua.") {
   const scenes = {
     scenes: Object.fromEntries(story.steps.map((step) => [step.key, {
       background_ref: `${step.key}.png`,
+      environment_prompt: `Ambiente ${step.key}`,
+      moment_prompt: `Momento ${step.key}`,
       slots: [{ role: "protagonist" }],
     }])),
   };
@@ -70,4 +72,34 @@ test("rejects missing cast entrance content", () => {
     result.errors.filter((error) => error.code === "CONTENT_MISSING"),
     [{ code: "CONTENT_MISSING", step: "left", ref: "missing-etto-entry.md" }]
   );
+});
+
+test("rejects a branch option without a destination", () => {
+  const input = contract();
+  input.story.steps[0].decision.options[1].next = null;
+  const result = validateAuthoringContract(input);
+  assert.deepEqual(result.errors.filter((error) => error.code === "BRANCH_DESTINATION_REQUIRED"), [{ code: "BRANCH_DESTINATION_REQUIRED", step: "start", option: "right" }]);
+});
+
+test("rejects incomplete scene authoring fields", () => {
+  const input = contract();
+  input.scenes.scenes.left.background_ref = "";
+  input.scenes.scenes.left.environment_prompt = "";
+  input.scenes.scenes.left.moment_prompt = "";
+  const result = validateAuthoringContract(input);
+  assert.deepEqual(result.errors.filter((error) => error.step === "left").map((error) => error.code), ["SCENE_BACKGROUND_REQUIRED", "SCENE_ENVIRONMENT_PROMPT_REQUIRED", "SCENE_MOMENT_PROMPT_REQUIRED"]);
+});
+
+test("rejects scene slots that are not declared by the story", () => {
+  const input = contract();
+  input.scenes.scenes.right.slots.push({ role: "ghost" });
+  const result = validateAuthoringContract(input);
+  assert.deepEqual(result.errors.filter((error) => error.code === "SCENE_SLOT_UNKNOWN"), [{ code: "SCENE_SLOT_UNKNOWN", step: "right", slot: "ghost" }]);
+});
+
+test("rejects duplicate or empty cast slot keys", () => {
+  const input = contract();
+  input.story.cast_slots.push({ key: "friend" }, { label: "Senza chiave" });
+  const result = validateAuthoringContract(input);
+  assert.deepEqual(result.errors.filter((error) => error.code === "CAST_SLOT_KEYS_INVALID"), [{ code: "CAST_SLOT_KEYS_INVALID" }]);
 });

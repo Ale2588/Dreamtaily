@@ -122,6 +122,14 @@ test('gli errori server-side sono tradotti e collegati alla pagina',()=>{
   assert.match(editor,/Apri la pagina/);
 });
 
+test('i controlli bloccano destinazioni e scene incomplete',()=>{
+  assert.match(editor,/BRANCH_DESTINATION_REQUIRED/);
+  assert.match(editor,/SCENE_BACKGROUND_REQUIRED/);
+  assert.match(editor,/SCENE_ENVIRONMENT_PROMPT_REQUIRED/);
+  assert.match(editor,/SCENE_MOMENT_PROMPT_REQUIRED/);
+  assert.match(editor,/SCENE_SLOT_UNKNOWN/);
+});
+
 test('l’anteprima importa il composer canonico',()=>{
   assert.match(editor,/Anteprima deterministica/);
   assert.match(editor,/import\('\.\/src\/story-composer\.js'\)/);

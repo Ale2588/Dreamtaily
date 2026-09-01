@@ -44,11 +44,17 @@ function usedSlots(step, scene, contentByRef) {
 export function validateAuthoringContract({ story, scenes, contentByRef }) {
   const errors = [];
   const steps = Array.isArray(story?.steps) ? story.steps : [];
+  const castSlots = Array.isArray(story?.cast_slots) ? story.cast_slots : [];
+  const castKeys = castSlots.map((slot) => slot.key).filter(Boolean);
+  const declaredSlots = new Set(["protagonist", ...castKeys]);
   const keys = steps.map((step) => step.key).filter(Boolean);
   const byKey = new Map(steps.map((step) => [step.key, step]));
 
   if (new Set(keys).size !== keys.length || keys.length !== steps.length) {
     errors.push({ code: "STEP_KEYS_INVALID" });
+  }
+  if (new Set(castKeys).size !== castKeys.length || castKeys.length !== castSlots.length) {
+    errors.push({ code: "CAST_SLOT_KEYS_INVALID" });
   }
   if (!story?.start || !byKey.has(story.start)) {
     errors.push({ code: "START_INVALID", step: story?.start || null });
@@ -83,12 +89,27 @@ export function validateAuthoringContract({ story, scenes, contentByRef }) {
     if (step.decision?.type === "branch" && (step.decision.options || []).length < 2) {
       errors.push({ code: "BRANCH_OPTIONS_REQUIRED", step: step.key });
     }
+    if (step.decision?.type === "branch") {
+      for (const option of step.decision.options || []) {
+        if (!option.next) errors.push({ code: "BRANCH_DESTINATION_REQUIRED", step: step.key, option: option.key || null });
+      }
+    }
     for (const ref of referencedContent(step)) {
       if (!contentByRef || !Object.prototype.hasOwnProperty.call(contentByRef, ref)) {
         errors.push({ code: "CONTENT_MISSING", step: step.key, ref });
       }
     }
-    if (!scenes?.scenes?.[step.key]) errors.push({ code: "SCENE_MISSING", step: step.key });
+    const scene = scenes?.scenes?.[step.key];
+    if (!scene) {
+      errors.push({ code: "SCENE_MISSING", step: step.key });
+    } else {
+      if (!String(scene.background_ref || scene.background || "").trim()) errors.push({ code: "SCENE_BACKGROUND_REQUIRED", step: step.key });
+      if (!String(scene.environment_prompt || "").trim()) errors.push({ code: "SCENE_ENVIRONMENT_PROMPT_REQUIRED", step: step.key });
+      if (!String(scene.moment_prompt || "").trim()) errors.push({ code: "SCENE_MOMENT_PROMPT_REQUIRED", step: step.key });
+      for (const slot of scene.slots || []) {
+        if (!slot?.role || !declaredSlots.has(slot.role)) errors.push({ code: "SCENE_SLOT_UNKNOWN", step: step.key, slot: slot?.role || null });
+      }
+    }
   }
 
   const predecessors = new Map(order.map((key) => [key, []]));
