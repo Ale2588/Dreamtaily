@@ -143,3 +143,12 @@ test('la preview dichiara che non genera immagini e non usa IA',()=>{
   assert.match(editor,/Percorso di prova/);
   assert.match(editor,/prima opzione disponibile a ogni bivio/);
 });
+
+test('la pubblicazione richiede la stessa revisione validata e una conferma esplicita',()=>{
+  assert.match(editor,/Pubblica versione/);
+  assert.match(editor,/report\.revision===state\.version\?\.updated_at/);
+  assert.match(editor,/confirm\('Pubblicare questa versione\?/);
+  assert.match(editor,/`\/versions\/\$\{versionId\}\/publish`/);
+  assert.match(editor,/expected_updated_at:state\.version\.updated_at/);
+  assert.match(editor,/I libri già creati non cambieranno/);
+});

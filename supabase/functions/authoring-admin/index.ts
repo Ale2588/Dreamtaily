@@ -253,6 +253,58 @@ async function validateVersion(versionId: string, uid: string, admin: boolean) {
   return reply(200, { validation: validationReport });
 }
 
+async function publishVersion(req: Request, versionId: string, uid: string, admin: boolean) {
+  const access = await ownedVersion(versionId, uid, admin);
+  if (access.response) return access.response;
+  if (access.version.status !== "draft") return reply(409, { error: "VERSION_IMMUTABLE" });
+  const body = await json(req);
+  const expected = String(body.expected_updated_at || "");
+  if (!expected || expected !== access.version.updated_at) return reply(409, { error: "REVISION_CONFLICT" });
+
+  const report = validateAuthoringContract({
+    story: access.version.source_story,
+    scenes: access.version.source_scenes,
+    contentByRef: access.version.content_by_ref,
+  });
+  const validation = access.version.validation_report || {};
+  if (!report.valid || validation.status !== "valid" || validation.revision !== access.version.updated_at) {
+    return reply(409, { error: "VALIDATION_REQUIRED", validation: report });
+  }
+
+  const { data: characters, error: catalogError } = await svc
+    .from("catalog_characters")
+    .select("key,name,species,identity_prompt,canonical_markers,art")
+    .eq("status", "active")
+    .order("key");
+  if (catalogError) throw catalogError;
+  const catalog = Object.fromEntries((characters || []).map((character) => [character.key, {
+    name: character.name,
+    species: character.species,
+    identity_prompt: character.identity_prompt,
+    canonical_markers: character.canonical_markers,
+    art: character.art,
+  }]));
+  const publishedContract = {
+    contract_version: 1,
+    story: access.version.source_story,
+    scenes: access.version.source_scenes,
+    contentByRef: access.version.content_by_ref,
+    catalog,
+  };
+  const { data, error } = await svc.rpc("publish_story_version_atomic", {
+    p_version_id: versionId,
+    p_expected_updated_at: expected,
+    p_published_contract: publishedContract,
+  });
+  if (error) {
+    for (const code of ["VERSION_NOT_FOUND", "VERSION_IMMUTABLE", "REVISION_CONFLICT", "VALIDATION_REQUIRED", "PUBLISHED_CONTRACT_INVALID"]) {
+      if (error.message.includes(code)) return reply(code === "VERSION_NOT_FOUND" ? 404 : 409, { error: code });
+    }
+    throw error;
+  }
+  return reply(200, { publication: data?.[0] || null });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   try {
@@ -260,7 +312,7 @@ Deno.serve(async (req) => {
     const admin = isAdmin(user);
     const path = new URL(req.url).pathname.replace(/\/+$/, "");
     const base = path.endsWith("/authoring-admin");
-    const versionMatch = path.match(/\/authoring-admin\/versions\/([0-9a-f-]{36})(?:\/(validate))?$/i);
+    const versionMatch = path.match(/\/authoring-admin\/versions\/([0-9a-f-]{36})(?:\/(validate|publish))?$/i);
 
     if (req.method === "GET" && base) return reply(200, { projects: await listProjects(user.id, admin) });
     if (req.method === "POST" && path.endsWith("/authoring-admin/projects")) return createProject(req, user.id);
@@ -268,6 +320,7 @@ Deno.serve(async (req) => {
     if (versionMatch && req.method === "GET" && !versionMatch[2]) return getVersion(versionMatch[1], user.id, admin);
     if (versionMatch && req.method === "PUT" && !versionMatch[2]) return saveVersion(req, versionMatch[1], user.id, admin);
     if (versionMatch && req.method === "POST" && versionMatch[2] === "validate") return validateVersion(versionMatch[1], user.id, admin);
+    if (versionMatch && req.method === "POST" && versionMatch[2] === "publish") return publishVersion(req, versionMatch[1], user.id, admin);
     return reply(405, { error: "METHOD_NOT_ALLOWED" });
   } catch (error) {
     const code = error instanceof Error ? error.message : "UNKNOWN";
