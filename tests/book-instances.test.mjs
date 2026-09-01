@@ -25,9 +25,10 @@ test('scegliere o creare un personaggio azzera soltanto il contesto attivo',()=>
   const newlyCreated=functionBody('async function saveAndContinue','async function getSignedReferenceUrl');
   const reset=functionBody('function resetActiveBookState','window.dtOpenSavedBook');
 
-  assert.match(savedCharacter,/resetActiveBookState\(\)/);
-  assert.match(newlyCreated,/resetActiveBookState\(\)/);
+  assert.match(savedCharacter,/window\.dtClearOnlyActiveBook\?\.\(\)/);
+  assert.match(newlyCreated,/window\.dtClearOnlyActiveBook\?\.\(\)/);
   assert.match(reset,/app\.bookId=null/);
+  assert.match(html,/window\.dtClearOnlyActiveBook=dtClearOnlyActiveBook/);
   assert.doesNotMatch(reset,/\.from\(["']books["']\)[\s\S]*?\.delete\(/);
 });
 

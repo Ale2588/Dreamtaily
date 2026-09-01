@@ -1274,9 +1274,9 @@ async function saveAndContinue(){
   showError('wow-error',null);
   try{
     await saveCharacter();
-    resetActiveBookState();
-    prepareStories();
-    setTimeout(()=>showScreen('stories'),350);
+    window.dtClearOnlyActiveBook?.();
+    await prepareStories();
+    showScreen('stories');
   }catch(error){
     console.error('[DreamTaily] Save error:',error);
     showError('wow-error','Il personaggio è stato creato, ma non sono riuscito a salvarlo. Riprova.');
@@ -1428,7 +1428,7 @@ function applyCharacterToForm(character){
   selectType(app.type);
 }
 
-function useSavedCharacter(characterId){
+async function useSavedCharacter(characterId){
   const character=app.savedCharacters.find(item=>item.id===characterId);
   if(!character) return;
 
@@ -1437,7 +1437,7 @@ function useSavedCharacter(characterId){
    * I libri esistenti restano salvati su Supabase, ma non devono contaminare
    * il nuovo funnel attraverso app.bookId/app.bookStories.
    */
-  resetActiveBookState();
+  window.dtClearOnlyActiveBook?.();
 
   applyCharacterToForm(character);
   app.characterAssetId=character.id;
@@ -1447,7 +1447,7 @@ function useSavedCharacter(characterId){
 
   document.getElementById('wow-image').src=app.previewUrl||'';
   document.getElementById('wow-title').textContent=`Ecco ${character.name}.`;
-  prepareStories();
+  await prepareStories();
   showScreen('stories');
 }
 
@@ -3389,6 +3389,9 @@ function dtRenderSavedBooks(){
 function dtClearOnlyActiveBook(){
   resetActiveBookState();
 }
+
+/* Espone il reset completo anche al funnel definito fuori da questo modulo. */
+window.dtClearOnlyActiveBook=dtClearOnlyActiveBook;
 
 function resetActiveBookState(){
   app.bookId=null;
