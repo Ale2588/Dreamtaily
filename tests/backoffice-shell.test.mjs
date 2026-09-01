@@ -50,3 +50,33 @@ test('la validazione passa dalla funzione server-side',()=>{
   assert.match(editor,/method:'POST'/);
   assert.doesNotMatch(editor,/\.from\(['"]story_versions['"]\)/);
 });
+
+test('gli slot dichiarano una sorgente senza introdurre un secondo modello',()=>{
+  assert.match(editor,/Personaggi della storia/);
+  assert.match(editor,/allowed_sources/);
+  assert.match(editor,/character_asset/);
+  assert.match(editor,/catalog_character/);
+  assert.match(editor,/allowed_catalog_ids/);
+  assert.doesNotMatch(editor,/story_cast_slots|StoryCastSlot/);
+});
+
+test('le pagine modificano direttamente gli step del contratto runtime',()=>{
+  assert.match(editor,/story\(\)\.steps/);
+  assert.match(editor,/content_ref:contentRef/);
+  assert.match(editor,/source_scenes\.scenes\[key\]/);
+  assert.match(editor,/Pagine e scelte/);
+});
+
+test('destinazioni e bivi si costruiscono solo da menu',()=>{
+  assert.match(editor,/Cosa succede dopo\?/);
+  assert.match(editor,/Chi legge compie una scelta/);
+  assert.match(editor,/function destinations/);
+  assert.match(editor,/data-option-next/);
+  assert.doesNotMatch(editor,/next_page_key/);
+});
+
+test('la provenienza di una pagina è calcolata in sola lettura',()=>{
+  assert.match(editor,/function predecessors/);
+  assert.match(editor,/Da dove si arriva/);
+  assert.match(editor,/class="readonly"/);
+});
