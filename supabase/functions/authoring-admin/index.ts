@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { validateAuthoringContract } from "../_shared/story-authoring-validator.js";
 
-const URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ADMINS = new Set(
@@ -10,7 +10,7 @@ const ADMINS = new Set(
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean)
 );
-const svc = createClient(URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
+const svc = createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization,apikey,content-type,x-client-info",
@@ -27,7 +27,7 @@ function reply(status: number, body: unknown) {
 async function currentUser(req: Request) {
   const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
   if (!token) throw new Error("AUTH_REQUIRED");
-  const auth = createClient(URL, ANON, { auth: { persistSession: false, autoRefreshToken: false } });
+  const auth = createClient(SUPABASE_URL, ANON, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data, error } = await auth.auth.getUser(token);
   if (error || !data.user) throw new Error("AUTH_INVALID");
   return data.user;
