@@ -31,3 +31,9 @@ test("server validation uses the shared canonical validator", () => {
   assert.match(source, /import \{ validateAuthoringContract \} from "\.\.\/_shared\/story-authoring-validator\.js"/);
   assert.match(source, /revision: access\.version\.updated_at/);
 });
+
+test("request routing does not shadow the native URL constructor", () => {
+  assert.match(source, /const SUPABASE_URL = Deno\.env\.get\("SUPABASE_URL"\)/);
+  assert.match(source, /new URL\(req\.url\)/);
+  assert.doesNotMatch(source, /const URL =/);
+});
