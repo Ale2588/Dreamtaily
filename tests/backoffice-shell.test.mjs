@@ -113,3 +113,25 @@ test('l’editor usa le strutture già consumate dal composer',()=>{
   assert.match(editor,/\[Aiutante\]/);
   assert.doesNotMatch(editor,/StoryPage|StoryAsset|StoryChoice/);
 });
+
+test('gli errori server-side sono tradotti e collegati alla pagina',()=>{
+  assert.match(editor,/Controlli editoriali/);
+  assert.match(editor,/function errorCopy/);
+  assert.match(editor,/Errore bloccante/);
+  assert.match(editor,/data-open-issue/);
+  assert.match(editor,/Apri la pagina/);
+});
+
+test('l’anteprima importa il composer canonico',()=>{
+  assert.match(editor,/Anteprima deterministica/);
+  assert.match(editor,/import\('\.\/src\/story-composer\.js'\)/);
+  assert.match(editor,/composeStory\(\{/);
+  assert.match(editor,/contentByRef:state\.version\.content_by_ref/);
+  assert.doesNotMatch(editor,/fetch\([^)]*(?:openai|generate)/i);
+});
+
+test('la preview dichiara che non genera immagini e non usa IA',()=>{
+  assert.match(editor,/Non genera immagini e non usa IA/);
+  assert.match(editor,/Percorso di prova/);
+  assert.match(editor,/prima opzione disponibile a ogni bivio/);
+});
