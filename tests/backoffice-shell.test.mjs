@@ -72,6 +72,8 @@ test('destinazioni e bivi si costruiscono solo da menu',()=>{
   assert.match(editor,/Chi legge compie una scelta/);
   assert.match(editor,/function destinations/);
   assert.match(editor,/data-option-next/);
+  assert.match(editor,/uniqueOptionKey/);
+  assert.doesNotMatch(editor,/data-option-key/);
   assert.doesNotMatch(editor,/next_page_key/);
 });
 
@@ -79,4 +81,35 @@ test('la provenienza di una pagina è calcolata in sola lettura',()=>{
   assert.match(editor,/function predecessors/);
   assert.match(editor,/Da dove si arriva/);
   assert.match(editor,/class="readonly"/);
+});
+
+test('i testi sono salvati in content_by_ref e i marcatori arrivano da menu',()=>{
+  assert.match(editor,/Testi della storia/);
+  assert.match(editor,/state\.version\.content_by_ref\[ref\]/);
+  assert.match(editor,/data-marker/);
+  assert.match(editor,/\[PERSONAGGIO:\$\{slot\.key\}\]/);
+  assert.match(editor,/insertAtCursor/);
+});
+
+test('ogni scena espone sfondo e prompt d’autore',()=>{
+  assert.match(editor,/Scene illustrate/);
+  assert.match(editor,/background_ref/);
+  assert.match(editor,/environment_prompt/);
+  assert.match(editor,/moment_prompt/);
+  assert.match(editor,/Nota per l’illustratore/);
+});
+
+test('l’autore seleziona gli slot visibili senza coordinate grezze',()=>{
+  assert.match(editor,/Chi compare nell’immagine/);
+  assert.match(editor,/data-scene-slot/);
+  assert.match(editor,/function automaticSlots/);
+  assert.doesNotMatch(editor,/<label[^>]*>\s*(?:x|y|scale|z-index)\s*</i);
+});
+
+test('l’editor usa le strutture già consumate dal composer',()=>{
+  assert.match(editor,/source_scenes\.scenes/);
+  assert.match(editor,/content_by_ref/);
+  assert.match(editor,/\[Nome\]/);
+  assert.match(editor,/\[Aiutante\]/);
+  assert.doesNotMatch(editor,/StoryPage|StoryAsset|StoryChoice/);
 });
