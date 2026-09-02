@@ -3042,6 +3042,9 @@ window.finishStoryComposer=async function(){
       throw new Error("MARKER_IRRISOLTI");
     }
 
+    // Ogni storia conserva il proprio snapshot appena viene completata.
+    // Il checkout può così renderizzare tutte le storie del libro, non solo l'ultima.
+    await dtPersistContentSnapshot(dtComposedBook);
     await persistPathChoices();
     dtBookPage=0;
     renderBookSummary();

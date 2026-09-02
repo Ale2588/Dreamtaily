@@ -73,6 +73,8 @@ const scenes = {
       step.key,
       {
         background_ref: `${step.key}.png`,
+        prompt_environment: `Environment for ${step.key}`,
+        prompt_moment: `Moment for ${step.key}`,
         variant_backgrounds:
           step.key === "s1" ? { atmosfera: { notte: "s1.notte.png" } } : {},
         slots: [
@@ -132,6 +134,8 @@ test("composes resolved pages and visual layers", () => {
   assert.equal(book.pages.length, 3);
   assert.equal(book.pages[0].text, "Ciao Lia. È notte.");
   assert.equal(book.pages[0].scene.bg, "s1.notte.png");
+  assert.equal(book.pages[0].scene.prompt_environment, "Environment for s1");
+  assert.equal(book.pages[0].scene.prompt_moment, "Moment for s1");
   assert.equal(book.pages[2].text, "Etto arriva. Ora Etto accompagna Lia.");
   assert.deepEqual(
     book.pages[2].scene.layers.map((layer) => layer.role),

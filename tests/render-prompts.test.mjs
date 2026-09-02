@@ -57,12 +57,13 @@ test("page prompt resolves helper identity from catalog id", () => {
   assert.match(prompt, /small grounded walking step/);
 });
 
-test("unknown scene fails explicitly", () => {
-  assert.throws(
-    () => buildPageRenderPrompt({
-      sceneId: "missing",
-      protagonistIdentity: "a child"
-    }),
-    /UNKNOWN_SCENE_PROMPT/
-  );
+test("authoring prompts support a scene unknown to the legacy Bosco pack", () => {
+  const prompt=buildPageRenderPrompt({
+    sceneId:"p1",
+    protagonistIdentity:"a child",
+    environmentOverride:"a glowing forest path",
+    momentOverride:"a firefly points toward home"
+  });
+  assert.match(prompt,/glowing forest path/);
+  assert.match(prompt,/firefly points toward home/);
 });

@@ -78,10 +78,17 @@ Per il progetto corrente:
 }
 ```
 
+## Supporto multi-storia
+
+- tutte le storie composte del libro vengono pianificate nell'ordine salvato;
+- ogni pagina conserva `book_story_id` e `story_slug`;
+- gli ID pagina sono prefissati con `book_story_id` per evitare collisioni;
+- ogni storia usa il proprio protagonista e la propria reference canonica;
+- ambiente e momento arrivano dal contratto editoriale pubblicato, con fallback al pacchetto storico del Bosco;
+- lo snapshot del render contiene l'intero libro e gli snapshot immutabili delle singole storie.
+
 ## Limitazioni v1
 
-- solo una storia per libro;
-- solo `Il bosco dei sussurri`;
 - niente OCR automatico;
 - niente mask nel flusso primario;
 - `generated_image_url` è firmato e scade; la futura delivery function

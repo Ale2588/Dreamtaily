@@ -174,10 +174,14 @@ export function buildPageRenderPrompt({
   helperId = null,
   helperIdentity = null,
   helperPose = "in_piedi",
+  environmentOverride = null,
   momentOverride = null
 } = {}) {
-  const scene = getScenePrompt(sceneId);
-  if (!scene) throw new Error(`UNKNOWN_SCENE_PROMPT:${sceneId}`);
+  const canonical = getScenePrompt(sceneId);
+  const scene = {
+    environment: clean(environmentOverride) || canonical?.environment || "a calm child-friendly storybook setting matching Image 1",
+    moment: clean(momentOverride) || canonical?.moment || "The protagonist experiences the story moment described by the approved scene."
+  };
 
   const protagonist = clean(protagonistIdentity);
   if (!protagonist) throw new Error("PROTAGONIST_IDENTITY_REQUIRED");

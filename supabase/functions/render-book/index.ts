@@ -65,54 +65,60 @@ async function ensureBucket(){
 
 async function loadContext(bookId:string,userId:string){
   const {data:book,error:be}=await svc.from("books")
-    .select("id,profile_id,current_style").eq("id",bookId).maybeSingle();
+    .select("id,profile_id,title,current_style").eq("id",bookId).maybeSingle();
   if(be) throw be;
   if(!book||book.profile_id!==userId) throw new Error("BOOK_NOT_FOUND");
 
   const {data:stories,error:se}=await svc.from("book_stories")
-    .select("id,story_slug,path_choices,content_snapshot")
+    .select("id,story_slug,position,path_choices,content_snapshot")
     .eq("book_id",bookId).order("position");
   if(se) throw se;
   if(!stories?.length) throw new Error("BOOK_HAS_NO_STORIES");
-  if(stories.length!==1) throw new Error("MVP_ONE_STORY_ONLY");
 
-  const story=stories[0];
-  if(story.story_slug!=="il-bosco-dei-sussurri") throw new Error("MVP_STORY_NOT_SUPPORTED");
-  if(!story.content_snapshot) throw new Error("BOOK_SNAPSHOT_MISSING");
-
-  const {data:assign,error:ae}=await svc.from("story_cast_assignments")
-    .select("slot_key,character_asset_id,catalog_character_id").eq("book_story_id",story.id);
-  if(ae) throw ae;
-
-  const pa=(assign||[]).find((x:any)=>x.slot_key==="protagonist");
-  if(!pa?.character_asset_id) throw new Error("PROTAGONIST_ASSIGNMENT_MISSING");
-
-  const {data:char,error:ce}=await svc.from("character_assets")
-    .select("id,name,traits,identity_prompt,default_style,status")
-    .eq("id",pa.character_asset_id).maybeSingle();
-  if(ce) throw ce;
-  if(!char) throw new Error("PROTAGONIST_ASSET_MISSING");
-
-  let identity=String(char.identity_prompt||"").trim();
-  if(!identity){
-    identity=buildIdentityPrompt(char.traits?.appearance||{},char.name||"");
-    if(!identity) throw new Error("PROTAGONIST_IDENTITY_MISSING");
-    const {error:e}=await svc.from("character_assets")
-      .update({identity_prompt:identity,updated_at:new Date().toISOString()}).eq("id",char.id);
-    if(e) throw e;
+  const contexts=[];
+  for(const story of stories){
+    if(!story.content_snapshot?.meta||!Array.isArray(story.content_snapshot?.pages))
+      throw new Error(`BOOK_SNAPSHOT_MISSING:${story.id}`);
+    const {data:assign,error:ae}=await svc.from("story_cast_assignments")
+      .select("slot_key,character_asset_id,catalog_character_id").eq("book_story_id",story.id);
+    if(ae) throw ae;
+    const pa=(assign||[]).find((x:any)=>x.slot_key==="protagonist");
+    if(!pa?.character_asset_id) throw new Error(`PROTAGONIST_ASSIGNMENT_MISSING:${story.id}`);
+    const {data:char,error:ce}=await svc.from("character_assets")
+      .select("id,name,traits,identity_prompt,default_style,status")
+      .eq("id",pa.character_asset_id).maybeSingle();
+    if(ce) throw ce;
+    if(!char) throw new Error(`PROTAGONIST_ASSET_MISSING:${story.id}`);
+    let identity=String(char.identity_prompt||"").trim();
+    if(!identity){
+      identity=buildIdentityPrompt(char.traits?.appearance||{},char.name||"");
+      if(!identity) throw new Error(`PROTAGONIST_IDENTITY_MISSING:${story.id}`);
+      const {error:e}=await svc.from("character_assets")
+        .update({identity_prompt:identity,updated_at:new Date().toISOString()}).eq("id",char.id);
+      if(e) throw e;
+    }
+    const {data:refs,error:re}=await svc.from("character_references")
+      .select("style,view_type,storage_path,status,created_at")
+      .eq("character_asset_id",char.id).order("created_at",{ascending:false});
+    if(re) throw re;
+    const ready=(refs||[]).filter((r:any)=>r.status==="ready"&&r.storage_path);
+    const ref=ready.find((r:any)=>r.style===char.default_style&&r.view_type==="canonical")
+      ||ready.find((r:any)=>r.style===char.default_style&&r.view_type==="wow_preview")||ready[0];
+    if(!ref) throw new Error(`PROTAGONIST_REFERENCE_MISSING:${story.id}`);
+    contexts.push({book_story_id:story.id,story_slug:story.story_slug,position:story.position,
+      snapshot:story.content_snapshot,identity,reference:ref});
   }
+  return {book,stories:contexts,snapshot:{meta:{book_id:book.id,title:book.title},stories:contexts.map((x:any)=>({book_story_id:x.book_story_id,story_slug:x.story_slug,position:x.position,content:x.snapshot}))}};
+}
 
-  const {data:refs,error:re}=await svc.from("character_references")
-    .select("style,view_type,storage_path,status,created_at")
-    .eq("character_asset_id",char.id).order("created_at",{ascending:false});
-  if(re) throw re;
-  const ready=(refs||[]).filter((r:any)=>r.status==="ready"&&r.storage_path);
-  const ref=ready.find((r:any)=>r.style===char.default_style&&r.view_type==="canonical")
-    ||ready.find((r:any)=>r.style===char.default_style&&r.view_type==="wow_preview")
-    ||ready[0];
-  if(!ref) throw new Error("PROTAGONIST_REFERENCE_MISSING");
-
-  return {snapshot:story.content_snapshot,identity,reference:ref};
+function planMultiStoryRender(contexts:any[]){
+  return contexts.flatMap((context:any)=>planBookRender(context.snapshot).map((page:any)=>({
+    ...page,
+    page_id:`${context.book_story_id}__${page.page_id}`,
+    local_page_id:page.page_id,
+    book_story_id:context.book_story_id,
+    story_slug:context.story_slug
+  })));
 }
 
 async function protagonistBlob(path:string){
@@ -149,7 +155,9 @@ async function renderOne(renderId:string,page:any,protagonist:Blob,identity:stri
   const prompt=buildPageRenderPrompt({
     sceneId:page.scene_id, atmosphere:page.atmosphere,
     protagonistIdentity:identity, protagonistPose:page.protagonist_pose||"in_piedi",
-    helperId:page.helper_id||null, helperPose:page.helper_pose||"in_piedi"
+    helperId:page.helper_id||null, helperPose:page.helper_pose||"in_piedi",
+    environmentOverride:page.prompt_environment||null,
+    momentOverride:page.prompt_moment||null
   });
   const ph=await sha256(prompt);
   let last="";
@@ -192,22 +200,30 @@ Deno.serve(async(req:Request)=>{
     if(!job){
       const {data,error}=await svc.from("book_renders").insert({
         book_id:bookId,status:"running",idempotency_key:key,book_snapshot:ctx.snapshot,
-        pages:planBookRender(ctx.snapshot),started_at:new Date().toISOString(),updated_at:new Date().toISOString()
+        pages:planMultiStoryRender(ctx.stories),started_at:new Date().toISOString(),updated_at:new Date().toISOString()
       }).select("*").single();
       if(error) throw error;
       job=data;
     }
 
     await ensureBucket();
-    const protagonist=await protagonistBlob(ctx.reference.storage_path);
-    const pages=(job.pages||planBookRender(ctx.snapshot)).map((p:any)=>({...p,render:{...p.render}}));
+    const storyById=new Map(ctx.stories.map((story:any)=>[story.book_story_id,story]));
+    const protagonistByStory=new Map();
+    for(const story of ctx.stories){
+      protagonistByStory.set(story.book_story_id,await protagonistBlob(story.reference.storage_path));
+    }
+    const pages=(job.pages||planMultiStoryRender(ctx.stories)).map((p:any)=>({...p,render:{...p.render}}));
 
     const pending=pages.map((page:any,index:number)=>({page,index}))
       .filter(({page}:any)=>page.render?.status!=="ready"&&Number(page.render?.attempts||0)<MAX_ATTEMPTS)
       .slice(0,MAX_CONCURRENCY);
 
     if(pending.length){
-      const results=await Promise.all(pending.map(({page}:any)=>renderOne(job.id,page,protagonist,ctx.identity)));
+      const results=await Promise.all(pending.map(({page}:any)=>{
+        const story:any=storyById.get(page.book_story_id);
+        if(!story) throw new Error(`RENDER_STORY_CONTEXT_MISSING:${page.book_story_id}`);
+        return renderOne(job.id,page,protagonistByStory.get(page.book_story_id),story.identity);
+      }));
       results.forEach((r:any,i:number)=>pages[pending[i].index]=r);
       const {error}=await svc.from("book_renders").update({pages,updated_at:new Date().toISOString()}).eq("id",job.id);
       if(error) throw error;
