@@ -18,6 +18,28 @@ test("Book Creator loads every published story and pins its immutable version", 
   assert.match(html, /const contract=bookStory\.content_snapshot\|\|null/);
 });
 
+test("dynamic stories prefix only relative assets with their own slug", () => {
+  assert.match(html, /const slug=app\.activeStoryDefinition\?\.slug\|\|"il-bosco-dei-sussurri"/);
+  assert.match(html, /return `stories\/\$\{slug\}\/\$\{ref\}`/);
+  const prefixer = html.match(/function dtPrefixedSceneContract\(\)[\s\S]*?window\.finishStoryComposer/)?.[0] || "";
+  assert.doesNotMatch(prefixer, /if\(app\.activeStoryContract\?\.scenes\) return scenes/);
+});
+
+test("stories without setup skip the obsolete preparation screen", () => {
+  assert.match(html, /function dtOpenStoryEntry\(\)/);
+  assert.match(html, /if\(\(app\.activeStoryDefinition\?\.setup\|\|\[\]\)\.length\)/);
+  const start = html.match(/window\.startStoryComposer=async[\s\S]*?async function dtComposeFromCurrentState/)?.[0] || "";
+  assert.match(start, /dtOpenStoryEntry\(\)/);
+});
+
+test("checkout details come from the active story instead of Bosco keys", () => {
+  assert.match(html, /function dtBookDetailRows\(\)/);
+  assert.match(html, /setup:dtSetupChoiceMap\(\)/);
+  assert.match(html, /branches:dtBranchChoiceMap\(\)/);
+  const checkout = html.match(/window\.openDtCheckout=function\(\)[\s\S]*?window\.updateDtPayButton/)?.[0] || "";
+  assert.doesNotMatch(checkout, /Sentiero|d_sentiero|d_finale/);
+});
+
 test("the public catalog uses the authoring cover before the fallback", () => {
   assert.match(publishedStorySource, /story\.editorial\?\.cover_ref\|\|story\.cover_image/);
   assert.match(publishedStorySource, /story\.editorial\?\.age_range\|\|story\.age_range\|\|p\.age_range/);

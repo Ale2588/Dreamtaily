@@ -1894,6 +1894,37 @@ async function legacyStartStoryComposerDisabled(story,bookStoryId){
 }
 function resolveEffectiveStart(definition,choices={}){const sb=(definition?.setup||[]).find(x=>x.type==='branch');if(!sb)return definition?.start||definition?.steps?.[0]?.key||null;return (sb.options||[]).find(o=>o.key===choices[sb.key])?.start||definition?.start||null}
 
+function dtSetupChoiceMap(definition=app.activeStoryDefinition,choices=app.compositionChoices){
+  return Object.fromEntries((definition?.setup||[]).map(item=>[item.key,choices?.[item.key]||""]).filter(([,value])=>Boolean(value)));
+}
+
+function dtBranchChoiceMap(definition=app.activeStoryDefinition,choices=app.compositionChoices){
+  return Object.fromEntries((definition?.steps||[]).filter(step=>step.decision?.type==="branch").map(step=>[step.decision.key,typeof choices?.[step.decision.key]==="string"?choices[step.decision.key]:choices?.[step.decision.key]?.value]).filter(([,value])=>Boolean(value)));
+}
+
+function dtCurrentPathChoices(){
+  const path={...dtSetupChoiceMap(),...dtBranchChoiceMap()};
+  for(const step of app.activeStoryDefinition?.steps||[]){
+    const decision=step.decision;
+    if(decision?.type!=="cast"||!decision.key) continue;
+    const choice=app.compositionChoices[decision.key]||(decision.key==="helper"?dtHelperChoice():null);
+    const value=typeof choice==="string"?choice:choice?.value;
+    if(value) path[decision.key]=value;
+  }
+  return path;
+}
+
+function dtOpenStoryEntry(){
+  if((app.activeStoryDefinition?.setup||[]).length){
+    renderSetupStep();
+    showScreen("setup");
+    return;
+  }
+  app.currentStepKey=resolveEffectiveStart(app.activeStoryDefinition,{});
+  renderComposerStep();
+  showScreen("composer");
+}
+
 function renderSetupStep(){
   const setup=app.activeStoryDefinition?.setup||[];
   const item=setup[app.setupIndex];
@@ -1973,17 +2004,7 @@ function selectSetupCard(key,value){
 }
 
 async function persistPathChoices(){
-  const helperChoice=app.compositionChoices.helper;
-  const path={...app.setupChoices};
-  for(const step of app.activeStoryDefinition?.steps||[]){
-    const decision=step.decision;
-    if(!decision?.key) continue;
-    const choice=app.compositionChoices[decision.key];
-    path[decision.key]=typeof choice==="string"?choice:choice?.value||null;
-  }
-  if(helperChoice&&!path.helper){
-    path.helper=typeof helperChoice==="string"?helperChoice:helperChoice.value||null;
-  }
+  const path=dtCurrentPathChoices();
   const {error}=await getSupabase()
     .from("book_stories")
     .update({
@@ -2128,25 +2149,7 @@ async function saveComposerDecision(step){
      * La scelta narrativa viene quindi salvata prima in path_choices,
      * che è il dato canonico sufficiente per ricomporre il libro.
      */
-    const helperKey=choice?.source==="catalog_character"?choice.value:null;
-    const path={
-      atmosfera:app.setupChoices.atmosfera||app.compositionChoices.atmosfera||null,
-      d_sentiero:app.compositionChoices.d_sentiero||null,
-      helper:helperKey,
-      d_finale:app.compositionChoices.d_finale||null
-    };
-
-    const {error:pathError}=await client
-      .from("book_stories")
-      .update({
-        path_choices:Object.fromEntries(
-          Object.entries(path).filter(([,value])=>Boolean(value))
-        ),
-        updated_at:new Date().toISOString()
-      })
-      .eq("id",app.activeBookStoryId);
-
-    if(pathError) throw pathError;
+    await persistPathChoices();
 
     if(choice?.source==="none"){
       const {error}=await client
@@ -2571,15 +2574,18 @@ function dtPrefixStoryRef(ref){
      - setup/atmosfera_notte.png
      - stories/il-bosco-dei-sussurri/setup/atmosfera_notte.png */
   if(ref.startsWith("stories/")) return ref;
-  return `${DT_STORY_ROOT}/${ref}`;
+  const slug=app.activeStoryDefinition?.slug||"il-bosco-dei-sussurri";
+  return `stories/${slug}/${ref}`;
 }
 
 function dtAtmosphereImage(option){
-  const canonical={
+  const authored=dtPrefixStoryRef(option?.image_ref||"");
+  if(authored) return authored;
+  const canonical=app.activeStoryDefinition?.slug==="il-bosco-dei-sussurri"?{
     notte:`${DT_STORY_ROOT}/setup/atmosfera_notte.png`,
     tramonto:`${DT_STORY_ROOT}/setup/atmosfera_tramonto.png`
-  };
-  const resolved=canonical[option?.key]||dtPrefixStoryRef(option?.image_ref||"");
+  }:{};
+  const resolved=canonical[option?.key]||"";
   return resolved ? `${resolved}?v=20260728-2` : "";
 }
 
@@ -2989,7 +2995,6 @@ async function dtLoadContent(){
 
 function dtPrefixedSceneContract(){
   const scenes=structuredClone(dtSceneContract);
-  if(app.activeStoryContract?.scenes) return scenes;
   const fix=definition=>{
     if(!definition) return;
     definition.background_ref=dtPrefixStoryRef(definition.background_ref);
@@ -3026,11 +3031,8 @@ window.finishStoryComposer=async function(){
         style:app.style,
         protagonist:{name:protagonist.name,asset_ref:protagonist.image},
         cast:{helper:helperId},
-        setup:{atmosfera:app.setupChoices.atmosfera},
-        branches:{
-          d_sentiero:app.compositionChoices.d_sentiero,
-          d_finale:app.compositionChoices.d_finale
-        }
+        setup:dtSetupChoiceMap(),
+        branches:dtBranchChoiceMap()
       }
     });
 
@@ -3157,12 +3159,34 @@ function dtChoiceLabel(key,valueKey){
   return (decision?.options||[]).find(option=>option.key===valueKey)?.label||valueKey||"—";
 }
 
+function dtBookDetailRows(){
+  const rows=[["Protagonista",dtProtagonist().name],["Stile",app.style]];
+  for(const item of app.activeStoryDefinition?.setup||[]){
+    const value=app.setupChoices[item.key]||app.compositionChoices[item.key];
+    const label=(item.options||[]).find(option=>option.key===value)?.label;
+    if(label) rows.push([item.label||item.prompt||"Scelta iniziale",label]);
+  }
+  for(const step of app.activeStoryDefinition?.steps||[]){
+    const decision=step.decision;
+    if(!decision?.key) continue;
+    if(decision.type==="branch"){
+      const value=app.compositionChoices[decision.key];
+      const label=(decision.options||[]).find(option=>option.key===value)?.label;
+      if(label) rows.push([decision.prompt||step.title||"Scelta",label]);
+    }
+    if(decision.type==="cast"){
+      const choice=app.compositionChoices[decision.key]||(decision.key==="helper"?dtHelperChoice():null);
+      const value=typeof choice==="string"?choice:choice?.value;
+      const entry=(decision.catalog_roster||[]).find(item=>(typeof item==="string"?item:item.key)===value);
+      const label=typeof entry==="string"?entry:entry?.name||DT_HELPERS[value]?.name;
+      if(label) rows.push([decision.prompt||step.title||"Personaggio",label]);
+    }
+  }
+  rows.push(["Capitoli",String(dtComposedBook.pages.length)]);
+  return rows;
+}
+
 window.openDtCheckout=function(){
-  const protagonist=dtProtagonist();
-  const helper=DT_HELPERS[dtHelperChoice()?.value];
-  const atmosphere=(app.activeStoryDefinition.setup||[])
-    .find(item=>item.key==="atmosfera")?.options
-    ?.find(option=>option.key===app.setupChoices.atmosfera);
   const screen=document.getElementById("screen-checkout");
 
   screen.innerHTML=`
@@ -3187,15 +3211,7 @@ window.openDtCheckout=function(){
       </main>
       <aside class="panel" style="padding:24px">
         <h2 style="font-family:'Baloo 2'">${escapeHtml(dtComposedBook.meta.title)}</h2>
-        ${[
-          ["Protagonista",protagonist.name],
-          ["Aiutante",helper?.name||"—"],
-          ["Stile",app.style],
-          ["Atmosfera",atmosphere?.label||"—"],
-          ["Sentiero",dtChoiceLabel("d_sentiero",app.compositionChoices.d_sentiero)],
-          ["Finale",dtChoiceLabel("d_finale",app.compositionChoices.d_finale)],
-          ["Capitoli",String(dtComposedBook.pages.length)]
-        ].map(([key,val])=>`<div class="dt-summary-row"><span>${escapeHtml(key)}</span><strong>${escapeHtml(val)}</strong></div>`).join("")}
+        ${dtBookDetailRows().map(([key,val])=>`<div class="dt-summary-row"><span>${escapeHtml(key)}</span><strong>${escapeHtml(val)}</strong></div>`).join("")}
       </aside>
     </div>
   </div>`;
@@ -3220,12 +3236,7 @@ async function dtPersistContentSnapshot(book){
 async function dtMarkReady(){
   const client=getSupabase();
   const now=new Date().toISOString();
-  const choices={
-    atmosfera:app.setupChoices.atmosfera,
-    d_sentiero:app.compositionChoices.d_sentiero,
-    helper:dtHelperChoice()?.value||null,
-    d_finale:app.compositionChoices.d_finale
-  };
+  const choices=dtCurrentPathChoices();
   const {error:storyError}=await client.from("book_stories")
     .update({status:"ready",path_choices:choices,updated_at:now})
     .eq("id",app.activeBookStoryId);
@@ -3510,7 +3521,7 @@ window.dtEditSavedBook=async function(bookId){
     app.activeStoryDefinition=await loadStoryDefinition(story);
     app.activeBookStoryId=preferred.id;
     app.compositionChoices={...(preferred.path_choices||{})};
-    app.setupChoices={atmosfera:preferred.path_choices?.atmosfera||""};
+    app.setupChoices=dtSetupChoiceMap(app.activeStoryDefinition,app.compositionChoices);
 
     const helper=preferred.story_cast_assignments?.find(item=>item.slot_key==="helper");
     const helperKey=helper?.catalog_character_id||preferred.path_choices?.helper||null;
@@ -3597,9 +3608,7 @@ window.startStoryComposer=async function(story,bookStoryId){
 
     const current=app.bookStories.find(item=>item.id===bookStoryId);
     app.compositionChoices={...(current?.path_choices||{})};
-    app.setupChoices={
-      atmosfera:app.compositionChoices.atmosfera||""
-    };
+    app.setupChoices=dtSetupChoiceMap(app.activeStoryDefinition,app.compositionChoices);
 
     const helper=current?.story_cast_assignments?.find(item=>item.slot_key==="helper");
     const helperKey=helper?.catalog_character_id||current?.path_choices?.helper||null;
@@ -3621,8 +3630,7 @@ window.startStoryComposer=async function(story,bookStoryId){
     dtTrail=[];
     dtTrailIndex=0;
     dtComposedBook=null;
-    renderSetupStep();
-    showScreen("setup");
+    dtOpenStoryEntry();
   }catch(error){
     console.error("[DreamTaily] Story start error:",error);
     showError("story-error","Non sono riuscito ad aprire la storia.");
@@ -3652,11 +3660,8 @@ async function dtComposeFromCurrentState(){
       style:app.style,
       protagonist:{name:protagonist.name,asset_ref:protagonist.image},
       cast:{helper:helperId},
-      setup:{atmosfera:app.setupChoices.atmosfera},
-      branches:{
-        d_sentiero:app.compositionChoices.d_sentiero,
-        d_finale:app.compositionChoices.d_finale
-      }
+      setup:dtSetupChoiceMap(),
+      branches:dtBranchChoiceMap()
     }
   });
 
@@ -3681,7 +3686,7 @@ function dtStoryChoicesComplete(bookStory){
       return Boolean(app.compositionChoices[decision.key]);
     }
     if(decision.type==="cast"){
-      const slotKey=decision.slot_key||"helper";
+      const slotKey=decision.slot||decision.slot_key||decision.key;
       return Boolean(
         bookStory?.story_cast_assignments?.some(item=>item.slot_key===slotKey)||
         (slotKey==="helper"&&dtHelperChoice()?.value)
@@ -3710,9 +3715,7 @@ async function dtRestorePersistedBook(){
   app.activeStoryDefinition=await loadStoryDefinition(story);
   app.activeBookStoryId=preferred.id;
   app.compositionChoices={...(preferred.path_choices||{})};
-  app.setupChoices={
-    atmosfera:preferred.path_choices?.atmosfera||""
-  };
+  app.setupChoices=dtSetupChoiceMap(app.activeStoryDefinition,app.compositionChoices);
 
   const helper=preferred.story_cast_assignments?.find(item=>item.slot_key==="helper");
   const helperKey=helper?.catalog_character_id||preferred.path_choices?.helper||null;
@@ -3734,8 +3737,7 @@ async function dtRestorePersistedBook(){
 
   if(!complete){
     dtComposedBook=null;
-    renderSetupStep();
-    showScreen("setup");
+    dtOpenStoryEntry();
     return true;
   }
 
@@ -3808,12 +3810,8 @@ window.goToBook=async function(){
   }
 
   if(app.activeStoryDefinition&&app.activeBookStoryId){
-    const complete=Boolean(
-      app.setupChoices.atmosfera&&
-      app.compositionChoices.d_sentiero&&
-      dtHelperChoice()?.value&&
-      app.compositionChoices.d_finale
-    );
+    const current=app.bookStories.find(item=>item.id===app.activeBookStoryId)||null;
+    const complete=dtStoryChoicesComplete(current);
 
     if(complete){
       try{
@@ -3827,8 +3825,7 @@ window.goToBook=async function(){
       }
     }
 
-    renderSetupStep();
-    showScreen("setup");
+    dtOpenStoryEntry();
     return;
   }
 
