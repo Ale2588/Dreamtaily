@@ -12,12 +12,13 @@ function functionBody(name,nextName){
   return html.slice(start,end);
 }
 
-test('un nuovo libro non recupera implicitamente una bozza precedente',()=>{
+test('la bozza attiva viene recuperata prima di tentare un secondo inserimento',()=>{
   const body=functionBody('async function getOrCreateDraftBook()','async function loadBookStories()');
   assert.match(body,/if\(app\.bookId\)/);
   assert.match(body,/\.from\('books'\)[\s\S]*?\.insert\(/);
-  assert.doesNotMatch(body,/\.eq\('status','draft'\)/);
-  assert.doesNotMatch(body,/\.order\('updated_at'/);
+  assert.match(body,/\.eq\('profile_id',user\.id\)/);
+  assert.match(body,/\.eq\('status','draft'\)/);
+  assert.ok(body.indexOf(".eq('status','draft')")<body.indexOf(".insert({"));
 });
 
 test('scegliere o creare un personaggio azzera soltanto il contesto attivo',()=>{
@@ -25,8 +26,8 @@ test('scegliere o creare un personaggio azzera soltanto il contesto attivo',()=>
   const newlyCreated=functionBody('async function saveAndContinue','async function getSignedReferenceUrl');
   const reset=functionBody('function resetActiveBookState','window.dtOpenSavedBook');
 
-  assert.match(savedCharacter,/window\.dtClearOnlyActiveBook\?\.\(\)/);
-  assert.match(newlyCreated,/window\.dtClearOnlyActiveBook\?\.\(\)/);
+  assert.match(savedCharacter,/if\(app\.bookFlowMode!=='add_story'\) window\.dtClearOnlyActiveBook\?\.\(\)/);
+  assert.match(newlyCreated,/if\(app\.bookFlowMode!=='add_story'\) window\.dtClearOnlyActiveBook\?\.\(\)/);
   assert.match(reset,/app\.bookId=null/);
   assert.match(html,/window\.dtClearOnlyActiveBook=dtClearOnlyActiveBook/);
   assert.doesNotMatch(reset,/\.from\(["']books["']\)[\s\S]*?\.delete\(/);

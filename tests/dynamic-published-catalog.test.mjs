@@ -32,11 +32,12 @@ test("stories without setup skip the obsolete preparation screen", () => {
   assert.match(start, /dtOpenStoryEntry\(\)/);
 });
 
-test("checkout details come from the active story instead of Bosco keys", () => {
-  assert.match(html, /function dtBookDetailRows\(\)/);
+test("checkout summarizes the whole book instead of story-specific path details", () => {
+  assert.doesNotMatch(html, /function dtBookDetailRows\(\)/);
   assert.match(html, /setup:dtSetupChoiceMap\(\)/);
   assert.match(html, /branches:dtBranchChoiceMap\(\)/);
-  const checkout = html.match(/window\.openDtCheckout=function\(\)[\s\S]*?window\.updateDtPayButton/)?.[0] || "";
+  const checkout = html.match(/window\.openDtCheckout=async function\(\)[\s\S]*?window\.updateDtPayButton/)?.[0] || "";
+  assert.match(checkout, /app\.bookStories\.map/);
   assert.doesNotMatch(checkout, /Sentiero|d_sentiero|d_finale/);
 });
 
