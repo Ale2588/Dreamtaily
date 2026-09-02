@@ -13,6 +13,13 @@ test("path persistence recovers the active story from the current book",()=>{
 
 test("path persistence verifies that exactly one owned story was writable",()=>{
   const block=html.match(/async function persistPathChoices\(\)[\s\S]*?async function advanceSetup/)?.[0]||"";
-  assert.match(block,/\.select\("id"\)/);
+  assert.match(block,/method:"PATCH"/);
+  assert.match(block,/Authorization:`Bearer \$\{accessToken\}`/);
+  assert.match(block,/Prefer:"return=representation"/);
   assert.match(block,/ACTIVE_BOOK_STORY_NOT_WRITABLE/);
+});
+
+test("setup exposes the real REST failure instead of hiding it",()=>{
+  assert.match(html,/PATH_CHOICES_SAVE_FAILED/);
+  assert.match(html,/Non sono riuscito a salvare l’atmosfera: \$\{detail\}/);
 });
