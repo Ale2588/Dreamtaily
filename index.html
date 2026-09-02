@@ -2004,8 +2004,19 @@ function selectSetupCard(key,value){
 }
 
 async function persistPathChoices(){
+  let bookStoryId=app.activeBookStoryId;
+  if(!bookStoryId||!app.bookStories.some(item=>item.id===bookStoryId)){
+    await loadBookStories();
+    const current=app.bookStories.find(
+      item=>item.story_slug===app.activeStoryDefinition?.slug
+    );
+    bookStoryId=current?.id||null;
+    app.activeBookStoryId=bookStoryId;
+  }
+  if(!bookStoryId) throw new Error("ACTIVE_BOOK_STORY_NOT_FOUND");
+
   const path=dtCurrentPathChoices();
-  const {error}=await getSupabase()
+  const {data,error}=await getSupabase()
     .from("book_stories")
     .update({
       path_choices:Object.fromEntries(
@@ -2013,8 +2024,11 @@ async function persistPathChoices(){
       ),
       updated_at:new Date().toISOString()
     })
-    .eq("id",app.activeBookStoryId);
+    .eq("id",bookStoryId)
+    .select("id")
+    .maybeSingle();
   if(error) throw error;
+  if(!data?.id) throw new Error("ACTIVE_BOOK_STORY_NOT_WRITABLE");
 }
 async function advanceSetup(){const setup=app.activeStoryDefinition?.setup||[],item=setup[app.setupIndex];if(!item)return beginStoryAfterSetup();if(!app.setupChoices[item.key])return showError('setup-error','Scegli un’opzione per continuare.');const b=document.getElementById('setup-next');b.disabled=true;b.textContent='Salvataggio…';try{await persistPathChoices();app.setupIndex+=1;if(app.setupIndex>=setup.length)await beginStoryAfterSetup();else renderSetupStep()}catch(error){console.error('[DreamTaily] Setup save error:',error);showError('setup-error','Non sono riuscito a salvare la scelta.')}finally{b.disabled=false}}
 async function beginStoryAfterSetup(){app.currentStepKey=resolveEffectiveStart(app.activeStoryDefinition,app.setupChoices);renderComposerStep();showScreen('composer')}
