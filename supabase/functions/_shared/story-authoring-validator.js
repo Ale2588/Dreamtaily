@@ -1,5 +1,7 @@
 const PERSON_MARKER_PATTERN = /\[PERSONAGGIO:([A-Za-z0-9_-]+)\]/g;
 const ENTRANCE_MARKER_PATTERN = /\[ENTRATA:([A-Za-z0-9_-]+)\]/g;
+const AGE_RANGES = new Set(["3–5 anni", "4–7 anni", "4–8 anni", "5–9 anni", "6–10 anni"]);
+const TONES = new Set(["Dolce e luminoso", "Caldo e rassicurante", "Avventuroso e rassicurante", "Curiosità e amicizia", "Coraggio e ascolto", "Fiabesco e contemplativo"]);
 
 function successors(step) {
   if (step.decision?.type === "branch") {
@@ -43,6 +45,13 @@ function usedSlots(step, scene, contentByRef) {
 
 export function validateAuthoringContract({ story, scenes, contentByRef }) {
   const errors = [];
+  const editorial = story?.editorial || {};
+  if (!String(story?.title || "").trim()) errors.push({ code: "TITLE_REQUIRED" });
+  if (!AGE_RANGES.has(String(editorial.age_range || ""))) errors.push({ code: "AGE_RANGE_INVALID" });
+  if (!TONES.has(String(editorial.tone || ""))) errors.push({ code: "TONE_INVALID" });
+  if (!String(editorial.summary || "").trim()) errors.push({ code: "SUMMARY_REQUIRED" });
+  if (!String(editorial.description || "").trim()) errors.push({ code: "DESCRIPTION_REQUIRED" });
+  if (!String(editorial.cover_ref || "").trim()) errors.push({ code: "COVER_REQUIRED" });
   const steps = Array.isArray(story?.steps) ? story.steps : [];
   const castSlots = Array.isArray(story?.cast_slots) ? story.cast_slots : [];
   const castKeys = castSlots.map((slot) => slot.key).filter(Boolean);

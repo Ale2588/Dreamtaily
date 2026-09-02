@@ -45,6 +45,17 @@ test('l’editor presenta metadati editoriali e mai JSON',()=>{
   assert.doesNotMatch(editor,/SERVICE_ROLE/);
 });
 
+test('fascia, tono e immagini sono gestiti senza percorsi tecnici',()=>{
+  assert.match(html,/<select id="age-range" required>/);
+  assert.match(html,/<select id="tone" required>/);
+  assert.match(editor,/<select id="age-range" required>/);
+  assert.match(editor,/<select id="tone" required>/);
+  assert.match(editor,/id="cover-file" type="file"/);
+  assert.match(editor,/id="scene-file" type="file"/);
+  assert.match(editor,/`\/versions\/\$\{versionId\}\/assets`/);
+  assert.doesNotMatch(editor,/id="background-ref"/);
+});
+
 test('la validazione passa dalla funzione server-side',()=>{
   assert.match(editor,/`\/versions\/\$\{versionId\}\/validate`/);
   assert.match(editor,/method:'POST'/);

@@ -4,6 +4,9 @@ import { validateAuthoringContract } from "../_shared/story-authoring-validator.
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const AGE_RANGES = new Set(["3–5 anni", "4–7 anni", "4–8 anni", "5–9 anni", "6–10 anni"]);
+const TONES = new Set(["Dolce e luminoso", "Caldo e rassicurante", "Avventuroso e rassicurante", "Curiosità e amicizia", "Coraggio e ascolto", "Fiabesco e contemplativo"]);
+const IMAGE_TYPES: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
 const ADMINS = new Set(
   (Deno.env.get("AUTHORING_ADMIN_EMAILS") || "")
     .split(",")
@@ -85,17 +88,20 @@ async function listProjects(uid: string, admin: boolean) {
   const { data: versions, error: versionError } = ids.length
     ? await svc
         .from("story_versions")
-        .select("id,story_project_id,version_number,status,published_at,updated_at")
+        .select("id,story_project_id,version_number,status,published_at,updated_at,source_story")
         .in("story_project_id", ids)
     : { data: [], error: null };
   if (versionError) throw versionError;
   return (projects || []).map((project) => {
     const own = (versions || []).filter((version) => version.story_project_id === project.id);
+    const latest = own.sort((left, right) => right.version_number - left.version_number)[0] || null;
+    const latestStory = latest?.source_story || {};
     return {
       ...project,
+      public_title: latestStory.title || project.public_title,
       draft_count: own.filter((version) => version.status === "draft").length,
       published_version: own.find((version) => version.id === project.current_published_version_id) || null,
-      latest_version: own.sort((left, right) => right.version_number - left.version_number)[0] || null,
+      latest_version: latest,
     };
   });
 }
@@ -106,6 +112,8 @@ async function createProject(req: Request, uid: string) {
   const internalTitle = String(body.internal_title || "").trim();
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return reply(400, { error: "SLUG_INVALID" });
   if (!internalTitle || internalTitle.length > 160) return reply(400, { error: "INTERNAL_TITLE_INVALID" });
+  if (!AGE_RANGES.has(String(body.age_range || ""))) return reply(400, { error: "AGE_RANGE_INVALID" });
+  if (!TONES.has(String(body.tone || ""))) return reply(400, { error: "TONE_INVALID" });
 
   const { data: project, error: projectError } = await svc
     .from("story_projects")
@@ -131,6 +139,13 @@ async function createProject(req: Request, uid: string) {
     slug,
     version: 1,
     title: String(body.public_title || internalTitle).trim(),
+    editorial: {
+      age_range: body.age_range,
+      tone: body.tone,
+      summary: body.description || null,
+      description: body.description || null,
+      cover_ref: null,
+    },
     start: null,
     cast_slots: [{ key: "protagonist", label: "Protagonista", allowed_sources: ["user_character"], introduced_at: "start" }],
     steps: [],
@@ -153,6 +168,48 @@ async function createProject(req: Request, uid: string) {
     throw versionError;
   }
   return reply(201, { project, version });
+}
+
+function decodeBase64(value: unknown) {
+  const encoded = String(value || "");
+  if (!encoded || encoded.length > 11_200_000) return null;
+  try {
+    const binary = atob(encoded);
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+    return bytes;
+  } catch (_error) {
+    return null;
+  }
+}
+
+function validImageBytes(bytes: Uint8Array, contentType: string) {
+  if (contentType === "image/png") return bytes.length > 8 && [137, 80, 78, 71, 13, 10, 26, 10].every((value, index) => bytes[index] === value);
+  if (contentType === "image/jpeg") return bytes.length > 3 && bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255;
+  if (contentType === "image/webp") return bytes.length > 12 && new TextDecoder().decode(bytes.slice(0, 4)) === "RIFF" && new TextDecoder().decode(bytes.slice(8, 12)) === "WEBP";
+  return false;
+}
+
+async function uploadAsset(req: Request, versionId: string, uid: string, admin: boolean) {
+  const access = await ownedVersion(versionId, uid, admin);
+  if (access.response) return access.response;
+  if (access.version.status !== "draft") return reply(409, { error: "VERSION_IMMUTABLE" });
+  const body = await json(req);
+  const kind = body.kind === "cover" ? "cover" : body.kind === "scene" ? "scene" : null;
+  const contentType = String(body.content_type || "").toLowerCase();
+  const extension = IMAGE_TYPES[contentType];
+  const bytes = decodeBase64(body.base64);
+  const sceneKey = String(body.scene_key || "").replace(/[^a-z0-9_-]/gi, "");
+  if (!kind || !extension || !bytes || bytes.byteLength > 8_000_000 || !validImageBytes(bytes, contentType) || (kind === "scene" && !sceneKey)) {
+    return reply(400, { error: "IMAGE_INVALID" });
+  }
+  const projectSlug = String(access.version.source_story?.slug || access.version.story_project_id).replace(/[^a-z0-9-]/gi, "");
+  const filename = kind === "cover" ? `cover.${extension}` : `scenes/${sceneKey}.${extension}`;
+  const path = `authoring/${projectSlug}/${versionId}/${filename}`;
+  const { error } = await svc.storage.from("story-images").upload(path, bytes, { contentType, upsert: true, cacheControl: "3600" });
+  if (error) throw error;
+  const { data } = svc.storage.from("story-images").getPublicUrl(path);
+  return reply(201, { asset: { kind, path, public_url: `${data.publicUrl}?v=${Date.now()}`, content_type: contentType } });
 }
 
 async function createVersion(req: Request, uid: string, admin: boolean) {
@@ -312,7 +369,7 @@ Deno.serve(async (req) => {
     const admin = isAdmin(user);
     const path = new URL(req.url).pathname.replace(/\/+$/, "");
     const base = path.endsWith("/authoring-admin");
-    const versionMatch = path.match(/\/authoring-admin\/versions\/([0-9a-f-]{36})(?:\/(validate|publish))?$/i);
+    const versionMatch = path.match(/\/authoring-admin\/versions\/([0-9a-f-]{36})(?:\/(validate|publish|assets))?$/i);
 
     if (req.method === "GET" && base) return reply(200, { projects: await listProjects(user.id, admin) });
     if (req.method === "POST" && path.endsWith("/authoring-admin/projects")) return createProject(req, user.id);
@@ -321,6 +378,7 @@ Deno.serve(async (req) => {
     if (versionMatch && req.method === "PUT" && !versionMatch[2]) return saveVersion(req, versionMatch[1], user.id, admin);
     if (versionMatch && req.method === "POST" && versionMatch[2] === "validate") return validateVersion(versionMatch[1], user.id, admin);
     if (versionMatch && req.method === "POST" && versionMatch[2] === "publish") return publishVersion(req, versionMatch[1], user.id, admin);
+    if (versionMatch && req.method === "POST" && versionMatch[2] === "assets") return uploadAsset(req, versionMatch[1], user.id, admin);
     return reply(405, { error: "METHOD_NOT_ALLOWED" });
   } catch (error) {
     const code = error instanceof Error ? error.message : "UNKNOWN";

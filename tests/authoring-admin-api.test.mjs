@@ -16,6 +16,26 @@ test("authoring API exposes the draft bundle lifecycle", () => {
   assert.match(source, /req\.method === "GET"/);
   assert.match(source, /req\.method === "PUT"/);
   assert.match(source, /versionMatch\[2\] === "validate"/);
+  assert.match(source, /versionMatch\[2\] === "assets"/);
+});
+
+test("new projects copy controlled metadata into the initial draft", () => {
+  assert.match(source, /const AGE_RANGES = new Set/);
+  assert.match(source, /const TONES = new Set/);
+  assert.match(source, /editorial: \{/);
+  assert.match(source, /cover_ref: null/);
+  assert.match(source, /AGE_RANGE_INVALID/);
+  assert.match(source, /TONE_INVALID/);
+});
+
+test("image uploads are owner checked and constrained", () => {
+  const upload = source.match(/async function uploadAsset[\s\S]*?async function createVersion/)?.[0] || "";
+  assert.match(upload, /ownedVersion\(versionId, uid, admin\)/);
+  assert.match(upload, /VERSION_IMMUTABLE/);
+  assert.match(upload, /bytes\.byteLength > 8_000_000/);
+  assert.match(upload, /validImageBytes\(bytes, contentType\)/);
+  assert.match(upload, /storage\.from\("story-images"\)\.upload/);
+  assert.match(source, /"image\/png": "png"/);
 });
 
 test("draft saves use optimistic concurrency and cannot mutate published versions", () => {

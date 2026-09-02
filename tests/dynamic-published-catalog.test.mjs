@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 import { composeStory } from "../src/story-composer.js";
 
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+const publishedStorySource = await readFile(new URL("../supabase/functions/published-story/index.ts", import.meta.url), "utf8");
 const endpoint = "https://hirzbtruxvjzmcnncvmv.supabase.co/functions/v1/published-story";
 const headers = { apikey: "sb_publishable_baZvlGyMLBkkiOwHina6CA_HB59Lclw" };
 
@@ -15,6 +16,12 @@ test("Book Creator loads every published story and pins its immutable version", 
   assert.match(html, /story_version_id:story\._versionId/);
   assert.match(html, /content_snapshot:story\._contract/);
   assert.match(html, /const contract=bookStory\.content_snapshot\|\|null/);
+});
+
+test("the public catalog uses the authoring cover before the fallback", () => {
+  assert.match(publishedStorySource, /story\.editorial\?\.cover_ref\|\|story\.cover_image/);
+  assert.match(publishedStorySource, /story\.editorial\?\.age_range\|\|story\.age_range\|\|p\.age_range/);
+  assert.match(publishedStorySource, /story\.title\|\|p\.public_title/);
 });
 
 test("the live catalog exposes Bosco and Lucciola", async () => {

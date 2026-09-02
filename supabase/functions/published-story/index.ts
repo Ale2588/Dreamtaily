@@ -54,11 +54,11 @@ Deno.serve(async(req:Request)=>{
         const story=v.published_contract?.story||{};
         return {
           slug:p.slug,
-          title:p.public_title||story.title||p.slug,
-          age:p.age_range||story.age_range||null,
-          tone:p.tone||story.tone||null,
-          description:p.description||story.summary||"",
-          image:story.cover_image||"assets/char/water/bear.png",
+          title:story.title||p.public_title||p.slug,
+          age:story.editorial?.age_range||story.age_range||p.age_range||null,
+          tone:story.editorial?.tone||story.tone||p.tone||null,
+          description:story.editorial?.summary||story.editorial?.description||story.summary||p.description||"",
+          image:story.editorial?.cover_ref||story.cover_image||"assets/char/water/bear.png",
           length:"Percorso dinamico",
           version:v.version_number,
           published_at:v.published_at

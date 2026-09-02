@@ -4,6 +4,14 @@ import { validateAuthoringContract } from "../src/story-authoring-validator.js";
 
 function contract(afterLeftText = "Il viaggio continua.") {
   const story = {
+    title: "Storia di prova",
+    editorial: {
+      age_range: "4–7 anni",
+      tone: "Dolce e luminoso",
+      summary: "Una promessa narrativa.",
+      description: "Una sinossi editoriale completa.",
+      cover_ref: "https://example.test/cover.png",
+    },
     start: "start",
     cast_slots: [{ key: "protagonist", introduced_at: "start" }, { key: "friend" }],
     steps: [
@@ -102,4 +110,14 @@ test("rejects duplicate or empty cast slot keys", () => {
   input.story.cast_slots.push({ key: "friend" }, { label: "Senza chiave" });
   const result = validateAuthoringContract(input);
   assert.deepEqual(result.errors.filter((error) => error.code === "CAST_SLOT_KEYS_INVALID"), [{ code: "CAST_SLOT_KEYS_INVALID" }]);
+});
+
+test("rejects incomplete editorial identity and missing cover", () => {
+  const input = contract();
+  input.story.editorial = { age_range: "libera", tone: "libero", summary: "", description: "", cover_ref: "" };
+  const result = validateAuthoringContract(input);
+  assert.deepEqual(
+    result.errors.filter((error) => ["AGE_RANGE_INVALID", "TONE_INVALID", "SUMMARY_REQUIRED", "DESCRIPTION_REQUIRED", "COVER_REQUIRED"].includes(error.code)).map((error) => error.code),
+    ["AGE_RANGE_INVALID", "TONE_INVALID", "SUMMARY_REQUIRED", "DESCRIPTION_REQUIRED", "COVER_REQUIRED"]
+  );
 });
