@@ -38,6 +38,7 @@ No `story_pages`, `story_choices` or `story_assets` tables are required for the 
 | Text | `content_by_ref[ref]` + `step.content_ref` | `contentByRef` | `resolveStepText()` |
 | Text variant | `step.variant_refs` | same | `resolveStepText()` |
 | Scene | `source_scenes.scenes[step.key]` | `scenes.scenes[step.key]` | `resolveScene()` |
+| Story cover | uploaded cover asset + `source_scenes.cover` | `published_contract.scenes.cover` + catalog image | story catalog and book cover |
 | Visual role | `scene.slots[].role` | same | `resolveScene()` |
 | Reader traversal | not part of draft | `book_stories.path_choices` + `story_version_id` | composer/render pipeline |
 | Resolved book | not part of draft | `book_stories.content_snapshot` / render snapshot | delivery |
@@ -185,6 +186,19 @@ Legacy aliases remain accepted during the compatibility period:
 The editor inserts markers from declared slots. Authors do not type slot keys manually.
 
 ## 6. Scene mapping
+
+### Story cover
+
+The editor must provide a dedicated **Story cover** upload with an immediate
+preview. Authors must not have to create a storage folder or copy a path by
+hand. The upload produces a stable storage reference used by:
+
+- the story card in Book Creator;
+- the cover of a book that starts from that story;
+- `source_scenes.cover` and the frozen published contract.
+
+Publishing is blocked when the cover is missing. The temporary bear image is a
+development fallback only and must never be treated as authored cover art.
 
 Every reachable step must have exactly one scene definition in v1. A scene declares visual slots using the same narrative slot keys:
 
