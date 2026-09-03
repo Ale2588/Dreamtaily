@@ -585,19 +585,12 @@ body.dreamtaily-configurator-open{overflow:hidden}
         <h1 class="step-title">Cominciamo da chi sarà l’eroe.</h1>
         <p class="intro">Bastano pochi dettagli. Potrai aggiungerne altri dopo averlo visto prendere vita.</p>
 
-        <label>Scegli lo stile</label>
+        <label>Stile visivo del libro</label>
+        <p class="small">Per l’MVP usiamo Paper Cut. Acquerello e Pastelli entreranno nel catalogo in seguito.</p>
         <div class="style-grid">
-          <button class="choice style-card" data-style="paper" onclick="selectStyle('paper')">
+          <button class="choice style-card selected" data-style="paper" onclick="selectStyle('paper')">
             <div class="style-thumb"><img src="assets/char/paper/rabbit.png" alt=""></div>
             <span>Paper Cut</span>
-          </button>
-          <button class="choice style-card selected" data-style="water" onclick="selectStyle('water')">
-            <div class="style-thumb"><img src="assets/char/water/rabbit.png" alt=""></div>
-            <span>Acquerello</span>
-          </button>
-          <button class="choice style-card" data-style="crayon" onclick="selectStyle('crayon')">
-            <div class="style-thumb"><img src="assets/char/crayon/rabbit.png" alt=""></div>
-            <span>Pastelli</span>
           </button>
         </div>
 
@@ -807,54 +800,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 
 
 
-<section class="screen composer-screen" id="screen-setup">
-  <div class="shell">
-    <div class="topbar">
-      <button class="brand-dark" onclick="showScreen('stories')">
-        <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
-      </button>
-      <div class="phase">4 · Prepara la storia</div>
-    </div>
-
-    <div class="panel composer-panel">
-      <div class="composer-progress" id="setup-progress">Preparazione</div>
-      <h1 class="step-title">Prepara la tua storia</h1>
-      <p class="intro">Scegli una carta per definire l’atmosfera iniziale.</p>
-
-      <div class="story-protagonist-header">
-        <div>
-          <div class="board-slot-label">Il protagonista di questa storia</div>
-          <div class="board-slot-help">È il personaggio che hai scelto prima del catalogo.</div>
-        </div>
-        <div id="board-protagonist"></div>
-      </div>
-
-      <div class="story-board">
-        <div class="board-slot">
-          <div class="board-slot-label">Atmosfera</div>
-          <div class="board-slot-title" id="board-setup-title">Scegli l’atmosfera</div>
-          <div id="board-setup-assigned"></div>
-          <div class="board-slot-help">La scelta cambia luce e sensazioni, non gli eventi.</div>
-        </div>
-
-        <div class="board-slot future">
-          <div class="board-slot-label">Un incontro ti aspetta</div>
-          <div class="board-slot-title">Nel bosco incontrerai qualcuno</div>
-          <div class="board-slot-help">Sceglierai l’aiutante quando entrerà davvero nella storia.</div>
-        </div>
-      </div>
-
-      <div class="board-pool-title">Scegli una carta</div>
-      <div id="board-card-pool" class="board-pool"></div>
-
-      <div class="error" id="setup-error"></div>
-      <div class="form-actions">
-        <button class="btn btn-ghost" onclick="goToBook()">Vai al mio libro</button>
-        <button class="btn btn-primary" id="setup-next" onclick="advanceSetup()">Inizia la storia →</button>
-      </div>
-    </div>
-  </div>
-</section>
+<section class="screen composer-screen" id="screen-setup"></section>
 
 <section class="screen composer-screen" id="screen-composer">
   <div class="shell">
@@ -947,9 +893,15 @@ body.dreamtaily-configurator-open{overflow:hidden}
 <script>
 const SUPABASE_URL = 'https://hirzbtruxvjzmcnncvmv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_baZvlGyMLBkkiOwHina6CA_HB59Lclw';
+const VISUAL_STYLE_CATALOG = Object.freeze({
+  paper:Object.freeze({id:'paper',label:'Paper Cut',status:'active'}),
+  water:Object.freeze({id:'water',label:'Acquerello',status:'planned'}),
+  crayon:Object.freeze({id:'crayon',label:'Pastelli',status:'planned'})
+});
+const MVP_VISUAL_STYLE_ID='paper';
 
 const app = {
-  style:'water',
+  style:MVP_VISUAL_STYLE_ID,
   type:'real_person',
   previewId:null,
   previewUrl:null,
@@ -980,7 +932,8 @@ function showScreen(name){
 }
 
 function selectStyle(style){
-  app.style=style;
+  const candidate=VISUAL_STYLE_CATALOG[style];
+  app.style=candidate?.status==='active'?candidate.id:MVP_VISUAL_STYLE_ID;
   document.querySelectorAll('[data-style]').forEach(el=>el.classList.toggle('selected',el.dataset.style===style));
 }
 
@@ -1374,7 +1327,7 @@ function renderSavedCharacters(){
     const traits=character.traits||{};
     const age=traits.narrative_age_group||'Età non indicata';
     const type=traits.type==='fictional_character'?'Personaggio fantastico':'Persona reale';
-    const fallback='assets/char/water/rabbit.png';
+    const fallback='assets/char/paper/rabbit.png';
     return `
       <button class="saved-character-card" type="button" onclick="useSavedCharacter('${character.id}')">
         <img src="${character.image_url||fallback}" alt="${escapeHtml(character.name)}">
@@ -1384,7 +1337,7 @@ function renderSavedCharacters(){
           <div class="saved-character-meta">
             <span>${escapeHtml(type)}</span>
             <span>${escapeHtml(age)}</span>
-            <span>${escapeHtml(character.default_style||'water')}</span>
+            <span>${escapeHtml(VISUAL_STYLE_CATALOG[character.default_style]?.label||character.default_style||'Paper Cut')}</span>
           </div>
         </div>
       </button>
@@ -1412,7 +1365,7 @@ function applyCharacterToForm(character){
   const outfit=appearance.default_outfit||{};
 
   app.type=traits.type||'real_person';
-  app.style=character.default_style||'water';
+  app.style=MVP_VISUAL_STYLE_ID;
 
   document.getElementById('name').value=character.name||traits.display_name||'';
   document.getElementById('age-group').value=traits.narrative_age_group||'';
@@ -1910,7 +1863,10 @@ async function legacyStartStoryComposerDisabled(story,bookStoryId){
 function resolveEffectiveStart(definition,choices={}){const sb=(definition?.setup||[]).find(x=>x.type==='branch');if(!sb)return definition?.start||definition?.steps?.[0]?.key||null;return (sb.options||[]).find(o=>o.key===choices[sb.key])?.start||definition?.start||null}
 
 function dtSetupChoiceMap(definition=app.activeStoryDefinition,choices=app.compositionChoices){
-  return Object.fromEntries((definition?.setup||[]).map(item=>[item.key,choices?.[item.key]||""]).filter(([,value])=>Boolean(value)));
+  return Object.fromEntries((definition?.setup||[])
+    .filter(item=>item.key!=="atmosfera")
+    .map(item=>[item.key,choices?.[item.key]||""])
+    .filter(([,value])=>Boolean(value)));
 }
 
 function dtBranchChoiceMap(definition=app.activeStoryDefinition,choices=app.compositionChoices){
@@ -1930,11 +1886,6 @@ function dtCurrentPathChoices(){
 }
 
 function dtOpenStoryEntry(){
-  if((app.activeStoryDefinition?.setup||[]).length){
-    renderSetupStep();
-    showScreen("setup");
-    return;
-  }
   app.currentStepKey=resolveEffectiveStart(app.activeStoryDefinition,{});
   renderComposerStep();
   showScreen("composer");
@@ -2500,13 +2451,13 @@ async function resumeDraftBook(){
 
 
 function startAnother(){
-  app.style='water';app.type='real_person';app.previewId=null;app.previewUrl=null;app.characterAssetId=null;app.candidateCharacterAssetId=null;app.selectedStoryId=null;
+  app.style=MVP_VISUAL_STYLE_ID;app.type='real_person';app.previewId=null;app.previewUrl=null;app.characterAssetId=null;app.candidateCharacterAssetId=null;app.selectedStoryId=null;
   document.querySelectorAll('input,textarea').forEach(el=>el.value='');
   document.getElementById('age-group').value='';
   document.getElementById('advanced').classList.remove('open');
   document.getElementById('wow-details').classList.remove('open');
   document.getElementById('saved-note').classList.remove('visible');
-  selectStyle('water');selectType('real_person');showScreen('creator');
+  selectStyle(MVP_VISUAL_STYLE_ID);selectType('real_person');showScreen('creator');
 }
 
 document.addEventListener('DOMContentLoaded',async()=>{await loadStoryCatalog();detectDraftBook()});
@@ -2607,55 +2558,9 @@ function dtPrefixStoryRef(ref){
   if(!ref) return "";
   if(/^(?:https?:|data:|blob:|\/)/.test(ref)) return ref;
 
-  /* Accetta entrambe le convenzioni:
-     - setup/atmosfera_notte.png
-     - stories/il-bosco-dei-sussurri/setup/atmosfera_notte.png */
   if(ref.startsWith("stories/")) return ref;
   const slug=app.activeStoryDefinition?.slug||"il-bosco-dei-sussurri";
   return `stories/${slug}/${ref}`;
-}
-
-function dtAtmosphereImage(option){
-  const authored=dtPrefixStoryRef(option?.image_ref||"");
-  if(authored) return authored;
-  const canonical=app.activeStoryDefinition?.slug==="il-bosco-dei-sussurri"?{
-    notte:`${DT_STORY_ROOT}/setup/atmosfera_notte.png`,
-    tramonto:`${DT_STORY_ROOT}/setup/atmosfera_tramonto.png`
-  }:{};
-  const resolved=canonical[option?.key]||"";
-  return resolved ? `${resolved}?v=20260728-2` : "";
-}
-
-window.dtAtmosphereImageFallback=function(image,key){
-  const direct={
-    notte:"stories/il-bosco-dei-sussurri/setup/atmosfera_notte.png",
-    tramonto:"stories/il-bosco-dei-sussurri/setup/atmosfera_tramonto.png"
-  }[key];
-
-  if(!direct){
-    image.remove();
-    return;
-  }
-
-  const fallback=`${direct}?v=20260728-3`;
-  if(image.dataset.fallbackTried==="1"||image.src.endsWith(fallback)){
-    image.style.display="none";
-    image.closest(".dt-decision-option")?.classList.add("asset-error");
-    console.error("[DreamTaily] Immagine atmosfera non caricata:",image.src);
-    return;
-  }
-
-  image.dataset.fallbackTried="1";
-  image.src=fallback;
-};
-
-function dtAtmosphereFallbackUrl(){
-  const atmosphere=app.setupChoices.atmosfera||app.compositionChoices.atmosfera;
-  const map={
-    notte:`${DT_STORY_ROOT}/setup/atmosfera_notte.png`,
-    tramonto:`${DT_STORY_ROOT}/setup/atmosfera_tramonto.png`
-  };
-  return map[atmosphere]||"";
 }
 
 window.dtSceneBackgroundFallback=function(image){
@@ -2677,9 +2582,7 @@ function dtSceneDefinition(stepKey){
 
 function dtResolvedBackground(definition){
   if(!definition) return "";
-  const atmosphere=app.setupChoices.atmosfera||app.compositionChoices.atmosfera;
-  const ref=definition.variant_backgrounds?.atmosfera?.[atmosphere]||definition.background_ref;
-  const resolved=dtPrefixStoryRef(ref);
+  const resolved=dtPrefixStoryRef(definition.background_ref);
   return resolved?`${resolved}?v=20260730-fix3`:"";
 }
 
@@ -2869,7 +2772,7 @@ window.renderComposerStep=function(){
       <aside class="panel dt-walk-preview">
         ${dtPreviewScene(step)}
         <p class="dt-preview-caption">
-          Anteprima del momento: atmosfera, ramo e aiutante reagiscono alle tue scelte.
+          Anteprima del momento: percorso e personaggi reagiscono alle tue scelte.
         </p>
       </aside>
     </div>
@@ -2883,8 +2786,7 @@ window.backFromDtComposer=function(){
     renderComposerStep();
     return;
   }
-  renderSetupStep();
-  showScreen("setup");
+  showScreen("stories");
 };
 
 window.advanceComposer=async function(){
@@ -2915,96 +2817,6 @@ window.advanceComposer=async function(){
   }catch(error){
     console.error("[DreamTaily] Composer save error:",error);
     showError("composer-error","Non sono riuscito a salvare la scelta.");
-  }
-};
-
-window.renderSetupStep=function(){
-  const definition=app.activeStoryDefinition;
-  const atmosphere=(definition?.setup||[]).find(item=>item.key==="atmosfera")||(definition?.setup||[])[0];
-  const setupKey=atmosphere?.key||null;
-  const selected=setupKey
-    ?app.setupChoices[setupKey]||app.compositionChoices[setupKey]||null
-    :null;
-  const protagonist=dtProtagonist();
-  const screen=document.getElementById("screen-setup");
-
-  screen.innerHTML=`
-  <div class="shell">
-    <div class="topbar">
-      <button class="brand-dark" onclick="showScreen('stories')">
-        <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
-      </button>
-      <div class="phase">4 · Prima di entrare</div>
-    </div>
-
-    <div class="dt-walk-layout">
-      <main class="panel dt-walk-main">
-        <div class="dt-moment-index">Tempo zero</div>
-        <h1 class="step-title">${escapeHtml(atmosphere?.prompt||"La storia è pronta")}</h1>
-        <p class="dt-moment-context">${escapeHtml(atmosphere?.prompt||"Puoi iniziare subito questa avventura.")}</p>
-
-        <section class="dt-decision-box">
-          <p class="dt-decision-note">${atmosphere
-            ?"Scegli l’impostazione iniziale. Le decisioni di trama arriveranno dentro la storia."
-            :"Questa storia non richiede scelte iniziali."}</p>
-          <div class="dt-decision-options">
-            ${(atmosphere?.options||[]).map(option=>`
-              <button type="button" class="dt-decision-option ${selected===option.key?"selected":""}"
-                onclick="selectDtAtmosphere('${escapeHtml(setupKey)}','${escapeHtml(option.key)}')">
-                ${option.image_ref?`<img src="${escapeHtml(dtAtmosphereImage(option))}" alt="${escapeHtml(option.label)}"
-                onerror="dtAtmosphereImageFallback(this,'${escapeHtml(option.key)}')">`:""}
-                <strong>${escapeHtml(option.label)}</strong>
-                <small>La stessa avventura, con una luce e una sensazione diverse.</small>
-              </button>`).join("")}
-          </div>
-        </section>
-
-        <div class="error" id="setup-error"></div>
-        <div class="form-actions">
-          <button class="btn btn-ghost" onclick="showScreen('stories')">← Storie</button>
-          <button class="btn btn-primary" id="setup-next" ${atmosphere&&!selected?"disabled":""}
-            onclick="beginStoryAfterSetup()">Inizia la storia →</button>
-        </div>
-      </main>
-
-      <aside class="panel dt-walk-preview">
-        <img src="${escapeHtml(protagonist.image)}" alt="${escapeHtml(protagonist.name)}"
-          style="display:block;width:170px;height:210px;object-fit:contain;margin:0 auto 12px">
-        <h2 style="font-family:'Baloo 2';text-align:center">${escapeHtml(protagonist.name)}</h2>
-        <p class="dt-preview-caption">Il protagonista è pronto. Il sentiero e gli incontri verranno decisi attraversando i capitoli.</p>
-      </aside>
-    </div>
-  </div>`;
-};
-
-window.selectDtAtmosphere=function(setupKey,key){
-  if(!setupKey) return;
-  app.setupChoices[setupKey]=key;
-  app.compositionChoices[setupKey]=key;
-  renderSetupStep();
-};
-
-window.beginStoryAfterSetup=async function(){
-  const requiredSetup=(app.activeStoryDefinition?.setup||[])[0];
-  if(requiredSetup&&!app.setupChoices[requiredSetup.key]){
-    showError("setup-error","Completa la scelta iniziale per continuare.");
-    return;
-  }
-  try{
-    await persistPathChoices();
-    await dtLoadSceneContract();
-    dtTrail=[];
-    dtTrailIndex=0;
-    app.currentStepKey=app.activeStoryDefinition.start;
-    dtBuildTrail();
-    renderComposerStep();
-    showScreen("composer");
-  }catch(error){
-    console.error("[DreamTaily] Setup error:",error);
-    const detail=String(error?.message||"").replace(/^PATH_CHOICES_SAVE_FAILED:/,"");
-    showError("setup-error",detail
-      ?`Non sono riuscito a salvare l’atmosfera: ${detail}`
-      :"Non sono riuscito a salvare l’atmosfera.");
   }
 };
 
@@ -3113,12 +2925,7 @@ function dtBookSequence(){
 function dtBookScene(scene){
   const bg=scene?.bg
     ?`<img class="dt-scene-bg" src="${escapeHtml(scene.bg)}" alt="" onerror="dtSceneBackgroundFallback(this)">`
-    :(() => {
-        const fallback=dtAtmosphereFallbackUrl();
-        return fallback
-          ?`<img class="dt-scene-bg" src="${escapeHtml(fallback)}?v=20260728-book-empty" alt="">`
-          :"";
-      })();
+    :"";
   const wash=scene?.wash?`<div class="dt-scene-wash" style="background:${escapeHtml(scene.wash)}"></div>`:"";
   const layers=[...(scene?.layers||[])].sort((a,b)=>a.z-b.z).map(layer=>`
     <img class="dt-scene-layer" src="${escapeHtml(layer.src)}" alt=""
@@ -3764,9 +3571,9 @@ async function dtComposeFromCurrentState(){
 
 function dtStoryChoicesComplete(bookStory){
   const definition=app.activeStoryDefinition;
-  const setupComplete=(definition?.setup||[]).every(item=>
-    Boolean(app.setupChoices[item.key]||app.compositionChoices[item.key])
-  );
+  const setupComplete=(definition?.setup||[])
+    .filter(item=>item.key!=="atmosfera")
+    .every(item=>Boolean(app.setupChoices[item.key]||app.compositionChoices[item.key]));
   const decisionsComplete=(definition?.steps||[]).every(step=>{
     const decision=step.decision;
     if(!decision) return true;

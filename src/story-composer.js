@@ -79,10 +79,12 @@ function normalizeChoices(raw = {}) {
 
   return {
     story: raw.story || raw.story_slug || null,
-    style: raw.style || "papercut",
+    style: raw.style || "paper",
     protagonist: normalizedCast.protagonist,
     cast: normalizedCast,
-    setup: { ...setup },
+    setup: Object.fromEntries(
+      Object.entries(setup).filter(([key]) => key !== "atmosfera")
+    ),
     branches: { ...branches },
   };
 }

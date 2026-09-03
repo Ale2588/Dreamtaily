@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
 const checkout=await readFile(new URL('../supabase/functions/checkout-book/index.ts',import.meta.url),'utf8');
 const renderer=await readFile(new URL('../supabase/functions/render-book/index.ts',import.meta.url),'utf8');
-const migration=await readFile(new URL('../supabase/migrations/20260903070036_finalize_book_checkout_v1.sql',import.meta.url),'utf8');
+const migration=await readFile(new URL('../supabase/migrations/20260903075239_finalize_book_checkout_v1.sql',import.meta.url),'utf8');
 
 test('browser confirms checkout without invoking AI rendering',()=>{
   const completion=html.match(/window\.completeDtCheckout=async function\(\)[\s\S]*?window\.startNewBook/)?.[0]||'';
@@ -51,4 +51,3 @@ test('status page supports refresh and starting another book',()=>{
   assert.match(html,/La generazione IA è volutamente sospesa/);
   assert.match(html,/\["draft","ready_for_checkout","paid","generating","ready","failed"\]/);
 });
-

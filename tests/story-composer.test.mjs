@@ -132,8 +132,9 @@ test("composes resolved pages and visual layers", () => {
   });
 
   assert.equal(book.pages.length, 3);
-  assert.equal(book.pages[0].text, "Ciao Lia. È notte.");
-  assert.equal(book.pages[0].scene.bg, "s1.notte.png");
+  assert.equal(book.pages[0].text, "Ciao Lia.");
+  assert.equal(book.pages[0].scene.bg, "s1.png");
+  assert.deepEqual(book.meta.choices.setup, {});
   assert.equal(book.pages[0].scene.prompt_environment, "Environment for s1");
   assert.equal(book.pages[0].scene.prompt_moment, "Moment for s1");
   assert.equal(book.pages[2].text, "Etto arriva. Ora Etto accompagna Lia.");

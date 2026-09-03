@@ -167,7 +167,7 @@ async function store(renderId:string,pageId:string,bytes:Uint8Array){
 
 async function renderOne(renderId:string,page:any,protagonist:Blob,identity:string){
   const prompt=buildPageRenderPrompt({
-    sceneId:page.scene_id, atmosphere:page.atmosphere,
+    sceneId:page.scene_id, styleId:page.style_id||"paper",
     protagonistIdentity:identity, protagonistPose:page.protagonist_pose||"in_piedi",
     helperId:page.helper_id||null, helperPose:page.helper_pose||"in_piedi",
     environmentOverride:page.prompt_environment||null,

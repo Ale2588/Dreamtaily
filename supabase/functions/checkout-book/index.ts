@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { normalizeVisualStyleId, requireActiveVisualStyle } from "../../../src/visual-styles.js";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -54,6 +55,7 @@ Deno.serve(async(req:Request)=>{
     if(bookError) throw bookError;
     if(!book) throw new Error("BOOK_NOT_FOUND");
     if(book.status!=="draft") throw new Error("BOOK_NOT_EDITABLE");
+    const bookStyle=requireActiveVisualStyle(normalizeVisualStyleId(book.current_style));
 
     const {data:stories,error:storiesError}=await svc.from("book_stories")
       .select("id,story_slug,story_version_id,position,status,path_choices,content_snapshot")
@@ -83,8 +85,14 @@ Deno.serve(async(req:Request)=>{
       const cast=(assignments||[]).filter((item:any)=>item.book_story_id===story.id).map((item:any)=>{
         const character=item.character_asset_id?characterById.get(item.character_asset_id):null;
         const reference=character?(references||[]).find((ref:any)=>
-          ref.character_asset_id===character.id&&ref.style===character.default_style&&ref.view_type==="canonical"
-        )||(references||[]).find((ref:any)=>ref.character_asset_id===character.id):null;
+          ref.character_asset_id===character.id&&
+          normalizeVisualStyleId(ref.style)===bookStyle.id&&
+          ref.view_type==="canonical"
+        )||(references||[]).find((ref:any)=>
+          ref.character_asset_id===character.id&&
+          normalizeVisualStyleId(ref.style)===bookStyle.id&&
+          ref.view_type==="wow_preview"
+        ):null;
         return {slot_key:item.slot_key,character_asset_id:item.character_asset_id,
           catalog_character_id:item.catalog_character_id,
           character:character?{id:character.id,name:character.name,traits:character.traits,
@@ -100,7 +108,7 @@ Deno.serve(async(req:Request)=>{
 
     const confirmedAt=new Date().toISOString();
     const snapshot={schema_version:"checkout-book-v1",confirmed_at:confirmedAt,
-      meta:{book_id:book.id,title:book.title,style:book.current_style,story_count:snapshotStories.length},
+      meta:{book_id:book.id,title:book.title,style:bookStyle.id,story_count:snapshotStories.length},
       stories:snapshotStories};
     const {data:finalized,error:finalizeError}=await svc.rpc("finalize_book_checkout_v1",{
       p_book_id:book.id,p_profile_id:user.id,p_idempotency_key:idempotencyKey,
@@ -116,4 +124,3 @@ Deno.serve(async(req:Request)=>{
     return reply(status,{error:detail});
   }
 });
-

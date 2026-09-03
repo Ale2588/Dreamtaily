@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-const checkoutMigration = await readFile(new URL('../supabase/migrations/20260903070036_finalize_book_checkout_v1.sql', import.meta.url), 'utf8');
+const checkoutMigration = await readFile(new URL('../supabase/migrations/20260903075239_finalize_book_checkout_v1.sql', import.meta.url), 'utf8');
 
 function between(start, end) {
   const from = html.indexOf(start);

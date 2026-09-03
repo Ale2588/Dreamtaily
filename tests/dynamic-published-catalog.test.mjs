@@ -25,9 +25,11 @@ test("dynamic stories prefix only relative assets with their own slug", () => {
   assert.doesNotMatch(prefixer, /if\(app\.activeStoryContract\?\.scenes\) return scenes/);
 });
 
-test("stories without setup skip the obsolete preparation screen", () => {
+test("all stories skip the obsolete preparation screen", () => {
   assert.match(html, /function dtOpenStoryEntry\(\)/);
-  assert.match(html, /if\(\(app\.activeStoryDefinition\?\.setup\|\|\[\]\)\.length\)/);
+  const entry = html.match(/function dtOpenStoryEntry\(\)\{[\s\S]*?\n\}/)?.[0] || "";
+  assert.match(entry, /showScreen\("composer"\)/);
+  assert.doesNotMatch(entry, /showScreen\("setup"\)/);
   const start = html.match(/window\.startStoryComposer=async[\s\S]*?async function dtComposeFromCurrentState/)?.[0] || "";
   assert.match(start, /dtOpenStoryEntry\(\)/);
 });

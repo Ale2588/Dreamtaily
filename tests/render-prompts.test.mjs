@@ -34,20 +34,21 @@ test("prompt pack covers cover plus all 10 scene ids", () => {
 test("page prompt has deterministic reference order and no helper when absent", () => {
   const prompt = buildPageRenderPrompt({
     sceneId: "s1",
-    atmosphere: "notte",
+    styleId: "paper",
     protagonistIdentity: "a small rabbit with a blue patch"
   });
   assert.match(prompt, /Image 1 is the APPROVED BACKGROUND/);
   assert.match(prompt, /Image 2 is the PROTAGONIST/);
   assert.doesNotMatch(prompt, /Image 3 is the HELPER/);
-  assert.match(prompt, /deep indigo night/);
+  assert.match(prompt, /CUT-PAPER COLLAGE/);
+  assert.doesNotMatch(prompt, /ATMOSPHERE:/);
   assert.match(prompt, /Do NOT render text/);
 });
 
 test("page prompt resolves helper identity from catalog id", () => {
   const prompt = buildPageRenderPrompt({
     sceneId: "s3_ruscello",
-    atmosphere: "notte",
+    styleId: "paper",
     protagonistIdentity: "a small rabbit with a blue patch",
     helperId: "ulivo",
     helperPose: "cammina"
@@ -55,6 +56,13 @@ test("page prompt resolves helper identity from catalog id", () => {
   assert.match(prompt, /Image 3 is the HELPER/);
   assert.match(prompt, /button-like eyes/);
   assert.match(prompt, /small grounded walking step/);
+});
+
+test("planned styles cannot accidentally enter the MVP renderer", () => {
+  assert.throws(
+    () => buildPageRenderPrompt({sceneId:"s1",styleId:"water",protagonistIdentity:"a child"}),
+    /VISUAL_STYLE_NOT_ACTIVE:water/
+  );
 });
 
 test("authoring prompts support a scene unknown to the legacy Bosco pack", () => {
