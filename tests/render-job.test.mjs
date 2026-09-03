@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {allPagesReady, assertResolvedBook, planBookRender} from "../src/render-job.js";
 
 const book={
-  meta:{title:"Bosco",helper:"ulivo",choices:{setup:{atmosfera:"notte"}}},
+  meta:{title:"Bosco",helper:"ulivo",style:"paper",choices:{setup:{}}},
   cover:{title:"Bosco",subtitle:"Un'avventura",scene:{bg:"cover.png",layers:[{role:"protagonist",pose:"in_piedi"}]}},
   pages:[
     {id:"p1",step_key:"s1",chapter:1,title:"La campanella",text:"Testo risolto.",scene:{bg:"s1.png",layers:[{role:"protagonist",pose:"in_piedi"}]}},
@@ -22,7 +22,13 @@ test("planner derives helper only from actual scene layer",()=>{
   assert.equal(p[1].helper_id,null);
   assert.equal(p[2].helper_id,"ulivo");
   assert.equal(p[2].helper_pose,"cammina");
-  assert.equal(p[2].atmosphere,"notte");
+  assert.equal(p[2].style_id,"paper");
+  assert.equal(Object.hasOwn(p[2],"atmosphere"),false);
+});
+test("legacy snapshot styles are safely pinned to the MVP style",()=>{
+  const legacy=structuredClone(book);
+  legacy.meta.style="water";
+  assert.ok(planBookRender(legacy).every(page=>page.style_id==="paper"));
 });
 test("ready requires storage path",()=>{
   const p=planBookRender(book);

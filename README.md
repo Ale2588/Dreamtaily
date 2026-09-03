@@ -1,6 +1,7 @@
-# DreamTaily — chiusura flow MVP
+Caricare su branch `backoffice` mantenendo i percorsi.
 
-Sostituire solo `index.html` su `Book-Creation`.
+1. Sostituire `supabase/functions/render-book/index.ts`
+2. Aggiungere `supabase/functions/deliver-book/index.ts`
 
-Flow: preview deterministica → checkout dimostrativo → snapshot → render AI a batch/resume → ready → permalink `libro.html?slug=...`.
-I libri ready nella libreria riaprono direttamente il render finale.
+Questi file allineano il repository al comportamento backend live validato.
+NON fare deploy Supabase: le funzioni live sono già attive.

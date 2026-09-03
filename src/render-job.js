@@ -1,3 +1,5 @@
+import { MVP_VISUAL_STYLE_ID } from "./visual-styles.js";
+
 const MARKER_PATTERN = /\[[A-Za-zÀ-ÿ0-9_:]+\]/g;
 
 export function assertResolvedBook(book) {
@@ -27,7 +29,9 @@ function layer(scene, role) {
 
 export function planBookRender(book) {
   assertResolvedBook(book);
-  const atmosphere = book.meta?.choices?.setup?.atmosfera || "giorno";
+  // During the MVP every book is rendered with the single active style.
+  // Legacy snapshots may still contain the old prototype values.
+  const style_id = MVP_VISUAL_STYLE_ID;
   const pages = [];
 
   if (book.cover) {
@@ -40,7 +44,9 @@ export function planBookRender(book) {
       title: book.cover.title || book.meta.title || "",
       text: book.cover.subtitle || "",
       background_ref: book.cover.scene.bg,
-      atmosphere,
+      prompt_environment: book.cover.scene.prompt_environment || null,
+      prompt_moment: book.cover.scene.prompt_moment || null,
+      style_id,
       protagonist_pose: protagonist?.pose || "in_piedi",
       helper_id: null,
       helper_pose: null,
@@ -59,7 +65,9 @@ export function planBookRender(book) {
       title: page.title || "",
       text: page.text || "",
       background_ref: page.scene.bg,
-      atmosphere,
+      prompt_environment: page.scene.prompt_environment || null,
+      prompt_moment: page.scene.prompt_moment || null,
+      style_id,
       protagonist_pose: protagonist?.pose || "in_piedi",
       helper_id: helper?.character_id || null,
       helper_pose: helper?.pose || null,

@@ -8,17 +8,9 @@
  * + scene/moment prompt -> one cohesive final illustration.
  */
 
-export const STYLE_PROMPT = [
-  "Create one finished children's storybook illustration in handcrafted CUT-PAPER COLLAGE style.",
-  "Match the approved background: hand-cut layered construction paper, visible paper grain and fibers, matte opaque surfaces, soft short shadows between stacked paper layers, no drawn outlines, simplified warm reassuring shapes.",
-  "The finished image must read as one coherent illustration, never as characters pasted onto a background."
-].join(" ");
+import { MVP_VISUAL_STYLE_ID, requireActiveVisualStyle } from "./visual-styles.js";
 
-export const ATMOSPHERE_PROMPTS = Object.freeze({
-  giorno: "gentle soft daylight with warm cream highlights",
-  tramonto: "warm coral sunset light with long soft paper-layer shadows",
-  notte: "deep indigo night with gentle silver moonlight and calm blue shadows"
-});
+export const STYLE_PROMPT = requireActiveVisualStyle(MVP_VISUAL_STYLE_ID).prompt;
 
 export const HELPER_IDENTITIES = Object.freeze({
   etto: Object.freeze({
@@ -168,16 +160,20 @@ export function getScenePrompt(sceneId) {
 
 export function buildPageRenderPrompt({
   sceneId,
-  atmosphere = "giorno",
+  styleId = MVP_VISUAL_STYLE_ID,
   protagonistIdentity,
   protagonistPose = "in_piedi",
   helperId = null,
   helperIdentity = null,
   helperPose = "in_piedi",
+  environmentOverride = null,
   momentOverride = null
 } = {}) {
-  const scene = getScenePrompt(sceneId);
-  if (!scene) throw new Error(`UNKNOWN_SCENE_PROMPT:${sceneId}`);
+  const canonical = getScenePrompt(sceneId);
+  const scene = {
+    environment: clean(environmentOverride) || canonical?.environment || "a calm child-friendly storybook setting matching Image 1",
+    moment: clean(momentOverride) || canonical?.moment || "The protagonist experiences the story moment described by the approved scene."
+  };
 
   const protagonist = clean(protagonistIdentity);
   if (!protagonist) throw new Error("PROTAGONIST_IDENTITY_REQUIRED");
@@ -186,13 +182,11 @@ export function buildPageRenderPrompt({
     ? { identity_prompt: clean(helperIdentity) }
     : getHelperIdentity(helperId);
 
-  const atmospherePrompt =
-    ATMOSPHERE_PROMPTS[atmosphere] || clean(atmosphere) || ATMOSPHERE_PROMPTS.giorno;
-
   const moment = clean(momentOverride) || scene.moment;
+  const stylePrompt = requireActiveVisualStyle(styleId).prompt;
 
   const blocks = [
-    STYLE_PROMPT,
+    stylePrompt,
     "",
     "REFERENCE ORDER:",
     "Image 1 is the APPROVED BACKGROUND and is authoritative for environment, composition, major objects and overall mood.",
@@ -200,7 +194,6 @@ export function buildPageRenderPrompt({
     helper ? "Image 3 is the HELPER identity reference." : "",
     "",
     `SCENE: ${scene.environment}.`,
-    `ATMOSPHERE: ${atmospherePrompt}.`,
     `STORY MOMENT: ${moment}`,
     "",
     `PROTAGONIST: preserve the identity from Image 2. Identity reinforcement: ${protagonist}. Pose: ${POSE_INSTRUCTIONS[protagonistPose] || protagonistPose}.`,

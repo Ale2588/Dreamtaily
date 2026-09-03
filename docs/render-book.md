@@ -2,12 +2,12 @@
 
 ## Pipeline implementata
 
-`render-book`:
+`render-book` (dopo la conferma tramite `checkout-book`):
 
 1. autentica l'utente;
 2. verifica ownership di `book_id`;
-3. legge il `content_snapshot` già risolto;
-4. crea/recupera `book_renders` tramite `idempotency_key`;
+3. richiede un `book_renders` già creato dal checkout;
+4. legge esclusivamente il `book_snapshot` immutabile;
 5. recupera lo stesso reference privato del protagonista;
 6. ricostruisce e persiste `identity_prompt` se manca su un vecchio personaggio;
 7. pianifica cover + pagine;
@@ -29,14 +29,14 @@
 
 La Edge Function NON ricompone la storia.
 
-`finishStoryComposer()` deve prima salvare `dtComposedBook` in
-`book_stories.content_snapshot`.
+`finishStoryComposer()` salva `dtComposedBook` in `book_stories.content_snapshot`.
+`checkout-book` congela poi storia, cast e reference in `book_renders.book_snapshot`.
 
 La funzione copia quel valore in `book_renders.book_snapshot`.
 
 Quindi:
 
-`composer deterministico -> content_snapshot -> book_snapshot -> render AI`
+`composer deterministico -> content_snapshot -> checkout -> book_snapshot -> job queued -> render AI`
 
 ## Idempotenza
 
@@ -78,10 +78,17 @@ Per il progetto corrente:
 }
 ```
 
+## Supporto multi-storia
+
+- tutte le storie composte del libro vengono pianificate nell'ordine salvato;
+- ogni pagina conserva `book_story_id` e `story_slug`;
+- gli ID pagina sono prefissati con `book_story_id` per evitare collisioni;
+- ogni storia usa il proprio protagonista e la propria reference canonica;
+- ambiente e momento arrivano dal contratto editoriale pubblicato, con fallback al pacchetto storico del Bosco;
+- lo snapshot del render contiene l'intero libro e gli snapshot immutabili delle singole storie.
+
 ## Limitazioni v1
 
-- solo una storia per libro;
-- solo `Il bosco dei sussurri`;
 - niente OCR automatico;
 - niente mask nel flusso primario;
 - `generated_image_url` è firmato e scade; la futura delivery function

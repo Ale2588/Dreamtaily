@@ -495,8 +495,8 @@ body.dreamtaily-configurator-open{overflow:hidden}
   <section class="home-section">
     <div class="home-heading">
       <div class="phase">Come funziona</div>
-      <h2>Un personaggio, tante avventure, un solo libro.</h2>
-      <p>Il cuore di DreamTaily non è compilare un ordine. È creare un personaggio che può tornare, crescere e vivere storie diverse.</p>
+      <h2>Un personaggio, tante avventure, tutti i libri che vuoi.</h2>
+      <p>Il cuore di DreamTaily non è compilare un ordine. È creare un personaggio che può tornare, crescere e vivere storie diverse, anche partendo più volte dallo stesso canovaccio.</p>
     </div>
 
     <div class="home-steps">
@@ -585,19 +585,12 @@ body.dreamtaily-configurator-open{overflow:hidden}
         <h1 class="step-title">Cominciamo da chi sarà l’eroe.</h1>
         <p class="intro">Bastano pochi dettagli. Potrai aggiungerne altri dopo averlo visto prendere vita.</p>
 
-        <label>Scegli lo stile</label>
+        <label>Stile visivo del libro</label>
+        <p class="small">Per l’MVP usiamo Paper Cut. Acquerello e Pastelli entreranno nel catalogo in seguito.</p>
         <div class="style-grid">
-          <button class="choice style-card" data-style="paper" onclick="selectStyle('paper')">
+          <button class="choice style-card selected" data-style="paper" onclick="selectStyle('paper')">
             <div class="style-thumb"><img src="assets/char/paper/rabbit.png" alt=""></div>
             <span>Paper Cut</span>
-          </button>
-          <button class="choice style-card selected" data-style="water" onclick="selectStyle('water')">
-            <div class="style-thumb"><img src="assets/char/water/rabbit.png" alt=""></div>
-            <span>Acquerello</span>
-          </button>
-          <button class="choice style-card" data-style="crayon" onclick="selectStyle('crayon')">
-            <div class="style-thumb"><img src="assets/char/crayon/rabbit.png" alt=""></div>
-            <span>Pastelli</span>
           </button>
         </div>
 
@@ -807,54 +800,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 
 
 
-<section class="screen composer-screen" id="screen-setup">
-  <div class="shell">
-    <div class="topbar">
-      <button class="brand-dark" onclick="showScreen('stories')">
-        <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
-      </button>
-      <div class="phase">4 · Prepara la storia</div>
-    </div>
-
-    <div class="panel composer-panel">
-      <div class="composer-progress" id="setup-progress">Preparazione</div>
-      <h1 class="step-title">Prepara la tua storia</h1>
-      <p class="intro">Scegli una carta per definire l’atmosfera iniziale.</p>
-
-      <div class="story-protagonist-header">
-        <div>
-          <div class="board-slot-label">Il protagonista di questa storia</div>
-          <div class="board-slot-help">È il personaggio che hai scelto prima del catalogo.</div>
-        </div>
-        <div id="board-protagonist"></div>
-      </div>
-
-      <div class="story-board">
-        <div class="board-slot">
-          <div class="board-slot-label">Atmosfera</div>
-          <div class="board-slot-title" id="board-setup-title">Scegli l’atmosfera</div>
-          <div id="board-setup-assigned"></div>
-          <div class="board-slot-help">La scelta cambia luce e sensazioni, non gli eventi.</div>
-        </div>
-
-        <div class="board-slot future">
-          <div class="board-slot-label">Un incontro ti aspetta</div>
-          <div class="board-slot-title">Nel bosco incontrerai qualcuno</div>
-          <div class="board-slot-help">Sceglierai l’aiutante quando entrerà davvero nella storia.</div>
-        </div>
-      </div>
-
-      <div class="board-pool-title">Scegli una carta</div>
-      <div id="board-card-pool" class="board-pool"></div>
-
-      <div class="error" id="setup-error"></div>
-      <div class="form-actions">
-        <button class="btn btn-ghost" onclick="goToBook()">Vai al mio libro</button>
-        <button class="btn btn-primary" id="setup-next" onclick="advanceSetup()">Inizia la storia →</button>
-      </div>
-    </div>
-  </div>
-</section>
+<section class="screen composer-screen" id="screen-setup"></section>
 
 <section class="screen composer-screen" id="screen-composer">
   <div class="shell">
@@ -939,6 +885,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 
 
 <section class="screen" id="screen-checkout"></section>
+<section class="screen" id="screen-render-status"></section>
 <section class="screen" id="screen-delivered"></section>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -946,9 +893,15 @@ body.dreamtaily-configurator-open{overflow:hidden}
 <script>
 const SUPABASE_URL = 'https://hirzbtruxvjzmcnncvmv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_baZvlGyMLBkkiOwHina6CA_HB59Lclw';
+const VISUAL_STYLE_CATALOG = Object.freeze({
+  paper:Object.freeze({id:'paper',label:'Paper Cut',status:'active'}),
+  water:Object.freeze({id:'water',label:'Acquerello',status:'planned'}),
+  crayon:Object.freeze({id:'crayon',label:'Pastelli',status:'planned'})
+});
+const MVP_VISUAL_STYLE_ID='paper';
 
 const app = {
-  style:'water',
+  style:MVP_VISUAL_STYLE_ID,
   type:'real_person',
   previewId:null,
   previewUrl:null,
@@ -960,11 +913,13 @@ const app = {
   bookStories:[],
   storyCatalog:[],
   activeStoryDefinition:null,
+  activeStoryContract:null,
   activeBookStoryId:null,
   currentStepKey:null,
   setupIndex:0,
   setupChoices:{},
   compositionChoices:{},
+  bookFlowMode:'new_book',
   saving:false
 };
 
@@ -977,7 +932,8 @@ function showScreen(name){
 }
 
 function selectStyle(style){
-  app.style=style;
+  const candidate=VISUAL_STYLE_CATALOG[style];
+  app.style=candidate?.status==='active'?candidate.id:MVP_VISUAL_STYLE_ID;
   document.querySelectorAll('[data-style]').forEach(el=>el.classList.toggle('selected',el.dataset.style===style));
 }
 
@@ -1274,8 +1230,9 @@ async function saveAndContinue(){
   showError('wow-error',null);
   try{
     await saveCharacter();
-    prepareStories();
-    setTimeout(()=>showScreen('stories'),350);
+    if(app.bookFlowMode!=='add_story') window.dtClearOnlyActiveBook?.();
+    await prepareStories();
+    showScreen('stories');
   }catch(error){
     console.error('[DreamTaily] Save error:',error);
     showError('wow-error','Il personaggio è stato creato, ma non sono riuscito a salvarlo. Riprova.');
@@ -1370,7 +1327,7 @@ function renderSavedCharacters(){
     const traits=character.traits||{};
     const age=traits.narrative_age_group||'Età non indicata';
     const type=traits.type==='fictional_character'?'Personaggio fantastico':'Persona reale';
-    const fallback='assets/char/water/rabbit.png';
+    const fallback='assets/char/paper/rabbit.png';
     return `
       <button class="saved-character-card" type="button" onclick="useSavedCharacter('${character.id}')">
         <img src="${character.image_url||fallback}" alt="${escapeHtml(character.name)}">
@@ -1380,7 +1337,7 @@ function renderSavedCharacters(){
           <div class="saved-character-meta">
             <span>${escapeHtml(type)}</span>
             <span>${escapeHtml(age)}</span>
-            <span>${escapeHtml(character.default_style||'water')}</span>
+            <span>${escapeHtml(VISUAL_STYLE_CATALOG[character.default_style]?.label||character.default_style||'Paper Cut')}</span>
           </div>
         </div>
       </button>
@@ -1408,7 +1365,7 @@ function applyCharacterToForm(character){
   const outfit=appearance.default_outfit||{};
 
   app.type=traits.type||'real_person';
-  app.style=character.default_style||'water';
+  app.style=MVP_VISUAL_STYLE_ID;
 
   document.getElementById('name').value=character.name||traits.display_name||'';
   document.getElementById('age-group').value=traits.narrative_age_group||'';
@@ -1427,29 +1384,11 @@ function applyCharacterToForm(character){
   selectType(app.type);
 }
 
-function useSavedCharacter(characterId){
+async function useSavedCharacter(characterId){
   const character=app.savedCharacters.find(item=>item.id===characterId);
   if(!character) return;
 
-  /*
-   * Scegliere un personaggio dalla libreria significa iniziare un nuovo libro.
-   * I libri esistenti restano salvati su Supabase, ma non devono contaminare
-   * il nuovo funnel attraverso app.bookId/app.bookStories.
-   */
-  app.bookId=null;
-  app.bookStories=[];
-  app.activeStoryDefinition=null;
-  app.activeBookStoryId=null;
-  app.currentStepKey=null;
-  app.setupIndex=0;
-  app.setupChoices={};
-  app.compositionChoices={};
-  app.selectedStoryId=null;
-  dtComposedBook=null;
-  dtBookPage=0;
-  dtTrail=[];
-  dtTrailIndex=0;
-  dtContentByRef=null;
+  if(app.bookFlowMode!=='add_story') window.dtClearOnlyActiveBook?.();
 
   applyCharacterToForm(character);
   app.characterAssetId=character.id;
@@ -1459,7 +1398,7 @@ function useSavedCharacter(characterId){
 
   document.getElementById('wow-image').src=app.previewUrl||'';
   document.getElementById('wow-title').textContent=`Ecco ${character.name}.`;
-  prepareStories();
+  await prepareStories();
   showScreen('stories');
 }
 
@@ -1470,15 +1409,17 @@ async function loadStoryCatalog(){
   if(STORY_TEMPLATES.length) return STORY_TEMPLATES;
 
   try{
-    const response=await fetch('stories/catalog.json',{cache:'no-store'});
+    const response=await fetch(`${SUPABASE_URL}/functions/v1/published-story`,{
+      cache:'no-store',
+      headers:{apikey:SUPABASE_ANON_KEY}
+    });
     if(!response.ok) throw new Error(`STORY_CATALOG_HTTP_${response.status}`);
-    const catalog=await response.json();
-    STORY_TEMPLATES=catalog
-      .filter(item=>item.slug==="il-bosco-dei-sussurri")
-      .map(item=>({
-        id:item.slug,
-        ...item
-      }));
+    const payload=await response.json();
+    STORY_TEMPLATES=(payload.stories||[]).map(item=>({
+      id:item.slug,
+      ...item,
+      image:item.image||'assets/char/water/bear.png'
+    }));
   }catch(error){
     console.error('[DreamTaily] Story catalog error:',error);
     STORY_TEMPLATES=[];
@@ -1489,10 +1430,24 @@ async function loadStoryCatalog(){
 }
 
 async function loadStoryDefinition(story){
-  if(story._definition) return story._definition;
-  const response=await fetch(story.definition,{cache:'no-store'});
+  if(story._definition){
+    app.activeStoryContract=story._contract||null;
+    return story._definition;
+  }
+  const response=await fetch(
+    `${SUPABASE_URL}/functions/v1/published-story?slug=${encodeURIComponent(story.id)}`,
+    {cache:'no-store',headers:{apikey:SUPABASE_ANON_KEY}}
+  );
   if(!response.ok) throw new Error(`STORY_DEFINITION_HTTP_${response.status}`);
-  story._definition=await response.json();
+  const payload=await response.json();
+  if(!payload.contract?.story||!payload.version_id){
+    throw new Error('STORY_CONTRACT_INVALID');
+  }
+  story._contract=payload.contract;
+  story._versionId=payload.version_id;
+  story._versionNumber=payload.version_number;
+  story._definition=payload.contract.story;
+  app.activeStoryContract=story._contract;
   const validation=window.DreamTailyStoryValidator?.validateStory(story._definition);
   if(validation&&!validation.valid){
     console.error('[DreamTaily] Story validation errors:',validation.errors);
@@ -1502,6 +1457,25 @@ async function loadStoryDefinition(story){
     console.warn('[DreamTaily] Story validation warnings:',validation.warnings);
   }
   return story._definition;
+}
+
+function storyForBookStory(bookStory){
+  if(!bookStory) return null;
+  const template=STORY_TEMPLATES.find(item=>item.id===bookStory.story_slug);
+  const contract=bookStory.content_snapshot||null;
+  if(!contract?.story) return template||null;
+  return {
+    ...(template||{
+      id:bookStory.story_slug,
+      slug:bookStory.story_slug,
+      title:contract.story.title||bookStory.story_slug,
+      image:'assets/char/water/bear.png'
+    }),
+    title:contract.story.title||template?.title||bookStory.story_slug,
+    _contract:contract,
+    _definition:contract.story,
+    _versionId:bookStory.story_version_id||null
+  };
 }
 
 async function prepareStories(){
@@ -1577,23 +1551,26 @@ async function getOrCreateDraftBook(){
     app.bookId=null;
   }
 
-  const {data:current,error:currentError}=await client
+  const title=value('name')?`Il libro di ${value('name')}`:'Il mio libro DreamTaily';
+  const {data:{user},error:userError}=await client.auth.getUser();
+  if(userError||!user) throw userError||new Error('USER_REQUIRED');
+
+  // Il database ammette una sola bozza per profilo. Se lo stato in memoria
+  // è stato perso, recuperiamo quella bozza invece di tentare di duplicarla.
+  const {data:draft,error:draftError}=await client
     .from('books')
     .select('id,status')
+    .eq('profile_id',user.id)
     .eq('status','draft')
     .order('updated_at',{ascending:false})
     .limit(1)
     .maybeSingle();
-
-  if(currentError) throw currentError;
-  if(current){
-    app.bookId=current.id;
-    return current.id;
+  if(draftError) throw draftError;
+  if(draft?.id){
+    app.bookId=draft.id;
+    await loadBookStories();
+    return draft.id;
   }
-
-  const title=value('name')?`Il libro di ${value('name')}`:'Il mio libro DreamTaily';
-  const {data:{user},error:userError}=await client.auth.getUser();
-  if(userError||!user) throw userError||new Error('USER_REQUIRED');
 
   const {data:created,error:createError}=await client
     .from('books')
@@ -1624,6 +1601,8 @@ async function loadBookStories(){
       id,
       book_id,
       story_slug,
+      story_version_id,
+      content_snapshot,
       position,
       status,
       path_choices,
@@ -1646,6 +1625,8 @@ async function loadBookStories(){
 async function persistSelectedStory(){
   const story=STORY_TEMPLATES.find(item=>item.id===app.selectedStoryId);
   if(!story) throw new Error('STORY_REQUIRED');
+  await loadStoryDefinition(story);
+  if(!story._versionId||!story._contract) throw new Error('STORY_VERSION_REQUIRED');
   const candidateCharacterId=app.candidateCharacterAssetId||app.characterAssetId;
   if(!candidateCharacterId) throw new Error('CHARACTER_ASSET_REQUIRED');
 
@@ -1662,6 +1643,8 @@ async function persistSelectedStory(){
     .insert({
       book_id:bookId,
       story_slug:story.id,
+      story_version_id:story._versionId,
+      content_snapshot:story._contract,
       position:nextPosition,
       status:'draft',
       path_choices:{}
@@ -1694,17 +1677,11 @@ async function persistSelectedStory(){
   if(touchError) throw touchError;
 
   await loadBookStories();
+  app.bookFlowMode='add_story';
   return {story,bookStoryId};
 }
 
 async function continueWithStory(){
-  if(app.selectedStoryId!=="il-bosco-dei-sussurri"){
-    app.selectedStoryId=null;
-    showError("story-error","Per questo MVP è disponibile solo Il bosco dei sussurri.");
-    prepareStories();
-    return;
-  }
-
   const story=STORY_TEMPLATES.find(item=>item.id===app.selectedStoryId);
   if(!story){
     showError('story-error','Scegli una storia per continuare.');
@@ -1885,6 +1862,37 @@ async function legacyStartStoryComposerDisabled(story,bookStoryId){
 }
 function resolveEffectiveStart(definition,choices={}){const sb=(definition?.setup||[]).find(x=>x.type==='branch');if(!sb)return definition?.start||definition?.steps?.[0]?.key||null;return (sb.options||[]).find(o=>o.key===choices[sb.key])?.start||definition?.start||null}
 
+function dtSetupChoiceMap(definition=app.activeStoryDefinition,choices=app.compositionChoices){
+  return Object.fromEntries((definition?.setup||[])
+    .filter(item=>item.key!=="atmosfera")
+    .map(item=>[item.key,choices?.[item.key]||""])
+    .filter(([,value])=>Boolean(value)));
+}
+
+function dtBranchChoiceMap(definition=app.activeStoryDefinition,choices=app.compositionChoices){
+  return Object.fromEntries((definition?.steps||[]).filter(step=>step.decision?.type==="branch").map(step=>[step.decision.key,typeof choices?.[step.decision.key]==="string"?choices[step.decision.key]:choices?.[step.decision.key]?.value]).filter(([,value])=>Boolean(value)));
+}
+
+function dtCurrentPathChoices(){
+  const path={...dtSetupChoiceMap(),...dtBranchChoiceMap()};
+  for(const step of app.activeStoryDefinition?.steps||[]){
+    const decision=step.decision;
+    if(decision?.type!=="cast"||!decision.key) continue;
+    const choice=app.compositionChoices[decision.key]||null;
+    const value=typeof choice==="string"?choice:choice?.value;
+    if(value) path[decision.key]=value;
+  }
+  return path;
+}
+
+function dtOpenStoryEntry(){
+  const missingSlot=window.dtMissingDeclaredCastSlot?.();
+  if(missingSlot){window.dtRenderDeclaredCastSlot(missingSlot);return}
+  app.currentStepKey=resolveEffectiveStart(app.activeStoryDefinition,{});
+  renderComposerStep();
+  showScreen("composer");
+}
+
 function renderSetupStep(){
   const setup=app.activeStoryDefinition?.setup||[];
   const item=setup[app.setupIndex];
@@ -1964,23 +1972,44 @@ function selectSetupCard(key,value){
 }
 
 async function persistPathChoices(){
-  const helperChoice=app.compositionChoices.helper;
-  const path={
-    atmosfera:app.setupChoices.atmosfera||app.compositionChoices.atmosfera||null,
-    d_sentiero:app.compositionChoices.d_sentiero||null,
-    helper:typeof helperChoice==="string"?helperChoice:helperChoice?.value||null,
-    d_finale:app.compositionChoices.d_finale||null
-  };
-  const {error}=await getSupabase()
-    .from("book_stories")
-    .update({
+  let bookStoryId=app.activeBookStoryId;
+  if(!bookStoryId||!app.bookStories.some(item=>item.id===bookStoryId)){
+    await loadBookStories();
+    const current=app.bookStories.find(
+      item=>item.story_slug===app.activeStoryDefinition?.slug
+    );
+    bookStoryId=current?.id||null;
+    app.activeBookStoryId=bookStoryId;
+  }
+  if(!bookStoryId) throw new Error("ACTIVE_BOOK_STORY_NOT_FOUND");
+
+  const path=dtCurrentPathChoices();
+  const accessToken=await getAccessToken();
+  const response=await fetch(
+    `${SUPABASE_URL}/rest/v1/book_stories?id=eq.${encodeURIComponent(bookStoryId)}&select=id`,
+    {
+      method:"PATCH",
+      headers:{
+        apikey:SUPABASE_ANON_KEY,
+        Authorization:`Bearer ${accessToken}`,
+        "Content-Type":"application/json",
+        Prefer:"return=representation"
+      },
+      body:JSON.stringify({
       path_choices:Object.fromEntries(
         Object.entries(path).filter(([,value])=>Boolean(value))
       ),
       updated_at:new Date().toISOString()
-    })
-    .eq("id",app.activeBookStoryId);
-  if(error) throw error;
+      })
+    }
+  );
+  const payload=await response.json().catch(()=>null);
+  if(!response.ok){
+    const detail=payload?.message||payload?.error||`HTTP_${response.status}`;
+    throw new Error(`PATH_CHOICES_SAVE_FAILED:${detail}`);
+  }
+  if(!Array.isArray(payload)||!payload[0]?.id)
+    throw new Error("ACTIVE_BOOK_STORY_NOT_WRITABLE");
 }
 async function advanceSetup(){const setup=app.activeStoryDefinition?.setup||[],item=setup[app.setupIndex];if(!item)return beginStoryAfterSetup();if(!app.setupChoices[item.key])return showError('setup-error','Scegli un’opzione per continuare.');const b=document.getElementById('setup-next');b.disabled=true;b.textContent='Salvataggio…';try{await persistPathChoices();app.setupIndex+=1;if(app.setupIndex>=setup.length)await beginStoryAfterSetup();else renderSetupStep()}catch(error){console.error('[DreamTaily] Setup save error:',error);showError('setup-error','Non sono riuscito a salvare la scelta.')}finally{b.disabled=false}}
 async function beginStoryAfterSetup(){app.currentStepKey=resolveEffectiveStart(app.activeStoryDefinition,app.setupChoices);renderComposerStep();showScreen('composer')}
@@ -2115,25 +2144,7 @@ async function saveComposerDecision(step){
      * La scelta narrativa viene quindi salvata prima in path_choices,
      * che è il dato canonico sufficiente per ricomporre il libro.
      */
-    const helperKey=choice?.source==="catalog_character"?choice.value:null;
-    const path={
-      atmosfera:app.setupChoices.atmosfera||app.compositionChoices.atmosfera||null,
-      d_sentiero:app.compositionChoices.d_sentiero||null,
-      helper:helperKey,
-      d_finale:app.compositionChoices.d_finale||null
-    };
-
-    const {error:pathError}=await client
-      .from("book_stories")
-      .update({
-        path_choices:Object.fromEntries(
-          Object.entries(path).filter(([,value])=>Boolean(value))
-        ),
-        updated_at:new Date().toISOString()
-      })
-      .eq("id",app.activeBookStoryId);
-
-    if(pathError) throw pathError;
+    await persistPathChoices();
 
     if(choice?.source==="none"){
       const {error}=await client
@@ -2282,7 +2293,7 @@ async function renderBookSummary(preferredStory=null){
 
   const latest=
     preferredStory||
-    STORY_TEMPLATES.find(item=>item.id===latestBookStory?.story_slug)||
+    storyForBookStory(latestBookStory)||
     STORY_TEMPLATES[0];
 
   const latestAssignment=getStoryProtagonistAssignment(latestBookStory);
@@ -2298,7 +2309,7 @@ async function renderBookSummary(preferredStory=null){
 
   const list=document.getElementById('book-story-list');
   list.innerHTML=app.bookStories.map((bookStory,index)=>{
-    const story=STORY_TEMPLATES.find(item=>item.id===bookStory.story_slug);
+    const story=storyForBookStory(bookStory);
     const protagonist=getStoryProtagonistAssignment(bookStory);
     const character=getSavedCharacterById(protagonist?.character_asset_id);
     const protagonistLabel=character?.name||(
@@ -2340,14 +2351,7 @@ async function goToBook(){
 }
 
 async function addAnotherStory(){
-  app.selectedStoryId=null;
-  try{
-    await loadBookStories();
-  }catch(error){
-    console.warn('[DreamTaily] Story catalog refresh skipped:',error);
-  }
-  prepareStories();
-  showScreen('stories');
+  return window.beginAddStory?.();
 }
 
 async function removeBookStory(bookStoryId){
@@ -2362,7 +2366,8 @@ async function removeBookStory(bookStoryId){
 
     if(error) throw error;
     await normalizeBookStoryPositions();
-    await renderBookSummary();
+    if(typeof window.renderBookWorkspace==='function') await window.renderBookWorkspace();
+    else await renderBookSummary();
   }catch(error){
     console.error('[DreamTaily] Remove story error:',error);
     alert('Non sono riuscito a rimuovere la storia.');
@@ -2448,13 +2453,13 @@ async function resumeDraftBook(){
 
 
 function startAnother(){
-  app.style='water';app.type='real_person';app.previewId=null;app.previewUrl=null;app.characterAssetId=null;app.candidateCharacterAssetId=null;app.selectedStoryId=null;
+  app.style=MVP_VISUAL_STYLE_ID;app.type='real_person';app.previewId=null;app.previewUrl=null;app.characterAssetId=null;app.candidateCharacterAssetId=null;app.selectedStoryId=null;
   document.querySelectorAll('input,textarea').forEach(el=>el.value='');
   document.getElementById('age-group').value='';
   document.getElementById('advanced').classList.remove('open');
   document.getElementById('wow-details').classList.remove('open');
   document.getElementById('saved-note').classList.remove('visible');
-  selectStyle('water');selectType('real_person');showScreen('creator');
+  selectStyle(MVP_VISUAL_STYLE_ID);selectType('real_person');showScreen('creator');
 }
 
 document.addEventListener('DOMContentLoaded',async()=>{await loadStoryCatalog();detectDraftBook()});
@@ -2493,6 +2498,7 @@ let dtTrail=[];
 let dtTrailIndex=0;
 let dtCheckoutEmail="";
 let dtDeliverySlug="";
+let dtPendingRender=null;
 
 function dtProtagonist(){
   const current=app.bookStories.find(item=>item.id===app.activeBookStoryId);
@@ -2519,13 +2525,89 @@ function dtHelperChoice(){
   return typeof choice==="string"?{value:choice}:choice||null;
 }
 
+function dtCurrentBookStory(){
+  return app.bookStories.find(item=>item.id===app.activeBookStoryId)||null;
+}
+
+function dtPublishedCatalog(){
+  return app.activeStoryContract?.catalog||DT_HELPERS;
+}
+
+function dtCatalogCharacterImage(character,pose="in_piedi"){
+  if(!character) return "";
+  const styleArt=character.art?.[app.style]||character.art?.papercut||character.art?.paper||character.art;
+  return styleArt?.[pose]||styleArt?.in_piedi||character.image||character.image_ref||character.image_url||"";
+}
+
+function dtCastAssignment(slotKey){
+  return dtCurrentBookStory()?.story_cast_assignments?.find(item=>item.slot_key===slotKey)||null;
+}
+
+function dtCastChoicesForComposer(){
+  const catalog=dtPublishedCatalog();
+  const result={};
+  for(const slot of app.activeStoryDefinition?.cast_slots||[]){
+    const assignment=dtCastAssignment(slot.key);
+    if(!assignment) continue;
+    if(assignment.character_asset_id){
+      const character=app.savedCharacters.find(item=>item.id===assignment.character_asset_id);
+      result[slot.key]={source:"user_character",character_id:assignment.character_asset_id,name:character?.name||slot.label,asset_ref:character?.image_url||null};
+    }else if(assignment.catalog_character_id){
+      const character=catalog[assignment.catalog_character_id];
+      result[slot.key]={source:"catalog_character",character_id:assignment.catalog_character_id,name:character?.name||assignment.catalog_character_id};
+    }
+  }
+  return result;
+}
+
+window.dtMissingDeclaredCastSlot=function(){
+  return (app.activeStoryDefinition?.cast_slots||[])
+    .find(slot=>slot.key!=="protagonist"&&!dtCastAssignment(slot.key))||null;
+};
+
+window.dtRenderDeclaredCastSlot=function(slot){
+  const catalog=dtPublishedCatalog();
+  const sources=slot.allowed_sources||[];
+  const allowsSaved=sources.includes("character_asset")||sources.includes("user_character");
+  const allowsCatalog=sources.includes("catalog_character");
+  const allowedIds=new Set(slot.allowed_catalog_ids||[]);
+  const catalogEntries=allowsCatalog?Object.entries(catalog)
+    .filter(([key])=>allowedIds.size===0||allowedIds.has(key)):[];
+  const protagonistId=dtCastAssignment("protagonist")?.character_asset_id;
+  const savedEntries=allowsSaved?app.savedCharacters.filter(item=>item.id!==protagonistId):[];
+  const screen=document.getElementById("screen-composer");
+  screen.innerHTML=`<div class="shell"><div class="topbar"><button class="brand-dark" onclick="backFromDtComposer()"><img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span></button><div class="phase">Scegli il cast</div></div><div class="panel" style="padding:clamp(24px,4vw,42px)"><h1 class="step-title">Chi sarà ${escapeHtml(slot.label||slot.key)}?</h1><p class="intro">Questa storia richiede una scelta esplicita per questo personaggio.</p><div class="cast-options">${savedEntries.map(character=>`<button type="button" class="cast-option" onclick="selectDtDeclaredCast('${escapeHtml(slot.key)}','character_asset','${escapeHtml(character.id)}')"><img src="${escapeHtml(character.image_url||'assets/char/water/rabbit.png')}" alt=""><strong>${escapeHtml(character.name)}</strong></button>`).join("")}${catalogEntries.map(([key,character])=>`<button type="button" class="cast-option" onclick="selectDtDeclaredCast('${escapeHtml(slot.key)}','catalog_character','${escapeHtml(key)}')"><img src="${escapeHtml(dtCatalogCharacterImage(character)||'assets/char/water/rabbit.png')}" alt=""><strong>${escapeHtml(character.name||key)}</strong></button>`).join("")}</div><div class="error" id="composer-error"></div></div></div>`;
+  showScreen("composer");
+};
+
+window.selectDtDeclaredCast=async function(slotKey,source,value){
+  try{
+    const payload={book_story_id:app.activeBookStoryId,slot_key:slotKey,character_asset_id:source==="character_asset"?value:null,catalog_character_id:source==="catalog_character"?value:null};
+    const {error}=await getSupabase().from("story_cast_assignments").upsert(payload,{onConflict:"book_story_id,slot_key"});
+    if(error) throw error;
+    await loadBookStories();
+    dtOpenStoryEntry();
+  }catch(error){
+    console.error("[DreamTaily] Declared cast save error:",error);
+    showError("composer-error","Non sono riuscito a salvare il personaggio scelto.");
+  }
+};
+
 function dtHelperEntryForStep(step){
   const id=dtHelperChoice()?.value;
   return (step?.decision?.catalog_roster||[]).find(entry=>entry.key===id)||null;
 }
 
 function dtReplaceName(text){
-  return String(text||"").replaceAll("[Nome]",dtProtagonist().name);
+  let value=String(text||"");
+  const cast=dtCastChoicesForComposer();
+  for(const [slot,assignment] of Object.entries(cast)){
+    const name=assignment.name||dtPublishedCatalog()[assignment.character_id]?.name||assignment.character_id;
+    if(name) value=value.replaceAll(`[PERSONAGGIO:${slot}]`,name);
+  }
+  return value
+    .replaceAll("[Nome]",dtProtagonist().name)
+    .replaceAll("[Aiutante]",cast.helper?.name||dtPublishedCatalog()[cast.helper?.character_id]?.name||"l’aiutante");
 }
 
 function dtOptionConsequences(decisionKey,optionKey){
@@ -2540,6 +2622,10 @@ function dtOptionConsequences(decisionKey,optionKey){
 
 async function dtLoadSceneContract(){
   if(dtSceneContract) return dtSceneContract;
+  if(app.activeStoryContract?.scenes){
+    dtSceneContract=structuredClone(app.activeStoryContract.scenes);
+    return dtSceneContract;
+  }
   const response=await fetch(`${DT_STORY_ROOT}/scene-pilot.json?v=20260730-fix3`,{cache:"no-store"});
   if(!response.ok) throw new Error(`SCENE_HTTP_${response.status}`);
   dtSceneContract=await response.json();
@@ -2550,52 +2636,9 @@ function dtPrefixStoryRef(ref){
   if(!ref) return "";
   if(/^(?:https?:|data:|blob:|\/)/.test(ref)) return ref;
 
-  /* Accetta entrambe le convenzioni:
-     - setup/atmosfera_notte.png
-     - stories/il-bosco-dei-sussurri/setup/atmosfera_notte.png */
   if(ref.startsWith("stories/")) return ref;
-  return `${DT_STORY_ROOT}/${ref}`;
-}
-
-function dtAtmosphereImage(option){
-  const canonical={
-    notte:`${DT_STORY_ROOT}/setup/atmosfera_notte.png`,
-    tramonto:`${DT_STORY_ROOT}/setup/atmosfera_tramonto.png`
-  };
-  const resolved=canonical[option?.key]||dtPrefixStoryRef(option?.image_ref||"");
-  return resolved ? `${resolved}?v=20260728-2` : "";
-}
-
-window.dtAtmosphereImageFallback=function(image,key){
-  const direct={
-    notte:"stories/il-bosco-dei-sussurri/setup/atmosfera_notte.png",
-    tramonto:"stories/il-bosco-dei-sussurri/setup/atmosfera_tramonto.png"
-  }[key];
-
-  if(!direct){
-    image.remove();
-    return;
-  }
-
-  const fallback=`${direct}?v=20260728-3`;
-  if(image.dataset.fallbackTried==="1"||image.src.endsWith(fallback)){
-    image.style.display="none";
-    image.closest(".dt-decision-option")?.classList.add("asset-error");
-    console.error("[DreamTaily] Immagine atmosfera non caricata:",image.src);
-    return;
-  }
-
-  image.dataset.fallbackTried="1";
-  image.src=fallback;
-};
-
-function dtAtmosphereFallbackUrl(){
-  const atmosphere=app.setupChoices.atmosfera||app.compositionChoices.atmosfera;
-  const map={
-    notte:`${DT_STORY_ROOT}/setup/atmosfera_notte.png`,
-    tramonto:`${DT_STORY_ROOT}/setup/atmosfera_tramonto.png`
-  };
-  return map[atmosphere]||"";
+  const slug=app.activeStoryDefinition?.slug||"il-bosco-dei-sussurri";
+  return `stories/${slug}/${ref}`;
 }
 
 window.dtSceneBackgroundFallback=function(image){
@@ -2617,17 +2660,14 @@ function dtSceneDefinition(stepKey){
 
 function dtResolvedBackground(definition){
   if(!definition) return "";
-  const atmosphere=app.setupChoices.atmosfera||app.compositionChoices.atmosfera;
-  const ref=definition.variant_backgrounds?.atmosfera?.[atmosphere]||definition.background_ref;
-  const resolved=dtPrefixStoryRef(ref);
+  const resolved=dtPrefixStoryRef(definition.background_ref);
   return resolved?`${resolved}?v=20260730-fix3`:"";
 }
 
 function dtHelperImage(pose="in_piedi"){
-  const helper=DT_HELPERS[dtHelperChoice()?.value];
+  const helper=dtPublishedCatalog()[dtHelperChoice()?.value];
   if(!helper) return "";
-  const styleArt=helper.art?.[app.style]||helper.art?.papercut||helper.art?.paper||helper.art;
-  const resolved=styleArt?.[pose]||styleArt?.in_piedi||helper.image||"";
+  const resolved=dtCatalogCharacterImage(helper,pose);
   return resolved?`${resolved}?v=20260730-fix3`:"";
 }
 
@@ -2645,8 +2685,11 @@ function dtPreviewScene(step){
         style="left:${slot.x*100}%;top:${slot.y*100}%;height:${slot.scale*100}%;z-index:${slot.z+2}"
         onerror="this.classList.add('dt-scene-cameo');this.style='';">`;
     }
-    if(slot.role==="helper"&&dtHelperChoice()?.value){
-      return `<img class="dt-scene-layer" src="${escapeHtml(dtHelperImage(slot.pose))}" alt=""
+    const assignment=dtCastChoicesForComposer()[slot.role];
+    if(assignment){
+      const character=assignment.source==="catalog_character"?dtPublishedCatalog()[assignment.character_id]:null;
+      const src=assignment.asset_ref||dtCatalogCharacterImage(character,slot.pose);
+      return `<img class="dt-scene-layer" src="${escapeHtml(src)}" alt=""
         style="left:${slot.x*100}%;top:${slot.y*100}%;height:${slot.scale*100}%;z-index:${slot.z+2}"
         onerror="this.remove()">`;
     }
@@ -2722,7 +2765,7 @@ function dtDecisionHtml(step){
         ${(decision.options||[]).map(option=>`
           <button type="button" class="dt-decision-option ${selected===option.key?"selected":""}"
             onclick="selectDtNarrativeChoice('${escapeHtml(decision.key)}','${escapeHtml(option.key)}')">
-            <strong>${escapeHtml(option.label)}</strong>
+            <strong>${escapeHtml(dtReplaceName(option.label))}</strong>
             <small>${escapeHtml(dtOptionConsequences(decision.key,option.key))}</small>
           </button>`).join("")}
       </div>
@@ -2736,7 +2779,7 @@ function dtDecisionHtml(step){
       <p class="dt-decision-note">Ogni aiutante entra nella storia con un passaggio scritto apposta.</p>
       <div class="dt-decision-options">
         ${(decision.catalog_roster||[]).map(entry=>{
-          const helper=DT_HELPERS[entry.key];
+          const helper=dtPublishedCatalog()[entry.key];
           if(!helper) return "";
           return `<button type="button" class="dt-decision-option ${selected===entry.key?"selected":""}"
             onclick="selectDtHelper('${escapeHtml(entry.key)}','${escapeHtml(entry.entrance_ref)}')">
@@ -2791,7 +2834,7 @@ window.renderComposerStep=function(){
       <main class="panel dt-walk-main">
         <div class="dt-moment-index">Momento ${dtTrailIndex+1}</div>
         ${dtProgressHtml()}
-        <h1 class="step-title">${escapeHtml(step.title||"La storia continua")}</h1>
+        <h1 class="step-title">${escapeHtml(dtReplaceName(step.title||"La storia continua"))}</h1>
         <p class="dt-moment-context">${escapeHtml(dtReplaceName(step.composer_summary||"Il bosco cambia intorno al protagonista."))}</p>
 
         ${dtDecisionHtml(step)}
@@ -2809,7 +2852,7 @@ window.renderComposerStep=function(){
       <aside class="panel dt-walk-preview">
         ${dtPreviewScene(step)}
         <p class="dt-preview-caption">
-          Anteprima del momento: atmosfera, ramo e aiutante reagiscono alle tue scelte.
+          Anteprima del momento: percorso e personaggi reagiscono alle tue scelte.
         </p>
       </aside>
     </div>
@@ -2823,8 +2866,7 @@ window.backFromDtComposer=function(){
     renderComposerStep();
     return;
   }
-  renderSetupStep();
-  showScreen("setup");
+  showScreen("stories");
 };
 
 window.advanceComposer=async function(){
@@ -2858,88 +2900,12 @@ window.advanceComposer=async function(){
   }
 };
 
-window.renderSetupStep=function(){
-  const definition=app.activeStoryDefinition;
-  const atmosphere=(definition?.setup||[]).find(item=>item.key==="atmosfera")||(definition?.setup||[])[0];
-  const selected=app.setupChoices.atmosfera||app.compositionChoices.atmosfera||null;
-  const protagonist=dtProtagonist();
-  const screen=document.getElementById("screen-setup");
-
-  screen.innerHTML=`
-  <div class="shell">
-    <div class="topbar">
-      <button class="brand-dark" onclick="showScreen('stories')">
-        <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
-      </button>
-      <div class="phase">4 · Prima di entrare</div>
-    </div>
-
-    <div class="dt-walk-layout">
-      <main class="panel dt-walk-main">
-        <div class="dt-moment-index">Tempo zero</div>
-        <h1 class="step-title">Che luce ha il bosco?</h1>
-        <p class="dt-moment-context">${escapeHtml(atmosphere?.prompt||"Scegli l’atmosfera iniziale.")}</p>
-
-        <section class="dt-decision-box">
-          <p class="dt-decision-note">Cambia luce e sensazioni, non gli eventi. Le decisioni di trama arriveranno dentro la storia.</p>
-          <div class="dt-decision-options">
-            ${(atmosphere?.options||[]).map(option=>`
-              <button type="button" class="dt-decision-option ${selected===option.key?"selected":""}"
-                onclick="selectDtAtmosphere('${escapeHtml(option.key)}')">
-                ${option.image_ref?`<img src="${escapeHtml(dtAtmosphereImage(option))}" alt="${escapeHtml(option.label)}"
-                onerror="dtAtmosphereImageFallback(this,'${escapeHtml(option.key)}')">`:""}
-                <strong>${escapeHtml(option.label)}</strong>
-                <small>La stessa avventura, con una luce e una sensazione diverse.</small>
-              </button>`).join("")}
-          </div>
-        </section>
-
-        <div class="error" id="setup-error"></div>
-        <div class="form-actions">
-          <button class="btn btn-ghost" onclick="showScreen('stories')">← Storie</button>
-          <button class="btn btn-primary" id="setup-next" ${selected?"":"disabled"}
-            onclick="beginStoryAfterSetup()">Entra nel bosco →</button>
-        </div>
-      </main>
-
-      <aside class="panel dt-walk-preview">
-        <img src="${escapeHtml(protagonist.image)}" alt="${escapeHtml(protagonist.name)}"
-          style="display:block;width:170px;height:210px;object-fit:contain;margin:0 auto 12px">
-        <h2 style="font-family:'Baloo 2';text-align:center">${escapeHtml(protagonist.name)}</h2>
-        <p class="dt-preview-caption">Il protagonista è pronto. Il sentiero e gli incontri verranno decisi attraversando i capitoli.</p>
-      </aside>
-    </div>
-  </div>`;
-};
-
-window.selectDtAtmosphere=function(key){
-  app.setupChoices.atmosfera=key;
-  app.compositionChoices.atmosfera=key;
-  renderSetupStep();
-};
-
-window.beginStoryAfterSetup=async function(){
-  if(!app.setupChoices.atmosfera){
-    showError("setup-error","Scegli un’atmosfera per entrare nel bosco.");
-    return;
-  }
-  try{
-    await persistPathChoices();
-    await dtLoadSceneContract();
-    dtTrail=[];
-    dtTrailIndex=0;
-    app.currentStepKey=app.activeStoryDefinition.start;
-    dtBuildTrail();
-    renderComposerStep();
-    showScreen("composer");
-  }catch(error){
-    console.error("[DreamTaily] Setup error:",error);
-    showError("setup-error","Non sono riuscito a salvare l’atmosfera.");
-  }
-};
-
 async function dtLoadContent(){
   if(dtContentByRef) return dtContentByRef;
+  if(app.activeStoryContract?.contentByRef){
+    dtContentByRef=structuredClone(app.activeStoryContract.contentByRef);
+    return dtContentByRef;
+  }
   const refs=new Set();
   for(const step of app.activeStoryDefinition?.steps||[]){
     if(step.content_ref) refs.add(step.content_ref);
@@ -2983,7 +2949,7 @@ window.finishStoryComposer=async function(){
     ]);
     const protagonist=dtProtagonist();
     const helperId=dtHelperChoice()?.value;
-    const catalog=Object.fromEntries(
+    const catalog=app.activeStoryContract?.catalog||Object.fromEntries(
       Object.entries(DT_HELPERS).map(([key,item])=>[key,{name:item.name,image:item.image,art:item.art}])
     );
 
@@ -2996,22 +2962,23 @@ window.finishStoryComposer=async function(){
         story:app.activeStoryDefinition.slug,
         style:app.style,
         protagonist:{name:protagonist.name,asset_ref:protagonist.image},
-        cast:{helper:helperId},
-        setup:{atmosfera:app.setupChoices.atmosfera},
-        branches:{
-          d_sentiero:app.compositionChoices.d_sentiero,
-          d_finale:app.compositionChoices.d_finale
-        }
+        cast:{...dtCastChoicesForComposer(),helper:helperId||dtCastChoicesForComposer().helper},
+        setup:dtSetupChoiceMap(),
+        branches:dtBranchChoiceMap()
       }
     });
 
-    const bad=dtComposedBook.pages.filter(page=>/\[[^\]]+\]/.test(page.text||""));
+    const bad=dtComposedBook.pages.filter(page=>/\[[^\]]+\]/.test(`${page.title||""} ${page.text||""}`));
     if(bad.length){
       console.error("[DreamTaily] Marker residui:",bad);
       throw new Error("MARKER_IRRISOLTI");
     }
 
+    // Ogni storia conserva il proprio snapshot appena viene completata.
+    // Il checkout può così renderizzare tutte le storie del libro, non solo l'ultima.
+    await dtPersistContentSnapshot(dtComposedBook);
     await persistPathChoices();
+    await dtMarkStoryComposed();
     dtBookPage=0;
     renderBookSummary();
     showScreen("book");
@@ -3038,12 +3005,7 @@ function dtBookSequence(){
 function dtBookScene(scene){
   const bg=scene?.bg
     ?`<img class="dt-scene-bg" src="${escapeHtml(scene.bg)}" alt="" onerror="dtSceneBackgroundFallback(this)">`
-    :(() => {
-        const fallback=dtAtmosphereFallbackUrl();
-        return fallback
-          ?`<img class="dt-scene-bg" src="${escapeHtml(fallback)}?v=20260728-book-empty" alt="">`
-          :"";
-      })();
+    :"";
   const wash=scene?.wash?`<div class="dt-scene-wash" style="background:${escapeHtml(scene.wash)}"></div>`:"";
   const layers=[...(scene?.layers||[])].sort((a,b)=>a.z-b.z).map(layer=>`
     <img class="dt-scene-layer" src="${escapeHtml(layer.src)}" alt=""
@@ -3056,6 +3018,53 @@ window.goToDtBookPage=function(index){
   const sequence=dtBookSequence();
   dtBookPage=Math.max(0,Math.min(Number(index)||0,sequence.length-1));
   renderBookSummary();
+};
+
+window.beginAddStory=async function(){
+  app.bookFlowMode='add_story';
+  app.selectedStoryId=null;
+  app.activeStoryDefinition=null;
+  app.activeStoryContract=null;
+  app.activeBookStoryId=null;
+  app.setupChoices={};
+  app.compositionChoices={};
+  dtComposedBook=null;
+  await openCharacterLibrary();
+};
+
+window.renderBookWorkspace=async function(){
+  await loadBookStories();
+  await ensureBookCharactersHydrated();
+  const screen=document.getElementById('screen-book');
+  const rows=app.bookStories.map((bookStory,index)=>{
+    const story=storyForBookStory(bookStory);
+    const assignment=getStoryProtagonistAssignment(bookStory);
+    const character=getSavedCharacterById(assignment?.character_asset_id);
+    return `<div class="book-story-item">
+      <div><h3>${index+1}. ${escapeHtml(story?.title||bookStory.story_slug)}</h3>
+      <p>Protagonista: ${escapeHtml(character?.name||'Non assegnato')} · ${bookStory.status==='ready'?'storia completata':'da completare'}</p></div>
+      <button class="icon-btn" type="button" title="Rimuovi storia" onclick="removeBookStory('${bookStory.id}')">×</button>
+    </div>`;
+  }).join('');
+  const allComplete=app.bookStories.length>0&&app.bookStories.every(item=>
+    item.status==='ready'&&item.content_snapshot?.meta&&Array.isArray(item.content_snapshot?.pages)
+  );
+  screen.innerHTML=`<div class="shell">
+    <div class="topbar"><button class="brand-dark" onclick="showScreen('landing')"><img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span></button><div class="phase">Il tuo libro in composizione</div></div>
+    <div class="panel book-summary" style="max-width:900px;margin:0 auto">
+      <div class="phase">Bozza salvata</div>
+      <h1 class="step-title">${app.bookStories.length===1?'Una storia nel libro':`${app.bookStories.length} storie nel libro`}</h1>
+      <p class="intro">Puoi aggiungere altre storie, anche con protagonisti diversi. Concludi il libro solo quando è completo.</p>
+      <div class="book-story-list">${rows}</div>
+      <div class="form-actions" style="flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="beginAddStory()">Aggiungi un’altra storia →</button>
+        <button class="btn btn-soft" onclick="openDtCheckout()" ${allComplete?'':'disabled'}>Concludi il libro e vai al checkout →</button>
+        <button class="btn btn-ghost" onclick="openCharacterLibrary()">Vai alla libreria</button>
+      </div>
+      ${allComplete?'':'<div class="book-note">Completa tutte le storie prima del checkout.</div>'}
+    </div>
+  </div>`;
+  showScreen('book');
 };
 
 window.renderBookSummary=function(){
@@ -3081,7 +3090,7 @@ window.renderBookSummary=function(){
           onclick="goToDtBookPage(${dtBookPage-1})">← Indietro</button>
         <button class="btn btn-soft" onclick="openCharacterLibrary()">Libreria</button>
         ${last
-          ?`<button class="btn btn-primary" onclick="openDtCheckout()">Ordina il libro →</button>`
+          ?`<button class="btn btn-primary" onclick="renderBookWorkspace()">Storia completata · Vai al libro →</button>`
           :`<button class="btn btn-primary" onclick="goToDtBookPage(${dtBookPage+1})">Avanti →</button>`}
       </div>
 
@@ -3103,13 +3112,14 @@ window.renderBookSummary=function(){
             onclick="goToDtBookPage(${index})" aria-label="Pagina ${index+1}"></button>`).join("")}
         </div>
         ${last
-          ?`<button class="btn btn-primary" onclick="openDtCheckout()">Ordina il libro →</button>`
+          ?`<button class="btn btn-primary" onclick="renderBookWorkspace()">Storia completata · Vai al libro →</button>`
           :`<button class="btn btn-primary" onclick="goToDtBookPage(${dtBookPage+1})">Avanti →</button>`}
       </div>
 
       <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
-        <button class="btn btn-soft" onclick="modifyDtBook()">← Modifica il libro</button>
-        <button class="btn btn-ghost" onclick="openCharacterLibrary()">Vai alla libreria</button>
+        <button class="btn btn-soft" onclick="modifyDtBook()">← Modifica questa storia</button>
+        <button class="btn btn-primary" onclick="beginAddStory()">Aggiungi un’altra storia</button>
+        <button class="btn btn-ghost" onclick="renderBookWorkspace()">Riepilogo libro</button>
       </div>
     </div>
   </div>`;
@@ -3128,12 +3138,15 @@ function dtChoiceLabel(key,valueKey){
   return (decision?.options||[]).find(option=>option.key===valueKey)?.label||valueKey||"—";
 }
 
-window.openDtCheckout=function(){
-  const protagonist=dtProtagonist();
-  const helper=DT_HELPERS[dtHelperChoice()?.value];
-  const atmosphere=(app.activeStoryDefinition.setup||[])
-    .find(item=>item.key==="atmosfera")?.options
-    ?.find(option=>option.key===app.setupChoices.atmosfera);
+window.openDtCheckout=async function(){
+  await loadBookStories();
+  const complete=app.bookStories.length>0&&app.bookStories.every(item=>
+    item.status==='ready'&&item.content_snapshot?.meta&&Array.isArray(item.content_snapshot?.pages)
+  );
+  if(!complete){
+    await renderBookWorkspace();
+    return;
+  }
   const screen=document.getElementById("screen-checkout");
 
   screen.innerHTML=`
@@ -3148,25 +3161,18 @@ window.openDtCheckout=function(){
       <main class="panel" style="padding:clamp(24px,4vw,40px)">
         <div class="phase">Libro digitale · €9,90</div>
         <h1 class="step-title">Dove lo consegniamo?</h1>
-        <p class="intro">Dopo il pagamento dimostrativo generiamo davvero cover e 7 pagine. Può richiedere qualche minuto.</p>
+        <p class="intro">Conferma il libro per congelarne contenuti, protagonisti e versioni. In questo collaudo non partirà alcuna generazione IA.</p>
         <label for="dt-email">Email</label>
         <input class="input" id="dt-email" type="email" value="${escapeHtml(dtCheckoutEmail)}"
           placeholder="nome@esempio.it" oninput="updateDtPayButton()">
         <div class="error" id="checkout-error"></div>
         <button class="btn btn-primary" id="dt-pay" style="width:100%;margin-top:18px"
-          onclick="completeDtCheckout()" disabled>Paga €9,90 (finto) e genera</button>
+          onclick="completeDtCheckout()" disabled>Conferma il libro (nessun addebito)</button>
       </main>
       <aside class="panel" style="padding:24px">
-        <h2 style="font-family:'Baloo 2'">${escapeHtml(dtComposedBook.meta.title)}</h2>
-        ${[
-          ["Protagonista",protagonist.name],
-          ["Aiutante",helper?.name||"—"],
-          ["Stile",app.style],
-          ["Atmosfera",atmosphere?.label||"—"],
-          ["Sentiero",dtChoiceLabel("d_sentiero",app.compositionChoices.d_sentiero)],
-          ["Finale",dtChoiceLabel("d_finale",app.compositionChoices.d_finale)],
-          ["Capitoli",String(dtComposedBook.pages.length)]
-        ].map(([key,val])=>`<div class="dt-summary-row"><span>${escapeHtml(key)}</span><strong>${escapeHtml(val)}</strong></div>`).join("")}
+        <h2 style="font-family:'Baloo 2'">Il tuo libro</h2>
+        <div class="dt-summary-row"><span>Storie</span><strong>${app.bookStories.length}</strong></div>
+        ${app.bookStories.map((item,index)=>`<div class="dt-summary-row"><span>${index+1}</span><strong>${escapeHtml(storyForBookStory(item)?.title||item.story_slug)}</strong></div>`).join("")}
       </aside>
     </div>
   </div>`;
@@ -3188,142 +3194,90 @@ async function dtPersistContentSnapshot(book){
   if(error) throw error;
 }
 
-async function dtMarkReady(){
-  const client=getSupabase();
-  const now=new Date().toISOString();
-  const choices={
-    atmosfera:app.setupChoices.atmosfera,
-    d_sentiero:app.compositionChoices.d_sentiero,
-    helper:dtHelperChoice()?.value||null,
-    d_finale:app.compositionChoices.d_finale
-  };
-  const {error:storyError}=await client.from("book_stories")
-    .update({status:"ready",path_choices:choices,updated_at:now})
-    .eq("id",app.activeBookStoryId);
-  if(storyError) throw storyError;
-  const {error:bookError}=await client.from("books")
-    .update({status:"ready",updated_at:now})
-    .eq("id",app.bookId);
-  if(bookError) throw bookError;
+async function dtMarkStoryComposed(){
+  if(!app.activeBookStoryId) throw new Error('BOOK_STORY_REQUIRED');
+  const {error}=await getSupabase().from('book_stories')
+    .update({status:'ready',updated_at:new Date().toISOString()})
+    .eq('id',app.activeBookStoryId);
+  if(error) throw error;
+  await loadBookStories();
 }
 
-function dtRenderProgress(pages=[]){
-  const total=pages.length||8;
-  const ready=pages.filter(page=>page?.render?.status==="ready").length;
-  const button=document.getElementById("dt-pay");
-  if(button) button.textContent=`Generazione ${ready}/${total}…`;
+async function dtLoadRenderStatus(){
+  if(!app.bookId) return null;
+  const {data,error}=await getSupabase().from("book_renders")
+    .select("id,book_id,status,permalink_slug,pages,error,confirmed_at,created_at,updated_at")
+    .eq("book_id",app.bookId).order("created_at",{ascending:false}).limit(1).maybeSingle();
+  if(error) throw error;
+  dtPendingRender=data||null;
+  return dtPendingRender;
 }
 
-async function dtGenerateFinalRender(){
-  if(!app.bookId) throw new Error("BOOK_REQUIRED");
-  const client=getSupabase();
-  const key=`book-${app.bookId}`;
-  for(let round=0;round<10;round++){
-    const {data,error}=await client.functions.invoke("render-book",{
-      body:{book_id:app.bookId,idempotency_key:key}
-    });
-    if(error) throw error;
-    if(!data) throw new Error("RENDER_EMPTY_RESPONSE");
-    dtRenderProgress(data.pages||[]);
-    if(data.status==="ready"){
-      if(!data.permalink_slug) throw new Error("RENDER_READY_WITHOUT_SLUG");
-      return data;
-    }
-    if(data.status==="review"||data.status==="failed"){
-      const failed=(data.pages||[]).filter(page=>page?.render?.status==="failed").map(page=>page.page_id).join(",");
-      throw new Error(`RENDER_${String(data.status).toUpperCase()}:${failed||"unknown"}`);
-    }
-    await new Promise(resolve=>setTimeout(resolve,700));
-  }
-  throw new Error("RENDER_DID_NOT_FINISH");
-}
+window.renderDtBookStatus=async function(render=null){
+  const job=render||await dtLoadRenderStatus();
+  if(!job){ await renderBookWorkspace(); return; }
+  dtPendingRender=job;
+  const pages=Array.isArray(job.pages)?job.pages:[];
+  const readyPages=pages.filter(page=>page?.render?.status==="ready").length;
+  const labels={queued:"In attesa",running:"In creazione",ready:"Pronto",failed:"Interrotto",review:"Da verificare"};
+  const ready=job.status==="ready"&&job.permalink_slug;
+  const screen=document.getElementById("screen-render-status");
+  screen.innerHTML=`<div class="shell" style="max-width:760px">
+    <div class="topbar"><button class="brand-dark" onclick="showScreen('landing')"><img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span></button><div class="phase">Stato del libro</div></div>
+    <div class="panel" style="padding:clamp(28px,5vw,52px);text-align:center">
+      <div style="font-size:58px">${ready?'🎉':job.status==='failed'||job.status==='review'?'🛠️':'✨'}</div>
+      <div class="phase">${escapeHtml(labels[job.status]||job.status)}</div>
+      <h1 class="step-title">${ready?'Il tuo libro è pronto':'Il tuo libro è stato confermato'}</h1>
+      <p class="intro">${job.status==='queued'
+        ?'Contenuti e personaggi sono congelati. La generazione IA è volutamente sospesa durante questo collaudo.'
+        :job.status==='running'?`Pagine completate: ${readyPages} su ${pages.length}. Puoi chiudere questa pagina e tornare più tardi.`
+        :ready?'La generazione è terminata e il libro può essere aperto.'
+        :'Il lavoro è salvato e potrà essere ripreso senza rigenerare le pagine già completate.'}</p>
+      <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
+        ${ready?`<button class="btn btn-primary" onclick="window.location.href='libro.html?slug=${encodeURIComponent(job.permalink_slug)}'">Apri il libro</button>`:''}
+        <button class="btn btn-soft" onclick="renderDtBookStatus()">Aggiorna stato</button>
+        <button class="btn btn-primary" onclick="startNewBook()">Crea un altro libro</button>
+        <button class="btn btn-ghost" onclick="showScreen('landing')">Torna alla home</button>
+      </div>
+    </div>
+  </div>`;
+  showScreen("render-status");
+};
 
 window.completeDtCheckout=async function(){
   updateDtPayButton();
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dtCheckoutEmail)){
     showError("checkout-error","Inserisci un’email valida."); return;
   }
-  if(!dtComposedBook){
-    showError("checkout-error","Il libro non è composto. Torna indietro e riprova."); return;
-  }
+  await loadBookStories();
+  const complete=app.bookStories.length>0&&app.bookStories.every(item=>
+    item.status==='ready'&&item.content_snapshot?.meta&&Array.isArray(item.content_snapshot?.pages)
+  );
+  if(!complete){showError("checkout-error","Completa tutte le storie prima di concludere il libro.");return;}
   const button=document.getElementById("dt-pay");
-  button.disabled=true; button.textContent="Preparo il libro…"; showError("checkout-error",null);
+  button.disabled=true; button.textContent="Confermo il libro…"; showError("checkout-error",null);
   try{
-    await dtPersistContentSnapshot(dtComposedBook);
-    const render=await dtGenerateFinalRender();
-    dtDeliverySlug=render.permalink_slug;
-    await dtMarkReady();
-    renderDtDelivered();
-    showScreen("delivered");
+    const {data,error}=await getSupabase().functions.invoke("checkout-book",{
+      body:{book_id:app.bookId,email:dtCheckoutEmail,idempotency_key:`checkout-${app.bookId}`}
+    });
+    if(error) throw error;
+    if(!data?.render_id) throw new Error("CHECKOUT_EMPTY_RESPONSE");
+    await renderDtBookStatus(data);
   }catch(error){
-    console.error("[DreamTaily] Final book flow error:",error);
-    showError("checkout-error","La generazione si è interrotta. Puoi riprovare: le pagine già create non verranno rifatte.");
-    button.disabled=false; button.textContent="Riprova generazione";
+    console.error("[DreamTaily] Checkout confirmation error:",error);
+    showError("checkout-error","Non sono riuscito a confermare il libro. La bozza è intatta: puoi riprovare senza perdere nulla.");
+    button.disabled=false; button.textContent="Riprova la conferma";
   }
 };
 
-window.deleteCurrentBookAndRestart=async function(){
-  if(!app.bookId) return;
-
-  const confirmed=confirm(
-    "Eliminare questo libro e ricominciare da capo? Il personaggio resterà nella libreria."
-  );
-  if(!confirmed) return;
-
-  try{
-    const client=getSupabase();
-    await loadBookStories();
-
-    const storyIds=(app.bookStories||[]).map(item=>item.id);
-
-    if(storyIds.length){
-      const {error:castError}=await client
-        .from("story_cast_assignments")
-        .delete()
-        .in("book_story_id",storyIds);
-      if(castError) console.warn("[DreamTaily] Cast cleanup skipped:",castError);
-
-      const {error:storiesError}=await client
-        .from("book_stories")
-        .delete()
-        .in("id",storyIds);
-      if(storiesError) throw storiesError;
-    }
-
-    const {error:bookError}=await client
-      .from("books")
-      .delete()
-      .eq("id",app.bookId);
-    if(bookError) throw bookError;
-
-    app.bookId=null;
-    app.bookStories=[];
-    app.activeStoryDefinition=null;
-    app.activeBookStoryId=null;
-    app.currentStepKey=null;
-    app.setupIndex=0;
-    app.setupChoices={};
-    app.compositionChoices={};
-    app.selectedStoryId=null;
-    dtComposedBook=null;
-    dtBookPage=0;
-    dtTrail=[];
-    dtTrailIndex=0;
-    dtContentByRef=null;
-
-    const resumeButton=document.getElementById("resume-book-btn");
-    if(resumeButton) resumeButton.style.display="none";
-
-    prepareStories();
-    showScreen("stories");
-  }catch(error){
-    console.error("[DreamTaily] Delete book error:",error);
-    alert("Non sono riuscito a eliminare il libro. Riprova.");
-  }
+window.startNewBook=async function(){
+  resetActiveBookState();
+  app.bookFlowMode='new_book';
+  await openCharacterLibrary();
 };
 
 window.renderDtDelivered=function(){
-  const protagonist=dtProtagonist();
+  const storyCount=app.bookStories.length||1;
   const base=location.pathname.replace(/index\.html$/," ").trim();
   const permanent=dtDeliverySlug
     ? `${location.origin}${base.endsWith("/")?base:base+"/"}libro.html?slug=${encodeURIComponent(dtDeliverySlug)}`
@@ -3335,7 +3289,7 @@ window.renderDtDelivered=function(){
       <div style="font-size:60px">🎉</div>
       <div class="phase">Consegna</div>
       <h1 class="step-title">Il tuo libro è pronto</h1>
-      <p class="intro">Cover e 7 capitoli del Bosco dei Sussurri di ${escapeHtml(protagonist.name)} sono stati generati e salvati.</p>
+      <p class="intro">Il libro con ${storyCount} ${storyCount===1?"storia":"storie"} è stato generato e salvato.</p>
       <div class="dt-delivery-link"><code id="dt-link">${escapeHtml(permanent)}</code><button class="btn btn-soft" onclick="copyDtLink()">Copia</button></div>
       <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="window.location.href=document.getElementById('dt-link').textContent">Apri il libro finale</button>
@@ -3377,6 +3331,8 @@ async function dtLoadSavedBooks(){
         book_stories (
           id,
           story_slug,
+          story_version_id,
+          content_snapshot,
           position,
           status,
           path_choices,
@@ -3388,7 +3344,7 @@ async function dtLoadSavedBooks(){
           )
         )
       `)
-      .in("status",["draft","ready"])
+      .in("status",["draft","ready_for_checkout","paid","generating","ready","failed"])
       .order("updated_at",{ascending:false});
 
     if(error) throw error;
@@ -3430,7 +3386,7 @@ function dtRenderSavedBooks(){
     const stories=(book.book_stories||[]).slice()
       .sort((a,b)=>(a.position||0)-(b.position||0));
     const latest=stories.at(-1)||null;
-    const template=STORY_TEMPLATES.find(item=>item.id===latest?.story_slug);
+    const template=storyForBookStory(latest);
     const protagonistAssignment=latest?.story_cast_assignments
       ?.find(item=>item.slot_key==="protagonist");
     const protagonist=app.savedCharacters
@@ -3438,6 +3394,8 @@ function dtRenderSavedBooks(){
     const image=protagonist?.image_url||template?.image||"assets/char/water/rabbit.png";
     const title=book.title||template?.title||"Il tuo libro";
     const ready=book.status==="ready";
+    const draft=book.status==="draft";
+    const statusLabel=ready?"Pronto":draft?"Bozza":book.status==="failed"?"Da riprendere":"In creazione";
     const date=new Date(book.updated_at||book.created_at||Date.now())
       .toLocaleDateString("it-IT",{day:"2-digit",month:"short",year:"numeric"});
 
@@ -3445,7 +3403,7 @@ function dtRenderSavedBooks(){
       <article class="dt-saved-book">
         <div class="dt-saved-book-cover">
           <img src="${escapeHtml(image)}" alt="" onerror="this.src='assets/char/water/rabbit.png'">
-          <span class="dt-saved-book-status">${ready?"Pronto":"Bozza"}</span>
+          <span class="dt-saved-book-status">${statusLabel}</span>
         </div>
         <div class="dt-saved-book-body">
           <h3>${escapeHtml(title)}</h3>
@@ -3456,11 +3414,9 @@ function dtRenderSavedBooks(){
           </div>
           <div class="dt-saved-book-actions">
             <button class="btn btn-primary" onclick="dtOpenSavedBook('${book.id}')">
-              ${ready?"Apri":"Riprendi"}
+              ${ready?"Apri":draft?"Riprendi":"Controlla"}
             </button>
-            ${ready?`<button class="btn btn-soft" onclick="dtEditSavedBook('${book.id}')">Modifica</button>`:""}
-            <button class="btn btn-ghost" style="color:#a8402e"
-              onclick="dtDeleteSavedBook('${book.id}')">Elimina</button>
+            ${draft?`<button class="btn btn-ghost" style="color:#a8402e" onclick="dtDeleteSavedBook('${book.id}')">Elimina</button>`:""}
           </div>
         </div>
       </article>`;
@@ -3468,9 +3424,17 @@ function dtRenderSavedBooks(){
 }
 
 function dtClearOnlyActiveBook(){
+  resetActiveBookState();
+}
+
+/* Espone il reset completo anche al funnel definito fuori da questo modulo. */
+window.dtClearOnlyActiveBook=dtClearOnlyActiveBook;
+
+function resetActiveBookState(){
   app.bookId=null;
   app.bookStories=[];
   app.activeStoryDefinition=null;
+  app.activeStoryContract=null;
   app.activeBookStoryId=null;
   app.currentStepKey=null;
   app.setupIndex=0;
@@ -3498,6 +3462,12 @@ window.dtOpenSavedBook=async function(bookId){
       location.href=`${location.origin}${base.endsWith("/")?base:base+"/"}libro.html?slug=${encodeURIComponent(data.permalink_slug)}`;
       return;
     }
+    if(saved&&saved.status!=="draft"){
+      dtClearOnlyActiveBook();
+      app.bookId=bookId;
+      await renderDtBookStatus();
+      return;
+    }
     dtClearOnlyActiveBook();
     app.bookId=bookId;
     const restored=await dtRestorePersistedBook();
@@ -3520,13 +3490,13 @@ window.dtEditSavedBook=async function(bookId){
     const preferred=
       app.bookStories.find(item=>item.status==="ready")||
       app.bookStories.at(-1);
-    const story=STORY_TEMPLATES.find(item=>item.id===preferred.story_slug);
+    const story=storyForBookStory(preferred);
     if(!story) throw new Error("STORY_NOT_FOUND");
 
     app.activeStoryDefinition=await loadStoryDefinition(story);
     app.activeBookStoryId=preferred.id;
     app.compositionChoices={...(preferred.path_choices||{})};
-    app.setupChoices={atmosfera:preferred.path_choices?.atmosfera||""};
+    app.setupChoices=dtSetupChoiceMap(app.activeStoryDefinition,app.compositionChoices);
 
     const helper=preferred.story_cast_assignments?.find(item=>item.slot_key==="helper");
     const helperKey=helper?.catalog_character_id||preferred.path_choices?.helper||null;
@@ -3604,6 +3574,8 @@ window.openCharacterLibrary=async function(){
 /* Avvio nel flusso reale, senza iframe e senza pagine parallele. */
 window.startStoryComposer=async function(story,bookStoryId){
   try{
+    dtSceneContract=null;
+    dtContentByRef=null;
     app.activeStoryDefinition=await loadStoryDefinition(story);
     app.activeBookStoryId=bookStoryId;
     await loadBookStories();
@@ -3611,9 +3583,7 @@ window.startStoryComposer=async function(story,bookStoryId){
 
     const current=app.bookStories.find(item=>item.id===bookStoryId);
     app.compositionChoices={...(current?.path_choices||{})};
-    app.setupChoices={
-      atmosfera:app.compositionChoices.atmosfera||""
-    };
+    app.setupChoices=dtSetupChoiceMap(app.activeStoryDefinition,app.compositionChoices);
 
     const helper=current?.story_cast_assignments?.find(item=>item.slot_key==="helper");
     const helperKey=helper?.catalog_character_id||current?.path_choices?.helper||null;
@@ -3635,8 +3605,7 @@ window.startStoryComposer=async function(story,bookStoryId){
     dtTrail=[];
     dtTrailIndex=0;
     dtComposedBook=null;
-    renderSetupStep();
-    showScreen("setup");
+    dtOpenStoryEntry();
   }catch(error){
     console.error("[DreamTaily] Story start error:",error);
     showError("story-error","Non sono riuscito ad aprire la storia.");
@@ -3652,7 +3621,7 @@ async function dtComposeFromCurrentState(){
 
   const protagonist=dtProtagonist();
   const helperId=dtHelperChoice()?.value;
-  const catalog=Object.fromEntries(
+  const catalog=app.activeStoryContract?.catalog||Object.fromEntries(
     Object.entries(DT_HELPERS).map(([key,item])=>[key,{name:item.name,image:item.image,art:item.art}])
   );
 
@@ -3665,22 +3634,45 @@ async function dtComposeFromCurrentState(){
       story:app.activeStoryDefinition.slug,
       style:app.style,
       protagonist:{name:protagonist.name,asset_ref:protagonist.image},
-      cast:{helper:helperId},
-      setup:{atmosfera:app.setupChoices.atmosfera},
-      branches:{
-        d_sentiero:app.compositionChoices.d_sentiero,
-        d_finale:app.compositionChoices.d_finale
-      }
+      cast:{...dtCastChoicesForComposer(),helper:helperId||dtCastChoicesForComposer().helper},
+      setup:dtSetupChoiceMap(),
+      branches:dtBranchChoiceMap()
     }
   });
 
-  const bad=book.pages.filter(page=>/\[[^\]]+\]/.test(page.text||""));
+  const bad=book.pages.filter(page=>/\[[^\]]+\]/.test(`${page.title||""} ${page.text||""}`));
   if(bad.length){
     console.error("[DreamTaily] Marker residui nel libro ripristinato:",bad);
     throw new Error("MARKER_IRRISOLTI");
   }
 
   return book;
+}
+
+function dtStoryChoicesComplete(bookStory){
+  const definition=app.activeStoryDefinition;
+  const declaredCastComplete=(definition?.cast_slots||[]).every(slot=>
+    bookStory?.story_cast_assignments?.some(item=>item.slot_key===slot.key)
+  );
+  const setupComplete=(definition?.setup||[])
+    .filter(item=>item.key!=="atmosfera")
+    .every(item=>Boolean(app.setupChoices[item.key]||app.compositionChoices[item.key]));
+  const decisionsComplete=(definition?.steps||[]).every(step=>{
+    const decision=step.decision;
+    if(!decision) return true;
+    if(decision.type==="branch"){
+      return Boolean(app.compositionChoices[decision.key]);
+    }
+    if(decision.type==="cast"){
+      const slotKey=decision.slot||decision.slot_key||decision.key;
+      return Boolean(
+        bookStory?.story_cast_assignments?.some(item=>item.slot_key===slotKey)||
+        (slotKey==="helper"&&dtHelperChoice()?.value)
+      );
+    }
+    return true;
+  });
+  return declaredCastComplete&&setupComplete&&decisionsComplete;
 }
 
 async function dtRestorePersistedBook(){
@@ -3690,20 +3682,18 @@ async function dtRestorePersistedBook(){
   await ensureBookCharactersHydrated();
 
   const preferred=
-    app.bookStories.find(item=>item.status==="ready")||
+    app.bookStories.find(item=>item.status==="draft")||
     app.bookStories.at(-1)||
     null;
   if(!preferred) return false;
 
-  const story=STORY_TEMPLATES.find(item=>item.id===preferred.story_slug);
+  const story=storyForBookStory(preferred);
   if(!story) throw new Error(`STORY_TEMPLATE_MISSING:${preferred.story_slug}`);
 
   app.activeStoryDefinition=await loadStoryDefinition(story);
   app.activeBookStoryId=preferred.id;
   app.compositionChoices={...(preferred.path_choices||{})};
-  app.setupChoices={
-    atmosfera:preferred.path_choices?.atmosfera||""
-  };
+  app.setupChoices=dtSetupChoiceMap(app.activeStoryDefinition,app.compositionChoices);
 
   const helper=preferred.story_cast_assignments?.find(item=>item.slot_key==="helper");
   const helperKey=helper?.catalog_character_id||preferred.path_choices?.helper||null;
@@ -3721,17 +3711,11 @@ async function dtRestorePersistedBook(){
     };
   }
 
-  const complete=Boolean(
-    app.setupChoices.atmosfera&&
-    app.compositionChoices.d_sentiero&&
-    dtHelperChoice()?.value&&
-    app.compositionChoices.d_finale
-  );
+  const complete=dtStoryChoicesComplete(preferred);
 
   if(!complete){
     dtComposedBook=null;
-    renderSetupStep();
-    showScreen("setup");
+    dtOpenStoryEntry();
     return true;
   }
 
@@ -3743,10 +3727,6 @@ async function dtRestorePersistedBook(){
   return true;
 }
 
-/*
- * Il codice originale cercava esclusivamente status=draft.
- * Dopo il checkout il libro diventa ready e spariva dalla landing.
- */
 window.detectDraftBook=async function(){
   try{
     await ensureUser();
@@ -3754,7 +3734,7 @@ window.detectDraftBook=async function(){
     const {data,error}=await client
       .from("books")
       .select("id,status,updated_at")
-      .in("status",["draft","ready"])
+      .in("status",["draft","ready_for_checkout","paid","generating","ready","failed"])
       .order("updated_at",{ascending:false})
       .limit(1)
       .maybeSingle();
@@ -3764,11 +3744,11 @@ window.detectDraftBook=async function(){
     const button=document.getElementById("resume-book-btn");
     if(data?.id){
       app.bookId=data.id;
+      app.bookFlowMode=data.status==="draft"?'add_story':'new_book';
       if(button){
         button.style.display="";
-        button.textContent=data.status==="ready"
-          ?"Apri il tuo libro →"
-          :"Riprendi il tuo libro →";
+        button.textContent=data.status==="draft"?"Riprendi il tuo libro →":
+          data.status==="ready"?"Apri il tuo libro →":"Controlla il tuo libro →";
       }
     }else if(button){
       button.style.display="none";
@@ -3786,6 +3766,14 @@ window.resumeDraftBook=async function(){
       return;
     }
 
+    const {data:book,error:bookError}=await getSupabase().from("books")
+      .select("id,status").eq("id",app.bookId).maybeSingle();
+    if(bookError) throw bookError;
+    if(book&&book.status!=="draft"){
+      await renderDtBookStatus();
+      return;
+    }
+
     const restored=await dtRestorePersistedBook();
     if(!restored) showScreen("stories");
   }catch(error){
@@ -3797,6 +3785,11 @@ window.resumeDraftBook=async function(){
 /* Riapre anche dopo refresh: ricostruisce il book dalle scelte persistite. */
 const dtOriginalGoToBook=window.goToBook;
 window.goToBook=async function(){
+  if(app.bookId){
+    await window.renderBookWorkspace();
+    return;
+  }
+
   if(dtComposedBook){
     renderBookSummary();
     showScreen("book");
@@ -3804,12 +3797,8 @@ window.goToBook=async function(){
   }
 
   if(app.activeStoryDefinition&&app.activeBookStoryId){
-    const complete=Boolean(
-      app.setupChoices.atmosfera&&
-      app.compositionChoices.d_sentiero&&
-      dtHelperChoice()?.value&&
-      app.compositionChoices.d_finale
-    );
+    const current=app.bookStories.find(item=>item.id===app.activeBookStoryId)||null;
+    const complete=dtStoryChoicesComplete(current);
 
     if(complete){
       try{
@@ -3823,8 +3812,7 @@ window.goToBook=async function(){
       }
     }
 
-    renderSetupStep();
-    showScreen("setup");
+    dtOpenStoryEntry();
     return;
   }
 
