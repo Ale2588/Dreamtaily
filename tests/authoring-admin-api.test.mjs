@@ -53,6 +53,14 @@ test("server validation uses the shared canonical validator", () => {
   assert.match(source, /revision: access\.version\.updated_at/);
 });
 
+test("validation and publishing reject production assets that are not reachable", () => {
+  assert.match(source, /async function validateProductionAssets/);
+  assert.match(source, /COVER_UNREACHABLE/);
+  assert.match(source, /SCENE_BACKGROUND_UNREACHABLE/);
+  assert.match(source, /ASSET_HOSTS\.has\(url\.host\)/);
+  assert.equal((source.match(/await validateProductionAssets\(/g) || []).length, 2);
+});
+
 test("request routing does not shadow the native URL constructor", () => {
   assert.match(source, /const SUPABASE_URL = Deno\.env\.get\("SUPABASE_URL"\)/);
   assert.match(source, /new URL\(req\.url\)/);

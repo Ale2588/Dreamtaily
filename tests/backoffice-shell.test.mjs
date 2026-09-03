@@ -151,8 +151,9 @@ test('l’anteprima importa il composer canonico',()=>{
 
 test('la preview dichiara che non genera immagini e non usa IA',()=>{
   assert.match(editor,/Non genera immagini e non usa IA/);
-  assert.match(editor,/Percorso di prova/);
-  assert.match(editor,/prima opzione disponibile a ogni bivio/);
+  assert.match(editor,/tutti i percorsi raggiungibili/);
+  assert.match(editor,/massimo di 32/);
+  assert.match(editor,/story-preview-paths\.js/);
 });
 
 test('la pubblicazione richiede la stessa revisione validata e una conferma esplicita',()=>{

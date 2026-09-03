@@ -87,6 +87,10 @@ const scenes = {
     ])
   ),
 };
+scenes.scenes.s1.environment_prompt = "Bosco quieto";
+scenes.scenes.s1.moment_prompt = "Lia ascolta";
+delete scenes.scenes.s1.prompt_environment;
+delete scenes.scenes.s1.prompt_moment;
 
 const contentByRef = {
   "s1.md": "Ciao [Nome]. [VARIANTE:atmosfera]",
@@ -134,9 +138,9 @@ test("composes resolved pages and visual layers", () => {
   assert.equal(book.pages.length, 3);
   assert.equal(book.pages[0].text, "Ciao Lia.");
   assert.equal(book.pages[0].scene.bg, "s1.png");
+  assert.equal(book.pages[0].scene.prompt_environment, "Bosco quieto");
+  assert.equal(book.pages[0].scene.prompt_moment, "Lia ascolta");
   assert.deepEqual(book.meta.choices.setup, {});
-  assert.equal(book.pages[0].scene.prompt_environment, "Environment for s1");
-  assert.equal(book.pages[0].scene.prompt_moment, "Moment for s1");
   assert.equal(book.pages[2].text, "Etto arriva. Ora Etto accompagna Lia.");
   assert.deepEqual(
     book.pages[2].scene.layers.map((layer) => layer.role),

@@ -7,6 +7,8 @@ const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const AGE_RANGES = new Set(["3–5 anni", "4–7 anni", "4–8 anni", "5–9 anni", "6–10 anni"]);
 const TONES = new Set(["Dolce e luminoso", "Caldo e rassicurante", "Avventuroso e rassicurante", "Curiosità e amicizia", "Coraggio e ascolto", "Fiabesco e contemplativo"]);
 const IMAGE_TYPES: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
+const ASSET_BASE = (Deno.env.get("DREAMTAILY_ASSET_BASE_URL") || "https://ale2588.github.io/Dreamtaily/").replace(/\/+$/, "") + "/";
+const ASSET_HOSTS = new Set([new URL(ASSET_BASE).host, new URL(SUPABASE_URL).host]);
 const ADMINS = new Set(
   (Deno.env.get("AUTHORING_ADMIN_EMAILS") || "")
     .split(",")
@@ -25,6 +27,49 @@ function reply(status: number, body: unknown) {
     status,
     headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
+}
+
+function productionAssetUrl(story: any, ref: unknown) {
+  const value = String(ref || "").trim();
+  const relative = value.startsWith("stories/")
+    ? value
+    : `stories/${story?.slug || ""}/${value.replace(/^\/+/, "")}`;
+  const url = new URL(/^https?:\/\//i.test(value) ? value : relative, ASSET_BASE);
+  return url.protocol === "https:" && ASSET_HOSTS.has(url.host) ? url.href : null;
+}
+
+async function assetReachable(url: string | null) {
+  if (!url) return false;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 7000);
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Range: "bytes=0-0" },
+      redirect: "follow",
+      signal: controller.signal,
+    });
+    return response.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function validateProductionAssets(story: any, scenes: any) {
+  const checks: Array<{url:string|null;code:string;step?:string}> = [];
+  const cover = story?.editorial?.cover_ref;
+  if (cover) checks.push({ url: productionAssetUrl(story, cover), code: "COVER_UNREACHABLE" });
+  for (const step of story?.steps || []) {
+    const ref = scenes?.scenes?.[step.key]?.background_ref || scenes?.scenes?.[step.key]?.background;
+    if (ref) checks.push({ url: productionAssetUrl(story, ref), code: "SCENE_BACKGROUND_UNREACHABLE", step: step.key });
+  }
+  const results = await Promise.all(checks.map(async check => ({
+    ...check,
+    reachable: await assetReachable(check.url),
+  })));
+  return results.filter(check => !check.reachable).map(({code,step,url}) => ({code,step:step || null,url}));
 }
 
 async function currentUser(req: Request) {
@@ -289,11 +334,15 @@ async function validateVersion(versionId: string, uid: string, admin: boolean) {
   const access = await ownedVersion(versionId, uid, admin);
   if (access.response) return access.response;
   if (access.version.status !== "draft") return reply(409, { error: "VERSION_IMMUTABLE" });
-  const report = validateAuthoringContract({
+  const structural = validateAuthoringContract({
     story: access.version.source_story,
     scenes: access.version.source_scenes,
     contentByRef: access.version.content_by_ref,
   });
+  const productionErrors = structural.valid
+    ? await validateProductionAssets(access.version.source_story, access.version.source_scenes)
+    : [];
+  const report = { valid: structural.valid && productionErrors.length === 0, errors: [...structural.errors, ...productionErrors] };
   const validationReport = {
     status: report.valid ? "valid" : "invalid",
     revision: access.version.updated_at,
@@ -318,11 +367,15 @@ async function publishVersion(req: Request, versionId: string, uid: string, admi
   const expected = String(body.expected_updated_at || "");
   if (!expected || expected !== access.version.updated_at) return reply(409, { error: "REVISION_CONFLICT" });
 
-  const report = validateAuthoringContract({
+  const structural = validateAuthoringContract({
     story: access.version.source_story,
     scenes: access.version.source_scenes,
     contentByRef: access.version.content_by_ref,
   });
+  const productionErrors = structural.valid
+    ? await validateProductionAssets(access.version.source_story, access.version.source_scenes)
+    : [];
+  const report = { valid: structural.valid && productionErrors.length === 0, errors: [...structural.errors, ...productionErrors] };
   const validation = access.version.validation_report || {};
   if (!report.valid || validation.status !== "valid" || validation.revision !== access.version.updated_at) {
     return reply(409, { error: "VALIDATION_REQUIRED", validation: report });
