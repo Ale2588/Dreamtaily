@@ -159,6 +159,18 @@ function slotName(assignment, catalog = {}) {
   );
 }
 
+export function resolveStoryMarkers(text, rawChoices = {}, catalog = {}) {
+  const choices = normalizeChoices(rawChoices);
+  let value = String(text || "");
+  for (const [slot, assignment] of Object.entries(choices.cast)) {
+    const name = slotName(assignment, catalog);
+    if (name) value = value.replaceAll(`[PERSONAGGIO:${slot}]`, name);
+  }
+  return value
+    .replaceAll("[Nome]", slotName(choices.protagonist, catalog) || "Il protagonista")
+    .replaceAll("[Aiutante]", slotName(choices.cast.helper, catalog) || "l’aiutante");
+}
+
 function castErrorCode(slot, suffix) {
   return slot === "helper" ? `HELPER_${suffix}` : `CAST_SLOT_${suffix}`;
 }
@@ -355,7 +367,7 @@ export function composeStory({
     id: `p${index + 1}`,
     step_key: step.key,
     chapter: step.chapter ?? index + 1,
-    title: step.title || "",
+    title: resolveStoryMarkers(step.title, choices, catalog),
     text: resolveStepText({ step, choices, contentByRef, catalog }),
     scene: resolveScene({ stepKey: step.key, choices, scenes, catalog }),
   }));

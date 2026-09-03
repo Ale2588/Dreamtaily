@@ -1886,6 +1886,8 @@ function dtCurrentPathChoices(){
 }
 
 function dtOpenStoryEntry(){
+  const missingSlot=dtMissingDeclaredCastSlot();
+  if(missingSlot){dtRenderDeclaredCastSlot(missingSlot);return}
   app.currentStepKey=resolveEffectiveStart(app.activeStoryDefinition,{});
   renderComposerStep();
   showScreen("composer");
@@ -2523,13 +2525,89 @@ function dtHelperChoice(){
   return typeof choice==="string"?{value:choice}:choice||null;
 }
 
+function dtCurrentBookStory(){
+  return app.bookStories.find(item=>item.id===app.activeBookStoryId)||null;
+}
+
+function dtPublishedCatalog(){
+  return app.activeStoryContract?.catalog||DT_HELPERS;
+}
+
+function dtCatalogCharacterImage(character,pose="in_piedi"){
+  if(!character) return "";
+  const styleArt=character.art?.[app.style]||character.art?.papercut||character.art?.paper||character.art;
+  return styleArt?.[pose]||styleArt?.in_piedi||character.image||character.image_ref||character.image_url||"";
+}
+
+function dtCastAssignment(slotKey){
+  return dtCurrentBookStory()?.story_cast_assignments?.find(item=>item.slot_key===slotKey)||null;
+}
+
+function dtCastChoicesForComposer(){
+  const catalog=dtPublishedCatalog();
+  const result={};
+  for(const slot of app.activeStoryDefinition?.cast_slots||[]){
+    const assignment=dtCastAssignment(slot.key);
+    if(!assignment) continue;
+    if(assignment.character_asset_id){
+      const character=app.savedCharacters.find(item=>item.id===assignment.character_asset_id);
+      result[slot.key]={source:"user_character",character_id:assignment.character_asset_id,name:character?.name||slot.label,asset_ref:character?.image_url||null};
+    }else if(assignment.catalog_character_id){
+      const character=catalog[assignment.catalog_character_id];
+      result[slot.key]={source:"catalog_character",character_id:assignment.catalog_character_id,name:character?.name||assignment.catalog_character_id};
+    }
+  }
+  return result;
+}
+
+function dtMissingDeclaredCastSlot(){
+  return (app.activeStoryDefinition?.cast_slots||[])
+    .find(slot=>slot.key!=="protagonist"&&!dtCastAssignment(slot.key))||null;
+}
+
+function dtRenderDeclaredCastSlot(slot){
+  const catalog=dtPublishedCatalog();
+  const sources=slot.allowed_sources||[];
+  const allowsSaved=sources.includes("character_asset")||sources.includes("user_character");
+  const allowsCatalog=sources.includes("catalog_character");
+  const allowedIds=new Set(slot.allowed_catalog_ids||[]);
+  const catalogEntries=allowsCatalog?Object.entries(catalog)
+    .filter(([key])=>allowedIds.size===0||allowedIds.has(key)):[];
+  const protagonistId=dtCastAssignment("protagonist")?.character_asset_id;
+  const savedEntries=allowsSaved?app.savedCharacters.filter(item=>item.id!==protagonistId):[];
+  const screen=document.getElementById("screen-composer");
+  screen.innerHTML=`<div class="shell"><div class="topbar"><button class="brand-dark" onclick="backFromDtComposer()"><img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span></button><div class="phase">Scegli il cast</div></div><div class="panel" style="padding:clamp(24px,4vw,42px)"><h1 class="step-title">Chi sarà ${escapeHtml(slot.label||slot.key)}?</h1><p class="intro">Questa storia richiede una scelta esplicita per questo personaggio.</p><div class="cast-options">${savedEntries.map(character=>`<button type="button" class="cast-option" onclick="selectDtDeclaredCast('${escapeHtml(slot.key)}','character_asset','${escapeHtml(character.id)}')"><img src="${escapeHtml(character.image_url||'assets/char/water/rabbit.png')}" alt=""><strong>${escapeHtml(character.name)}</strong></button>`).join("")}${catalogEntries.map(([key,character])=>`<button type="button" class="cast-option" onclick="selectDtDeclaredCast('${escapeHtml(slot.key)}','catalog_character','${escapeHtml(key)}')"><img src="${escapeHtml(dtCatalogCharacterImage(character)||'assets/char/water/rabbit.png')}" alt=""><strong>${escapeHtml(character.name||key)}</strong></button>`).join("")}</div><div class="error" id="composer-error"></div></div></div>`;
+  showScreen("composer");
+}
+
+window.selectDtDeclaredCast=async function(slotKey,source,value){
+  try{
+    const payload={book_story_id:app.activeBookStoryId,slot_key:slotKey,character_asset_id:source==="character_asset"?value:null,catalog_character_id:source==="catalog_character"?value:null};
+    const {error}=await getSupabase().from("story_cast_assignments").upsert(payload,{onConflict:"book_story_id,slot_key"});
+    if(error) throw error;
+    await loadBookStories();
+    dtOpenStoryEntry();
+  }catch(error){
+    console.error("[DreamTaily] Declared cast save error:",error);
+    showError("composer-error","Non sono riuscito a salvare il personaggio scelto.");
+  }
+};
+
 function dtHelperEntryForStep(step){
   const id=dtHelperChoice()?.value;
   return (step?.decision?.catalog_roster||[]).find(entry=>entry.key===id)||null;
 }
 
 function dtReplaceName(text){
-  return String(text||"").replaceAll("[Nome]",dtProtagonist().name);
+  let value=String(text||"");
+  const cast=dtCastChoicesForComposer();
+  for(const [slot,assignment] of Object.entries(cast)){
+    const name=assignment.name||dtPublishedCatalog()[assignment.character_id]?.name||assignment.character_id;
+    if(name) value=value.replaceAll(`[PERSONAGGIO:${slot}]`,name);
+  }
+  return value
+    .replaceAll("[Nome]",dtProtagonist().name)
+    .replaceAll("[Aiutante]",cast.helper?.name||dtPublishedCatalog()[cast.helper?.character_id]?.name||"l’aiutante");
 }
 
 function dtOptionConsequences(decisionKey,optionKey){
@@ -2587,10 +2665,9 @@ function dtResolvedBackground(definition){
 }
 
 function dtHelperImage(pose="in_piedi"){
-  const helper=DT_HELPERS[dtHelperChoice()?.value];
+  const helper=dtPublishedCatalog()[dtHelperChoice()?.value];
   if(!helper) return "";
-  const styleArt=helper.art?.[app.style]||helper.art?.papercut||helper.art?.paper||helper.art;
-  const resolved=styleArt?.[pose]||styleArt?.in_piedi||helper.image||"";
+  const resolved=dtCatalogCharacterImage(helper,pose);
   return resolved?`${resolved}?v=20260730-fix3`:"";
 }
 
@@ -2608,8 +2685,11 @@ function dtPreviewScene(step){
         style="left:${slot.x*100}%;top:${slot.y*100}%;height:${slot.scale*100}%;z-index:${slot.z+2}"
         onerror="this.classList.add('dt-scene-cameo');this.style='';">`;
     }
-    if(slot.role==="helper"&&dtHelperChoice()?.value){
-      return `<img class="dt-scene-layer" src="${escapeHtml(dtHelperImage(slot.pose))}" alt=""
+    const assignment=dtCastChoicesForComposer()[slot.role];
+    if(assignment){
+      const character=assignment.source==="catalog_character"?dtPublishedCatalog()[assignment.character_id]:null;
+      const src=assignment.asset_ref||dtCatalogCharacterImage(character,slot.pose);
+      return `<img class="dt-scene-layer" src="${escapeHtml(src)}" alt=""
         style="left:${slot.x*100}%;top:${slot.y*100}%;height:${slot.scale*100}%;z-index:${slot.z+2}"
         onerror="this.remove()">`;
     }
@@ -2685,7 +2765,7 @@ function dtDecisionHtml(step){
         ${(decision.options||[]).map(option=>`
           <button type="button" class="dt-decision-option ${selected===option.key?"selected":""}"
             onclick="selectDtNarrativeChoice('${escapeHtml(decision.key)}','${escapeHtml(option.key)}')">
-            <strong>${escapeHtml(option.label)}</strong>
+            <strong>${escapeHtml(dtReplaceName(option.label))}</strong>
             <small>${escapeHtml(dtOptionConsequences(decision.key,option.key))}</small>
           </button>`).join("")}
       </div>
@@ -2699,7 +2779,7 @@ function dtDecisionHtml(step){
       <p class="dt-decision-note">Ogni aiutante entra nella storia con un passaggio scritto apposta.</p>
       <div class="dt-decision-options">
         ${(decision.catalog_roster||[]).map(entry=>{
-          const helper=DT_HELPERS[entry.key];
+          const helper=dtPublishedCatalog()[entry.key];
           if(!helper) return "";
           return `<button type="button" class="dt-decision-option ${selected===entry.key?"selected":""}"
             onclick="selectDtHelper('${escapeHtml(entry.key)}','${escapeHtml(entry.entrance_ref)}')">
@@ -2754,7 +2834,7 @@ window.renderComposerStep=function(){
       <main class="panel dt-walk-main">
         <div class="dt-moment-index">Momento ${dtTrailIndex+1}</div>
         ${dtProgressHtml()}
-        <h1 class="step-title">${escapeHtml(step.title||"La storia continua")}</h1>
+        <h1 class="step-title">${escapeHtml(dtReplaceName(step.title||"La storia continua"))}</h1>
         <p class="dt-moment-context">${escapeHtml(dtReplaceName(step.composer_summary||"Il bosco cambia intorno al protagonista."))}</p>
 
         ${dtDecisionHtml(step)}
@@ -2882,13 +2962,13 @@ window.finishStoryComposer=async function(){
         story:app.activeStoryDefinition.slug,
         style:app.style,
         protagonist:{name:protagonist.name,asset_ref:protagonist.image},
-        cast:{helper:helperId},
+        cast:{...dtCastChoicesForComposer(),helper:helperId||dtCastChoicesForComposer().helper},
         setup:dtSetupChoiceMap(),
         branches:dtBranchChoiceMap()
       }
     });
 
-    const bad=dtComposedBook.pages.filter(page=>/\[[^\]]+\]/.test(page.text||""));
+    const bad=dtComposedBook.pages.filter(page=>/\[[^\]]+\]/.test(`${page.title||""} ${page.text||""}`));
     if(bad.length){
       console.error("[DreamTaily] Marker residui:",bad);
       throw new Error("MARKER_IRRISOLTI");
@@ -3554,13 +3634,13 @@ async function dtComposeFromCurrentState(){
       story:app.activeStoryDefinition.slug,
       style:app.style,
       protagonist:{name:protagonist.name,asset_ref:protagonist.image},
-      cast:{helper:helperId},
+      cast:{...dtCastChoicesForComposer(),helper:helperId||dtCastChoicesForComposer().helper},
       setup:dtSetupChoiceMap(),
       branches:dtBranchChoiceMap()
     }
   });
 
-  const bad=book.pages.filter(page=>/\[[^\]]+\]/.test(page.text||""));
+  const bad=book.pages.filter(page=>/\[[^\]]+\]/.test(`${page.title||""} ${page.text||""}`));
   if(bad.length){
     console.error("[DreamTaily] Marker residui nel libro ripristinato:",bad);
     throw new Error("MARKER_IRRISOLTI");
@@ -3571,6 +3651,9 @@ async function dtComposeFromCurrentState(){
 
 function dtStoryChoicesComplete(bookStory){
   const definition=app.activeStoryDefinition;
+  const declaredCastComplete=(definition?.cast_slots||[]).every(slot=>
+    bookStory?.story_cast_assignments?.some(item=>item.slot_key===slot.key)
+  );
   const setupComplete=(definition?.setup||[])
     .filter(item=>item.key!=="atmosfera")
     .every(item=>Boolean(app.setupChoices[item.key]||app.compositionChoices[item.key]));
@@ -3589,7 +3672,7 @@ function dtStoryChoicesComplete(bookStory){
     }
     return true;
   });
-  return setupComplete&&decisionsComplete;
+  return declaredCastComplete&&setupComplete&&decisionsComplete;
 }
 
 async function dtRestorePersistedBook(){

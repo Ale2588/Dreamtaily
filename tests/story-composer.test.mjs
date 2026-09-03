@@ -259,3 +259,16 @@ test("composes named cast slots from user and catalog sources", () => {
   });
   assert.equal(dreamtaily.pages[0].text, "Etto arriva. Anna gioca con Etto.");
 });
+
+test("resolves protagonist and cast markers in page titles",()=>{
+  const markedStory=structuredClone(story);
+  markedStory.steps[0].title="Cosa decide [Nome] con [PERSONAGGIO:helper]?";
+  const book=composeStory({
+    story:markedStory,
+    scenes,
+    contentByRef,
+    catalog,
+    choices:{...baseChoices,cast:{helper:"etto"},branches:{d_sentiero:"felci"}}
+  });
+  assert.equal(book.pages[0].title,"Cosa decide Lia con Etto?");
+});
