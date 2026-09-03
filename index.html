@@ -939,6 +939,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 
 
 <section class="screen" id="screen-checkout"></section>
+<section class="screen" id="screen-render-status"></section>
 <section class="screen" id="screen-delivered"></section>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -2544,6 +2545,7 @@ let dtTrail=[];
 let dtTrailIndex=0;
 let dtCheckoutEmail="";
 let dtDeliverySlug="";
+let dtPendingRender=null;
 
 function dtProtagonist(){
   const current=app.bookStories.find(item=>item.id===app.activeBookStoryId);
@@ -3272,13 +3274,13 @@ window.openDtCheckout=async function(){
       <main class="panel" style="padding:clamp(24px,4vw,40px)">
         <div class="phase">Libro digitale · €9,90</div>
         <h1 class="step-title">Dove lo consegniamo?</h1>
-        <p class="intro">Dopo il pagamento dimostrativo generiamo tutte le ${app.bookStories.length} storie del libro. Può richiedere qualche minuto.</p>
+        <p class="intro">Conferma il libro per congelarne contenuti, protagonisti e versioni. In questo collaudo non partirà alcuna generazione IA.</p>
         <label for="dt-email">Email</label>
         <input class="input" id="dt-email" type="email" value="${escapeHtml(dtCheckoutEmail)}"
           placeholder="nome@esempio.it" oninput="updateDtPayButton()">
         <div class="error" id="checkout-error"></div>
         <button class="btn btn-primary" id="dt-pay" style="width:100%;margin-top:18px"
-          onclick="completeDtCheckout()" disabled>Paga €9,90 (finto) e genera</button>
+          onclick="completeDtCheckout()" disabled>Conferma il libro (nessun addebito)</button>
       </main>
       <aside class="panel" style="padding:24px">
         <h2 style="font-family:'Baloo 2'">Il tuo libro</h2>
@@ -3314,49 +3316,46 @@ async function dtMarkStoryComposed(){
   await loadBookStories();
 }
 
-async function dtMarkReady(){
-  const client=getSupabase();
-  const now=new Date().toISOString();
-  const {error:storyError}=await client.from("book_stories")
-    .update({status:"ready",updated_at:now})
-    .eq("book_id",app.bookId);
-  if(storyError) throw storyError;
-  const {error:bookError}=await client.from("books")
-    .update({status:"ready",updated_at:now})
-    .eq("id",app.bookId);
-  if(bookError) throw bookError;
+async function dtLoadRenderStatus(){
+  if(!app.bookId) return null;
+  const {data,error}=await getSupabase().from("book_renders")
+    .select("id,book_id,status,permalink_slug,pages,error,confirmed_at,created_at,updated_at")
+    .eq("book_id",app.bookId).order("created_at",{ascending:false}).limit(1).maybeSingle();
+  if(error) throw error;
+  dtPendingRender=data||null;
+  return dtPendingRender;
 }
 
-function dtRenderProgress(pages=[]){
-  const total=pages.length||8;
-  const ready=pages.filter(page=>page?.render?.status==="ready").length;
-  const button=document.getElementById("dt-pay");
-  if(button) button.textContent=`Generazione ${ready}/${total}…`;
-}
-
-async function dtGenerateFinalRender(){
-  if(!app.bookId) throw new Error("BOOK_REQUIRED");
-  const client=getSupabase();
-  const key=`book-${app.bookId}`;
-  for(let round=0;round<10;round++){
-    const {data,error}=await client.functions.invoke("render-book",{
-      body:{book_id:app.bookId,idempotency_key:key}
-    });
-    if(error) throw error;
-    if(!data) throw new Error("RENDER_EMPTY_RESPONSE");
-    dtRenderProgress(data.pages||[]);
-    if(data.status==="ready"){
-      if(!data.permalink_slug) throw new Error("RENDER_READY_WITHOUT_SLUG");
-      return data;
-    }
-    if(data.status==="review"||data.status==="failed"){
-      const failed=(data.pages||[]).filter(page=>page?.render?.status==="failed").map(page=>page.page_id).join(",");
-      throw new Error(`RENDER_${String(data.status).toUpperCase()}:${failed||"unknown"}`);
-    }
-    await new Promise(resolve=>setTimeout(resolve,700));
-  }
-  throw new Error("RENDER_DID_NOT_FINISH");
-}
+window.renderDtBookStatus=async function(render=null){
+  const job=render||await dtLoadRenderStatus();
+  if(!job){ await renderBookWorkspace(); return; }
+  dtPendingRender=job;
+  const pages=Array.isArray(job.pages)?job.pages:[];
+  const readyPages=pages.filter(page=>page?.render?.status==="ready").length;
+  const labels={queued:"In attesa",running:"In creazione",ready:"Pronto",failed:"Interrotto",review:"Da verificare"};
+  const ready=job.status==="ready"&&job.permalink_slug;
+  const screen=document.getElementById("screen-render-status");
+  screen.innerHTML=`<div class="shell" style="max-width:760px">
+    <div class="topbar"><button class="brand-dark" onclick="showScreen('landing')"><img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span></button><div class="phase">Stato del libro</div></div>
+    <div class="panel" style="padding:clamp(28px,5vw,52px);text-align:center">
+      <div style="font-size:58px">${ready?'🎉':job.status==='failed'||job.status==='review'?'🛠️':'✨'}</div>
+      <div class="phase">${escapeHtml(labels[job.status]||job.status)}</div>
+      <h1 class="step-title">${ready?'Il tuo libro è pronto':'Il tuo libro è stato confermato'}</h1>
+      <p class="intro">${job.status==='queued'
+        ?'Contenuti e personaggi sono congelati. La generazione IA è volutamente sospesa durante questo collaudo.'
+        :job.status==='running'?`Pagine completate: ${readyPages} su ${pages.length}. Puoi chiudere questa pagina e tornare più tardi.`
+        :ready?'La generazione è terminata e il libro può essere aperto.'
+        :'Il lavoro è salvato e potrà essere ripreso senza rigenerare le pagine già completate.'}</p>
+      <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
+        ${ready?`<button class="btn btn-primary" onclick="window.location.href='libro.html?slug=${encodeURIComponent(job.permalink_slug)}'">Apri il libro</button>`:''}
+        <button class="btn btn-soft" onclick="renderDtBookStatus()">Aggiorna stato</button>
+        <button class="btn btn-primary" onclick="startNewBook()">Crea un altro libro</button>
+        <button class="btn btn-ghost" onclick="showScreen('landing')">Torna alla home</button>
+      </div>
+    </div>
+  </div>`;
+  showScreen("render-status");
+};
 
 window.completeDtCheckout=async function(){
   updateDtPayButton();
@@ -3369,17 +3368,18 @@ window.completeDtCheckout=async function(){
   );
   if(!complete){showError("checkout-error","Completa tutte le storie prima di concludere il libro.");return;}
   const button=document.getElementById("dt-pay");
-  button.disabled=true; button.textContent="Preparo il libro…"; showError("checkout-error",null);
+  button.disabled=true; button.textContent="Confermo il libro…"; showError("checkout-error",null);
   try{
-    const render=await dtGenerateFinalRender();
-    dtDeliverySlug=render.permalink_slug;
-    await dtMarkReady();
-    renderDtDelivered();
-    showScreen("delivered");
+    const {data,error}=await getSupabase().functions.invoke("checkout-book",{
+      body:{book_id:app.bookId,email:dtCheckoutEmail,idempotency_key:`checkout-${app.bookId}`}
+    });
+    if(error) throw error;
+    if(!data?.render_id) throw new Error("CHECKOUT_EMPTY_RESPONSE");
+    await renderDtBookStatus(data);
   }catch(error){
-    console.error("[DreamTaily] Final book flow error:",error);
-    showError("checkout-error","La generazione si è interrotta. Puoi riprovare: le pagine già create non verranno rifatte.");
-    button.disabled=false; button.textContent="Riprova generazione";
+    console.error("[DreamTaily] Checkout confirmation error:",error);
+    showError("checkout-error","Non sono riuscito a confermare il libro. La bozza è intatta: puoi riprovare senza perdere nulla.");
+    button.disabled=false; button.textContent="Riprova la conferma";
   }
 };
 
@@ -3457,7 +3457,7 @@ async function dtLoadSavedBooks(){
           )
         )
       `)
-      .in("status",["draft","ready"])
+      .in("status",["draft","ready_for_checkout","paid","generating","ready","failed"])
       .order("updated_at",{ascending:false});
 
     if(error) throw error;
@@ -3507,6 +3507,8 @@ function dtRenderSavedBooks(){
     const image=protagonist?.image_url||template?.image||"assets/char/water/rabbit.png";
     const title=book.title||template?.title||"Il tuo libro";
     const ready=book.status==="ready";
+    const draft=book.status==="draft";
+    const statusLabel=ready?"Pronto":draft?"Bozza":book.status==="failed"?"Da riprendere":"In creazione";
     const date=new Date(book.updated_at||book.created_at||Date.now())
       .toLocaleDateString("it-IT",{day:"2-digit",month:"short",year:"numeric"});
 
@@ -3514,7 +3516,7 @@ function dtRenderSavedBooks(){
       <article class="dt-saved-book">
         <div class="dt-saved-book-cover">
           <img src="${escapeHtml(image)}" alt="" onerror="this.src='assets/char/water/rabbit.png'">
-          <span class="dt-saved-book-status">${ready?"Pronto":"Bozza"}</span>
+          <span class="dt-saved-book-status">${statusLabel}</span>
         </div>
         <div class="dt-saved-book-body">
           <h3>${escapeHtml(title)}</h3>
@@ -3525,11 +3527,9 @@ function dtRenderSavedBooks(){
           </div>
           <div class="dt-saved-book-actions">
             <button class="btn btn-primary" onclick="dtOpenSavedBook('${book.id}')">
-              ${ready?"Apri":"Riprendi"}
+              ${ready?"Apri":draft?"Riprendi":"Controlla"}
             </button>
-            ${ready?`<button class="btn btn-soft" onclick="dtEditSavedBook('${book.id}')">Modifica</button>`:""}
-            <button class="btn btn-ghost" style="color:#a8402e"
-              onclick="dtDeleteSavedBook('${book.id}')">Elimina</button>
+            ${draft?`<button class="btn btn-ghost" style="color:#a8402e" onclick="dtDeleteSavedBook('${book.id}')">Elimina</button>`:""}
           </div>
         </div>
       </article>`;
@@ -3573,6 +3573,12 @@ window.dtOpenSavedBook=async function(bookId){
       if(!data?.permalink_slug) throw new Error("FINAL_RENDER_NOT_FOUND");
       const base=location.pathname.replace(/index\.html$/," ").trim();
       location.href=`${location.origin}${base.endsWith("/")?base:base+"/"}libro.html?slug=${encodeURIComponent(data.permalink_slug)}`;
+      return;
+    }
+    if(saved&&saved.status!=="draft"){
+      dtClearOnlyActiveBook();
+      app.bookId=bookId;
+      await renderDtBookStatus();
       return;
     }
     dtClearOnlyActiveBook();
@@ -3831,10 +3837,6 @@ async function dtRestorePersistedBook(){
   return true;
 }
 
-/*
- * Il codice originale cercava esclusivamente status=draft.
- * Dopo il checkout il libro diventa ready e spariva dalla landing.
- */
 window.detectDraftBook=async function(){
   try{
     await ensureUser();
@@ -3842,7 +3844,7 @@ window.detectDraftBook=async function(){
     const {data,error}=await client
       .from("books")
       .select("id,status,updated_at")
-      .in("status",["draft","ready"])
+      .in("status",["draft","ready_for_checkout","paid","generating","ready","failed"])
       .order("updated_at",{ascending:false})
       .limit(1)
       .maybeSingle();
@@ -3855,9 +3857,8 @@ window.detectDraftBook=async function(){
       app.bookFlowMode=data.status==="draft"?'add_story':'new_book';
       if(button){
         button.style.display="";
-        button.textContent=data.status==="ready"
-          ?"Apri il tuo libro →"
-          :"Riprendi il tuo libro →";
+        button.textContent=data.status==="draft"?"Riprendi il tuo libro →":
+          data.status==="ready"?"Apri il tuo libro →":"Controlla il tuo libro →";
       }
     }else if(button){
       button.style.display="none";
@@ -3872,6 +3873,14 @@ window.resumeDraftBook=async function(){
     if(!app.bookId) await window.detectDraftBook();
     if(!app.bookId){
       showScreen("stories");
+      return;
+    }
+
+    const {data:book,error:bookError}=await getSupabase().from("books")
+      .select("id,status").eq("id",app.bookId).maybeSingle();
+    if(bookError) throw bookError;
+    if(book&&book.status!=="draft"){
+      await renderDtBookStatus();
       return;
     }
 

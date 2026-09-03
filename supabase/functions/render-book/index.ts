@@ -121,6 +121,20 @@ function planMultiStoryRender(contexts:any[]){
   })));
 }
 
+function contextsFromCheckoutSnapshot(snapshot:any){
+  if(snapshot?.schema_version!=="checkout-book-v1"||!Array.isArray(snapshot?.stories))
+    throw new Error("CHECKOUT_SNAPSHOT_REQUIRED");
+  return snapshot.stories.map((story:any)=>{
+    const protagonist=(story.cast||[]).find((item:any)=>item.slot_key==="protagonist")?.character;
+    if(!story.content?.meta||!Array.isArray(story.content?.pages))
+      throw new Error(`BOOK_SNAPSHOT_MISSING:${story.book_story_id}`);
+    if(!protagonist?.identity_prompt) throw new Error(`PROTAGONIST_IDENTITY_MISSING:${story.book_story_id}`);
+    if(!protagonist?.reference?.storage_path) throw new Error(`PROTAGONIST_REFERENCE_MISSING:${story.book_story_id}`);
+    return {book_story_id:story.book_story_id,story_slug:story.story_slug,position:story.position,
+      snapshot:story.content,identity:protagonist.identity_prompt,reference:protagonist.reference};
+  });
+}
+
 async function protagonistBlob(path:string){
   const {data,error}=await svc.storage.from("character-references").download(path);
   if(error||!data) throw error||new Error("PROTAGONIST_REFERENCE_DOWNLOAD_FAILED");
@@ -181,38 +195,50 @@ Deno.serve(async(req:Request)=>{
   if(req.method==="OPTIONS") return new Response("ok",{headers:cors});
   if(req.method!=="POST") return reply(405,{error:"METHOD_NOT_ALLOWED"});
   try{
-    if(!OPENAI) throw new Error("OPENAI_API_KEY_MISSING");
     const user=await authenticate(req);
     const body=await req.json().catch(()=>({}));
     const bookId=String(body.book_id||"").trim();
     const key=String(body.idempotency_key||"").trim();
+    const start=body.start===true;
     if(!bookId) return reply(400,{error:"BOOK_ID_REQUIRED"});
     if(!key) return reply(400,{error:"IDEMPOTENCY_KEY_REQUIRED"});
 
-    const ctx=await loadContext(bookId,user.id);
     let {data:job,error:je}=await svc.from("book_renders").select("*").eq("idempotency_key",key).maybeSingle();
     if(je) throw je;
-    if(job&&job.book_id!==bookId) throw new Error("IDEMPOTENCY_KEY_CONFLICT");
-    if(job&&job.status!=="running") return reply(200,{
+    if(!job) throw new Error("CHECKOUT_REQUIRED");
+    if(job.book_id!==bookId) throw new Error("IDEMPOTENCY_KEY_CONFLICT");
+    const {data:owned,error:ownedError}=await svc.from("books").select("id").eq("id",bookId).eq("profile_id",user.id).maybeSingle();
+    if(ownedError) throw ownedError;
+    if(!owned) throw new Error("BOOK_NOT_FOUND");
+    if(job.status==="queued"&&!start) return reply(202,{
       render_id:job.id,status:job.status,pages:job.pages,permalink_slug:job.permalink_slug,idempotent:true
     });
-
-    if(!job){
-      const {data,error}=await svc.from("book_renders").insert({
-        book_id:bookId,status:"running",idempotency_key:key,book_snapshot:ctx.snapshot,
-        pages:planMultiStoryRender(ctx.stories),started_at:new Date().toISOString(),updated_at:new Date().toISOString()
-      }).select("*").single();
-      if(error) throw error;
-      job=data;
+    if(job.status==="queued"&&start){
+      if(!OPENAI) throw new Error("OPENAI_API_KEY_MISSING");
+      const contexts=contextsFromCheckoutSnapshot(job.book_snapshot);
+      const now=new Date().toISOString();
+      const {data:started,error:startError}=await svc.from("book_renders")
+        .update({status:"running",pages:planMultiStoryRender(contexts),started_at:now,updated_at:now})
+        .eq("id",job.id).eq("status","queued").select("*").single();
+      if(startError) throw startError;
+      job=started;
+      const {error:bookStartError}=await svc.from("books").update({status:"generating",updated_at:now}).eq("id",bookId);
+      if(bookStartError) throw bookStartError;
     }
+    if(job.status!=="running") return reply(200,{
+      render_id:job.id,status:job.status,pages:job.pages,permalink_slug:job.permalink_slug,idempotent:true
+    });
+    if(!OPENAI) throw new Error("OPENAI_API_KEY_MISSING");
+
+    const contexts=contextsFromCheckoutSnapshot(job.book_snapshot);
 
     await ensureBucket();
-    const storyById=new Map(ctx.stories.map((story:any)=>[story.book_story_id,story]));
+    const storyById=new Map(contexts.map((story:any)=>[story.book_story_id,story]));
     const protagonistByStory=new Map();
-    for(const story of ctx.stories){
+    for(const story of contexts){
       protagonistByStory.set(story.book_story_id,await protagonistBlob(story.reference.storage_path));
     }
-    const pages=(job.pages||planMultiStoryRender(ctx.stories)).map((p:any)=>({...p,render:{...p.render}}));
+    const pages=(job.pages?.length?job.pages:planMultiStoryRender(contexts)).map((p:any)=>({...p,render:{...p.render}}));
 
     const pending=pages.map((page:any,index:number)=>({page,index}))
       .filter(({page}:any)=>page.render?.status!=="ready"&&Number(page.render?.attempts||0)<MAX_ATTEMPTS)
@@ -238,14 +264,19 @@ Deno.serve(async(req:Request)=>{
 
     const {data:done,error:de}=await svc.from("book_renders").update(payload).eq("id",job.id).select("*").single();
     if(de) throw de;
+    if(status!=="running"){
+      const {error:bookDoneError}=await svc.from("books")
+        .update({status:status==="ready"?"ready":"failed",updated_at:new Date().toISOString()}).eq("id",bookId);
+      if(bookDoneError) throw bookDoneError;
+    }
     const remaining=pages.filter((p:any)=>p.render?.status!=="ready"&&Number(p.render?.attempts||0)<MAX_ATTEMPTS).length;
     return reply(status==="running"?202:200,{
       render_id:done.id,status:done.status,pages:done.pages,permalink_slug:done.permalink_slug,idempotent:false,remaining
     });
   }catch(e){
     const d=msg(e);
-    const status=d.startsWith("AUTH_")?401:d==="BOOK_NOT_FOUND"?404:d==="BOOK_SNAPSHOT_MISSING"?409:500;
-    console.error("render-book-v3",d);
+    const status=d.startsWith("AUTH_")?401:d==="BOOK_NOT_FOUND"?404:/SNAPSHOT|CHECKOUT_REQUIRED|MISSING/.test(d)?409:500;
+    console.error("render-book-v5",d);
     return reply(status,{error:d});
   }
 });
