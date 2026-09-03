@@ -5,7 +5,9 @@ import fs from "node:fs";
 const source=fs.readFileSync("index.html","utf8");
 
 test("declared cast slots are selected explicitly from their allowed sources",()=>{
-  assert.match(source,/function dtMissingDeclaredCastSlot/);
+  assert.match(source,/window\.dtMissingDeclaredCastSlot=function/);
+  assert.match(source,/window\.dtMissingDeclaredCastSlot\?\.\(\)/);
+  assert.match(source,/window\.dtRenderDeclaredCastSlot\(missingSlot\)/);
   assert.match(source,/slot\.allowed_sources\|\|\[\]/);
   assert.match(source,/slot\.allowed_catalog_ids\|\|\[\]/);
   assert.match(source,/app\.activeStoryContract\?\.catalog\|\|DT_HELPERS/);

@@ -7,7 +7,7 @@ const checkout=fs.readFileSync(new URL("../supabase/functions/checkout-book/inde
 
 test("runtime skips the legacy initial atmosphere screen", () => {
   assert.match(html,/function dtOpenStoryEntry\(\)\{[\s\S]*?app\.currentStepKey=resolveEffectiveStart/);
-  assert.match(html,/dtMissingDeclaredCastSlot\(\)/);
+  assert.match(html,/window\.dtMissingDeclaredCastSlot\?\.\(\)/);
   assert.match(html,/\.filter\(item=>item\.key!==\"atmosfera\"\)/);
   assert.match(html,/const resolved=dtPrefixStoryRef\(definition\.background_ref\)/);
 });

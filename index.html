@@ -1886,8 +1886,8 @@ function dtCurrentPathChoices(){
 }
 
 function dtOpenStoryEntry(){
-  const missingSlot=dtMissingDeclaredCastSlot();
-  if(missingSlot){dtRenderDeclaredCastSlot(missingSlot);return}
+  const missingSlot=window.dtMissingDeclaredCastSlot?.();
+  if(missingSlot){window.dtRenderDeclaredCastSlot(missingSlot);return}
   app.currentStepKey=resolveEffectiveStart(app.activeStoryDefinition,{});
   renderComposerStep();
   showScreen("composer");
@@ -2560,12 +2560,12 @@ function dtCastChoicesForComposer(){
   return result;
 }
 
-function dtMissingDeclaredCastSlot(){
+window.dtMissingDeclaredCastSlot=function(){
   return (app.activeStoryDefinition?.cast_slots||[])
     .find(slot=>slot.key!=="protagonist"&&!dtCastAssignment(slot.key))||null;
-}
+};
 
-function dtRenderDeclaredCastSlot(slot){
+window.dtRenderDeclaredCastSlot=function(slot){
   const catalog=dtPublishedCatalog();
   const sources=slot.allowed_sources||[];
   const allowsSaved=sources.includes("character_asset")||sources.includes("user_character");
@@ -2578,7 +2578,7 @@ function dtRenderDeclaredCastSlot(slot){
   const screen=document.getElementById("screen-composer");
   screen.innerHTML=`<div class="shell"><div class="topbar"><button class="brand-dark" onclick="backFromDtComposer()"><img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span></button><div class="phase">Scegli il cast</div></div><div class="panel" style="padding:clamp(24px,4vw,42px)"><h1 class="step-title">Chi sarà ${escapeHtml(slot.label||slot.key)}?</h1><p class="intro">Questa storia richiede una scelta esplicita per questo personaggio.</p><div class="cast-options">${savedEntries.map(character=>`<button type="button" class="cast-option" onclick="selectDtDeclaredCast('${escapeHtml(slot.key)}','character_asset','${escapeHtml(character.id)}')"><img src="${escapeHtml(character.image_url||'assets/char/water/rabbit.png')}" alt=""><strong>${escapeHtml(character.name)}</strong></button>`).join("")}${catalogEntries.map(([key,character])=>`<button type="button" class="cast-option" onclick="selectDtDeclaredCast('${escapeHtml(slot.key)}','catalog_character','${escapeHtml(key)}')"><img src="${escapeHtml(dtCatalogCharacterImage(character)||'assets/char/water/rabbit.png')}" alt=""><strong>${escapeHtml(character.name||key)}</strong></button>`).join("")}</div><div class="error" id="composer-error"></div></div></div>`;
   showScreen("composer");
-}
+};
 
 window.selectDtDeclaredCast=async function(slotKey,source,value){
   try{
