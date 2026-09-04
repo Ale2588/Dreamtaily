@@ -8,7 +8,7 @@
 <link rel="apple-touch-icon" href="assets/brand/dreamtaily-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Lora:ital@0;1&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Lora:ital@0;1&family=Nunito:wght@400;600;700;800&display=swap&family=Faustina:wght@600&family=Hanken+Grotesk:wght@400;500;600&family=Caveat:wght@500;600" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -464,110 +464,392 @@ body.dreamtaily-configurator-open{overflow:hidden}
 
 .dt-build-badge{position:fixed;left:10px;bottom:10px;z-index:30000;padding:5px 8px;border-radius:999px;background:rgba(61,43,31,.86);color:#fff;font-size:10px;font-weight:800;letter-spacing:.35px;box-shadow:0 4px 14px rgba(0,0,0,.18);pointer-events:none}
 .dt-asset-error{position:absolute;inset:0;z-index:20;display:grid;place-items:center;padding:24px;background:#fff3ef;color:#9a3f2d;text-align:center;font-weight:800;line-height:1.5}
+
+/* ===== HOME (design handoff) ===== */
+/* ===================== DreamTaily home — direzione "libro di carta" =====================
+   Tutto è scoped sotto .dth per non collidere con gli stili dell'app.
+   Token e misure dal design handoff (variante 3a desktop / 3b mobile).
+======================================================================================= */
+.dth{
+  --carta:#fdf5e6; --miele:#fbe7c2; --disco:#f7dfae; --disco-sm:#f6dda8;
+  --sera:#22321f; --scrim:#1b2a19;
+  --azione:#e8735a; --azione-giu:#c25743; --azione-giu-scuro:#b8503c; --azione-hover:#ef7f67;
+  --evid:#f2c14e; --testo:#3a2a1d; --testo-2:#6f5b47; --testo-3:#8a7256;
+  --nav:#7a6551; --tratteggio:#dcc6a1; --tratteggio-miele:#d8b985;
+  --su-scuro:#f6ecd9; --teal:#5b9ea0;
+  --serif:'Faustina',Georgia,serif; --sans:'Hanken Grotesk',system-ui,sans-serif; --hand:'Caveat',cursive;
+  background:var(--carta); color:var(--testo); font-family:var(--sans);
+  text-align:left; overflow-x:hidden;
+}
+.dth *{box-sizing:border-box}
+.dth h1,.dth h2,.dth h3,.dth p,.dth ul,.dth li{margin:0;padding:0}
+.dth ul{list-style:none}
+.dth button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.dth :focus-visible{outline:2px solid var(--azione);outline-offset:3px;border-radius:4px}
+.dth img{display:block;max-width:100%}
+
+/* --- tipografia --- */
+.dth-h1{font-family:var(--serif);font-weight:600;font-size:58px;line-height:1.04;letter-spacing:-.02em}
+.dth-h2{font-family:var(--serif);font-weight:600;font-size:42px;line-height:1.04;letter-spacing:-.015em}
+.dth-h2-dark{font-size:52px;color:var(--su-scuro)}
+.dth-h2-sm{font-size:44px}
+.dth-h3{font-family:var(--serif);font-weight:600;font-size:25px}
+.dth-nb{display:block;white-space:nowrap}
+.dth-mark{display:inline-block;background:linear-gradient(transparent 74%,var(--evid) 74%,var(--evid) 96%,transparent 96%)}
+.dth-sub{font-size:18px;line-height:1.6;color:var(--testo-2);max-width:430px;margin-top:18px}
+.dth-body{font-size:16px;line-height:1.55;color:var(--testo-2)}
+.dth-body-dark{font-size:18px;color:rgba(246,236,217,.76);max-width:370px;margin-top:16px;line-height:1.6}
+.dth-eyebrow{font-family:var(--hand);font-size:26px;color:var(--azione-giu);margin-bottom:14px}
+.dth-eyebrow-gold{color:var(--evid)}
+.dth-hand{font-family:var(--hand);font-size:21px;color:var(--testo-3)}
+.dth-hand-red{font-size:23px;color:#b3543d}
+.dth-tiny{font-size:13px;color:var(--testo-3)}
+
+/* --- header --- */
+.dth-head{display:flex;justify-content:space-between;align-items:center;padding:24px 64px 14px}
+.dth-logo{display:flex;align-items:center;gap:10px}
+.dth-logo img{width:38px;height:38px}
+.dth-logo span{font-family:var(--serif);font-weight:600;font-size:23px;letter-spacing:-.01em;color:var(--testo)}
+.dth-nav{display:flex;align-items:center;gap:32px}
+.dth-nav a{font-size:15px;color:var(--nav);text-decoration:none}
+.dth-nav a:hover{color:var(--testo)}
+.dth-nav-cta{font-family:var(--serif);font-weight:600;font-size:17px;color:var(--testo);
+  border-bottom:2px solid var(--evid);padding-bottom:2px}
+.dth-burger{display:none;flex-direction:column;gap:6px;padding:6px}
+.dth-burger span{display:block;width:22px;height:2px;background:var(--testo)}
+
+/* --- hero --- */
+.dth-hero{position:relative;display:grid;grid-template-columns:1.02fr 1fr;gap:16px;align-items:end;
+  padding:36px 40px 0 64px;min-height:470px;overflow:hidden}
+.dth-hero-glow{position:absolute;left:-60px;top:-40px;width:760px;height:520px;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(242,193,78,.34),rgba(242,193,78,0))}
+.dth-hero-copy{position:relative;padding-bottom:64px;max-width:620px}
+.dth-ctarow{display:flex;gap:24px;align-items:center;margin-top:30px;flex-wrap:wrap}
+.dth-cta{background:var(--azione);color:#fffdf8;font-size:17px;font-weight:600;padding:18px 32px;
+  border-radius:999px;box-shadow:0 3px 0 var(--azione-giu),0 12px 24px -12px rgba(194,87,67,.75);
+  transition:background 180ms}
+.dth-cta:hover{background:var(--azione-hover)}
+.dth-cta-dark{box-shadow:0 3px 0 var(--azione-giu-scuro),0 14px 30px -14px rgba(0,0,0,.8)}
+.dth-link{font-family:var(--serif);font-weight:600;font-size:18px;color:var(--testo);
+  border-bottom:2px solid #d9c3a0;padding-bottom:3px}
+.dth-resume{display:inline-block;margin-top:16px;font-family:var(--serif);font-weight:600;font-size:16px;
+  color:var(--azione-giu);border-bottom:2px solid var(--evid);padding-bottom:2px}
+.dth-hand+.dth-hand{margin-top:0}
+.dth-hero-copy .dth-hand{margin-top:18px}
+
+.dth-hero-art{position:relative;width:440px;height:470px;justify-self:center}
+.dth-disc{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+  width:330px;height:330px;border-radius:50%;background:var(--disco)}
+.dth-dot{position:absolute;border-radius:50%}
+.dth-dot-teal{width:22px;height:22px;background:var(--teal);opacity:.5;left:14px;top:76px}
+.dth-dot-coral{width:13px;height:13px;background:var(--azione);opacity:.6;right:26px;top:36px}
+.dth-hero-img{position:absolute;left:46%;bottom:0;transform:translateX(-50%);
+  height:462px;width:auto;max-width:none;filter:drop-shadow(0 24px 26px rgba(58,42,29,.22))}
+
+.dth-groundrow{display:flex;justify-content:space-between;align-items:baseline;
+  border-top:2px dashed var(--tratteggio);padding:10px 64px 0;margin:0}
+
+/* --- tre passi --- */
+.dth-steps{background:var(--miele);padding:50px 0 52px;margin-top:22px}
+.dth-wrap{padding:0 64px}
+.dth-steps-head{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:16px}
+.dth-steps-grid{display:grid;grid-template-columns:1fr 1fr 1fr;column-gap:40px;align-items:end;padding-top:6px}
+.dth-step{display:contents}
+.dth-step-text{grid-row:1;align-self:end}
+.dth-step-img{grid-row:2;position:relative;display:flex;justify-content:center;align-items:flex-end;
+  min-height:300px;padding-top:26px}
+.dth-num{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;
+  border:2px solid var(--azione);border-radius:50%;font-family:var(--hand);font-size:22px;
+  color:var(--azione-giu);margin-bottom:10px}
+.dth-rot1{transform:rotate(-4deg)} .dth-rot2{transform:rotate(3deg)} .dth-rot3{transform:rotate(-2deg)}
+.dth-step-text h3{margin-bottom:6px}
+.dth-step-img img{position:relative;filter:drop-shadow(0 16px 18px rgba(58,42,29,.2))}
+.dth-si-1 img{height:288px;width:auto}
+.dth-si-2 img,.dth-si-3 img{width:100%;height:auto}
+.dth-flat img{filter:none;box-shadow:0 18px 28px -14px rgba(58,42,29,.45)}
+.dth-disc-sm{position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+  width:250px;height:250px;border-radius:50%;background:var(--disco-sm)}
+.dth-ground{height:0;border-top:2px dashed var(--tratteggio-miele);margin:0 64px}
+
+/* --- reveal --- */
+.dth-reveal{position:relative;background:var(--sera);color:var(--su-scuro);overflow:hidden}
+.dth-reveal-glow{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(110% 85% at 36% 40%,rgba(255,206,128,.22),rgba(255,206,128,0) 62%)}
+.dth-reveal-grid{position:relative;display:grid;grid-template-columns:1fr 430px;gap:52px;
+  align-items:center;padding:64px 64px 70px}
+.dth-scene{position:relative;height:440px}
+.dth-pool{position:absolute;left:50%;top:50%;width:540px;height:420px;border-radius:50%;
+  background:radial-gradient(circle at 50% 45%,rgba(255,222,160,.58),rgba(255,222,160,.15) 42%,rgba(255,222,160,0) 70%);
+  filter:blur(8px);transform:translate(-50%,-50%) scale(.42);opacity:.35;
+  transition:transform 1100ms cubic-bezier(.22,.7,.3,1),opacity 900ms ease}
+.dth-sheet{position:absolute;left:50%;bottom:40px;transform:translateX(-50%) rotate(-1.6deg);
+  width:400px;height:336px;background:linear-gradient(#fdf6e6,#f5e7cd);
+  box-shadow:0 28px 50px -18px rgba(0,0,0,.55);opacity:.55;transition:opacity 900ms ease}
+.dth-fox{position:absolute;left:50%;bottom:58px;transform:translateX(-50%);height:306px;width:auto;
+  max-width:none;filter:drop-shadow(0 18px 26px rgba(0,0,0,.4))}
+.dth-scrim{position:absolute;left:50%;bottom:40px;transform:translateX(-50%) rotate(-1.6deg);
+  width:400px;height:336px;background:var(--scrim);opacity:1;transition:opacity 950ms ease 120ms}
+.dth-caption{position:absolute;left:0;right:0;bottom:0;text-align:center;font-family:var(--hand);
+  font-size:21px;color:rgba(246,236,217,.72);opacity:0;transition:opacity 600ms ease 750ms}
+.dth-reveal.is-on .dth-pool{transform:translate(-50%,-50%) scale(1);opacity:1}
+.dth-reveal.is-on .dth-sheet{opacity:1}
+.dth-reveal.is-on .dth-scrim{opacity:0}
+.dth-reveal.is-on .dth-caption{opacity:1}
+.dth-replay{font-family:var(--hand);font-size:21px;color:rgba(246,236,217,.65);
+  border-bottom:1px solid rgba(246,236,217,.3);padding-bottom:2px}
+
+/* --- chiusura --- */
+.dth-close{background:var(--carta);padding:54px 64px 26px}
+.dth-close-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:end;
+  padding-bottom:36px;border-bottom:2px dashed var(--tratteggio)}
+.dth-assure li{display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start;
+  font-size:15px;color:var(--testo-2);line-height:1.5}
+.dth-assure li+li{margin-top:14px}
+.dth-anum{font-family:var(--hand);font-size:22px;color:var(--azione-giu);line-height:1.1}
+.dth-foot{display:flex;justify-content:space-between;align-items:center;padding-top:20px;flex-wrap:wrap;gap:10px}
+.dth-footlinks{display:flex;gap:18px}
+.dth-footlinks a{font-size:13.5px;color:var(--testo-3);text-decoration:none}
+.dth-footlinks a:hover{text-decoration:underline}
+
+/* ===================== MOBILE (3b) ===================== */
+@media (max-width:900px){
+  .dth-head{padding:16px 22px 10px}
+  .dth-logo img{width:30px;height:30px}
+  .dth-logo span{font-size:20px}
+  .dth-nav{display:none}
+  .dth-burger{display:flex}
+
+  .dth-hero{grid-template-columns:1fr;padding:18px 22px 0;min-height:0;gap:0}
+  .dth-hero-glow{width:420px;height:360px;left:-80px;top:-20px}
+  .dth-hero-copy{padding-bottom:22px;max-width:none}
+  .dth-eyebrow{font-size:23px;margin-bottom:10px}
+  .dth-h1{font-size:34px}
+  .dth-sub{font-size:16px;margin-top:14px;max-width:none}
+  .dth-ctarow{flex-direction:column;align-items:stretch;gap:14px;margin-top:22px}
+  .dth-cta{display:flex;justify-content:center;padding:18px 24px;width:100%}
+  .dth-link{align-self:center;border-bottom-width:2px}
+  .dth-hero-copy .dth-hand{margin-top:14px;text-align:center;font-size:19px}
+
+  .dth-hero-art{width:100%;height:326px;margin-top:6px}
+  .dth-disc{width:250px;height:250px;bottom:10px}
+  .dth-dot-teal{left:8px;top:40px;width:18px;height:18px}
+  .dth-dot-coral{right:14px;top:18px}
+  .dth-hero-img{height:318px;left:50%}
+  .dth-groundrow{padding:10px 22px 0;margin:0 0 0}
+  .dth-groundrow .dth-tiny{display:none}
+  .dth-groundrow .dth-hand{font-size:19px}
+
+  .dth-steps{padding:34px 0 30px;margin-top:16px}
+  .dth-wrap{padding:0}
+  .dth-steps-head{flex-direction:column;align-items:flex-start;gap:4px;padding:0 22px 14px}
+  .dth-h2{font-size:31px}
+  .dth-steps-grid{display:block;padding-top:0}
+  .dth-step{display:block;margin-bottom:26px}
+  .dth-step-text{padding:0 22px 14px}
+  .dth-step-img{min-height:0;padding-top:0;display:block;position:relative}
+  /* linea di terra ripetuta per ogni passo */
+  .dth-step-img::after{content:"";display:block;height:0;border-top:2px dashed var(--tratteggio-miele);margin:0 22px}
+  .dth-si-1{height:290px}
+  .dth-si-1 .dth-disc-sm{width:230px;height:230px;bottom:2px}
+  .dth-si-1 img{height:278px;position:absolute;left:50%;bottom:2px;transform:translateX(-50%)}
+  .dth-si-2 img{width:calc(100% - 16px);margin:0 auto -12px}
+  .dth-si-3 img{width:100%}
+  .dth-flat::after{display:none}
+  .dth-ground{display:none}
+  .dth-reveal-grid{grid-template-columns:1fr;gap:26px;padding:36px 22px 40px}
+  .dth-scene{height:300px}
+  .dth-pool{width:340px;height:290px}
+  .dth-sheet,.dth-scrim{width:264px;height:230px;bottom:34px}
+  .dth-fox{height:212px;bottom:46px}
+  .dth-h2-dark{font-size:34px}
+  .dth-body-dark{font-size:16px;max-width:none}
+
+  .dth-close{padding:34px 22px 20px}
+  .dth-close-grid{grid-template-columns:1fr;gap:26px;padding-bottom:26px}
+  .dth-h2-sm{font-size:31px}
+  .dth-anum{font-size:20px}
+  .dth-foot{padding-top:16px;font-size:13px}
+}
+
+/* --- accessibilità: nessun movimento --- */
+@media (prefers-reduced-motion:reduce){
+  .dth-pool,.dth-sheet,.dth-scrim,.dth-caption{transition:none !important}
+  .dth-pool{transform:translate(-50%,-50%) scale(1);opacity:1}
+  .dth-sheet{opacity:1}
+  .dth-scrim{opacity:0}
+  .dth-caption{opacity:1}
+  .dth-cta{transition:none}
+}
+
 </style>
 </head>
 <body>
 <div class="dt-build-badge">Build: Book-Creation 2026-07-30 fix-3</div>
 
 <section class="screen active" id="screen-landing">
-  <nav class="nav">
-    <button class="logo" type="button" onclick="showScreen('landing')">
-      <img src="assets/brand/dreamtaily-icon.png" alt="">
-      <span>Dream<b>Taily</b></span>
-    </button>
-  </nav>
+<div class="dth">
 
-  <div class="hero">
-    <div class="hero-copy">
-      <div class="kicker">✦ UNA STORIA CHE COMINCIA DA LUI</div>
-      <h1>Crea il suo personaggio.<br>Apri il suo <em>mondo.</em></h1>
-      <p>DreamTaily trasforma un bambino o un personaggio inventato in un eroe illustrato, pronto a vivere storie sempre nuove e a diventare il cuore del suo libro.</p>
-      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:30px">
-        <button class="btn btn-primary" onclick="showScreen('creator')">Crea il suo personaggio →</button>
-        <button class="btn btn-soft" id="resume-book-btn" onclick="resumeDraftBook()" style="display:none">Riprendi il tuo libro</button>
-          <button class="btn btn-ghost" onclick="openCharacterLibrary()">Apri la libreria</button>
-        <span style="font-size:13px;font-weight:700;color:#f7e9c8">Il primo personaggio prende vita in pochi istanti</span>
+  <!-- ============ HEADER ============ -->
+  <header class="dth-head">
+    <button class="dth-logo" type="button" onclick="showScreen('landing')">
+      <img src="assets/home/dreamtaily-icon.png" alt="" width="38" height="38">
+      <span>DreamTaily</span>
+    </button>
+    <nav class="dth-nav">
+      <a href="#dth-passi">Come funziona</a>
+      <a href="#dth-reveal">Gli stili</a>
+      <a href="#dth-passi">Le storie</a>
+      <button type="button" class="dth-nav-cta" onclick="openCharacterLibrary()">Accedi</button>
+    </nav>
+    <button class="dth-burger" type="button" aria-label="Menu" onclick="openCharacterLibrary()">
+      <span></span><span></span>
+    </button>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section class="dth-hero">
+    <div class="dth-hero-glow" aria-hidden="true"></div>
+
+    <div class="dth-hero-copy">
+      <p class="dth-eyebrow">Una storia che comincia da lui</p>
+      <h1 class="dth-h1">
+        <span class="dth-nb">Crea il suo <span class="dth-mark">personaggio.</span></span>
+        <span class="dth-nb">Apri il suo mondo.</span>
+      </h1>
+      <p class="dth-sub">Lo componiamo nello stile che scegli e diventa il protagonista di tutte le sue storie.</p>
+
+      <div class="dth-ctarow">
+        <button class="dth-cta" onclick="showScreen('creator')">Crea il suo personaggio</button>
+        <button class="dth-link" onclick="openCharacterLibrary()">Apri la libreria</button>
       </div>
+      <button class="dth-resume" id="resume-book-btn" onclick="resumeDraftBook()" style="display:none">Riprendi il tuo libro</button>
+
+      <p class="dth-hand">pronto in pochi minuti — e puoi rifarlo</p>
     </div>
-    <div class="hero-art"><img src="assets/char/water/rabbit.png" alt="Personaggio DreamTaily"></div>
+
+    <div class="dth-hero-art">
+      <div class="dth-disc" aria-hidden="true"></div>
+      <span class="dth-dot dth-dot-teal" aria-hidden="true"></span>
+      <span class="dth-dot dth-dot-coral" aria-hidden="true"></span>
+      <picture>
+        <source srcset="assets/home/bambino-carta.webp" type="image/webp">
+        <img class="dth-hero-img" src="assets/home/bambino-carta.png" alt="Il personaggio illustrato di un bambino, in stile carta ritagliata" width="620" height="930">
+      </picture>
+    </div>
+  </section>
+
+  <div class="dth-groundrow">
+    <span class="dth-hand">tav. i — stile carta ritagliata</span>
+    <span class="dth-tiny">tutti i personaggi stanno sulla stessa linea</span>
   </div>
 
-  <section class="home-section">
-    <div class="home-heading">
-      <div class="phase">Come funziona</div>
-      <h2>Un personaggio, tante avventure, tutti i libri che vuoi.</h2>
-      <p>Il cuore di DreamTaily non è compilare un ordine. È creare un personaggio che può tornare, crescere e vivere storie diverse, anche partendo più volte dallo stesso canovaccio.</p>
-    </div>
-
-    <div class="home-steps">
-      <article class="home-step">
-        <div class="home-step-num">1</div>
-        <div class="home-step-icon">✨</div>
-        <h3>Dai vita al personaggio</h3>
-        <p>Scegli lo stile, inserisci pochi dettagli e incontralo illustrato in pochi istanti.</p>
-      </article>
-      <article class="home-step">
-        <div class="home-step-num">2</div>
-        <div class="home-step-icon">🗺️</div>
-        <h3>Scegli le sue avventure</h3>
-        <p>Usalo nelle storie che preferite e componi il cast di ogni racconto.</p>
-      </article>
-      <article class="home-step">
-        <div class="home-step-num">3</div>
-        <div class="home-step-icon">📚</div>
-        <h3>Componi il suo libro</h3>
-        <p>Raccogli più storie in un libro personale, fatto per essere riletto e ricordato.</p>
-      </article>
-    </div>
-  </section>
-
-  <section class="home-showcase">
-    <div class="home-showcase-copy">
-      <div class="phase">Il primo incontro</div>
-      <h2>Prima si vede. Poi si salva.</h2>
-      <p>Il personaggio prende vita davanti a voi. Lo guardate insieme, aggiungete ciò che manca e poi scegliete la sua prima avventura.</p>
-      <button class="btn btn-soft" onclick="showScreen('creator')">Inizia dal personaggio</button>
-    </div>
-    <div class="home-showcase-art">
-      <div class="showcase-card one"><img src="assets/char/paper/rabbit.png" alt="Paper Cut"></div>
-      <div class="showcase-card two"><img src="assets/char/water/bear.png" alt="Acquerello"></div>
-      <div class="showcase-card three"><img src="assets/char/crayon/fox.png" alt="Pastelli"></div>
-    </div>
-  </section>
-
-  <section class="home-proof">
-    <div class="home-heading compact">
-      <div class="phase">Pensato per le famiglie</div>
-      <h2>Facile da capire. Bello da vivere insieme.</h2>
-    </div>
-    <div class="proof-grid">
-      <div class="proof-card">
-        <div class="proof-stars">★★★★★</div>
-        <p>“Il momento in cui si è visto illustrato è stato quello che ha reso tutto reale.”</p>
-        <span>Elena, mamma di Sofia</span>
+  <!-- ============ TRE PASSI ============ -->
+  <section class="dth-steps" id="dth-passi">
+    <div class="dth-wrap">
+      <div class="dth-steps-head">
+        <h2 class="dth-h2">Un personaggio, tante avventure.</h2>
+        <span class="dth-hand dth-hand-red">tre passi, tre stili</span>
       </div>
-      <div class="proof-card">
-        <div class="proof-stars">★★★★★</div>
-        <p>“Non sembrava un form. Sembrava l’inizio di una storia fatta per noi.”</p>
-        <span>Marco, papà di Leo</span>
+
+      <div class="dth-steps-grid">
+        <article class="dth-step">
+          <div class="dth-step-text">
+            <span class="dth-num dth-rot1">1</span>
+            <h3 class="dth-h3">Dai vita al personaggio</h3>
+            <p class="dth-body">Una foto o una descrizione. Basta questo.</p>
+          </div>
+          <div class="dth-step-img dth-si-1">
+            <div class="dth-disc-sm" aria-hidden="true"></div>
+            <picture><source srcset="assets/home/bear.webp" type="image/webp">
+              <img src="assets/home/bear.png" alt="Un orso illustrato ad acquerello" loading="lazy" width="344" height="463"></picture>
+          </div>
+        </article>
+
+        <article class="dth-step">
+          <div class="dth-step-text">
+            <span class="dth-num dth-rot2">2</span>
+            <h3 class="dth-h3">Scegli le sue avventure</h3>
+            <p class="dth-body">Il bosco, il mare, la notte prima di dormire.</p>
+          </div>
+          <div class="dth-step-img dth-si-2">
+            <picture><source srcset="assets/home/scena-accampamento.webp" type="image/webp">
+              <img src="assets/home/scena-accampamento.png" alt="Una scena illustrata: accampamento nel bosco" loading="lazy" width="760" height="570"></picture>
+          </div>
+        </article>
+
+        <article class="dth-step">
+          <div class="dth-step-text">
+            <span class="dth-num dth-rot3">3</span>
+            <h3 class="dth-h3">Componi il suo libro</h3>
+            <p class="dth-body">Le storie si mettono in fila e diventano il suo libro.</p>
+          </div>
+          <div class="dth-step-img dth-si-3 dth-flat">
+            <picture><source srcset="assets/home/libro-doppia-pagina.webp" type="image/webp">
+              <img src="assets/home/libro-doppia-pagina.png" alt="La doppia pagina di un libro illustrato" loading="lazy" width="760" height="570"></picture>
+          </div>
+        </article>
       </div>
-      <div class="proof-card">
-        <div class="proof-stars">★★★★★</div>
-        <p>“La cosa più bella è poter immaginare lo stesso personaggio in avventure diverse.”</p>
-        <span>Priya, mamma di Aanya</span>
+      <div class="dth-ground" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- ============ IL REVEAL ============ -->
+  <section class="dth-reveal" id="dth-reveal">
+    <div class="dth-reveal-glow" aria-hidden="true"></div>
+    <div class="dth-reveal-grid">
+
+      <div class="dth-scene">
+        <div class="dth-pool" aria-hidden="true"></div>
+        <div class="dth-sheet" aria-hidden="true"></div>
+        <picture><source srcset="assets/home/fox.webp" type="image/webp">
+          <img class="dth-fox" src="assets/home/fox.png" alt="Una volpe illustrata ad acquerello" loading="lazy" width="426" height="560"></picture>
+        <div class="dth-scrim" aria-hidden="true"></div>
+        <p class="dth-caption">eccolo — stile acquerello</p>
+      </div>
+
+      <div class="dth-reveal-copy">
+        <p class="dth-eyebrow dth-eyebrow-gold">Il momento</p>
+        <h2 class="dth-h2 dth-h2-dark">
+          <span class="dth-nb">Prima si vede.</span>
+          <span class="dth-nb">Poi si salva.</span>
+        </h2>
+        <p class="dth-body dth-body-dark">Lo componiamo mentre guardi: la luce si accende e lui è lì. Da quel momento è suo.</p>
+        <div class="dth-ctarow">
+          <button class="dth-cta dth-cta-dark" onclick="showScreen('creator')">Crea il suo personaggio</button>
+          <button class="dth-replay" type="button" id="dth-replay">rivedi il momento</button>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="home-cta">
-    <div>
-      <div class="phase">Il primo passo</div>
-      <h2>Comincia dal suo personaggio.</h2>
-      <p>Pochi dettagli. Poi il primo incontro.</p>
+  <!-- ============ CHIUSURA ============ -->
+  <section class="dth-close">
+    <div class="dth-close-grid">
+      <div>
+        <h2 class="dth-h2 dth-h2-sm">
+          <span class="dth-nb">Comincia dal</span>
+          <span class="dth-nb">suo personaggio.</span>
+        </h2>
+        <div class="dth-ctarow">
+          <button class="dth-cta" onclick="showScreen('creator')">Crea il suo personaggio</button>
+          <button class="dth-link" onclick="openCharacterLibrary()">Apri la libreria</button>
+        </div>
+      </div>
+      <ul class="dth-assure">
+        <li><span class="dth-anum">1</span><span>Il personaggio si crea in pochi minuti e resta lo stesso in tutte le storie.</span></li>
+        <li><span class="dth-anum">2</span><span>Se non ti somiglia, lo rifai: nessun limite di tentativi.</span></li>
+        <li><span class="dth-anum">3</span><span>La foto serve solo a creare il personaggio: la cancelliamo subito dopo.</span></li>
+      </ul>
     </div>
-    <button class="btn btn-primary" onclick="showScreen('creator')">Crea il suo personaggio →</button>
+    <footer class="dth-foot">
+      <span class="dth-hand">DreamTaily — storie illustrate su misura</span>
+      <span class="dth-footlinks"><a href="#">Privacy</a><a href="#">Contatti</a><a href="#">Aiuto</a></span>
+    </footer>
   </section>
+
+</div>
 </section>
+
 
 <section class="screen" id="screen-creator">
   <div class="shell">
@@ -3831,5 +4113,34 @@ window.addEventListener("pageshow",()=>window.detectDraftBook());
 })();
 </script>
 
+<script>
+/* ---- Il reveal: l'unica animazione della home. Una volta sola, all'ingresso. ---- */
+(function(){
+  function initDthReveal(){
+    var el=document.getElementById('dth-reveal');
+    if(!el||el.dataset.dthInit)return;
+    el.dataset.dthInit='1';
+    var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var on=function(){el.classList.add('is-on');};
+    if(reduce){on();return;}
+    var fired=false, fire=function(){ if(!fired){fired=true;on();} };
+    if('IntersectionObserver' in window){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ fire(); io.disconnect(); } });
+      },{threshold:.35});
+      io.observe(el);
+    }
+    setTimeout(fire,4000); // fallback: non deve mai restare buia
+    var replay=document.getElementById('dth-replay');
+    if(replay) replay.addEventListener('click',function(){
+      el.classList.remove('is-on');
+      setTimeout(function(){el.classList.add('is-on');},380);
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initDthReveal);
+  else initDthReveal();
+  window.initDthReveal=initDthReveal;
+})();
+</script>
 </body>
 </html>
