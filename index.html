@@ -77,14 +77,14 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 .loader-bar::after{content:"";display:block;width:40%;height:100%;background:linear-gradient(90deg,var(--coral),var(--gold));animation:shimmer 1.8s infinite}
 .error{display:none;margin-top:13px;padding:12px 14px;border-radius:12px;background:#fdeae5;color:#a8402e;font-size:13px;font-weight:700}
 .error.visible{display:block}
-.wow{min-height:100svh;background:linear-gradient(160deg,#dbe8df,#f6ead7);padding:24px 18px 50px}
-.wow-wrap{max-width:1000px;margin:auto}
-.wow-stage{position:relative;min-height:620px;overflow:hidden;border-radius:32px;background:#efe7d9;box-shadow:var(--shadow)}
-.wow-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.wow-overlay{position:absolute;inset:auto 0 0;padding:120px 30px 32px;background:linear-gradient(transparent,rgba(30,33,28,.78));color:white;text-align:center}
-.wow-overlay h2{font-family:'Faustina',Georgia,serif;font-size:clamp(34px,5vw,58px)}
-.wow-overlay p{font-family:'Faustina',Georgia,serif;font-style:italic;font-size:17px;margin-top:4px}
-.wow-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+
+
+
+
+
+
+
 .details-card{display:none;margin-top:16px;padding:22px}
 .details-card.open{display:block}
 .saved-note{display:none;margin:16px auto 0;max-width:760px;padding:15px 18px;border-radius:16px;background:#e2efef;color:#356f70;font-weight:700;text-align:center}
@@ -100,7 +100,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
   .style-thumb{height:70px;margin:0}
   .grid,.type-grid{grid-template-columns:1fr}
   .form-actions{flex-direction:column}
-  .wow-stage{min-height:520px}
+  
 }
 .home-heading.compact{margin-bottom:28px}
 
@@ -596,6 +596,74 @@ body.dreamtaily-configurator-open{overflow:hidden}
   .dth-cta{transition:none}
 }
 
+
+/* ===================== SCREEN WOW — il momento, coerente con la home ===================== */
+.wow{min-height:100svh;background:#fdf5e6;padding:24px 0 50px}
+.wow .wow-wrap{max-width:1000px;margin:auto;padding:0 18px}
+
+.wow-reveal{position:relative;background:#22321f;color:#f6ecd9;overflow:hidden;margin:14px 0 26px}
+.wow-glow{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(110% 85% at 36% 40%,rgba(255,206,128,.22),rgba(255,206,128,0) 62%)}
+.wow-grid{position:relative;max-width:1000px;margin:auto;display:grid;
+  grid-template-columns:1fr 400px;gap:48px;align-items:center;padding:56px 24px 60px}
+
+/* la scena */
+.wow-scene{position:relative;height:440px}
+.wow-pool{position:absolute;left:50%;top:50%;width:540px;height:420px;border-radius:50%;
+  background:radial-gradient(circle at 50% 45%,rgba(255,222,160,.58),rgba(255,222,160,.15) 42%,rgba(255,222,160,0) 70%);
+  filter:blur(8px);transform:translate(-50%,-50%) scale(.42);opacity:.35}
+.wow-sheet{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-1.6deg);
+  width:360px;height:400px;background:linear-gradient(#fdf6e6,#f5e7cd);
+  box-shadow:0 28px 50px -18px rgba(0,0,0,.55);opacity:.55;
+  display:flex;align-items:center;justify-content:center;padding:16px 16px 34px}
+.wow-sheet img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
+.wow-scrim{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-1.6deg);
+  width:360px;height:400px;background:#1b2a19;opacity:1}
+.wow-caption{position:absolute;left:0;right:0;bottom:-6px;text-align:center;
+  font-family:'Caveat',cursive;font-size:21px;color:rgba(246,236,217,.72);opacity:0}
+
+/* la colonna testo */
+.wow-eyebrow{font-family:'Caveat',cursive;font-size:26px;color:#f2c14e;margin-bottom:10px}
+.wow-reveal h2{font-family:'Faustina',Georgia,serif;font-weight:600;font-size:clamp(30px,4vw,46px);
+  line-height:1.05;color:#f6ecd9;margin:0}
+.wow-sub{font-family:'Hanken Grotesk',system-ui,sans-serif;font-size:17px;line-height:1.6;
+  color:rgba(246,236,217,.76);margin-top:12px;max-width:340px}
+.wow-actions{display:flex;flex-direction:column;align-items:flex-start;gap:14px;margin-top:26px}
+.wow-minor{display:flex;gap:10px;flex-wrap:wrap}
+
+/* bottoni sul fondo scuro */
+.wow-reveal .btn-primary{box-shadow:0 3px 0 #b8503c,0 14px 30px -14px rgba(0,0,0,.8)}
+.wow-reveal .btn-ghost{color:#f6ecd9;border-color:rgba(246,236,217,.34);background:transparent}
+.wow-reveal .btn-ghost:hover{border-color:rgba(246,236,217,.6);background:rgba(246,236,217,.07)}
+.wow-reveal .btn-soft{background:rgba(242,193,78,.14);color:#f2c14e;border:2px solid rgba(242,193,78,.4)}
+.wow-reveal .btn-ghost,.wow-reveal .btn-soft{padding:12px 20px;font-size:15px}
+
+/* ---- il reveal: parte da solo quando la schermata si apre ---- */
+@keyframes wowPool{to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+@keyframes wowSheet{to{opacity:1}}
+@keyframes wowScrim{to{opacity:0}}
+@keyframes wowCap{to{opacity:1}}
+.screen.wow.active .wow-pool{animation:wowPool 1100ms cubic-bezier(.22,.7,.3,1) forwards}
+.screen.wow.active .wow-sheet{animation:wowSheet 900ms ease forwards}
+.screen.wow.active .wow-scrim{animation:wowScrim 950ms ease 120ms forwards}
+.screen.wow.active .wow-caption{animation:wowCap 600ms ease 750ms forwards}
+
+@media (max-width:900px){
+  .wow-grid{grid-template-columns:1fr;gap:24px;padding:34px 20px 40px}
+  .wow-scene{height:330px}
+  .wow-pool{width:340px;height:300px}
+  .wow-sheet,.wow-scrim{width:262px;height:296px}
+  .wow-sheet{padding:12px 12px 26px}
+  .wow-sub{max-width:none}
+  .wow-actions{align-items:stretch}
+  .wow-reveal .btn-primary{width:100%;justify-content:center}
+}
+@media (prefers-reduced-motion:reduce){
+  .screen.wow.active .wow-pool,.screen.wow.active .wow-sheet,
+  .screen.wow.active .wow-scrim,.screen.wow.active .wow-caption{animation:none}
+  .wow-pool{transform:translate(-50%,-50%) scale(1);opacity:1}
+  .wow-sheet{opacity:1}.wow-scrim{opacity:0}.wow-caption{opacity:1}
+}
 </style>
 </head>
 <body>
@@ -876,36 +944,51 @@ body.dreamtaily-configurator-open{overflow:hidden}
       </button>
       <div class="phase">2 · Il primo incontro</div>
     </div>
+  </div>
 
-    <div class="wow-stage">
-      <img id="wow-image" alt="Il personaggio illustrato">
-      <div class="wow-overlay">
+  <!-- ===== la fascia scura: il momento ===== -->
+  <div class="wow-reveal">
+    <div class="wow-glow" aria-hidden="true"></div>
+    <div class="wow-grid">
+
+      <div class="wow-scene">
+        <div class="wow-pool" aria-hidden="true"></div>
+        <div class="wow-sheet">
+          <img id="wow-image" alt="Il personaggio illustrato">
+        </div>
+        <div class="wow-scrim" aria-hidden="true"></div>
+        <p class="wow-caption">eccolo — stile carta ritagliata</p>
+      </div>
+
+      <div class="wow-copy">
+        <p class="wow-eyebrow">Il momento</p>
         <h2 id="wow-title">Ecco il tuo personaggio</h2>
-        <p>È pronto per entrare nel suo primo racconto.</p>
+        <p class="wow-sub">È pronto per entrare nel suo primo racconto.</p>
+        <div class="wow-actions">
+          <button class="btn btn-primary" id="continue-btn" onclick="saveAndContinue()">Continua con questo personaggio →</button>
+          <div class="wow-minor">
+            <button class="btn btn-ghost" onclick="showScreen('creator')">Modifica</button>
+            <button class="btn btn-ghost" onclick="regenerateCharacter()">Rigenera</button>
+            <button class="btn btn-soft" onclick="toggleWowDetails()">Aggiungi dettagli</button>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="wow-actions">
-      <button class="btn btn-ghost" onclick="showScreen('creator')">Modifica</button>
-      <button class="btn btn-ghost" onclick="regenerateCharacter()">Rigenera</button>
-      <button class="btn btn-soft" onclick="toggleWowDetails()">Aggiungi dettagli</button>
-      <button class="btn btn-primary" id="continue-btn" onclick="saveAndContinue()">Continua con questo personaggio →</button>
-    </div>
-
+  <div class="wow-wrap">
     <div class="panel details-card" id="wow-details">
       <div class="grid">
         <div class="field"><label for="wow-outfit">Abbigliamento</label><input class="input" id="wow-outfit" placeholder="Es. felpa verde e pantaloni blu"></div>
         <div class="field"><label for="wow-feature">Dettaglio distintivo</label><input class="input" id="wow-feature" placeholder="Es. lentiggini o sciarpa gialla"></div>
       </div>
-      <p class="small" style="margin-top:10px">Le modifiche aggiornano la scheda del personaggio. Per vederle nell’immagine usa “Rigenera”.</p>
+      <p class="small" style="margin-top:10px">Le modifiche aggiornano la scheda del personaggio. Per vederle nell'immagine usa "Rigenera".</p>
     </div>
 
     <div class="saved-note" id="saved-note">✓ Il personaggio è pronto per le sue prossime avventure.</div>
     <div class="error" id="wow-error"></div>
   </div>
 </section>
-
-
 
 <section class="screen library-screen" id="screen-library">
   <div class="shell">
