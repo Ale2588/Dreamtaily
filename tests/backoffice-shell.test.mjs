@@ -1,4 +1,5 @@
 import test from 'node:test';
+import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
@@ -143,17 +144,19 @@ test('i controlli bloccano destinazioni e scene incomplete',()=>{
 
 test('l’anteprima importa il composer canonico',()=>{
   assert.match(editor,/Anteprima deterministica/);
-  assert.match(editor,/import\('\.\/src\/story-composer\.js'\)/);
-  assert.match(editor,/composeStory\(\{/);
-  assert.match(editor,/contentByRef:state\.version\.content_by_ref/);
+  assert.match(editor,/import\('\.\/src\/editor-preview\.js'\)/);
+  const preview=fs.readFileSync('src/editor-preview.js','utf8');
+  assert.match(preview,/import \{composeStory\} from '\.\/story-composer.js'/);
+  assert.match(preview,/contentByRef:bundle.content_by_ref/);
   assert.doesNotMatch(editor,/fetch\([^)]*(?:openai|generate)/i);
 });
 
 test('la preview dichiara che non genera immagini e non usa IA',()=>{
   assert.match(editor,/Non genera immagini e non usa IA/);
-  assert.match(editor,/tutti i percorsi raggiungibili/);
-  assert.match(editor,/massimo di 32/);
-  assert.match(editor,/story-preview-paths\.js/);
+  const preview=fs.readFileSync('src/editor-preview.js','utf8');
+  assert.match(preview,/enumerateStoryPreviewPaths/);
+  assert.match(preview,/Massimo 32 percorsi/);
+  assert.match(preview,/story-preview-paths\.js/);
 });
 
 test('la pubblicazione richiede la stessa revisione validata e una conferma esplicita',()=>{
