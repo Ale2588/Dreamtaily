@@ -38,7 +38,17 @@ function geometria(item) {
   return `left:${percent(item.x, 1240)};top:${percent(item.y, 465)};width:${percent(item.w, 1240)};height:${percent(item.h, 465)}`;
 }
 
-export function renderDoppia({ gabbia, immagine, testo, figura = null, specchiata = false }) {
+function livelliScenaHtml(livelli, riquadro) {
+  return (livelli || []).map((livello, index) => {
+    if (!livello?.src) return "";
+    const left = (livello.x ?? 0.5) * 100;
+    const top = (livello.y ?? 1) * 100;
+    const height = (livello.scale ?? 0.5) * 100;
+    return `<img class="dtb-livello dtb-livello-${index + 1}" src="${escapeHtml(livello.src)}" alt="" style="left:${left}%;top:${top}%;height:${height}%;z-index:${Number(livello.z ?? index) + 2}">`;
+  }).join("");
+}
+
+export function renderDoppia({ gabbia, immagine, testo, figura = null, livelli = [], specchiata = false }) {
   if (!gabbia?.nome) throw new Error("GABBIA_RICHIESTA");
   if (String(testo || "").length > gabbia.max) throw new Error(`TESTO_TROPPO_LUNGO:${gabbia.nome}`);
   const variante = specchiata && gabbia.specchiata ? gabbia.specchiata : gabbia;
@@ -51,7 +61,10 @@ export function renderDoppia({ gabbia, immagine, testo, figura = null, specchiat
     if (!source) throw new Error(`ASSET_MANCANTE:${gabbia.nome}:${item.asset || "scena"}`);
     const mask = item.mask ? `;mask-image:${item.mask};-webkit-mask-image:${item.mask}` : "";
     const mirror = item.specchiata ? ";transform:scaleX(-1)" : "";
-    return `<img class="dtb-immagine dtb-immagine-${index + 1}" src="${escapeHtml(source)}" alt="" style="${geometria(item)};object-position:${escapeHtml(item.position || "center")}${mask}${mirror}">`;
+    if (item.asset === "figura") {
+      return `<img class="dtb-immagine dtb-immagine-${index + 1}" src="${escapeHtml(source)}" alt="" style="${geometria(item)};object-position:${escapeHtml(item.position || "center")}${mask}${mirror}">`;
+    }
+    return `<div class="dtb-scena dtb-immagine-${index + 1}" style="${geometria(item)}${mask}${mirror}"><img class="dtb-scena-sfondo" src="${escapeHtml(source)}" alt="" style="object-position:${escapeHtml(item.position || "center")}">${livelliScenaHtml(livelli, item)}</div>`;
   }).join("");
 
   const testoHtml = testi.map((item, index) =>
@@ -64,6 +77,9 @@ export function renderDoppia({ gabbia, immagine, testo, figura = null, specchiat
 export const stiliDoppia = `
 .dtb-doppia{font-family:Faustina,Georgia,serif}
 .dtb-immagine{position:absolute;display:block;object-fit:cover;border:0;border-radius:0;box-shadow:none}
+.dtb-scena{position:absolute;overflow:hidden}
+.dtb-scena-sfondo{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;border:0;border-radius:0;box-shadow:none}
+.dtb-livello{position:absolute;display:block;width:auto;object-fit:contain;transform:translate(-50%,-100%);filter:drop-shadow(0 10px 12px rgba(0,0,0,.2))}
 .dtb-testo{position:absolute;display:flex;align-items:flex-start}
 .dtb-testo p{margin:0;white-space:pre-wrap}
 `;

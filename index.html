@@ -339,7 +339,9 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dt-scene-cameo{position:absolute;right:12px;bottom:12px;width:110px;height:140px;z-index:6;border-radius:18px;object-fit:contain;background:rgba(255,253,248,.9);border:3px solid white;box-shadow:0 10px 22px rgba(0,0,0,.2)}
 .dt-preview-caption{margin-top:12px;font-size:13px;color:var(--muted);line-height:1.55;text-align:center}
 .dt-reader-shell{max-width:760px;margin:0 auto}
+.dt-reader-shell.with-spread{max-width:1240px}
 .dt-reader-card{overflow:hidden;border-radius:28px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}
+.dt-reader-card .dtb-doppia{width:100%}
 .dt-reader-copy{padding:24px clamp(20px,5vw,42px) 28px}
 .dt-reader-chapter{font-size:12px;text-transform:uppercase;letter-spacing:1.3px;color:var(--coral-dark);font-weight:800}
 .dt-reader-copy h1{font-family:'Faustina',Georgia,serif;font-size:clamp(29px,5vw,43px);line-height:1.05;margin:6px 0 13px}
@@ -2773,6 +2775,7 @@ const DT_HELPERS={
 let dtSceneContract=null;
 let dtContentByRef=null;
 let dtComposedBook=null;
+let dtLayoutRenderer=null;
 let dtBookPage=0;
 let dtTrail=[];
 let dtTrailIndex=0;
@@ -3219,21 +3222,37 @@ function dtPrefixedSceneContract(){
   return scenes;
 }
 
+async function dtEnsureLayoutRenderer(module){
+  dtLayoutRenderer=module||dtLayoutRenderer||await import("./src/book/final-layout.js");
+  if(!document.getElementById("dtb-layout-styles")){
+    const response=await fetch("./src/book/gabbie.json",{cache:"no-store"});
+    if(!response.ok) throw new Error(`GABBIE_HTTP_${response.status}`);
+    dtLayoutRenderer.inizializzaRendererGabbie(await response.json());
+    const style=document.createElement("style");
+    style.id="dtb-layout-styles";
+    style.textContent=dtLayoutRenderer.stiliDoppia;
+    document.head.append(style);
+  }
+  return dtLayoutRenderer;
+}
+
 window.finishStoryComposer=async function(){
   const button=document.getElementById("composer-next");
   if(button){button.disabled=true;button.textContent="Composizione…";}
   try{
-    const [{composeStory},contentByRef]=await Promise.all([
+    const [{composeStory},contentByRef,layoutRenderer]=await Promise.all([
       import("./src/story-composer.js"),
-      dtLoadContent()
+      dtLoadContent(),
+      import("./src/book/final-layout.js")
     ]);
+    await dtEnsureLayoutRenderer(layoutRenderer);
     const protagonist=dtProtagonist();
     const helperId=dtHelperChoice()?.value;
     const catalog=app.activeStoryContract?.catalog||Object.fromEntries(
       Object.entries(DT_HELPERS).map(([key,item])=>[key,{name:item.name,image:item.image,art:item.art}])
     );
 
-    dtComposedBook=composeStory({
+    dtComposedBook=dtLayoutRenderer.applicaLayoutAlLibro(composeStory({
       story:app.activeStoryDefinition,
       scenes:dtPrefixedSceneContract(),
       contentByRef,
@@ -3246,7 +3265,7 @@ window.finishStoryComposer=async function(){
         setup:dtSetupChoiceMap(),
         branches:dtBranchChoiceMap()
       }
-    });
+    }),app.activeStoryDefinition);
 
     const bad=dtComposedBook.pages.filter(page=>/\[[^\]]+\]/.test(`${page.title||""} ${page.text||""}`));
     if(bad.length){
@@ -3354,6 +3373,11 @@ window.renderBookSummary=function(){
   const sequence=dtBookSequence();
   const page=sequence[dtBookPage];
   const last=dtBookPage===sequence.length-1;
+  let spread=null;
+  if(page.kind==="page"&&page.layout?.gabbia){
+    try{spread=dtLayoutRenderer?.renderPaginaImpaginata(page)||null}
+    catch(error){console.error("[DreamTaily] Layout rendering error:",error)}
+  }
   const screen=document.getElementById("screen-book");
   screen.innerHTML=`
   <div class="shell">
@@ -3364,7 +3388,7 @@ window.renderBookSummary=function(){
       <div class="phase">6 · Il tuo libro</div>
     </div>
 
-    <div class="dt-reader-shell">
+    <div class="dt-reader-shell ${spread?'with-spread':''}">
       <div class="dt-reader-nav" style="margin:0 0 16px">
         <button class="btn btn-ghost" ${dtBookPage===0?"disabled":""}
           onclick="goToDtBookPage(${dtBookPage-1})">← Indietro</button>
@@ -3375,13 +3399,13 @@ window.renderBookSummary=function(){
       </div>
 
       <div class="dt-reader-card">
-        ${dtBookScene(page.scene)}
+        ${spread||`${dtBookScene(page.scene)}
         <div class="dt-reader-copy">
           <div class="dt-reader-chapter">${page.kind==="cover"?"Copertina":`Capitolo ${page.chapter}`}</div>
           <h1>${escapeHtml(page.title||dtComposedBook.meta.title)}</h1>
           <div class="dt-reader-text">${escapeHtml(page.text||"")}</div>
           <span class="dt-reader-qa">✓ zero marcatori</span>
-        </div>
+        </div>`}
       </div>
 
       <div class="dt-reader-nav">
@@ -3894,10 +3918,12 @@ window.startStoryComposer=async function(story,bookStoryId){
 
 async function dtComposeFromCurrentState(){
   await dtLoadSceneContract();
-  const [{composeStory},contentByRef]=await Promise.all([
+  const [{composeStory},contentByRef,layoutRenderer]=await Promise.all([
     import("./src/story-composer.js"),
-    dtLoadContent()
+    dtLoadContent(),
+    import("./src/book/final-layout.js")
   ]);
+  await dtEnsureLayoutRenderer(layoutRenderer);
 
   const protagonist=dtProtagonist();
   const helperId=dtHelperChoice()?.value;
@@ -3905,7 +3931,7 @@ async function dtComposeFromCurrentState(){
     Object.entries(DT_HELPERS).map(([key,item])=>[key,{name:item.name,image:item.image,art:item.art}])
   );
 
-  const book=composeStory({
+  const book=dtLayoutRenderer.applicaLayoutAlLibro(composeStory({
     story:app.activeStoryDefinition,
     scenes:dtPrefixedSceneContract(),
     contentByRef,
@@ -3918,7 +3944,7 @@ async function dtComposeFromCurrentState(){
       setup:dtSetupChoiceMap(),
       branches:dtBranchChoiceMap()
     }
-  });
+  }),app.activeStoryDefinition);
 
   const bad=book.pages.filter(page=>/\[[^\]]+\]/.test(`${page.title||""} ${page.text||""}`));
   if(bad.length){
