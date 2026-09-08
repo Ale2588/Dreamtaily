@@ -159,6 +159,23 @@ test('la preview dichiara che non genera immagini e non usa IA',()=>{
   assert.match(preview,/story-preview-paths\.js/);
 });
 
+test('l’impaginazione usa il catalogo canonico e salva la scelta nello step',()=>{
+  assert.match(editor,/Impaginazione del libro/);
+  assert.match(editor,/import\('\.\/src\/book\/editor-layout\.js'\)/);
+  assert.match(editor,/fetch\('\.\/src\/book\/gabbie\.json'\)/);
+  assert.match(editor,/model\.step\.layout=\{gabbia:gabbia\.nome,specchiata:orientation\.specchiata\}/);
+  assert.match(editor,/figura_slot/);
+  assert.match(editor,/layoutIssues\(\)\.length/);
+  assert.doesNotMatch(editor,/const\s+GABBIE\s*=\s*\[/);
+});
+
+test('l’autore vede capienza orientamento e personaggio in evidenza',()=>{
+  assert.match(editor,/caratteri<\/strong>/);
+  assert.match(editor,/data-layout-mirror/);
+  assert.match(editor,/Personaggio in evidenza/);
+  assert.match(editor,/Le proposte rispettano tutti i rami/);
+});
+
 test('la pubblicazione richiede la stessa revisione validata e una conferma esplicita',()=>{
   assert.match(editor,/Pubblica versione/);
   assert.match(editor,/report\.revision===state\.version\?\.updated_at/);
