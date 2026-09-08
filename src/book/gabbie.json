@@ -1,0 +1,678 @@
+{
+  "formato": {
+    "doppia": {
+      "w": 1240,
+      "h": 465
+    },
+    "facciata": {
+      "w": 620,
+      "h": 465
+    },
+    "piega": 620,
+    "bandaPiega": {
+      "x": 592,
+      "w": 56
+    },
+    "margini": {
+      "tagliOesterno": 62,
+      "piega": 54,
+      "testa": 46,
+      "piede": 46
+    },
+    "zonaSicura": {
+      "x": 42,
+      "y": 34,
+      "w": 1156,
+      "h": 397
+    },
+    "scala": {
+      "mmPerPunto": 0.387,
+      "facciataReale": "240 × 180 mm"
+    }
+  },
+  "colori": {
+    "carta": "#fdf5e6",
+    "testo": "#22321f",
+    "accento": "#d8503f"
+  },
+  "tipografia": {
+    "famiglia": "Faustina",
+    "prosa": {
+      "fontSize": 17,
+      "lineHeight": 1.65,
+      "battutePerRiga": [
+        55,
+        70
+      ]
+    },
+    "medio": {
+      "fontSize": 19,
+      "lineHeight": 1.58
+    },
+    "didascalia": {
+      "fontSize": 22,
+      "lineHeight": 1.45
+    },
+    "regola": "La misura di riga viene prima del taglio: se non ci stanno 55 battute, la gabbia non esiste."
+  },
+  "tagli": {
+    "larga": {
+      "w": 810,
+      "h": 465,
+      "position": "center 85%",
+      "costo": "-24% altezza"
+    },
+    "facciata": {
+      "w": 620,
+      "h": 465,
+      "position": "center",
+      "costo": "nessuno"
+    },
+    "quadra": {
+      "w": 465,
+      "h": 465,
+      "position": "22% center",
+      "costo": "-25% larghezza"
+    },
+    "alta": {
+      "w": 349,
+      "h": 465,
+      "position": "15% center",
+      "costo": "-44% larghezza"
+    }
+  },
+  "asset": {
+    "scena": {
+      "tipo": "illustrazione 4:3 rettangolare, personaggi dentro la scena, nessuna trasparenza",
+      "vincoli": [
+        "niente di essenziale nell'ultimo 20% a destra",
+        "niente di essenziale nel 15% in alto",
+        "nessun testo dentro l'immagine"
+      ]
+    },
+    "figura": {
+      "tipo": "personaggio solo, corpo intero coi piedi, fondo trasparente, nessuna ombra portata",
+      "usatoDa": [
+        9,
+        10,
+        11
+      ],
+      "stato": "non ancora prodotto dal sistema"
+    }
+  },
+  "gabbie": [
+    {
+      "n": 1,
+      "nome": "Panoramica",
+      "famiglia": "scena",
+      "max": 90,
+      "registro": "didascalia",
+      "taglio": "larga",
+      "immagini": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 810,
+          "h": 465,
+          "position": "center 85%"
+        }
+      ],
+      "testo": [
+        {
+          "x": 864,
+          "y": 104,
+          "w": 314,
+          "h": 130,
+          "max": 90,
+          "fontSize": 22,
+          "lineHeight": 1.45
+        }
+      ],
+      "note": "L'unica che attraversa la piega: sconfina di 190. Non selezionare se un volto cade nella banda di piega."
+    },
+    {
+      "n": 2,
+      "nome": "Dettaglio",
+      "famiglia": "scena",
+      "max": 140,
+      "registro": "medio",
+      "taglio": "quadra",
+      "immagini": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 465,
+          "h": 465,
+          "position": "22% center"
+        }
+      ],
+      "testo": [
+        {
+          "x": 682,
+          "y": 104,
+          "w": 436,
+          "h": 180,
+          "max": 140,
+          "fontSize": 19,
+          "lineHeight": 1.56
+        }
+      ],
+      "specchiata": {
+        "immagini": [
+          {
+            "x": 775,
+            "y": 0,
+            "w": 465,
+            "h": 465,
+            "position": "22% center"
+          }
+        ],
+        "testo": [
+          {
+            "x": 62,
+            "y": 104,
+            "w": 436,
+            "h": 180,
+            "max": 140,
+            "fontSize": 19,
+            "lineHeight": 1.56
+          }
+        ]
+      },
+      "note": "155 di carta prima della piega."
+    },
+    {
+      "n": 3,
+      "nome": "Apertura",
+      "famiglia": "scena",
+      "max": 200,
+      "registro": "medio",
+      "taglio": "facciata",
+      "immagini": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 620,
+          "h": 465,
+          "position": "center"
+        }
+      ],
+      "testo": [
+        {
+          "x": 682,
+          "y": 96,
+          "w": 436,
+          "h": 250,
+          "max": 200,
+          "fontSize": 19,
+          "lineHeight": 1.58
+        }
+      ],
+      "blocco": [
+        "numero in Caveat 24 accento",
+        "titolo Faustina 32/1.14",
+        "testo 19/1.58"
+      ],
+      "note": "Apre il capitolo. L'immagine intera è esattamente una facciata: nessun taglio."
+    },
+    {
+      "n": 4,
+      "nome": "Mezzo",
+      "famiglia": "scena",
+      "max": 300,
+      "registro": "prosa",
+      "taglio": "facciata",
+      "immagini": [
+        {
+          "x": 620,
+          "y": 0,
+          "w": 620,
+          "h": 465,
+          "position": "center"
+        }
+      ],
+      "testo": [
+        {
+          "x": 62,
+          "y": 72,
+          "w": 436,
+          "h": 290,
+          "max": 300,
+          "fontSize": 17,
+          "lineHeight": 1.65
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "nome": "Campo",
+      "famiglia": "scena",
+      "max": 450,
+      "registro": "prosa",
+      "taglio": "facciata",
+      "immagini": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 620,
+          "h": 465,
+          "position": "center"
+        }
+      ],
+      "testo": [
+        {
+          "x": 682,
+          "y": 46,
+          "w": 436,
+          "h": 382,
+          "max": 450,
+          "fontSize": 17,
+          "lineHeight": 1.65
+        }
+      ],
+      "specchiata": {
+        "immagini": [
+          {
+            "x": 620,
+            "y": 0,
+            "w": 620,
+            "h": 465,
+            "position": "center"
+          }
+        ],
+        "testo": [
+          {
+            "x": 62,
+            "y": 46,
+            "w": 436,
+            "h": 382,
+            "max": 450,
+            "fontSize": 17,
+            "lineHeight": 1.65
+          }
+        ]
+      },
+      "note": "La gabbia più frequente. Due paragrafi, gap 16."
+    },
+    {
+      "n": 6,
+      "nome": "Vignetta",
+      "famiglia": "scena",
+      "max": 520,
+      "registro": "prosa",
+      "taglio": "alta",
+      "immagini": [
+        {
+          "x": 891,
+          "y": 0,
+          "w": 349,
+          "h": 465,
+          "position": "15% center"
+        }
+      ],
+      "testo": [
+        {
+          "x": 62,
+          "y": 96,
+          "w": 470,
+          "h": 290,
+          "max": 520,
+          "fontSize": 17,
+          "lineHeight": 1.65
+        }
+      ],
+      "note": "Colonna unica sulla facciata sinistra: 65 battute. La carta accanto alla banda non prende testo."
+    },
+    {
+      "n": 7,
+      "nome": "Coro",
+      "famiglia": "scena",
+      "max": 120,
+      "registro": "medio",
+      "taglio": "alta",
+      "immagini": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 349,
+          "h": 465,
+          "position": "15% center"
+        },
+        {
+          "x": 891,
+          "y": 0,
+          "w": 349,
+          "h": 465,
+          "position": "15% center",
+          "specchiata": true
+        }
+      ],
+      "testo": [
+        {
+          "x": 411,
+          "y": 166,
+          "w": 200,
+          "h": 140,
+          "max": 60,
+          "fontSize": 19,
+          "lineHeight": 1.55
+        },
+        {
+          "x": 674,
+          "y": 166,
+          "w": 200,
+          "h": 140,
+          "max": 60,
+          "fontSize": 19,
+          "lineHeight": 1.55
+        }
+      ],
+      "note": "Chiede DUE immagini, una per facciata. Non porta prosa: due frasi brevi, tre righe ciascuna."
+    },
+    {
+      "n": 8,
+      "nome": "Colonna",
+      "famiglia": "scena",
+      "max": 380,
+      "registro": "prosa",
+      "taglio": "alta",
+      "immagini": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 349,
+          "h": 465,
+          "position": "15% center"
+        }
+      ],
+      "testo": [
+        {
+          "x": 682,
+          "y": 80,
+          "w": 436,
+          "h": 240,
+          "max": 380,
+          "fontSize": 17,
+          "lineHeight": 1.65
+        }
+      ],
+      "note": "I 168 punti accanto alla banda restano carta: a quella larghezza non esiste misura leggibile."
+    },
+    {
+      "n": 9,
+      "nome": "Figura",
+      "famiglia": "figura",
+      "max": 380,
+      "registro": "prosa",
+      "immagini": [
+        {
+          "x": 120,
+          "y": 35,
+          "w": 287,
+          "h": 430,
+          "position": "center bottom",
+          "asset": "figura"
+        }
+      ],
+      "testo": [
+        {
+          "x": 682,
+          "y": 80,
+          "w": 436,
+          "h": 240,
+          "max": 380,
+          "fontSize": 17,
+          "lineHeight": 1.65
+        }
+      ],
+      "specchiata": {
+        "immagini": [
+          {
+            "x": 834,
+            "y": 35,
+            "w": 287,
+            "h": 430,
+            "position": "center bottom",
+            "asset": "figura",
+            "specchiata": true
+          }
+        ],
+        "testo": [
+          {
+            "x": 62,
+            "y": 80,
+            "w": 436,
+            "h": 240,
+            "max": 380,
+            "fontSize": 17,
+            "lineHeight": 1.65
+          }
+        ]
+      },
+      "note": "La figura si specchia davvero: guarda sempre verso il testo."
+    },
+    {
+      "n": 10,
+      "nome": "Ritratto",
+      "famiglia": "figura",
+      "max": 70,
+      "registro": "didascalia",
+      "immagini": [
+        {
+          "x": 786,
+          "y": 35,
+          "w": 287,
+          "h": 430,
+          "position": "center bottom",
+          "asset": "figura"
+        }
+      ],
+      "testo": [
+        {
+          "x": 62,
+          "y": 186,
+          "w": 436,
+          "h": 124,
+          "max": 70,
+          "fontSize": 22,
+          "lineHeight": 1.45
+        }
+      ]
+    },
+    {
+      "n": 11,
+      "nome": "Cammino",
+      "famiglia": "figura",
+      "max": 520,
+      "registro": "prosa",
+      "immagini": [
+        {
+          "x": 96,
+          "y": 165,
+          "w": 200,
+          "h": 300,
+          "position": "center bottom",
+          "asset": "figura"
+        }
+      ],
+      "testo": [
+        {
+          "x": 62,
+          "y": 62,
+          "w": 436,
+          "h": 140,
+          "max": 180,
+          "fontSize": 17,
+          "lineHeight": 1.65
+        },
+        {
+          "x": 682,
+          "y": 62,
+          "w": 436,
+          "h": 260,
+          "max": 340,
+          "fontSize": 17,
+          "lineHeight": 1.65
+        }
+      ],
+      "note": "L'unica gabbia in cui la figura non arriva alla testa, e l'unica in cui il testo occupa entrambe le facciate."
+    },
+    {
+      "n": 12,
+      "nome": "Orizzonte",
+      "famiglia": "dissolvenza",
+      "max": 300,
+      "registro": "prosa",
+      "immagini": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 930,
+          "h": 465,
+          "position": "center 85%",
+          "mask": "linear-gradient(90deg, #000 0 40%, transparent 82%)"
+        }
+      ],
+      "testo": [
+        {
+          "x": 790,
+          "y": 96,
+          "w": 388,
+          "h": 250,
+          "max": 300,
+          "fontSize": 17,
+          "lineHeight": 1.65
+        }
+      ],
+      "note": "Piena fino a 372, svanita a 762: muore 148 oltre la piega."
+    },
+    {
+      "n": 13,
+      "nome": "Fascia",
+      "famiglia": "dissolvenza",
+      "max": 450,
+      "registro": "prosa",
+      "immagini": [
+        {
+          "x": 0,
+          "y": 210,
+          "w": 1240,
+          "h": 255,
+          "position": "center bottom",
+          "mask": "linear-gradient(to bottom, transparent 0, #000 55%)"
+        }
+      ],
+      "testo": [
+        {
+          "x": 62,
+          "y": 62,
+          "w": 436,
+          "h": 124,
+          "max": 220,
+          "fontSize": 17,
+          "lineHeight": 1.65
+        },
+        {
+          "x": 682,
+          "y": 62,
+          "w": 436,
+          "h": 124,
+          "max": 230,
+          "fontSize": 17,
+          "lineHeight": 1.65
+        }
+      ],
+      "note": "L'unica che tocca entrambi i tagli esterni. Perde il cielo perché è verso il cielo che svanisce."
+    },
+    {
+      "n": 14,
+      "nome": "Deriva",
+      "famiglia": "dissolvenza",
+      "max": 340,
+      "registro": "prosa",
+      "immagini": [
+        {
+          "x": 520,
+          "y": 0,
+          "w": 720,
+          "h": 465,
+          "position": "center",
+          "mask": "linear-gradient(to left, #000 0 55%, transparent 100%)"
+        }
+      ],
+      "testo": [
+        {
+          "x": 62,
+          "y": 110,
+          "w": 436,
+          "h": 250,
+          "max": 340,
+          "fontSize": 17,
+          "lineHeight": 1.65
+        }
+      ],
+      "note": "Non è la specchiata di Orizzonte: qui la sfumatura va verso il testo. Muore 94 oltre la piega."
+    },
+    {
+      "n": 15,
+      "nome": "Velo",
+      "famiglia": "dissolvenza",
+      "max": 200,
+      "registro": "medio",
+      "immagini": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 1240,
+          "h": 465,
+          "position": "center 76%",
+          "mask": "linear-gradient(to top right, #000 0 34%, transparent 70%)"
+        }
+      ],
+      "testo": [
+        {
+          "x": 742,
+          "y": 72,
+          "w": 436,
+          "h": 150,
+          "max": 200,
+          "fontSize": 19,
+          "lineHeight": 1.6
+        }
+      ],
+      "note": "L'unica diagonale. Da usare una volta sola per libro — vincolo non implementato."
+    }
+  ],
+  "fuoriSistema": [
+    {
+      "nome": "Respiro",
+      "descrizione": "doppia bianca di apertura e chiusura, senza testo e senza immagine. Foliazione, non gabbia."
+    }
+  ],
+  "selezione": {
+    "filtro": "Il massimo di caratteri dice cosa ci sta, non cosa ci sta bene. La scelta finale è dell'autore sull'anteprima.",
+    "vincoli": [
+      "mai due volte lo stesso taglio di seguito",
+      "mai due volte di fila l'immagine sullo stesso lato",
+      "se un volto cade nella banda di piega, escludere Panoramica"
+    ]
+  },
+  "scartate": [
+    {
+      "nome": "Silenzio",
+      "motivo": "appoggiava l'immagine sulla piega e per farlo tagliava troppo. Ripresa come Ritratto, con la figura."
+    },
+    {
+      "nome": "Passo",
+      "motivo": "stesso difetto di Silenzio."
+    },
+    {
+      "nome": "Dittico",
+      "motivo": "chiedere due illustrazioni per una doppia non ha senso."
+    },
+    {
+      "nome": "Sospensione",
+      "motivo": "immagine al centro: le due strisce di carta restavano di 186 punti, ventuno battute per riga."
+    }
+  ]
+}
