@@ -8,6 +8,7 @@
     "test:book-gabbie": "node --test tests/book-gabbie.test.mjs",
     "test:editor-layout": "node --test tests/editor-layout.test.mjs",
     "test:final-layout": "node --test tests/final-layout.test.mjs",
+    "test:narrative-copy": "node --test tests/narrative-labels-and-markers.test.mjs",
     "test:golden": "node tools/test_story_composer_golden.mjs .",
     "test:gate-d-live": "node --test tests/gate-d-runtime-live.test.mjs",
     "test:book-instances": "node --test tests/book-instances.test.mjs",
@@ -18,6 +19,6 @@
     "test:identity": "node --test tests/identity-prompt.test.mjs",
     "test:mask": "node --test tests/scene-mask.test.mjs",
     "test:render-engine": "npm run test:identity && npm run test:mask",
-    "test": "npm run test:composer && npm run test:authoring-validator && npm run test:authoring-api && npm run test:authoring-publish && npm run test:reader && npm run test:book-gabbie && npm run test:editor-layout && npm run test:final-layout && npm run test:backoffice-shell && npm run test:book-instances && npm run test:render-engine"
+    "test": "npm run test:composer && npm run test:authoring-validator && npm run test:authoring-api && npm run test:authoring-publish && npm run test:reader && npm run test:book-gabbie && npm run test:editor-layout && npm run test:final-layout && npm run test:narrative-copy && npm run test:backoffice-shell && npm run test:book-instances && npm run test:render-engine"
   }
 }

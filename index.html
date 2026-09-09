@@ -2893,14 +2893,11 @@ function dtReplaceName(text){
     .replaceAll("[Aiutante]",cast.helper?.name||dtPublishedCatalog()[cast.helper?.character_id]?.name||"l’aiutante");
 }
 
-function dtOptionConsequences(decisionKey,optionKey){
-  const labels={
-    "d_sentiero:felci":"Entrerai nel verde fitto e incontrerai qualcuno tra le foglie.",
-    "d_sentiero:ruscello":"Seguirai l’acqua e scoprirai piccole impronte sulle pietre.",
-    "d_finale:promessa":"Un finale quieto: il bosco riceve una promessa.",
-    "d_finale:festa":"Un finale luminoso: la radura si riempie di festa."
-  };
-  return labels[`${decisionKey}:${optionKey}`]||"Questa scelta modifica il percorso del libro.";
+function dtOptionDescription(option){
+  const authored=String(option?.description||"").trim();
+  if(authored) return dtReplaceName(authored);
+  const destination=(app.activeStoryDefinition?.steps||[]).find(step=>step.key===option?.next);
+  return dtReplaceName(destination?.composer_summary||"");
 }
 
 async function dtLoadSceneContract(){
@@ -3045,12 +3042,12 @@ function dtDecisionHtml(step){
       <h2>${escapeHtml(prompt)}</h2>
       <p class="dt-decision-note">Questa è una scelta di trama: cambia il percorso che leggerai.</p>
       <div class="dt-decision-options">
-        ${(decision.options||[]).map(option=>`
+        ${(decision.options||[]).map(option=>{const description=dtOptionDescription(option);return`
           <button type="button" class="dt-decision-option ${selected===option.key?"selected":""}"
             onclick="selectDtNarrativeChoice('${escapeHtml(decision.key)}','${escapeHtml(option.key)}')">
             <strong>${escapeHtml(dtReplaceName(option.label))}</strong>
-            <small>${escapeHtml(dtOptionConsequences(decision.key,option.key))}</small>
-          </button>`).join("")}
+            ${description?`<small>${escapeHtml(description)}</small>`:""}
+          </button>`}).join("")}
       </div>
     </section>`;
   }

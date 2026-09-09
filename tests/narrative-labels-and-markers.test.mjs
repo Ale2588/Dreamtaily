@@ -21,3 +21,12 @@ test("backoffice offers marker buttons for page titles and decision prompts",()=
   assert.match(editor,/inlineMarkerButtons\('choice-prompt'\)/);
   assert.match(editor,/data-inline-marker/);
 });
+
+test("branch cards use authored labels and descriptions without legacy hardcodes",()=>{
+  assert.match(editor,/data-option-description/);
+  assert.match(editor,/\.description=input\.value/);
+  assert.match(frontend,/function dtOptionDescription\(option\)/);
+  assert.match(frontend,/option\?\.description/);
+  assert.match(frontend,/destination\?\.composer_summary/);
+  assert.doesNotMatch(frontend,/Questa scelta modifica il percorso del libro/);
+});
