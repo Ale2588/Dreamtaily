@@ -396,10 +396,10 @@ export function composeStory({
     },
     cover: scenes?.cover
       ? {
-          title: resolveStoryMarkers(story.editorial?.book_cover?.front?.title || story.title, choices, catalog),
-          subtitle: resolveStoryMarkers(story.editorial?.book_cover?.front?.subtitle || `Un’avventura di ${slotName(choices.protagonist, catalog) || "Il protagonista"}`, choices, catalog),
-          layout: clone(story.editorial?.book_cover?.front?.layout || null),
-          brand_variant: story.editorial?.book_cover?.front?.brand_variant || "dark",
+          title: resolveStoryMarkers(story.title, choices, catalog),
+          subtitle: `Un’avventura di ${slotName(choices.protagonist, catalog) || "Il protagonista"}`,
+          layout: null,
+          brand_variant: null,
           scene: {
             bg: resolveBackground(scenes.cover, mergedDecisionMap(choices)),
             wash: scenes.cover.wash || null,

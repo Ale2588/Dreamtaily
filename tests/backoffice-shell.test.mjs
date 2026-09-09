@@ -186,11 +186,8 @@ test('la pubblicazione richiede la stessa revisione validata e una conferma espl
   assert.match(editor,/I libri già creati non cambieranno/);
 });
 
-test('la copertina del libro usa un catalogo separato e salva il prompt compositivo',()=>{
-  assert.match(editor,/data-section="cover"/);
-  assert.match(editor,/gabbie-copertina\.json/);
-  assert.match(editor,/import\('\.\/src\/book\/cover-layout\.js'\)/);
-  assert.match(editor,/book_cover/);
-  assert.match(editor,/prompt_layout_instruction:gabbia\.prompt_layout_instruction/);
-  assert.match(editor,/Titolo, logo e DreamTaily saranno applicati dal renderer/);
+test('il backoffice gestisce la copertina della storia ma non quella globale',()=>{
+  assert.match(editor,/Copertina della storia/);
+  assert.doesNotMatch(editor,/data-section="cover"/);
+  assert.doesNotMatch(editor,/book-cover-editor/);
 });

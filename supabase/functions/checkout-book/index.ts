@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { normalizeVisualStyleId, requireActiveVisualStyle } from "../../../src/visual-styles.js";
+import { buildBookCover } from "../../../src/book/book-cover-selection.js";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -105,11 +106,12 @@ Deno.serve(async(req:Request)=>{
       return {book_story_id:story.id,story_slug:story.story_slug,story_version_id:story.story_version_id,
         position:story.position,path_choices:story.path_choices,content:story.content_snapshot,cast};
     });
+    const cover=buildBookCover({selection:body.cover,book,stories:snapshotStories});
 
     const confirmedAt=new Date().toISOString();
     const snapshot={schema_version:"checkout-book-v1",confirmed_at:confirmedAt,
       meta:{book_id:book.id,title:book.title,style:bookStyle.id,story_count:snapshotStories.length},
-      stories:snapshotStories};
+      cover,stories:snapshotStories};
     const {data:finalized,error:finalizeError}=await svc.rpc("finalize_book_checkout_v1",{
       p_book_id:book.id,p_profile_id:user.id,p_idempotency_key:idempotencyKey,
       p_checkout_email:email,p_book_snapshot:snapshot

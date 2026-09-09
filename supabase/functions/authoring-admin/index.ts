@@ -190,10 +190,6 @@ async function createProject(req: Request, uid: string) {
       summary: body.description || null,
       description: body.description || null,
       cover_ref: null,
-      book_cover: {
-        front: { title: String(body.public_title || internalTitle).trim(), subtitle: "Un’avventura di [Nome]", layout: null, brand_variant: "dark" },
-        back: { layout: null, description: body.description || null, phrase: null },
-      },
     },
     start: null,
     cast_slots: [{ key: "protagonist", label: "Protagonista", allowed_sources: ["user_character"], introduced_at: "start" }],

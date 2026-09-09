@@ -149,11 +149,10 @@ test("composes resolved pages and visual layers", () => {
     book.pages[2].scene.layers.map((layer) => layer.role),
     ["helper", "protagonist"]
   );
-  assert.equal(book.cover.title, "Il bosco di Lia");
-  assert.equal(book.cover.subtitle, "Una storia per Lia");
-  assert.equal(book.cover.layout.gabbia, "Ritratto");
-  assert.match(book.cover.layout.prompt_layout_instruction, /top calm/);
-  assert.equal(book.cover.brand_variant, "dark");
+  assert.equal(book.cover.title, "Il bosco dei sussurri");
+  assert.equal(book.cover.subtitle, "Un’avventura di Lia");
+  assert.equal(book.cover.layout, null);
+  assert.equal(book.cover.brand_variant, null);
   assert.equal((bookToMarkdown(book).match(/---/g) || []).length, 2);
 });
 

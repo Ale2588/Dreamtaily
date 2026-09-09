@@ -21,6 +21,8 @@ test('checkout freezes story versions, content, cast and private reference paths
   assert.match(checkout,/path_choices:story\.path_choices/);
   assert.match(checkout,/identity_prompt:character\.identity_prompt/);
   assert.match(checkout,/storage_path:reference\.storage_path/);
+  assert.match(checkout,/buildBookCover/);
+  assert.match(checkout,/cover,stories:snapshotStories/);
 });
 
 test('checkout transition is atomic and service-role only',()=>{

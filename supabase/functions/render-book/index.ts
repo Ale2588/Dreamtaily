@@ -113,14 +113,16 @@ async function loadContext(bookId:string,userId:string){
   return {book,stories:contexts,snapshot:{meta:{book_id:book.id,title:book.title},stories:contexts.map((x:any)=>({book_story_id:x.book_story_id,story_slug:x.story_slug,position:x.position,content:x.snapshot}))}};
 }
 
-function planMultiStoryRender(contexts:any[]){
-  return contexts.flatMap((context:any)=>planBookRender(context.snapshot).map((page:any)=>({
+function planMultiStoryRender(contexts:any[],bookCover:any=null){
+  const globalCover=bookCover?planBookRender({meta:{title:bookCover.title},cover:bookCover,pages:[]}).map((page:any)=>({...page,page_id:"book__cover",local_page_id:"cover",book_story_id:null,story_slug:null,characters:(bookCover.characters||[]).map((item:any)=>({slot_key:item.slot_key,character_id:item.character_asset_id,pose:"in_piedi",featured:true})),cover_characters:bookCover.characters||[]})):[];
+  const storyPages=contexts.flatMap((context:any)=>planBookRender(context.snapshot).map((page:any)=>({
     ...page,
     page_id:`${context.book_story_id}__${page.page_id}`,
     local_page_id:page.page_id,
     book_story_id:context.book_story_id,
     story_slug:context.story_slug
   })));
+  return [...globalCover,...storyPages];
 }
 
 function contextsFromCheckoutSnapshot(snapshot:any){
@@ -145,6 +147,7 @@ async function protagonistBlob(path:string){
 }
 
 async function characterInputs(page:any,story:any){
+  if(Array.isArray(page.cover_characters)&&page.cover_characters.length)return await Promise.all(page.cover_characters.map(async(item:any)=>({slotKey:item.slot_key,identity:item.character.identity_prompt,pose:"in_piedi",featured:true,blob:await protagonistBlob(item.character.reference.storage_path)})));
   const planned=Array.isArray(page.characters)&&page.characters.length?page.characters:[{
     slot_key:"protagonist",character_id:"protagonist",pose:page.protagonist_pose||"in_piedi"
   }];
@@ -258,7 +261,7 @@ Deno.serve(async(req:Request)=>{
       const contexts=contextsFromCheckoutSnapshot(job.book_snapshot);
       const now=new Date().toISOString();
       const {data:started,error:startError}=await svc.from("book_renders")
-        .update({status:"running",pages:planMultiStoryRender(contexts),started_at:now,updated_at:now})
+        .update({status:"running",pages:planMultiStoryRender(contexts,job.book_snapshot?.cover),started_at:now,updated_at:now})
         .eq("id",job.id).eq("status","queued").select("*").single();
       if(startError) throw startError;
       job=started;
@@ -274,7 +277,7 @@ Deno.serve(async(req:Request)=>{
 
     await ensureBucket();
     const storyById=new Map(contexts.map((story:any)=>[story.book_story_id,story]));
-    const pages=(job.pages?.length?job.pages:planMultiStoryRender(contexts)).map((p:any)=>({...p,render:{...p.render}}));
+    const pages=(job.pages?.length?job.pages:planMultiStoryRender(contexts,job.book_snapshot?.cover)).map((p:any)=>({...p,render:{...p.render}}));
 
     const candidates=pages.map((page:any,index:number)=>({page,index}))
       .filter(({page}:any)=>page.render?.status!=="ready"&&Number(page.render?.attempts||0)<MAX_ATTEMPTS);
@@ -286,8 +289,8 @@ Deno.serve(async(req:Request)=>{
 
     if(pending.length){
       const results=await Promise.all(pending.map(({page}:any)=>{
-        const story:any=storyById.get(page.book_story_id);
-        if(!story) throw new Error(`RENDER_STORY_CONTEXT_MISSING:${page.book_story_id}`);
+        const story:any=page.page_id==="book__cover"?null:storyById.get(page.book_story_id);
+        if(!story&&page.page_id!=="book__cover") throw new Error(`RENDER_STORY_CONTEXT_MISSING:${page.book_story_id}`);
         return renderOne(job.id,page,story);
       }));
       results.forEach((r:any,i:number)=>pages[pending[i].index]=r);
