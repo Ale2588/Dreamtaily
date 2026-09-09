@@ -32,7 +32,7 @@ test("the image API receives one background followed by all character references
   assert.match(source,/compiled_prompt:prompt/);
 });
 
-test("pilot mode generates at most one illustration per invocation",()=>{
+test("each resumable invocation generates at most one illustration",()=>{
   assert.match(source,/const MAX_CONCURRENCY = 1/);
   assert.match(source,/\.slice\(0,MAX_CONCURRENCY\)/);
 });
@@ -41,6 +41,12 @@ test("pilot mode validates a narrative spread before the cover",()=>{
   assert.match(source,/firstNarrative=candidates\.find/);
   assert.match(source,/page\.kind==="page"/);
   assert.match(source,/firstNarrative\?\[firstNarrative\]:candidates/);
+});
+
+test("full mode follows book order and skips durable ready pages",()=>{
+  assert.match(source,/const full=body\.mode==="full"/);
+  assert.match(source,/page\.render\?\.status!=="ready"/);
+  assert.match(source,/const ordered=full\?candidates/);
 });
 
 test("completed stories persist their snapshots before checkout",()=>{

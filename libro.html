@@ -17,6 +17,7 @@ body{padding:14px 14px 92px}
 .brand i{width:25px;height:25px;border-radius:50%;background:var(--coral);display:inline-block;position:relative}
 .brand i:after{content:"";position:absolute;width:10px;height:10px;border-radius:50% 50% 50% 0;background:#f4c75d;left:7px;top:7px;transform:rotate(45deg)}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:24px;box-shadow:0 18px 42px rgba(58,40,29,.10);overflow:hidden}
+.layout-card{width:100%;background:var(--paper)}
 .spread{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);min-height:calc(100vh - 150px)}
 .visual{background:#eee5d8;min-height:520px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .visual img{width:100%;height:100%;object-fit:cover;display:block}
@@ -72,19 +73,38 @@ button:disabled{opacity:.35;cursor:default}
     <button class="primary" id="next">Avanti →</button>
   </div>
 </div>
-<script>
+<script type="module">
+import {caricaGabbie,gabbiaPerNome} from "./src/book/gabbie.js";
+import {renderDoppia,stiliDoppia} from "./src/book/doppia.js";
+
 const DELIVERY_URL="https://hirzbtruxvjzmcnncvmv.supabase.co/functions/v1/deliver-book";
 let slides=[], current=0;
+let gabbieReady=false;
+const style=document.createElement("style");style.textContent=stiliDoppia;document.head.appendChild(style);
 const esc=(value)=>String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 function state(title,body){document.getElementById("nav").hidden=true;document.getElementById("book").innerHTML=`<div class="card state"><h2>${esc(title)}</h2><p>${esc(body)}</p></div>`;}
-function spread(page,isCover=false){return `<article class="card spread ${isCover?"cover":""}"><div class="visual"><img src="${esc(page.image_url)}" alt=""></div><div class="copy"><div class="eyebrow">${isCover?"DreamTaily":`Capitolo ${esc(page.chapter??"")}`}</div>${isCover?`<h1>${esc(page.title||"")}</h1><div class="subtitle">${esc(page.text||"")}</div>`:`<h2>${esc(page.title||"")}</h2><div class="story">${esc(page.text||"")}</div><div class="page-number">— ${esc(page.chapter??"")} —</div>`}</div></article>`;}
+function spread(page,isCover=false){
+  if(!isCover&&gabbieReady&&page.layout?.gabbia){
+    const gabbia=gabbiaPerNome(page.layout.gabbia);
+    if(gabbia)return `<article class="card layout-card">${renderDoppia({
+      gabbia,
+      immagine:page.image_url,
+      figura:page.image_url,
+      testo:page.text||"",
+      specchiata:page.layout.specchiata===true
+    })}</article>`;
+  }
+  return `<article class="card spread ${isCover?"cover":""}"><div class="visual"><img src="${esc(page.image_url)}" alt=""></div><div class="copy"><div class="eyebrow">${isCover?"DreamTaily":`Capitolo ${esc(page.chapter??"")}`}</div>${isCover?`<h1>${esc(page.title||"")}</h1><div class="subtitle">${esc(page.text||"")}</div>`:`<div class="story">${esc(page.text||"")}</div><div class="page-number">— ${esc(page.chapter??"")} —</div>`}</div></article>`;
+}
 function printPage(page,isCover=false){return `<section class="print-page ${isCover?"print-cover":""}"><div class="print-visual"><img src="${esc(page.image_url)}" alt=""></div><div class="print-copy"><div class="eyebrow">${isCover?"DreamTaily":`Capitolo ${esc(page.chapter??"")}`}</div>${isCover?`<h1>${esc(page.title||"")}</h1><div class="subtitle">${esc(page.text||"")}</div>`:`<h2>${esc(page.title||"")}</h2><div class="story">${esc(page.text||"")}</div>`}</div></section>`;}
 function build(book){
   const pages=Array.isArray(book.pages)?book.pages:[];
-  const cover=pages.find(p=>p.kind==="cover"); const storyPages=pages.filter(p=>p.kind!=="cover");
   slides=[]; const printPages=[];
-  if(cover){slides.push(spread(cover,true));printPages.push(printPage(cover,true));}
-  storyPages.forEach(p=>{slides.push(spread(p,false));printPages.push(printPage(p,false));});
+  pages.forEach(page=>{
+    const isCover=page.kind==="cover";
+    slides.push(spread(page,isCover));
+    printPages.push(printPage(page,isCover));
+  });
   slides.push(`<article class="card end"><div class="big">Fine ✨</div><p>Questa storia appartiene a ${esc(book.protagonist||"te")}.<br>Puoi rileggerla tutte le volte che vuoi.</p><button onclick="printWholeBook()">🖨 Stampa il libro</button></article>`);
   document.getElementById("print-book").innerHTML=printPages.join("");
 }
@@ -101,10 +121,13 @@ function printWholeBook(){
   const imgs=[...document.querySelectorAll("#print-book img")];
   Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(r=>{img.onload=r;img.onerror=r;}))).then(()=>window.print());
 }
+window.printWholeBook=printWholeBook;
 async function load(){
   const slug=new URLSearchParams(location.search).get("slug")||"";
   if(!/^[a-f0-9]{48,96}$/i.test(slug)){state("Libro non trovato","Il link non è valido o è incompleto.");return;}
   try{
+    const catalogResponse=await fetch("./src/book/gabbie.json",{cache:"no-store"});
+    if(catalogResponse.ok){caricaGabbie(await catalogResponse.json());gabbieReady=true;}
     const response=await fetch(`${DELIVERY_URL}?slug=${encodeURIComponent(slug)}&v=3`,{method:"GET",headers:{"Accept":"application/json"},cache:"no-store"});
     const payload=await response.json().catch(()=>null);
     if(response.status===404){state("Libro non trovato","Questo libro non è disponibile.");return;}

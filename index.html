@@ -3514,6 +3514,8 @@ async function dtLoadRenderStatus(){
   return dtPendingRender;
 }
 
+let dtFullRenderActive=false;
+
 window.renderDtBookStatus=async function(render=null){
   const job=render||await dtLoadRenderStatus();
   if(!job){ await renderBookWorkspace(); return; }
@@ -3536,7 +3538,7 @@ window.renderDtBookStatus=async function(render=null){
         :'Il lavoro è salvato e potrà essere ripreso senza rigenerare le pagine già completate.'}</p>
       <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
         ${ready?`<button class="btn btn-primary" onclick="window.location.href='libro.html?slug=${encodeURIComponent(job.permalink_slug)}'">Apri il libro</button>`:''}
-        ${job.status==='queued'?`<button id="dt-pilot-render" class="btn btn-primary" onclick="startDtPilotRender()">Genera una pagina di prova</button>`:''}
+        ${job.status==='queued'||job.status==='running'?`<button id="dt-full-render" class="btn btn-primary" onclick="startDtFullRender()">${job.status==='queued'?'Genera il libro':'Continua la generazione'}</button>`:''}
         <button class="btn btn-soft" onclick="renderDtBookStatus()">Aggiorna stato</button>
         <button class="btn btn-primary" onclick="startNewBook()">Crea un altro libro</button>
         <button class="btn btn-ghost" onclick="showScreen('landing')">Torna alla home</button>
@@ -3544,6 +3546,34 @@ window.renderDtBookStatus=async function(render=null){
     </div>
   </div>`;
   showScreen("render-status");
+};
+
+window.startDtFullRender=async function(){
+  if(dtFullRenderActive||!app.bookId||!dtPendingRender?.id) return;
+  dtFullRenderActive=true;
+  try{
+    while(dtPendingRender?.status==='queued'||dtPendingRender?.status==='running'){
+      const button=document.getElementById("dt-full-render");
+      if(button){button.disabled=true;button.textContent="Creo la prossima pagina…";}
+      const {data,error}=await getSupabase().functions.invoke("render-book",{
+        body:{
+          book_id:app.bookId,
+          idempotency_key:`checkout-${app.bookId}`,
+          start:true,
+          mode:"full"
+        }
+      });
+      if(error) throw error;
+      dtPendingRender={...dtPendingRender,...data,book_id:app.bookId};
+      await renderDtBookStatus(dtPendingRender);
+    }
+  }catch(error){
+    console.error("[DreamTaily] Full render error:",error);
+    alert("La generazione si è fermata. Le pagine completate sono salve: premi ‘Continua la generazione’ per riprendere.");
+    await renderDtBookStatus();
+  }finally{
+    dtFullRenderActive=false;
+  }
 };
 
 window.startDtPilotRender=async function(){

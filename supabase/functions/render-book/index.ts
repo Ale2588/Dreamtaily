@@ -14,7 +14,8 @@ const MODEL = Deno.env.get("OPENAI_IMAGE_MODEL") || "gpt-image-2";
 const SIZE = Deno.env.get("OPENAI_IMAGE_SIZE") || "1536x1024";
 const QUALITY = Deno.env.get("OPENAI_IMAGE_QUALITY") || "medium";
 const MAX_ATTEMPTS = 3;
-// Pilot safety: one invocation can generate at most one illustration.
+// Each invocation renders one durable page. The browser can safely resume the
+// sequence without repeating pages already stored in Storage.
 const MAX_CONCURRENCY = 1;
 
 const cors = {
@@ -238,6 +239,7 @@ Deno.serve(async(req:Request)=>{
     const bookId=String(body.book_id||"").trim();
     const key=String(body.idempotency_key||"").trim();
     const start=body.start===true;
+    const full=body.mode==="full";
     if(!bookId) return reply(400,{error:"BOOK_ID_REQUIRED"});
     if(!key) return reply(400,{error:"IDEMPOTENCY_KEY_REQUIRED"});
 
@@ -276,9 +278,11 @@ Deno.serve(async(req:Request)=>{
 
     const candidates=pages.map((page:any,index:number)=>({page,index}))
       .filter(({page}:any)=>page.render?.status!=="ready"&&Number(page.render?.attempts||0)<MAX_ATTEMPTS);
-    // The pilot must validate a real spread (cast + authored layout), not the cover.
+    // Pilot mode validates a narrative spread. Full mode follows book order;
+    // each subsequent invocation skips every page already marked ready.
     const firstNarrative=candidates.find(({page}:any)=>page.kind==="page");
-    const pending=(firstNarrative?[firstNarrative]:candidates).slice(0,MAX_CONCURRENCY);
+    const ordered=full?candidates:(firstNarrative?[firstNarrative]:candidates);
+    const pending=ordered.slice(0,MAX_CONCURRENCY);
 
     if(pending.length){
       const results=await Promise.all(pending.map(({page}:any)=>{
