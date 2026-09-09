@@ -274,9 +274,11 @@ Deno.serve(async(req:Request)=>{
     const storyById=new Map(contexts.map((story:any)=>[story.book_story_id,story]));
     const pages=(job.pages?.length?job.pages:planMultiStoryRender(contexts)).map((p:any)=>({...p,render:{...p.render}}));
 
-    const pending=pages.map((page:any,index:number)=>({page,index}))
-      .filter(({page}:any)=>page.render?.status!=="ready"&&Number(page.render?.attempts||0)<MAX_ATTEMPTS)
-      .slice(0,MAX_CONCURRENCY);
+    const candidates=pages.map((page:any,index:number)=>({page,index}))
+      .filter(({page}:any)=>page.render?.status!=="ready"&&Number(page.render?.attempts||0)<MAX_ATTEMPTS);
+    // The pilot must validate a real spread (cast + authored layout), not the cover.
+    const firstNarrative=candidates.find(({page}:any)=>page.kind==="page");
+    const pending=(firstNarrative?[firstNarrative]:candidates).slice(0,MAX_CONCURRENCY);
 
     if(pending.length){
       const results=await Promise.all(pending.map(({page}:any)=>{

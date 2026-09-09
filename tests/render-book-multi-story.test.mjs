@@ -37,6 +37,12 @@ test("pilot mode generates at most one illustration per invocation",()=>{
   assert.match(source,/\.slice\(0,MAX_CONCURRENCY\)/);
 });
 
+test("pilot mode validates a narrative spread before the cover",()=>{
+  assert.match(source,/firstNarrative=candidates\.find/);
+  assert.match(source,/page\.kind==="page"/);
+  assert.match(source,/firstNarrative\?\[firstNarrative\]:candidates/);
+});
+
 test("completed stories persist their snapshots before checkout",()=>{
   const finish=html.match(/window\.finishStoryComposer=async function\(\)[\s\S]*?function dtBookSequence/)?.[0]||"";
   assert.match(finish,/await dtPersistContentSnapshot\(dtComposedBook\)/);
