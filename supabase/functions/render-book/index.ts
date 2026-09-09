@@ -14,7 +14,8 @@ const MODEL = Deno.env.get("OPENAI_IMAGE_MODEL") || "gpt-image-2";
 const SIZE = Deno.env.get("OPENAI_IMAGE_SIZE") || "1536x1024";
 const QUALITY = Deno.env.get("OPENAI_IMAGE_QUALITY") || "medium";
 const MAX_ATTEMPTS = 3;
-const MAX_CONCURRENCY = 3;
+// Pilot safety: one invocation can generate at most one illustration.
+const MAX_CONCURRENCY = 1;
 
 const cors = {
   "Access-Control-Allow-Origin":"*",

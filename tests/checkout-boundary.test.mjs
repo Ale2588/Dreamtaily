@@ -44,6 +44,15 @@ test('renderer requires checkout and stays idle while queued',()=>{
   assert.doesNotMatch(renderer,/book_snapshot:ctx\.snapshot/);
 });
 
+test('pilot rendering starts only from an explicit one-page button',()=>{
+  assert.match(html,/Genera una pagina di prova/);
+  assert.match(html,/window\.startDtPilotRender=async function/);
+  const pilot=html.match(/window\.startDtPilotRender=async function\(\)[\s\S]*?window\.completeDtCheckout/)?.[0]||'';
+  assert.match(pilot,/functions\.invoke\("render-book"/);
+  assert.match(pilot,/start:true/);
+  assert.match(pilot,/idempotency_key:`checkout-\$\{app\.bookId\}`/);
+});
+
 test('status page supports refresh and starting another book',()=>{
   assert.match(html,/window\.renderDtBookStatus=async function/);
   assert.match(html,/dtLoadRenderStatus/);

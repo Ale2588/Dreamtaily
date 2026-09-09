@@ -32,6 +32,11 @@ test("the image API receives one background followed by all character references
   assert.match(source,/compiled_prompt:prompt/);
 });
 
+test("pilot mode generates at most one illustration per invocation",()=>{
+  assert.match(source,/const MAX_CONCURRENCY = 1/);
+  assert.match(source,/\.slice\(0,MAX_CONCURRENCY\)/);
+});
+
 test("completed stories persist their snapshots before checkout",()=>{
   const finish=html.match(/window\.finishStoryComposer=async function\(\)[\s\S]*?function dtBookSequence/)?.[0]||"";
   assert.match(finish,/await dtPersistContentSnapshot\(dtComposedBook\)/);
