@@ -3536,6 +3536,7 @@ window.renderDtBookStatus=async function(render=null){
         :'Il lavoro è salvato e potrà essere ripreso senza rigenerare le pagine già completate.'}</p>
       <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
         ${ready?`<button class="btn btn-primary" onclick="window.location.href='libro.html?slug=${encodeURIComponent(job.permalink_slug)}'">Apri il libro</button>`:''}
+        ${job.status==='queued'?`<button id="dt-pilot-render" class="btn btn-primary" onclick="startDtPilotRender()">Genera una pagina di prova</button>`:''}
         <button class="btn btn-soft" onclick="renderDtBookStatus()">Aggiorna stato</button>
         <button class="btn btn-primary" onclick="startNewBook()">Crea un altro libro</button>
         <button class="btn btn-ghost" onclick="showScreen('landing')">Torna alla home</button>
@@ -3543,6 +3544,27 @@ window.renderDtBookStatus=async function(render=null){
     </div>
   </div>`;
   showScreen("render-status");
+};
+
+window.startDtPilotRender=async function(){
+  if(!app.bookId||!dtPendingRender?.id) return;
+  const button=document.getElementById("dt-pilot-render");
+  if(button){button.disabled=true;button.textContent="Genero una pagina…";}
+  try{
+    const {data,error}=await getSupabase().functions.invoke("render-book",{
+      body:{
+        book_id:app.bookId,
+        idempotency_key:`checkout-${app.bookId}`,
+        start:true
+      }
+    });
+    if(error) throw error;
+    await renderDtBookStatus(data);
+  }catch(error){
+    console.error("[DreamTaily] Pilot render error:",error);
+    if(button){button.disabled=false;button.textContent="Riprova la pagina di prova";}
+    alert("Non sono riuscito a generare la pagina di prova. Il libro congelato non è stato modificato.");
+  }
 };
 
 window.completeDtCheckout=async function(){
