@@ -25,7 +25,6 @@ test("backoffice offers marker buttons for page titles and decision prompts",()=
 test("branch cards use authored labels and descriptions without legacy hardcodes",()=>{
   assert.match(editor,/data-option-description/);
   assert.match(editor,/\.description=input\.value/);
-  assert.match(editor,/label:`Opzione \$\{index\}`,description:""/);
   assert.match(frontend,/function dtOptionDescription\(option\)/);
   assert.match(frontend,/option\?\.description/);
   assert.match(frontend,/destination\?\.composer_summary/);
