@@ -146,6 +146,24 @@ const POSE_INSTRUCTIONS = Object.freeze({
   di_spalle: "seen mostly from behind"
 });
 
+const LAYOUT_HINTS = Object.freeze({
+  Panoramica: "Use a wide panoramic composition across the spread. Keep faces and essential details away from the central fold.",
+  Dettaglio: "Compose the key action inside a compact square image area, leaving the opposite page calm for text.",
+  Apertura: "Compose the illustration as one complete facing page, with the opposite page reserved for the chapter opening and text.",
+  Mezzo: "Compose the illustration on one facing page and preserve the opposite page as a quiet readable text area.",
+  Campo: "Use a readable environmental composition on one facing page; keep all essential action inside that page crop.",
+  Vignetta: "Keep the main action inside a compact vignette and preserve generous calm paper around it for text.",
+  Figura: "Make the featured character the clear full-body focus while keeping them naturally integrated into the illustrated environment.",
+  Ritratto: "Make the featured character the emotional focus in a closer portrait-like composition, still integrated into the scene.",
+  Cammino: "Show the featured character moving naturally through the environment with a clear grounded full-body action.",
+  Coro: "Create one broad coherent scene that supports two coordinated crops of the same moment.",
+  Colonna: "Build a strong vertical composition on one side and preserve the facing area for readable narrative text.",
+  Orizzonte: "Use a low, wide horizon-led composition with a soft transition into the text-safe area.",
+  Fascia: "Concentrate the visual action in a horizontal band and let the surrounding paper remain calm for text.",
+  Deriva: "Let the illustration fade organically toward the text-safe side without cutting through faces or essential action.",
+  Velo: "Use a soft atmospheric composition with a calm readable area for the narrative text."
+});
+
 function clean(value) {
   return typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
 }
@@ -167,7 +185,10 @@ export function buildPageRenderPrompt({
   helperIdentity = null,
   helperPose = "in_piedi",
   environmentOverride = null,
-  momentOverride = null
+  momentOverride = null,
+  authoringNote = null,
+  layout = null,
+  characters = null
 } = {}) {
   const canonical = getScenePrompt(sceneId);
   const scene = {
@@ -176,7 +197,16 @@ export function buildPageRenderPrompt({
   };
 
   const protagonist = clean(protagonistIdentity);
-  if (!protagonist) throw new Error("PROTAGONIST_IDENTITY_REQUIRED");
+  const dynamicCharacters = Array.isArray(characters) && characters.length
+    ? characters.map((item, index) => ({
+        slotKey: clean(item.slotKey || item.slot_key) || `character_${index + 1}`,
+        identity: clean(item.identity || item.identity_prompt),
+        pose: clean(item.pose) || "in_piedi",
+        featured: item.featured === true,
+      }))
+    : null;
+  if (!dynamicCharacters && !protagonist) throw new Error("PROTAGONIST_IDENTITY_REQUIRED");
+  if (dynamicCharacters?.some((item) => !item.identity)) throw new Error("CHARACTER_IDENTITY_REQUIRED");
 
   const helper = helperIdentity
     ? { identity_prompt: clean(helperIdentity) }
@@ -185,28 +215,42 @@ export function buildPageRenderPrompt({
   const moment = clean(momentOverride) || scene.moment;
   const stylePrompt = requireActiveVisualStyle(styleId).prompt;
 
+  const effectiveCharacters = dynamicCharacters || [
+    {slotKey:"protagonist",identity:protagonist,pose:protagonistPose,featured:false},
+    ...(helper ? [{slotKey:"helper",identity:helper.identity_prompt,pose:helperPose,featured:false}] : [])
+  ];
+  const referenceLines = effectiveCharacters.map((item, index) =>
+    `Image ${index + 2} is the ${item.slotKey.toUpperCase()} identity reference.`
+  );
+  const characterLines = effectiveCharacters.map((item, index) => {
+    const emphasis = item.featured ? " This is the FEATURED character for this composition." : "";
+    return `CHARACTER ${index + 1} (${item.slotKey}): preserve the identity from Image ${index + 2}. Identity reinforcement: ${item.identity}. Pose/action: ${POSE_INSTRUCTIONS[item.pose] || item.pose}.${emphasis}`;
+  });
+  const layoutName = clean(layout?.gabbia);
+  const layoutSide = layout?.specchiata === true ? "The layout is mirrored: reserve the opposite side from the normal layout for text." : "Use the normal, non-mirrored layout orientation.";
+  const layoutHint = LAYOUT_HINTS[layoutName] || (layoutName ? `Respect the ${layoutName} editorial layout and its text-safe area.` : "Preserve a calm readable area suitable for the narrative text.");
+
   const blocks = [
     stylePrompt,
     "",
     "REFERENCE ORDER:",
     "Image 1 is the APPROVED BACKGROUND and is authoritative for environment, composition, major objects and overall mood.",
-    "Image 2 is the PROTAGONIST identity reference.",
-    helper ? "Image 3 is the HELPER identity reference." : "",
+    ...referenceLines,
     "",
     `SCENE: ${scene.environment}.`,
     `STORY MOMENT: ${moment}`,
+    clean(authoringNote) ? `AUTHOR'S DIRECTION: ${clean(authoringNote)}` : "",
     "",
-    `PROTAGONIST: preserve the identity from Image 2. Identity reinforcement: ${protagonist}. Pose: ${POSE_INSTRUCTIONS[protagonistPose] || protagonistPose}.`,
-    helper
-      ? `HELPER: preserve the identity from Image 3. Identity reinforcement: ${helper.identity_prompt}. Pose: ${POSE_INSTRUCTIONS[helperPose] || helperPose}.`
-      : "",
+    ...characterLines,
+    "",
+    layoutName ? `EDITORIAL LAYOUT: ${layoutName}. ${layoutSide} ${layoutHint}` : "",
     "",
     "COMPOSITION RULES:",
     "- Integrate every character into the same paper world with matching material, lighting direction, colour temperature and paper-layer shadows.",
     "- Keep the approved background recognizable: do not remove, replace or invent major environmental landmarks.",
     "- Keep character scale believable for the scene and relative to each other.",
     "- Feet/body base must rest naturally on a believable ground or surface.",
-    "- Preserve a calm readable upper area suitable for HTML story text.",
+    "- Preserve the layout-specific calm area for text; keep faces, hands and story-critical objects outside it and away from the central fold.",
     "- Generate a SINGLE finished illustration, not separate cutouts or a collage layout.",
     "- Do NOT render text, letters, words, captions, speech bubbles, borders or watermarks."
   ];

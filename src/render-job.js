@@ -23,8 +23,14 @@ export function assertResolvedBook(book) {
   return true;
 }
 
-function layer(scene, role) {
-  return (scene?.layers || []).find((item) => item.role === role) || null;
+function characters(scene, layout = null) {
+  return (scene?.layers || []).map((item) => ({
+    slot_key: item.role,
+    character_id: item.character_id || item.role,
+    asset_ref: item.src || null,
+    pose: item.pose || "in_piedi",
+    featured: layout?.figura_slot === item.role,
+  }));
 }
 
 export function planBookRender(book) {
@@ -35,7 +41,7 @@ export function planBookRender(book) {
   const pages = [];
 
   if (book.cover) {
-    const protagonist = layer(book.cover.scene, "protagonist");
+    const cast = characters(book.cover.scene);
     pages.push({
       page_id: "cover",
       kind: "cover",
@@ -46,17 +52,21 @@ export function planBookRender(book) {
       background_ref: book.cover.scene.bg,
       prompt_environment: book.cover.scene.prompt_environment || null,
       prompt_moment: book.cover.scene.prompt_moment || null,
+      authoring_note: book.cover.scene.authoring_note || null,
+      layout: null,
       style_id,
-      protagonist_pose: protagonist?.pose || "in_piedi",
+      characters: cast,
+      protagonist_pose: cast.find((item) => item.slot_key === "protagonist")?.pose || "in_piedi",
       helper_id: null,
       helper_pose: null,
-      render: {status:"queued",generated_image_url:null,generated_image_path:null,attempts:0,prompt_hash:null,error:null}
+      render: {status:"queued",generated_image_url:null,generated_image_path:null,attempts:0,prompt_hash:null,compiled_prompt:null,error:null}
     });
   }
 
   for (const page of book.pages) {
-    const protagonist = layer(page.scene, "protagonist");
-    const helper = layer(page.scene, "helper");
+    const cast = characters(page.scene, page.layout);
+    const protagonist = cast.find((item) => item.slot_key === "protagonist");
+    const helper = cast.find((item) => item.slot_key === "helper");
     pages.push({
       page_id: page.id,
       kind: "page",
@@ -67,11 +77,14 @@ export function planBookRender(book) {
       background_ref: page.scene.bg,
       prompt_environment: page.scene.prompt_environment || null,
       prompt_moment: page.scene.prompt_moment || null,
+      authoring_note: page.scene.authoring_note || null,
+      layout: page.layout ? structuredClone(page.layout) : null,
       style_id,
+      characters: cast,
       protagonist_pose: protagonist?.pose || "in_piedi",
       helper_id: helper?.character_id || null,
       helper_pose: helper?.pose || null,
-      render: {status:"queued",generated_image_url:null,generated_image_path:null,attempts:0,prompt_hash:null,error:null}
+      render: {status:"queued",generated_image_url:null,generated_image_path:null,attempts:0,prompt_hash:null,compiled_prompt:null,error:null}
     });
   }
   return JSON.parse(JSON.stringify(pages));

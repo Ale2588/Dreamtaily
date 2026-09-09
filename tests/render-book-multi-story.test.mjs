@@ -18,9 +18,18 @@ test("render pages are namespaced and retain their story context",()=>{
   assert.match(source,/storyById\.get\(page\.book_story_id\)/);
 });
 
-test("each story uses its own protagonist reference",()=>{
-  assert.match(source,/protagonistByStory\.set\(story\.book_story_id/);
-  assert.match(source,/protagonistByStory\.get\(page\.book_story_id\)/);
+test("each page resolves every planned character from its frozen story cast",()=>{
+  assert.match(source,/async function characterInputs\(page:any,story:any\)/);
+  assert.match(source,/story\.cast\|\|\[\]/);
+  assert.match(source,/entry\.slot_key===item\.slot_key/);
+  assert.match(source,/characters:cast\.map/);
+  assert.doesNotMatch(source,/protagonistByStory/);
+});
+
+test("the image API receives one background followed by all character references",()=>{
+  assert.match(source,/\.\.\.cast\.map\(\(item:any\)=>item\.blob\)/);
+  assert.match(source,/`character-\$\{i\}\.png`/);
+  assert.match(source,/compiled_prompt:prompt/);
 });
 
 test("completed stories persist their snapshots before checkout",()=>{

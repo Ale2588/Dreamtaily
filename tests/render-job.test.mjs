@@ -36,3 +36,18 @@ test("ready requires storage path",()=>{
   p.forEach(x=>{x.render.status="ready";x.render.generated_image_path=`r/${x.page_id}.png`;});
   assert.equal(allPagesReady(p),true);
 });
+
+test("render plan preserves the full dynamic cast, author direction and layout",()=>{
+  const b=structuredClone(book);
+  b.pages[0].layout={gabbia:"Figura",specchiata:true,figura_slot:"friend"};
+  b.pages[0].scene.authoring_note="Keep the bell visible";
+  b.pages[0].scene.layers.push({
+    role:"friend",character_id:"dragon",src:"dragon.png",pose:"cammina"
+  });
+  const page=planBookRender(b)[1];
+  assert.deepEqual(page.layout,b.pages[0].layout);
+  assert.equal(page.authoring_note,"Keep the bell visible");
+  assert.deepEqual(page.characters.map((item)=>item.slot_key),["protagonist","friend"]);
+  assert.equal(page.characters[1].asset_ref,"dragon.png");
+  assert.equal(page.characters[1].featured,true);
+});

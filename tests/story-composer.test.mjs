@@ -89,6 +89,7 @@ const scenes = {
 };
 scenes.scenes.s1.environment_prompt = "Bosco quieto";
 scenes.scenes.s1.moment_prompt = "Lia ascolta";
+scenes.scenes.s1.authoring_note = "La campanella deve restare visibile accanto a [Nome]";
 delete scenes.scenes.s1.prompt_environment;
 delete scenes.scenes.s1.prompt_moment;
 
@@ -140,6 +141,7 @@ test("composes resolved pages and visual layers", () => {
   assert.equal(book.pages[0].scene.bg, "s1.png");
   assert.equal(book.pages[0].scene.prompt_environment, "Bosco quieto");
   assert.equal(book.pages[0].scene.prompt_moment, "Lia ascolta");
+  assert.equal(book.pages[0].scene.authoring_note, "La campanella deve restare visibile accanto a Lia");
   assert.deepEqual(book.meta.choices.setup, {});
   assert.equal(book.pages[2].text, "Etto arriva. Ora Etto accompagna Lia.");
   assert.deepEqual(

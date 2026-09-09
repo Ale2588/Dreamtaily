@@ -103,8 +103,9 @@ test('i testi sono salvati in content_by_ref e i marcatori arrivano da menu',()=
   assert.match(editor,/insertAtCursor/);
 });
 
-test('ogni scena espone sfondo e prompt d’autore',()=>{
-  assert.match(editor,/Scene illustrate/);
+test('ogni scena espone riferimento ambientale e regia d’autore',()=>{
+  assert.match(editor,/Illustrazione della scena/);
+  assert.match(editor,/un’unica illustrazione integrata/);
   assert.match(editor,/background_ref/);
   assert.match(editor,/environment_prompt/);
   assert.match(editor,/moment_prompt/);
