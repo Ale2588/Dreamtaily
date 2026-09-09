@@ -46,6 +46,7 @@ Deno.serve(async(req:Request)=>{
       book_story_id:p.book_story_id||null,
       story_slug:p.story_slug||null,
       layout:p.layout||null,
+      brand_variant:p.brand_variant||null,
       image_url:signed?.[index]?.signedUrl||null
     }));
     const snapshot=render.book_snapshot||{};

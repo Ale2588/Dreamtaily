@@ -76,14 +76,20 @@ button:disabled{opacity:.35;cursor:default}
 <script type="module">
 import {caricaGabbie,gabbiaPerNome} from "./src/book/gabbie.js";
 import {renderDoppia,stiliDoppia} from "./src/book/doppia.js";
+import {inizializzaGabbieCopertina,gabbiaCopertinaPerNome,renderCopertina,stiliCopertina} from "./src/book/cover-layout.js";
 
 const DELIVERY_URL="https://hirzbtruxvjzmcnncvmv.supabase.co/functions/v1/deliver-book";
 let slides=[], current=0;
 let gabbieReady=false;
-const style=document.createElement("style");style.textContent=stiliDoppia;document.head.appendChild(style);
+let coverLayoutsReady=false;
+const style=document.createElement("style");style.textContent=stiliDoppia+stiliCopertina;document.head.appendChild(style);
 const esc=(value)=>String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 function state(title,body){document.getElementById("nav").hidden=true;document.getElementById("book").innerHTML=`<div class="card state"><h2>${esc(title)}</h2><p>${esc(body)}</p></div>`;}
 function spread(page,isCover=false){
+  if(isCover&&coverLayoutsReady&&page.layout?.gabbia){
+    const gabbia=gabbiaCopertinaPerNome(page.layout.gabbia,"front");
+    if(gabbia)return `<article class="card layout-card">${renderCopertina({gabbia,image:page.image_url,title:page.title||"",subtitle:page.text||"",brandVariant:page.brand_variant||"dark"})}</article>`;
+  }
   if(!isCover&&gabbieReady&&page.layout?.gabbia){
     const gabbia=gabbiaPerNome(page.layout.gabbia);
     if(gabbia)return `<article class="card layout-card">${renderDoppia({
@@ -126,8 +132,9 @@ async function load(){
   const slug=new URLSearchParams(location.search).get("slug")||"";
   if(!/^[a-f0-9]{48,96}$/i.test(slug)){state("Libro non trovato","Il link non è valido o è incompleto.");return;}
   try{
-    const catalogResponse=await fetch("./src/book/gabbie.json",{cache:"no-store"});
+    const [catalogResponse,coverCatalogResponse]=await Promise.all([fetch("./src/book/gabbie.json",{cache:"no-store"}),fetch("./src/book/gabbie-copertina.json",{cache:"no-store"})]);
     if(catalogResponse.ok){caricaGabbie(await catalogResponse.json());gabbieReady=true;}
+    if(coverCatalogResponse.ok){inizializzaGabbieCopertina(await coverCatalogResponse.json());coverLayoutsReady=true;}
     const response=await fetch(`${DELIVERY_URL}?slug=${encodeURIComponent(slug)}&v=3`,{method:"GET",headers:{"Accept":"application/json"},cache:"no-store"});
     const payload=await response.json().catch(()=>null);
     if(response.status===404){state("Libro non trovato","Questo libro non è disponibile.");return;}

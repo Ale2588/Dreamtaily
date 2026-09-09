@@ -51,3 +51,14 @@ test("render plan preserves the full dynamic cast, author direction and layout",
   assert.equal(page.characters[1].asset_ref,"dragon.png");
   assert.equal(page.characters[1].featured,true);
 });
+
+test("cover plan preserves cover layout and deterministic brand variant",()=>{
+  const b=structuredClone(book);
+  b.cover.layout={gabbia:"Ritratto",catalog_version:2,prompt_layout_instruction:"Keep the top calm."};
+  b.cover.brand_variant="light";
+  const cover=planBookRender(b)[0];
+  assert.equal(cover.kind,"cover");
+  assert.equal(cover.layout.gabbia,"Ritratto");
+  assert.match(cover.layout.prompt_layout_instruction,/top calm/);
+  assert.equal(cover.brand_variant,"light");
+});

@@ -228,7 +228,7 @@ export function buildPageRenderPrompt({
   });
   const layoutName = clean(layout?.gabbia);
   const layoutSide = layout?.specchiata === true ? "The layout is mirrored: reserve the opposite side from the normal layout for text." : "Use the normal, non-mirrored layout orientation.";
-  const layoutHint = LAYOUT_HINTS[layoutName] || (layoutName ? `Respect the ${layoutName} editorial layout and its text-safe area.` : "Preserve a calm readable area suitable for the narrative text.");
+  const layoutHint = clean(layout?.prompt_layout_instruction) || LAYOUT_HINTS[layoutName] || (layoutName ? `Respect the ${layoutName} editorial layout and its text-safe area.` : "Preserve a calm readable area suitable for the narrative text.");
 
   const blocks = [
     stylePrompt,

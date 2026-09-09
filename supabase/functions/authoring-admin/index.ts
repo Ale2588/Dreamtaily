@@ -190,6 +190,10 @@ async function createProject(req: Request, uid: string) {
       summary: body.description || null,
       description: body.description || null,
       cover_ref: null,
+      book_cover: {
+        front: { title: String(body.public_title || internalTitle).trim(), subtitle: "Un’avventura di [Nome]", layout: null, brand_variant: "dark" },
+        back: { layout: null, description: body.description || null, phrase: null },
+      },
     },
     start: null,
     cast_slots: [{ key: "protagonist", label: "Protagonista", allowed_sources: ["user_character"], introduced_at: "start" }],
@@ -202,7 +206,7 @@ async function createProject(req: Request, uid: string) {
       version_number: 1,
       status: "draft",
       source_story: sourceStory,
-      source_scenes: { version: 1, scenes: {} },
+      source_scenes: { version: 1, cover: { background_ref: null, environment_prompt: "", moment_prompt: "", authoring_note: "", slots: [{ role: "protagonist", pose: "in_piedi", x: 0.5, y: 0.9, scale: 0.5, z: 2 }] }, scenes: {} },
       content_by_ref: {},
       validation_report: { status: "not_validated" },
     })

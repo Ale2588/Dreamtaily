@@ -23,3 +23,10 @@ test("final reader applies the authored gabbia to narrative spreads",()=>{
   assert.match(reader,/gabbiaPerNome\(page\.layout\.gabbia\)/);
   assert.match(reader,/specchiata:page\.layout\.specchiata===true/);
 });
+
+test("final reader overlays the authored front cover and DreamTaily brand",()=>{
+  assert.match(delivery,/brand_variant:p\.brand_variant/);
+  assert.match(reader,/gabbiaCopertinaPerNome\(page\.layout\.gabbia,"front"\)/);
+  assert.match(reader,/renderCopertina/);
+  assert.match(reader,/gabbie-copertina\.json/);
+});

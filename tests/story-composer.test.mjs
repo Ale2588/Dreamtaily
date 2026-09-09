@@ -10,6 +10,7 @@ import {
 const story = {
   slug: "il-bosco-dei-sussurri",
   title: "Il bosco dei sussurri",
+  editorial: { book_cover: { front: { title: "Il bosco di [Nome]", subtitle: "Una storia per [Nome]", layout: { gabbia: "Ritratto", catalog_version: 2, prompt_layout_instruction: "Keep the top calm." }, brand_variant: "dark" } } },
   start: "s1",
   steps: [
     {
@@ -148,7 +149,11 @@ test("composes resolved pages and visual layers", () => {
     book.pages[2].scene.layers.map((layer) => layer.role),
     ["helper", "protagonist"]
   );
-  assert.equal(book.cover.subtitle, "Un’avventura di Lia");
+  assert.equal(book.cover.title, "Il bosco di Lia");
+  assert.equal(book.cover.subtitle, "Una storia per Lia");
+  assert.equal(book.cover.layout.gabbia, "Ritratto");
+  assert.match(book.cover.layout.prompt_layout_instruction, /top calm/);
+  assert.equal(book.cover.brand_variant, "dark");
   assert.equal((bookToMarkdown(book).match(/---/g) || []).length, 2);
 });
 

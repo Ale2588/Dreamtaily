@@ -102,3 +102,9 @@ test("dynamic cast rejects a character without a canonical identity", () => {
     characters:[{slotKey:"protagonist",identity:""}]
   }),/CHARACTER_IDENTITY_REQUIRED/);
 });
+
+test("cover catalog instruction overrides generic narrative layout hints", () => {
+  const prompt=buildPageRenderPrompt({sceneId:"cover",characters:[{slotKey:"protagonist",identity:"a child with red boots",pose:"in_piedi"}],layout:{gabbia:"Ritratto",prompt_layout_instruction:"Keep the top and bottom bands visually calm."}});
+  assert.match(prompt,/Keep the top and bottom bands visually calm/);
+  assert.match(prompt,/Do NOT render text/);
+});

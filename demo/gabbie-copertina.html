@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DreamTaily — gabbie di copertina e quarta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Faustina:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root { --carta: #fdf5e6; --ink: #22321f; --soft: #8a8471; --accento: #d8503f; }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: #efe9dd; color: var(--ink); font-family: Faustina, Georgia, serif; }
+  main { max-width: 1400px; margin: 0 auto; padding: 48px 28px 96px; display: flex; flex-direction: column; gap: 44px; }
+  h1 { font-size: 34px; line-height: 1.12; margin: 0; font-weight: 500; }
+  .kicker { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--soft); }
+  .lede { font-size: 17px; line-height: 27px; color: #4a5545; max-width: 66ch; text-wrap: pretty; margin: 10px 0 0; }
+  .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button, select { font-family: inherit; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; padding: 11px 16px; border: 1px solid var(--ink); background: var(--carta); color: var(--ink); cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--ink); color: var(--carta); }
+  .verdetto { font-size: 14px; line-height: 21px; padding: 14px 18px; background: var(--carta); border-left: 3px solid var(--accento); white-space: pre-wrap; font-variant-numeric: tabular-nums; }
+  .verdetto.ok { border-left-color: #3e7a52; }
+  .legenda { display: flex; flex-wrap: wrap; gap: 20px; padding: 16px 20px; background: var(--carta); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #4a5545; }
+  .legenda span { display: flex; align-items: center; gap: 8px; }
+  .legenda i { width: 22px; height: 12px; display: block; }
+  .griglia { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; }
+  .scheda { display: flex; flex-direction: column; gap: 12px; }
+  .cover { position: relative; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; container-type: size; }
+  .cover > * { position: absolute; }
+  .zona { pointer-events: none; }
+  .zlab { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; padding: 1px 3px; }
+  .logo { border: 1px dashed currentColor; display: flex; align-items: center; justify-content: center; text-align: center; letter-spacing: .04em; }
+  .didascalia { font-size: 15px; line-height: 23px; color: #4a5545; text-wrap: pretty; }
+  .didascalia b { font-weight: 600; color: var(--ink); }
+  .caricatore { padding: 20px; background: var(--carta); font-size: 15px; line-height: 24px; }
+  .tabella { display: grid; grid-template-columns: 190px 1fr; gap: 8px 24px; font-size: 15px; line-height: 22px; background: var(--carta); padding: 24px 28px; }
+  .tabella dt { color: var(--soft); margin: 0; }
+  .tabella dd { margin: 0; }
+  .scale { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+  .scale .cover { width: 420px; } .scale .cover.m { width: 280px; } .scale .cover.s { width: 190px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="kicker">DreamTaily · catalogo di copertina</div>
+    <h1>Cinque gabbie: tre frontali, due di quarta</h1>
+    <p class="lede">Formato singolo 620 × 465 punti (4:3). L'illustrazione è una scena unica e coerente; titolo, sottotitolo, descrizione, frase personalizzata, logo e wordmark sono sovrapposti dal renderer. Questa pagina disegna tutto leggendo <code>../src/book/gabbie-copertina.json</code>: nessun numero è ripetuto qui dentro.</p>
+  </header>
+
+  <div class="bar">
+    <button id="bTech" aria-pressed="false">Modalità tecnica</button>
+    <select id="selFondo" aria-label="Fondo del segnaposto">
+      <option value="chiaro">Fondo chiaro</option>
+      <option value="scuro">Fondo scuro</option>
+      <option value="complesso">Fondo complesso</option>
+    </select>
+  </div>
+
+  <div id="verdetto" class="verdetto">Validazione in corso…</div>
+  <div id="legenda" class="legenda" hidden></div>
+  <div id="caricatore" class="caricatore" hidden>
+    Il browser ha bloccato la lettura locale del JSON (<code>file://</code>). Servi la cartella con un server statico —
+    <code>python3 -m http.server</code> — oppure carica qui il file: <input type="file" id="file" accept=".json,application/json">
+  </div>
+
+  <section id="sezFront"></section>
+  <section id="sezBack"></section>
+  <section id="sezScale"></section>
+  <section id="sezRegole"></section>
+</main>
+
+<script src="../src/book/valida-gabbie-copertina.js"></script>
+<script>
+var TEMI = {
+  chiaro: { field: "#e9dfc6", shape1: "rgba(126,148,116,.42)", shape2: "rgba(190,150,104,.55)", velo: "253,245,230" },
+  scuro:  { field: "#20302c", shape1: "rgba(52,78,80,.75)",   shape2: "rgba(96,120,110,.7)",  velo: "14,22,20" },
+  complesso: {
+    field: "repeating-linear-gradient(38deg,#8f7d52 0 16px,#5d6b4a 16px 30px,#a9924f 30px 44px,#46543f 44px 60px)",
+    shape1: "repeating-linear-gradient(-52deg,rgba(255,240,200,.5) 0 10px,rgba(60,70,50,.45) 10px 22px)",
+    shape2: "repeating-linear-gradient(90deg,rgba(240,120,80,.6) 0 8px,rgba(40,60,50,.5) 8px 18px)",
+    velo: "253,245,230"
+  }
+};
+var ZONE = {
+  safe:    { border: "1px dashed rgba(48,110,80,.95)", background: "none", label: "safe" },
+  testo:   { border: "1px solid rgba(216,80,63,.9)", background: "rgba(216,80,63,.14)", label: "" },
+  brand:   { border: "1px solid rgba(52,84,150,.9)", background: "rgba(52,84,150,.16)", label: "" },
+  subject: { border: "1px dashed rgba(163,116,20,.95)", background: "rgba(200,150,40,.16)", label: "subject" },
+  estens:  { border: "1px dotted rgba(163,116,20,.8)", background: "none", label: "estensione ammessa" },
+  avoid:   { border: "1px solid rgba(180,40,40,.75)", background: "repeating-linear-gradient(45deg,rgba(180,40,40,.2) 0 4px,rgba(180,40,40,0) 4px 9px)", label: "avoid" },
+  panel:   { border: "1px dotted rgba(34,50,31,.6)", background: "none", label: "panel" }
+};
+var stato = { tech: false, fondo: "chiaro", cat: null };
+var W, H, MIS;
+
+function pct(v, tot) { return (v / tot * 100) + "%"; }
+function box(a) { return "left:" + pct(a.x, W) + ";top:" + pct(a.y, H) + ";width:" + pct(a.w, W) + ";height:" + pct(a.h, H) + ";"; }
+function cq(v) { return (v / W * 100) + "cqw"; }
+function el(tag, style, html) { var d = document.createElement(tag); d.setAttribute("style", style || ""); if (html != null) d.innerHTML = html; return d; }
+function tema() { return TEMI[stato.fondo]; }
+function inchiostro() { return stato.fondo === "scuro" ? stato.cat.tema.scuro : stato.cat.tema.chiaro; }
+
+function velo(v) {
+  var rgb = tema().velo, o = stato.fondo === "scuro" ? v.opacita_scuro : v.opacita_chiaro;
+  var a = "rgba(" + rgb + "," + o + ")", z = "rgba(" + rgb + ",0)";
+  if (v.tipo === "pieno") return "linear-gradient(to bottom," + z + " 0%," + a + " 8%," + a + " 100%)";
+  if (v.tipo === "verticale-alto") return "linear-gradient(to bottom," + a + "," + z + ")";
+  if (v.tipo === "verticale-basso") return "linear-gradient(to top," + a + "," + z + ")";
+  if (v.tipo === "orizzontale-sinistra") return "linear-gradient(to right," + a + " 0%,rgba(" + rgb + "," + (o * .92) + ") 58%," + z + " 100%)";
+  return a;
+}
+
+function zona(a, kind, label) {
+  var z = ZONE[kind];
+  var d = el("div", box(a) + "border:" + z.border + ";background:" + z.background + ";", "");
+  d.className = "zona";
+  var testo = label || z.label;
+  var basso = kind === "subject" || kind === "estens" || kind === "panel";
+  if (testo) d.appendChild(el("div", "position:absolute;left:0;" + (basso ? "bottom:0;" : "top:0;") + "color:rgba(34,50,31,.9);background:rgba(253,245,230,.8);", testo)).className = "zlab";
+  return d;
+}
+
+function testo(a, contenuto, colore, corsivo) {
+  var st = box(a) + "font-size:" + cq(a.corpo) + ";line-height:" + cq(a.interlinea) + ";color:" + colore + ";text-align:" + (a.allineamento === "center" ? "center" : "left") + ";text-wrap:pretty;";
+  if (corsivo) st += "font-style:italic;";
+  if (a.corpo >= 30) st += "letter-spacing:-.005em;";
+  return el("div", st, contenuto);
+}
+
+function marchio(a, ink, grande) {
+  var lato = grande ? 38 : 26;
+  var d = el("div", box(a) + "display:flex;align-items:center;gap:" + cq(12) + ";color:" + ink.inchiostro_soft + ";" +
+    "justify-content:" + (a.allineamento === "center" ? "center" : a.allineamento === "right" ? "flex-end" : "flex-start") + ";");
+  var logo = el("div", "position:relative;flex:0 0 auto;width:" + cq(lato) + ";height:" + cq(lato) + ";font-size:" + cq(grande ? 6 : 5) + ";line-height:1.25;", "LOGO<br>DREAM<br>TAILY");
+  logo.className = "logo";
+  d.appendChild(logo);
+  d.appendChild(el("div", "position:relative;font-size:" + cq(grande ? 21 : 15) + ";letter-spacing:.04em;color:" + ink.inchiostro + ";", stato.cat.asset_marchio.wordmark.testo));
+  return d;
+}
+
+function disegna(g) {
+  var t = tema(), ink = inchiostro();
+  var c = el("div", "background:" + (g.image_area.h < H ? ink.carta : t.field) + ";");
+  c.className = "cover";
+
+  // illustrazione segnaposto: forme astratte, nessun testo
+  var img = el("div", box(g.image_area) + "overflow:hidden;background:" + t.field + ";");
+  img.appendChild(el("div", "position:absolute;left:-8%;right:-8%;top:52%;bottom:-8%;background:" + t.shape1 + ";"));
+  var sz = g.subject_zones && g.subject_zones[0];
+  if (sz) {
+    var relX = (sz.x - g.image_area.x + sz.w / 2) / g.image_area.w, relY = (sz.y - g.image_area.y) / g.image_area.h;
+    var fw = sz.w * .42 / g.image_area.w, fh = sz.h * .92 / g.image_area.h;
+    img.appendChild(el("div", "position:absolute;left:" + ((relX - fw / 2) * 100) + "%;top:" + (relY * 100) + "%;width:" + (fw * 100) + "%;height:" + (fh * 100) + "%;background:" + t.shape2 + ";border-radius:50% 50% 8% 8%;"));
+  }
+  c.appendChild(img);
+
+  (g.veil || []).forEach(function (v) { c.appendChild(el("div", box(v.copre) + "background:" + velo(v) + ";")); });
+
+  var suCarta = g.image_area.h < H;
+  var col = suCarta ? stato.cat.tema.chiaro : ink;
+  if (g.title_area) c.appendChild(testo(g.title_area, g.esempio.titolo || "", col.inchiostro));
+  if (g.subtitle_area) {
+    var frase = g.subtitle_area.ruolo === "frase personalizzata";
+    c.appendChild(testo(g.subtitle_area, frase ? (g.esempio.frase_personalizzata || "") : (g.esempio.sottotitolo || ""), frase ? col.accento : col.inchiostro_soft, frase));
+  }
+  if (g.description_area) c.appendChild(testo(g.description_area, g.esempio.descrizione || "", col.inchiostro));
+  if (g.brand_area) c.appendChild(marchio(g.brand_area, col, g.tipo === "front"));
+
+  if (stato.tech) {
+    (g.safe_zones || []).forEach(function (z) { c.appendChild(zona(z, "safe", z.nota && z.nota.indexOf("carta") === 0 ? "carta piena" : "safe zone")); });
+    (g.avoid_zones || []).forEach(function (z) { c.appendChild(zona(z, "avoid")); });
+    if (g.panel_area) c.appendChild(zona(g.panel_area, "panel", "panel · velo unico"));
+    if (g.title_area) c.appendChild(zona(g.title_area, "testo", "title"));
+    if (g.subtitle_area) c.appendChild(zona(g.subtitle_area, "testo", g.subtitle_area.ruolo === "frase personalizzata" ? "frase" : "subtitle"));
+    if (g.description_area) c.appendChild(zona(g.description_area, "testo", "description"));
+    if (g.brand_area) c.appendChild(zona(g.brand_area, "brand", "brand"));
+    if (g.technical_area) c.appendChild(zona(g.technical_area, "brand", "technical"));
+    (g.subject_zones || []).forEach(function (z) {
+      if (z.estensione_ammessa) c.appendChild(zona(z.estensione_ammessa, "estens"));
+      c.appendChild(zona(z, "subject", "subject · essenziale"));
+    });
+    c.appendChild(el("div", "left:0;top:0;right:0;bottom:0;outline:1px dotted rgba(34,50,31,.55);outline-offset:" + (MIS.abbondanza / W * 100) + "cqw;"));
+  }
+  return c;
+}
+
+function scheda(g, i) {
+  var s = el("div", "");
+  s.className = "scheda";
+  s.appendChild(disegna(g));
+  var tetti = [];
+  if (g.max_title) tetti.push("titolo " + g.max_title);
+  if (g.max_subtitle) tetti.push((g.tipo === "back" ? "frase " : "sottotitolo ") + g.max_subtitle);
+  if (g.max_description) tetti.push("descrizione " + g.max_description);
+  s.appendChild(el("div", "", "<b>" + (i + 1) + " · " + g.nome + "</b> — " + g.registro + ". " + tetti.join(" · ") + " caratteri." +
+    (g.technical_area ? " Area tecnica riservata." : "") + (g.brand_area && g.brand_area.facoltativo ? " Marchio secondario." : ""))).className = "didascalia";
+  return s;
+}
+
+function sezione(nodo, titolo, gabbie, offset) {
+  nodo.innerHTML = "";
+  nodo.appendChild(el("div", "margin-bottom:18px;", titolo)).className = "kicker";
+  var g = el("div", "");
+  g.className = "griglia";
+  gabbie.forEach(function (x, i) { g.appendChild(scheda(x, i + offset)); });
+  nodo.appendChild(g);
+}
+
+function legenda() {
+  var n = document.getElementById("legenda");
+  n.hidden = !stato.tech;
+  if (!stato.tech) return;
+  var voci = [["safe", "safe zone"], ["testo", "title · subtitle · description"], ["brand", "brand · technical"], ["subject", "subject zone (essenziale)"], ["estens", "estensione ammessa in abbondanza"], ["avoid", "avoid zone"]];
+  n.innerHTML = voci.map(function (v) {
+    var z = ZONE[v[0]];
+    return "<span><i style='border:" + z.border + ";background:" + z.background + "'></i>" + v[1] + "</span>";
+  }).join("") + "<span><i style='border:1px dotted rgba(34,50,31,.55)'></i>abbondanza " + MIS.abbondanza + "</span>";
+}
+
+function scale() {
+  var n = document.getElementById("sezScale");
+  n.innerHTML = "";
+  n.appendChild(el("div", "margin-bottom:18px;", "Prova responsive — stesse percentuali, tre larghezze")).className = "kicker";
+  var w = el("div", "");
+  w.className = "scale";
+  var g = stato.cat.gabbie[0];
+  ["", "m", "s"].forEach(function (cls) { var c = disegna(g); c.className = "cover " + cls; w.appendChild(c); });
+  n.appendChild(w);
+  n.appendChild(el("p", "", "Le coordinate in punti diventano percentuali con <i>x / " + W + "</i> e <i>y / " + H + "</i>; i corpi tipografici seguono la larghezza del contenitore. Nessuna area cambia rapporto al variare della scala.")).className = "lede";
+}
+
+function regole() {
+  var n = document.getElementById("sezRegole"), c = stato.cat;
+  var righe = [
+    ["Formato", W + " × " + H + " punti, " + MIS.proporzioni + ", singola copertina"],
+    ["front", c.tipi.front],
+    ["back", c.tipi.back],
+    ["dorso", c.tipi.dorso],
+    ["Abbondanza", MIS.abbondanza + " punti oltre il taglio, tutti i lati"],
+    ["Sicurezza", MIS.margine_sicurezza + " punti dal taglio: nessun elemento essenziale oltre"],
+    ["Immagine", c.regole_globali.immagine],
+    ["Testi e marchio", c.regole_globali.testi],
+    ["Leggibilità", c.regole_globali.leggibilita],
+    ["Volti", c.regole_globali.volti]
+  ];
+  n.innerHTML = "";
+  n.appendChild(el("div", "margin-bottom:18px;", "Regole del formato — dal JSON")).className = "kicker";
+  var dl = el("dl", "");
+  dl.className = "tabella";
+  righe.forEach(function (r) { dl.appendChild(el("dt", "", r[0])); dl.appendChild(el("dd", "", r[1])); });
+  n.appendChild(dl);
+}
+
+function render() {
+  var c = stato.cat;
+  sezione(document.getElementById("sezFront"), "Copertina frontale — tre registri", c.gabbie.filter(function (g) { return g.tipo === "front"; }), 0);
+  sezione(document.getElementById("sezBack"), "Quarta di copertina — due registri", c.gabbie.filter(function (g) { return g.tipo === "back"; }), 3);
+  legenda(); scale(); regole();
+}
+
+function avvia(cat) {
+  stato.cat = cat;
+  MIS = cat.sistema_di_misura; W = MIS.larghezza; H = MIS.altezza;
+  var r = validaGabbie.valida(cat);
+  var v = document.getElementById("verdetto");
+  v.className = "verdetto" + (r.ok ? " ok" : "");
+  v.textContent = "Validatore · " + validaGabbie.report(r) + (r.ok ? "\ncoordinate entro " + W + " × " + H + " · aree tipografiche entro il margine di sicurezza · nessuna sovrapposizione testo/subject · campi obbligatori presenti · 3 front + 2 back" : "");
+  render();
+}
+
+document.getElementById("bTech").addEventListener("click", function () {
+  stato.tech = !stato.tech;
+  this.setAttribute("aria-pressed", String(stato.tech));
+  if (stato.cat) render();
+});
+document.getElementById("selFondo").addEventListener("change", function () {
+  stato.fondo = this.value;
+  if (stato.cat) render();
+});
+document.getElementById("file").addEventListener("change", function (e) {
+  var f = e.target.files[0];
+  if (!f) return;
+  var fr = new FileReader();
+  fr.onload = function () { document.getElementById("caricatore").hidden = true; avvia(JSON.parse(fr.result)); };
+  fr.readAsText(f);
+});
+
+fetch("../src/book/gabbie-copertina.json")
+  .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(avvia)
+  .catch(function () {
+    document.getElementById("caricatore").hidden = false;
+    var v = document.getElementById("verdetto");
+    v.textContent = "JSON non caricato: la demo non disegna nulla finché non legge ../src/book/gabbie-copertina.json (è la sola fonte dei numeri).";
+  });
+</script>
+</body>
+</html>

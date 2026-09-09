@@ -75,3 +75,9 @@ test("publishing revalidates and delegates the atomic transition to Postgres", (
   assert.match(source, /contentByRef: access\.version\.content_by_ref/);
   assert.match(source, /versionMatch\[2\] === "publish"/);
 });
+
+test("new drafts reserve a generated book cover distinct from the catalog cover",()=>{
+  assert.match(source,/book_cover:/);
+  assert.match(source,/subtitle: "Un’avventura di \[Nome\]"/);
+  assert.match(source,/source_scenes: \{ version: 1, cover:/);
+});
