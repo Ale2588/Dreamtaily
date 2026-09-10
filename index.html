@@ -516,6 +516,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dth-reveal.is-on .dth-caption{opacity:1}
 .dth-replay{font-family:var(--hand);font-size:21px;color:rgba(246,236,217,.65);
   border-bottom:1px solid rgba(246,236,217,.3);padding-bottom:2px}
+.dth-replay:disabled{opacity:.38;cursor:not-allowed;border-bottom-color:transparent}
 
 /* --- chiusura --- */
 .dth-close{background:var(--carta);padding:54px 64px 26px}
@@ -709,8 +710,6 @@ body.dreamtaily-configurator-open{overflow:hidden}
         <button class="dth-cta" onclick="showScreen('creator')">Crea il suo personaggio</button>
         <button class="dth-link" onclick="openCharacterLibrary()">Apri la libreria</button>
       </div>
-      <button class="dth-resume" id="resume-book-btn" onclick="resumeDraftBook()" style="display:none">Riprendi il tuo libro</button>
-
       <p class="dth-hand">pronto in pochi minuti — e puoi rifarlo</p>
     </div>
 
@@ -725,17 +724,11 @@ body.dreamtaily-configurator-open{overflow:hidden}
     </div>
   </section>
 
-  <div class="dth-groundrow">
-    <span class="dth-hand">tav. i — stile carta ritagliata</span>
-    <span class="dth-tiny">tutti i personaggi stanno sulla stessa linea</span>
-  </div>
-
   <!-- ============ TRE PASSI ============ -->
   <section class="dth-steps" id="dth-passi">
     <div class="dth-wrap">
       <div class="dth-steps-head">
         <h2 class="dth-h2">Un personaggio, tante avventure.</h2>
-        <span class="dth-hand dth-hand-red">tre passi, tre stili</span>
       </div>
 
       <div class="dth-steps-grid">
@@ -803,7 +796,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
         <p class="dth-body dth-body-dark">Lo componiamo mentre guardi: la luce si accende e lui è lì. Da quel momento è suo.</p>
         <div class="dth-ctarow">
           <button class="dth-cta dth-cta-dark" onclick="showScreen('creator')">Crea il suo personaggio</button>
-          <button class="dth-replay" type="button" id="dth-replay">rivedi il momento</button>
+          <button class="dth-replay" type="button" id="dth-characters-link" onclick="openCharacterLibrary()" disabled>Vai ai tuoi personaggi</button>
         </div>
       </div>
     </div>
@@ -825,7 +818,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
       <ul class="dth-assure">
         <li><span class="dth-anum">1</span><span>Il personaggio si crea in pochi minuti e resta lo stesso in tutte le storie.</span></li>
         <li><span class="dth-anum">2</span><span>Se non ti somiglia, lo rifai: nessun limite di tentativi.</span></li>
-        <li><span class="dth-anum">3</span><span>La foto serve solo a creare il personaggio: la cancelliamo subito dopo.</span></li>
+        <li><span class="dth-anum">3</span><span>Puoi creare più personaggi per le tue storie.</span></li>
       </ul>
     </div>
     <footer class="dth-foot">
@@ -1588,11 +1581,29 @@ async function loadSavedCharacters(){
     }
 
     app.savedCharacters=hydrated;
+    updateRevealCharactersCta(hydrated.length>0);
     renderSavedCharacters();
   }catch(error){
     console.error('[DreamTaily] Character library error:',error);
     status.textContent='';
     showError('library-error','Non sono riuscito a recuperare i personaggi salvati.');
+  }
+}
+
+function updateRevealCharactersCta(enabled){
+  const button=document.getElementById('dth-characters-link');
+  if(button) button.disabled=!enabled;
+}
+
+async function detectSavedCharactersForHomepage(){
+  updateRevealCharactersCta(false);
+  try{
+    await ensureUser();
+    const {data,error}=await getSupabase().from('character_assets').select('id').eq('status','ready').limit(1);
+    if(error) throw error;
+    updateRevealCharactersCta(Boolean(data?.length));
+  }catch(error){
+    console.warn('[DreamTaily] Homepage character detection skipped:',error);
   }
 }
 
@@ -2691,8 +2702,8 @@ async function detectDraftBook(){
     const button=document.getElementById('resume-book-btn');
     if(data?.id){
       app.bookId=data.id;
-      button.style.display='';
-    }else{
+      if(button) button.style.display='';
+    }else if(button){
       button.style.display='none';
     }
   }catch(error){
@@ -2746,7 +2757,7 @@ function startAnother(){
   selectStyle(MVP_VISUAL_STYLE_ID);selectType('real_person');showScreen('creator');
 }
 
-document.addEventListener('DOMContentLoaded',async()=>{await loadStoryCatalog();detectDraftBook()});
+document.addEventListener('DOMContentLoaded',async()=>{await loadStoryCatalog();detectDraftBook();detectSavedCharactersForHomepage()});
 window.DreamTailyCharacterFlow={
   generate:generateCharacter,
   save:saveCharacter,
@@ -4256,11 +4267,6 @@ window.addEventListener("pageshow",()=>window.detectDraftBook());
       io.observe(el);
     }
     setTimeout(fire,4000); // fallback: non deve mai restare buia
-    var replay=document.getElementById('dth-replay');
-    if(replay) replay.addEventListener('click',function(){
-      el.classList.remove('is-on');
-      setTimeout(function(){el.classList.add('is-on');},380);
-    });
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initDthReveal);
   else initDthReveal();
