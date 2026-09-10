@@ -55,6 +55,7 @@ export function planBookRender(book) {
       authoring_note: book.cover.scene.authoring_note || null,
       layout: book.cover.layout ? structuredClone(book.cover.layout) : null,
       brand_variant: book.cover.brand_variant || "dark",
+      format: book.cover.format || null,
       style_id,
       characters: cast,
       protagonist_pose: cast.find((item) => item.slot_key === "protagonist")?.pose || "in_piedi",

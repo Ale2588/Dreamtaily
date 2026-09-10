@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
-import {gabbieCopertina, gabbiaCopertinaPerNome, inizializzaGabbieCopertina, renderCopertina, validaSceltaCopertina} from "../src/book/cover-layout.js";
+import {gabbieCopertina, gabbiaCopertinaPerNome, inizializzaGabbieCopertina, renderCopertina, stiliCopertina, validaSceltaCopertina} from "../src/book/cover-layout.js";
 
 const raw=await readFile(new URL("../src/book/gabbie-copertina.json",import.meta.url),"utf8");
 const catalog=inizializzaGabbieCopertina(raw);
@@ -19,12 +19,16 @@ test("front cover requires layout, texts and authored scene prompts",()=>{
 });
 
 test("renderer overlays title and deterministic DreamTaily brand",()=>{
-  const html=renderCopertina({gabbia:gabbiaCopertinaPerNome("Ritratto","front"),image:"cover.png",title:"Il bosco",subtitle:"Un’avventura di Lia"});
+  const html=renderCopertina({gabbia:gabbiaCopertinaPerNome("Ritratto","front"),image:"cover.png",title:"Il bosco",subtitle:"Un’avventura di Lia",portrait:true});
   assert.match(html,/data-cover-layout="Ritratto"/);
   assert.match(html,/src="cover\.png"/);
   assert.match(html,/Il bosco/);
   assert.match(html,/DreamTaily/);
   assert.match(html,/assets\/brand\/dreamtaily-icon\.png/);
+  assert.match(html,/data-cover-format="portrait"/);
+  assert.match(stiliCopertina,/aspect-ratio:2\/3/);
+  assert.match(stiliCopertina,/font-size:clamp\(34px,10cqw,72px\)/);
+  assert.match(stiliCopertina,/border-radius:50%/);
 });
 
 test("every required typographic area remains in the canonical safe box",()=>{

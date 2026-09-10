@@ -122,7 +122,7 @@ async function loadContext(bookId:string,userId:string){
 }
 
 function planMultiStoryRender(contexts:any[],bookCover:any=null){
-  const globalCover=bookCover?planBookRender({meta:{title:bookCover.title},cover:bookCover,pages:[]}).map((page:any)=>({...page,page_id:"book__cover",local_page_id:"cover",book_story_id:null,story_slug:null,characters:(bookCover.characters||[]).map((item:any)=>({slot_key:item.slot_key,character_id:item.character_asset_id,pose:"in_piedi",featured:true})),cover_characters:bookCover.characters||[]})):[];
+  const globalCover=bookCover?planBookRender({meta:{title:bookCover.title},cover:bookCover,pages:[]}).map((page:any)=>({...page,page_id:"book__cover",local_page_id:"cover",book_story_id:null,story_slug:null,format:"portrait",characters:(bookCover.characters||[]).map((item:any)=>({slot_key:item.slot_key,character_id:item.character_asset_id,pose:"in_piedi",featured:true})),cover_characters:bookCover.characters||[]})):[];
   const storyPages=contexts.flatMap((context:any)=>planBookRender(context.snapshot).map((page:any)=>({
     ...page,
     page_id:`${context.book_story_id}__${page.page_id}`,
@@ -190,9 +190,9 @@ async function characterInputs(page:any,story:any){
   return inputs;
 }
 
-async function openAIEdit(images:Blob[],prompt:string){
+async function openAIEdit(images:Blob[],prompt:string,size=SIZE){
   const f=new FormData();
-  f.append("model",MODEL); f.append("prompt",prompt); f.append("size",SIZE);
+  f.append("model",MODEL); f.append("prompt",prompt); f.append("size",size);
   f.append("quality",QUALITY); f.append("output_format","png");
   images.forEach((b,i)=>f.append("image[]",b,i===0?"background.png":`character-${i}.png`));
   const r=await fetch("https://api.openai.com/v1/images/edits",{
@@ -229,7 +229,7 @@ async function renderOne(renderId:string,page:any,story:any){
   for(let attempt=Number(page.render?.attempts||0)+1;attempt<=MAX_ATTEMPTS;attempt++){
     try{
       const imgs:Blob[]=[await fetchBlob(page.background_ref,"BACKGROUND"),...cast.map((item:any)=>item.blob)];
-      const bytes=await openAIEdit(imgs,prompt);
+      const bytes=await openAIEdit(imgs,prompt,page.format==="portrait"?"1024x1536":SIZE);
       const s=await store(renderId,page.page_id,bytes);
       return {...page,render:{status:"ready",generated_image_url:s.url,generated_image_path:s.path,
         attempts:attempt,prompt_hash:ph,compiled_prompt:prompt,error:null}};
@@ -251,6 +251,7 @@ Deno.serve(async(req:Request)=>{
     const key=String(body.idempotency_key||"").trim();
     const start=body.start===true;
     const full=body.mode==="full";
+    const regeneratePageId=String(body.regenerate_page_id||"").trim();
     if(!bookId) return reply(400,{error:"BOOK_ID_REQUIRED"});
     if(!key) return reply(400,{error:"IDEMPOTENCY_KEY_REQUIRED"});
 
@@ -261,6 +262,24 @@ Deno.serve(async(req:Request)=>{
     const {data:owned,error:ownedError}=await svc.from("books").select("id").eq("id",bookId).eq("profile_id",user.id).maybeSingle();
     if(ownedError) throw ownedError;
     if(!owned) throw new Error("BOOK_NOT_FOUND");
+    if(regeneratePageId){
+      if(regeneratePageId!=="book__cover") return reply(400,{error:"REGENERATE_PAGE_NOT_ALLOWED"});
+      if(!start) return reply(400,{error:"REGENERATE_START_REQUIRED"});
+      if(!["ready","review"].includes(job.status)) return reply(409,{error:"REGENERATE_RENDER_NOT_STABLE"});
+      const target=(job.pages||[]).find((page:any)=>page.page_id===regeneratePageId);
+      if(!target) return reply(404,{error:"REGENERATE_PAGE_NOT_FOUND"});
+      const pages=(job.pages||[]).map((page:any)=>page.page_id===regeneratePageId?{
+        ...page,format:"portrait",render:{...page.render,status:"queued",attempts:0,error:null,generated_image_url:null,generated_image_path:null}
+      }:page);
+      const now=new Date().toISOString();
+      const {data:restarted,error:restartError}=await svc.from("book_renders")
+        .update({status:"running",pages,error:null,finished_at:null,updated_at:now})
+        .eq("id",job.id).eq("status",job.status).select("*").single();
+      if(restartError) throw restartError;
+      job=restarted;
+      const {error:bookRestartError}=await svc.from("books").update({status:"generating",updated_at:now}).eq("id",bookId);
+      if(bookRestartError) throw bookRestartError;
+    }
     if(job.status==="queued"&&!start) return reply(202,{
       render_id:job.id,status:job.status,pages:job.pages,permalink_slug:job.permalink_slug,idempotent:true
     });

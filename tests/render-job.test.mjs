@@ -62,3 +62,8 @@ test("cover plan preserves cover layout and deterministic brand variant",()=>{
   assert.match(cover.layout.prompt_layout_instruction,/top calm/);
   assert.equal(cover.brand_variant,"light");
 });
+
+test("cover plan preserves an explicit portrait format",()=>{
+  const b=structuredClone(book);b.cover.format="portrait";
+  assert.equal(planBookRender(b)[0].format,"portrait");
+});

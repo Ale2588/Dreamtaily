@@ -42,6 +42,14 @@ test("renderer resumes frozen relative cover assets from scaffolding",()=>{
   assert.match(source,/Dreamtaily\/scaffolding/);
 });
 
+test("global cover is portrait and can be regenerated on its own",()=>{
+  assert.match(source,/format:"portrait"/);
+  assert.match(source,/page\.format==="portrait"\?"1024x1536":SIZE/);
+  assert.match(source,/regenerate_page_id/);
+  assert.match(source,/regeneratePageId!=="book__cover"/);
+  assert.match(source,/page\.page_id===regeneratePageId/);
+});
+
 test("pilot mode validates a narrative spread before the cover",()=>{
   assert.match(source,/firstNarrative=candidates\.find/);
   assert.match(source,/page\.kind==="page"/);

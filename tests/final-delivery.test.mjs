@@ -29,4 +29,12 @@ test("final reader overlays the authored front cover and DreamTaily brand",()=>{
   assert.match(reader,/gabbiaCopertinaPerNome\(page\.layout\.gabbia,"front"\)/);
   assert.match(reader,/renderCopertina/);
   assert.match(reader,/gabbie-copertina\.json/);
+  assert.match(delivery,/format:p\.format/);
+  assert.match(reader,/page\.page_id==="book__cover"\|\|page\.format==="portrait"/);
+  assert.match(reader,/portrait:globalCover/);
+});
+
+test("reader logo links home and every DreamTaily logo is circular",()=>{
+  assert.match(reader,/<a class="brand" href="index\.html">/);
+  assert.match(reader,/\.brand img\{[^}]*border-radius:50%/);
 });

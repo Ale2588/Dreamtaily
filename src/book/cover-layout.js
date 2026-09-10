@@ -74,7 +74,7 @@ function veilStyle(veil, theme) {
   return solid;
 }
 
-export function renderCopertina({ gabbia, image, title, subtitle, brandVariant = "dark", logoSrc = "assets/brand/dreamtaily-icon.png" }) {
+export function renderCopertina({ gabbia, image, title, subtitle, brandVariant = "dark", logoSrc = "assets/brand/dreamtaily-icon.png", portrait = false }) {
   if (!gabbia || gabbia.tipo !== "front") throw new Error("COVER_FRONT_LAYOUT_REQUIRED");
   const width = gabbia.formato.larghezza;
   const height = gabbia.formato.altezza;
@@ -82,7 +82,7 @@ export function renderCopertina({ gabbia, image, title, subtitle, brandVariant =
   const veils = (gabbia.veil || []).map((item) => `<div class="dtc-veil" style="${geometry(item.copre, width, height)};background:${veilStyle(item, brandVariant)}"></div>`).join("");
   const text = (area, value, className) => area ? `<div class="${className}" style="${geometry(area, width, height)};font-size:${pct(area.corpo, width)};line-height:${area.interlinea / area.corpo};text-align:${area.allineamento};color:${ink}">${esc(value)}</div>` : "";
   const brand = `<div class="dtc-brand" style="${geometry(gabbia.brand_area, width, height)};color:${ink};justify-content:${gabbia.brand_area.allineamento === "center" ? "center" : "flex-start"}"><img src="${esc(logoSrc)}" alt=""><strong>DreamTaily</strong></div>`;
-  return `<section class="dtc-cover" data-cover-layout="${esc(gabbia.nome)}"><img class="dtc-image" src="${esc(image)}" alt="">${veils}${text(gabbia.title_area, title, "dtc-title")}${text(gabbia.subtitle_area, subtitle, "dtc-subtitle")}${brand}</section>`;
+  return `<section class="dtc-cover" data-cover-layout="${esc(gabbia.nome)}" data-cover-format="${portrait ? "portrait" : "landscape"}"><img class="dtc-image" src="${esc(image)}" alt="">${veils}${text(gabbia.title_area, title, "dtc-title")}${text(gabbia.subtitle_area, subtitle, "dtc-subtitle")}${brand}</section>`;
 }
 
 export const stiliCopertina = `
@@ -90,5 +90,12 @@ export const stiliCopertina = `
 .dtc-cover>*{position:absolute;box-sizing:border-box}.dtc-image{inset:0;width:100%;height:100%;object-fit:cover}
 .dtc-title,.dtc-subtitle{display:flex;align-items:center;justify-content:center;text-wrap:balance;z-index:3}
 .dtc-title{font-weight:600}.dtc-subtitle{font-style:italic}.dtc-veil{z-index:2}.dtc-brand{display:flex;align-items:center;gap:2.2cqw;z-index:4;font-size:3.25cqw}
-.dtc-brand img{position:static;width:5.2cqw;height:5.2cqw;object-fit:contain}.dtc-brand strong{font-weight:600;letter-spacing:.01em}
+.dtc-brand img{position:static;width:5.2cqw;height:5.2cqw;object-fit:cover;border-radius:50%;background:#fff}.dtc-brand strong{font-weight:700;letter-spacing:.01em}
+.dtc-cover[data-cover-format="portrait"]{aspect-ratio:2/3;max-width:min(100%,680px);margin-inline:auto}
+.dtc-cover[data-cover-format="portrait"] .dtc-title{left:9%!important;top:7%!important;width:82%!important;height:25%!important;font-size:clamp(34px,10cqw,72px)!important;line-height:1.02!important;text-align:center!important;align-items:center;font-weight:700;text-shadow:0 2px 16px rgba(253,245,230,.35)}
+.dtc-cover[data-cover-format="portrait"][data-cover-layout="Margine"] .dtc-title{left:9%!important;top:9%!important;width:66%!important;text-align:left!important;justify-content:flex-start}
+.dtc-cover[data-cover-format="portrait"][data-cover-layout="Pannello"] .dtc-title{left:8%!important;top:61%!important;width:84%!important;height:22%!important;background:rgba(253,245,230,.86);padding:5%;border-radius:2cqw}
+.dtc-cover[data-cover-format="portrait"] .dtc-subtitle{display:none}
+.dtc-cover[data-cover-format="portrait"] .dtc-brand{left:9%!important;top:88%!important;width:82%!important;height:8%!important;justify-content:center!important;gap:2.5cqw;font-size:clamp(18px,4.8cqw,34px)!important}
+.dtc-cover[data-cover-format="portrait"] .dtc-brand img{width:9cqw;height:9cqw;border-radius:50%;box-shadow:0 2px 10px rgba(34,50,31,.18)}
 `;

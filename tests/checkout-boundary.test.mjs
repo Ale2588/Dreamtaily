@@ -79,3 +79,9 @@ test('status page supports refresh and starting another book',()=>{
   assert.match(html,/Crea un altro libro/);
   assert.match(html,/\["draft","ready_for_checkout","paid","generating","ready","failed"\]/);
 });
+
+test('ready books expose cover-only regeneration',()=>{
+  assert.match(html,/Rigenera solo la copertina/);
+  assert.match(html,/window\.regenerateDtBookCover=async function/);
+  assert.match(html,/regenerate_page_id:"book__cover"/);
+});
