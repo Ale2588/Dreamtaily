@@ -3584,7 +3584,7 @@ window.startDtFullRender=async function(){
   if(dtFullRenderActive||!app.bookId||!dtPendingRender?.id) return;
   dtFullRenderActive=true;
   try{
-    while(dtPendingRender?.status==='queued'||dtPendingRender?.status==='running'){
+    while(dtPendingRender?.status==='queued'||dtPendingRender?.status==='running'||dtPendingRender?.status==='review'){
       const button=document.getElementById("dt-full-render");
       if(button){button.disabled=true;button.textContent="Creo la prossima pagina…";}
       const {data,error}=await getSupabase().functions.invoke("render-book",{

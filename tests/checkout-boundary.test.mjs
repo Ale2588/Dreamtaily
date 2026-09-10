@@ -58,7 +58,7 @@ test('full rendering starts explicitly and resumes page by page',()=>{
   const full=html.match(/window\.startDtFullRender=async function\(\)[\s\S]*?window\.startDtPilotRender/)?.[0]||'';
   assert.match(full,/functions\.invoke\("render-book"/);
   assert.match(full,/mode:"full"/);
-  assert.match(full,/while\(dtPendingRender\?\.status==='queued'\|\|dtPendingRender\?\.status==='running'\)/);
+  assert.match(full,/while\(dtPendingRender\?\.status==='queued'\|\|dtPendingRender\?\.status==='running'\|\|dtPendingRender\?\.status==='review'\)/);
   assert.match(full,/Le pagine completate sono salve/);
   assert.match(renderer,/job\.status==="queued"\|\|job\.status==="review"/);
   assert.match(renderer,/status:"queued",attempts:0,error:null/);
