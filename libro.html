@@ -40,6 +40,16 @@ button:disabled{opacity:.35;cursor:default}
 .count{flex:1;text-align:center;color:var(--muted);font-size:13px;font-weight:800}
 .end{text-align:center;padding:74px 26px}.end .big{font:800 44px "Baloo 2",sans-serif;color:var(--coral)}.end p{font-family:Lora,serif;color:var(--muted);line-height:1.7}
 #print-book{display:none}
+.pdf-export-root{position:fixed;left:-100000px;top:0;width:1240px;background:#fff;pointer-events:none}
+.pdf-export-root .print-book-spread{position:relative;width:1240px;height:465px;background:#fff;overflow:hidden}
+.pdf-export-root .print-full-spread .layout-card,.pdf-export-root .print-full-spread .dtb-doppia{width:1240px!important;height:465px!important;max-width:none!important;margin:0!important}
+.pdf-export-root .print-story-title{display:grid;grid-template-columns:620px 620px}
+.pdf-export-root .print-story-title .print-cover-front,.pdf-export-root .print-story-title .layout-card,.pdf-export-root .print-story-title .dtc-cover{width:620px!important;height:465px!important;max-width:none!important;margin:0!important}
+.pdf-export-root .print-cover-sheet{display:grid;grid-template-columns:620px 620px;background:#fdf8f0}
+.pdf-export-root .print-cover-back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:56px;color:#22321f;text-align:center;font-family:Faustina,Georgia,serif}
+.pdf-export-root .print-cover-back img{width:58px;height:58px;border-radius:50%;object-fit:cover;background:#fff}
+.pdf-export-root .print-cover-back strong{font-size:38px}.pdf-export-root .print-cover-back p{font-size:21px;line-height:1.5;max-width:390px}
+.pdf-export-root .print-cover-front,.pdf-export-root .print-cover-front .layout-card,.pdf-export-root .print-cover-front .dtc-cover{width:620px!important;height:465px!important;max-width:none!important;margin:0!important}
 @media(max-width:780px){
   body{padding:8px 8px 86px}.card{border-radius:18px}.spread{display:block;min-height:0}
   .visual{min-height:0;aspect-ratio:4/3}.copy{max-height:none;padding:24px 21px 30px}.story{font-size:17px;line-height:1.75}
@@ -80,6 +90,7 @@ button:disabled{opacity:.35;cursor:default}
 import {caricaGabbie,gabbiaPerNome} from "./src/book/gabbie.js";
 import {renderDoppia,stiliDoppia} from "./src/book/doppia.js";
 import {inizializzaGabbieCopertina,gabbiaCopertinaPerNome,renderCopertina,stiliCopertina} from "./src/book/cover-layout.js";
+import {buildImagePdf} from "./src/book/pdf-export.js";
 
 const DELIVERY_URL="https://hirzbtruxvjzmcnncvmv.supabase.co/functions/v1/deliver-book";
 let slides=[], current=0;
@@ -139,25 +150,65 @@ function render(){
   window.scrollTo({top:0,behavior:"instant"});
 }
 function go(delta){const n=current+delta;if(n<0||n>=slides.length)return;current=n;render();}
-async function printDocument(content,pageSize){
-  document.getElementById("print-book").innerHTML=content;
-  let pageStyle=document.getElementById("dt-print-page-size");
-  if(!pageStyle){pageStyle=document.createElement("style");pageStyle.id="dt-print-page-size";document.head.appendChild(pageStyle);}
-  pageStyle.textContent=`@page{size:${pageSize};margin:0}`;
-  const imgs=[...document.querySelectorAll("#print-book img")];
-  try{
-    await document.fonts.ready;
-    await Promise.all(imgs.map(async img=>{
-      if(!img.complete) await new Promise((resolve,reject)=>{img.addEventListener("load",resolve,{once:true});img.addEventListener("error",reject,{once:true});});
-      if(!img.naturalWidth) throw new Error("PRINT_IMAGE_MISSING");
-      if(img.decode) await img.decode();
-    }));
-    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-    await new Promise(resolve=>setTimeout(resolve,300));
-    window.print();
-  }catch(error){console.error(error);alert("Non tutte le immagini sono pronte. Riprova tra qualche secondo.");}
+const EXPORT_WIDTH=5669;
+const EXPORT_HEIGHT=2126;
+const PDF_WIDTH=1360.63;
+const PDF_HEIGHT=510.24;
+async function dataUrl(src){
+  if(String(src).startsWith("data:"))return src;
+  const response=await fetch(src,{cache:"force-cache"});
+  if(!response.ok)throw new Error(`PDF_ASSET_HTTP_${response.status}`);
+  const blob=await response.blob();
+  return await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob);});
 }
-function printWholeBook(){return printDocument(window.dtPrintBook||"","480mm 180mm");}
+async function freezeSheet(sheet){
+  const clone=sheet.cloneNode(true);
+  const originals=[sheet,...sheet.querySelectorAll("*")];
+  const copies=[clone,...clone.querySelectorAll("*")];
+  for(let index=0;index<originals.length;index+=1){
+    const computed=getComputedStyle(originals[index]);
+    copies[index].style.cssText=[...computed].map(name=>`${name}:${computed.getPropertyValue(name)};`).join("");
+  }
+  const originalImages=[...sheet.querySelectorAll("img")];
+  const clonedImages=[...clone.querySelectorAll("img")];
+  await Promise.all(originalImages.map(async(img,index)=>{clonedImages[index].src=await dataUrl(img.currentSrc||img.src);}));
+  clone.setAttribute("xmlns","http://www.w3.org/1999/xhtml");
+  return new XMLSerializer().serializeToString(clone);
+}
+async function sheetJpeg(sheet){
+  const markup=await freezeSheet(sheet);
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="465" viewBox="0 0 1240 465"><foreignObject width="1240" height="465">${markup}</foreignObject></svg>`;
+  const url=URL.createObjectURL(new Blob([svg],{type:"image/svg+xml;charset=utf-8"}));
+  try{
+    const image=new Image();
+    await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=reject;image.src=url;});
+    const canvas=document.createElement("canvas");
+    canvas.width=EXPORT_WIDTH;canvas.height=EXPORT_HEIGHT;
+    const context=canvas.getContext("2d",{alpha:false});
+    context.fillStyle="#ffffff";context.fillRect(0,0,canvas.width,canvas.height);
+    context.drawImage(image,0,0,canvas.width,canvas.height);
+    const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error("PDF_CANVAS_EMPTY")),"image/jpeg",.94));
+    return new Uint8Array(await blob.arrayBuffer());
+  }finally{URL.revokeObjectURL(url);}
+}
+async function exportBookPdf(content){
+  const button=document.getElementById("print");
+  const root=document.createElement("div");root.className="pdf-export-root";root.innerHTML=content;document.body.appendChild(root);
+  try{
+    button.disabled=true;button.textContent="Preparo il PDF…";
+    await document.fonts.ready;
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    const sheets=[...root.querySelectorAll(".print-book-spread")];
+    if(!sheets.length)throw new Error("PDF_PAGES_EMPTY");
+    const jpegs=[];
+    for(let index=0;index<sheets.length;index+=1){button.textContent=`Creo pagina ${index+1} di ${sheets.length}…`;jpegs.push(await sheetJpeg(sheets[index]));}
+    const pdf=buildImagePdf({jpegs,width:PDF_WIDTH,height:PDF_HEIGHT,imageWidth:EXPORT_WIDTH,imageHeight:EXPORT_HEIGHT});
+    const link=document.createElement("a");link.href=URL.createObjectURL(pdf);link.download=`${document.title.replace(/[^a-z0-9à-ž _—-]/gi,"").trim()||"DreamTaily"}.pdf`;link.click();
+    setTimeout(()=>URL.revokeObjectURL(link.href),30000);
+  }catch(error){console.error(error);alert("Non riesco a preparare il PDF. Riprova tra qualche secondo.");}
+  finally{root.remove();button.disabled=false;button.textContent="Scarica PDF del libro";}
+}
+function printWholeBook(){return exportBookPdf(window.dtPrintBook||"");}
 window.printWholeBook=printWholeBook;
 async function load(){
   const slug=new URLSearchParams(location.search).get("slug")||"";

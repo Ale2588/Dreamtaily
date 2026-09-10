@@ -80,7 +80,7 @@ export function renderCopertina({ gabbia, image, title, subtitle, brandVariant =
   const height = gabbia.formato.altezza;
   const ink = brandVariant === "light" ? "#fdf5e6" : "#22321f";
   const veils = (gabbia.veil || []).map((item) => `<div class="dtc-veil" style="${geometry(item.copre, width, height)};background:${veilStyle(item, brandVariant)}"></div>`).join("");
-  const text = (area, value, className) => area ? `<div class="${className}" style="${geometry(area, width, height)};font-size:${pct(area.corpo, width)};line-height:${area.interlinea / area.corpo};text-align:${area.allineamento};color:${ink}">${esc(value)}</div>` : "";
+  const text = (area, value, className) => area ? `<div class="${className}" style="${geometry(area, width, height)};font-size:${(Number(area.corpo) / width) * 100}cqw;line-height:${area.interlinea / area.corpo};text-align:${area.allineamento};color:${ink}">${esc(value)}</div>` : "";
   const brand = `<div class="dtc-brand" style="${geometry(gabbia.brand_area, width, height)};color:${ink};justify-content:${gabbia.brand_area.allineamento === "center" ? "center" : "flex-start"}"><img src="${esc(logoSrc)}" alt=""><strong>DreamTaily</strong></div>`;
   return `<section class="dtc-cover" data-cover-layout="${esc(gabbia.nome)}" data-cover-format="${portrait ? "portrait" : "landscape"}"><img class="dtc-image" src="${esc(image)}" alt="">${veils}${text(gabbia.title_area, title, "dtc-title")}${text(gabbia.subtitle_area, subtitle, "dtc-subtitle")}${brand}</section>`;
 }

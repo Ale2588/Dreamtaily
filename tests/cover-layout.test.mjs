@@ -31,6 +31,13 @@ test("renderer overlays title and deterministic DreamTaily brand",()=>{
   assert.match(stiliCopertina,/border-radius:50%/);
 });
 
+test("landscape cover typography scales from the cover width",()=>{
+  const html=renderCopertina({gabbia:gabbiaCopertinaPerNome("Ritratto","front"),image:"cover.png",title:"Il libro di Tommy",subtitle:"Tre avventure",portrait:false});
+  assert.match(html,/dtc-title[^>]+font-size:[\d.]+cqw/);
+  assert.match(html,/dtc-subtitle[^>]+font-size:[\d.]+cqw/);
+  assert.doesNotMatch(html,/dtc-title[^>]+font-size:[\d.]+%;/);
+});
+
 test("every required typographic area remains in the canonical safe box",()=>{
   const safe=catalog.sistema_di_misura.safe_box;
   for(const layout of catalog.gabbie){

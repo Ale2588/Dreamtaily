@@ -48,18 +48,23 @@ test("printer export keeps every sheet horizontal and preserves canonical spread
   assert.doesNotMatch(reader,/class="print-copy"/);
 });
 
-test("printer receives one unified horizontal PDF",()=>{
+test("exporter produces one unified horizontal PDF without browser printing",()=>{
   assert.match(reader,/Scarica PDF del libro/);
   assert.doesNotMatch(reader,/PDF interni/);
   assert.doesNotMatch(reader,/PDF copertina/);
-  assert.match(reader,/printDocument\(window\.dtPrintBook\|\|"","480mm 180mm"\)/);
+  assert.match(reader,/exportBookPdf\(window\.dtPrintBook\|\|""\)/);
+  assert.match(reader,/buildImagePdf\(\{jpegs,width:PDF_WIDTH/);
+  assert.doesNotMatch(reader,/window\.print\(\)/);
   assert.match(reader,/print-cover-back/);
   assert.match(reader,/print-cover-front/);
 });
 
-test("printing waits for fonts and fully decoded images",()=>{
+test("deterministic exporter freezes fonts, assets and every spread at 300 DPI",()=>{
   assert.match(reader,/await document\.fonts\.ready/);
-  assert.match(reader,/if\(img\.decode\) await img\.decode\(\)/);
-  assert.match(reader,/if\(!img\.naturalWidth\) throw new Error\("PRINT_IMAGE_MISSING"\)/);
+  assert.match(reader,/const EXPORT_WIDTH=5669/);
+  assert.match(reader,/const EXPORT_HEIGHT=2126/);
+  assert.match(reader,/await dataUrl\(img\.currentSrc\|\|img\.src\)/);
+  assert.match(reader,/new XMLSerializer\(\)\.serializeToString\(clone\)/);
+  assert.match(reader,/canvas\.toBlob/);
   assert.match(reader,/requestAnimationFrame\(\(\)=>requestAnimationFrame\(resolve\)\)/);
 });
