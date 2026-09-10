@@ -52,20 +52,21 @@ test("exporter produces one unified horizontal PDF without browser printing",()=
   assert.match(reader,/Scarica PDF del libro/);
   assert.doesNotMatch(reader,/PDF interni/);
   assert.doesNotMatch(reader,/PDF copertina/);
-  assert.match(reader,/exportBookPdf\(window\.dtPrintBook\|\|""\)/);
+  assert.match(reader,/exportBookPdf\(window\.dtBookPages\|\|\[\]\)/);
   assert.match(reader,/buildImagePdf\(\{jpegs,width:PDF_WIDTH/);
   assert.doesNotMatch(reader,/window\.print\(\)/);
   assert.match(reader,/print-cover-back/);
   assert.match(reader,/print-cover-front/);
 });
 
-test("deterministic exporter freezes fonts, assets and every spread at 300 DPI",()=>{
+test("deterministic exporter draws assets and every spread directly at 300 DPI",()=>{
   assert.match(reader,/await document\.fonts\.ready/);
   assert.match(reader,/const EXPORT_WIDTH=5669/);
   assert.match(reader,/const EXPORT_HEIGHT=2126/);
-  assert.match(reader,/await dataUrl\(img\.currentSrc\|\|img\.src\)/);
-  assert.match(reader,/Array\.from\(computed\)/);
-  assert.match(reader,/new XMLSerializer\(\)\.serializeToString\(clone\)/);
+  assert.match(reader,/createImageBitmap\(blob\)/);
+  assert.match(reader,/async function drawNarrative\(context,page\)/);
+  assert.match(reader,/async function drawCover\(context,page,offsetX\)/);
   assert.match(reader,/canvas\.toBlob/);
-  assert.match(reader,/requestAnimationFrame\(\(\)=>requestAnimationFrame\(resolve\)\)/);
+  assert.doesNotMatch(reader,/foreignObject/);
+  assert.doesNotMatch(reader,/XMLSerializer/);
 });
