@@ -338,8 +338,17 @@ export function resolveScene({
   return {
     bg: resolveBackground(definition, decisions),
     wash: definition.wash || null,
-    prompt_environment: definition.prompt_environment || definition.environment_prompt || null,
-    prompt_moment: definition.prompt_moment || definition.moment_prompt || null,
+    prompt_environment: resolveStoryMarkers(
+      definition.prompt_environment || definition.environment_prompt || "",
+      choices,
+      catalog
+    ) || null,
+    prompt_moment: resolveStoryMarkers(
+      definition.prompt_moment || definition.moment_prompt || "",
+      choices,
+      catalog
+    ) || null,
+    authoring_note: resolveStoryMarkers(definition.authoring_note || "", choices, catalog) || null,
     layers,
   };
 }
@@ -387,13 +396,16 @@ export function composeStory({
     },
     cover: scenes?.cover
       ? {
-          title: story.title,
+          title: resolveStoryMarkers(story.title, choices, catalog),
           subtitle: `Un’avventura di ${slotName(choices.protagonist, catalog) || "Il protagonista"}`,
+          layout: null,
+          brand_variant: null,
           scene: {
             bg: resolveBackground(scenes.cover, mergedDecisionMap(choices)),
             wash: scenes.cover.wash || null,
             prompt_environment: scenes.cover.prompt_environment || scenes.cover.environment_prompt || null,
             prompt_moment: scenes.cover.prompt_moment || scenes.cover.moment_prompt || null,
+            authoring_note: scenes.cover.authoring_note || null,
             layers: (scenes.cover.slots || [])
               .filter((slot) => slot.role === "protagonist")
               .map((slot) => ({

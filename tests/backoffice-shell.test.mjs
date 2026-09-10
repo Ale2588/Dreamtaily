@@ -1,4 +1,5 @@
 import test from 'node:test';
+import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
@@ -102,8 +103,9 @@ test('i testi sono salvati in content_by_ref e i marcatori arrivano da menu',()=
   assert.match(editor,/insertAtCursor/);
 });
 
-test('ogni scena espone sfondo e prompt d’autore',()=>{
-  assert.match(editor,/Scene illustrate/);
+test('ogni scena espone riferimento ambientale e regia d’autore',()=>{
+  assert.match(editor,/Illustrazione della scena/);
+  assert.match(editor,/un’unica illustrazione integrata/);
   assert.match(editor,/background_ref/);
   assert.match(editor,/environment_prompt/);
   assert.match(editor,/moment_prompt/);
@@ -143,17 +145,36 @@ test('i controlli bloccano destinazioni e scene incomplete',()=>{
 
 test('l’anteprima importa il composer canonico',()=>{
   assert.match(editor,/Anteprima deterministica/);
-  assert.match(editor,/import\('\.\/src\/story-composer\.js'\)/);
-  assert.match(editor,/composeStory\(\{/);
-  assert.match(editor,/contentByRef:state\.version\.content_by_ref/);
+  assert.match(editor,/import\('\.\/src\/editor-preview\.js'\)/);
+  const preview=fs.readFileSync('src/editor-preview.js','utf8');
+  assert.match(preview,/import \{composeStory\} from '\.\/story-composer.js'/);
+  assert.match(preview,/contentByRef:bundle.content_by_ref/);
   assert.doesNotMatch(editor,/fetch\([^)]*(?:openai|generate)/i);
 });
 
 test('la preview dichiara che non genera immagini e non usa IA',()=>{
   assert.match(editor,/Non genera immagini e non usa IA/);
-  assert.match(editor,/tutti i percorsi raggiungibili/);
-  assert.match(editor,/massimo di 32/);
-  assert.match(editor,/story-preview-paths\.js/);
+  const preview=fs.readFileSync('src/editor-preview.js','utf8');
+  assert.match(preview,/enumerateStoryPreviewPaths/);
+  assert.match(preview,/Massimo 32 percorsi/);
+  assert.match(preview,/story-preview-paths\.js/);
+});
+
+test('l’impaginazione usa il catalogo canonico e salva la scelta nello step',()=>{
+  assert.match(editor,/Impaginazione del libro/);
+  assert.match(editor,/import\('\.\/src\/book\/editor-layout\.js'\)/);
+  assert.match(editor,/fetch\('\.\/src\/book\/gabbie\.json'\)/);
+  assert.match(editor,/model\.step\.layout=\{gabbia:gabbia\.nome,specchiata:orientation\.specchiata\}/);
+  assert.match(editor,/figura_slot/);
+  assert.match(editor,/layoutIssues\(\)\.length/);
+  assert.doesNotMatch(editor,/const\s+GABBIE\s*=\s*\[/);
+});
+
+test('l’autore vede capienza orientamento e personaggio in evidenza',()=>{
+  assert.match(editor,/caratteri<\/strong>/);
+  assert.match(editor,/data-layout-mirror/);
+  assert.match(editor,/Personaggio in evidenza/);
+  assert.match(editor,/Le proposte rispettano tutti i rami/);
 });
 
 test('la pubblicazione richiede la stessa revisione validata e una conferma esplicita',()=>{
@@ -163,4 +184,10 @@ test('la pubblicazione richiede la stessa revisione validata e una conferma espl
   assert.match(editor,/`\/versions\/\$\{versionId\}\/publish`/);
   assert.match(editor,/expected_updated_at:state\.version\.updated_at/);
   assert.match(editor,/I libri già creati non cambieranno/);
+});
+
+test('il backoffice gestisce la copertina della storia ma non quella globale',()=>{
+  assert.match(editor,/Copertina della storia/);
+  assert.doesNotMatch(editor,/data-section="cover"/);
+  assert.doesNotMatch(editor,/book-cover-editor/);
 });

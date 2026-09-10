@@ -10,6 +10,7 @@ import {
 const story = {
   slug: "il-bosco-dei-sussurri",
   title: "Il bosco dei sussurri",
+  editorial: { book_cover: { front: { title: "Il bosco di [Nome]", subtitle: "Una storia per [Nome]", layout: { gabbia: "Ritratto", catalog_version: 2, prompt_layout_instruction: "Keep the top calm." }, brand_variant: "dark" } } },
   start: "s1",
   steps: [
     {
@@ -89,6 +90,7 @@ const scenes = {
 };
 scenes.scenes.s1.environment_prompt = "Bosco quieto";
 scenes.scenes.s1.moment_prompt = "Lia ascolta";
+scenes.scenes.s1.authoring_note = "La campanella deve restare visibile accanto a [Nome]";
 delete scenes.scenes.s1.prompt_environment;
 delete scenes.scenes.s1.prompt_moment;
 
@@ -140,13 +142,17 @@ test("composes resolved pages and visual layers", () => {
   assert.equal(book.pages[0].scene.bg, "s1.png");
   assert.equal(book.pages[0].scene.prompt_environment, "Bosco quieto");
   assert.equal(book.pages[0].scene.prompt_moment, "Lia ascolta");
+  assert.equal(book.pages[0].scene.authoring_note, "La campanella deve restare visibile accanto a Lia");
   assert.deepEqual(book.meta.choices.setup, {});
   assert.equal(book.pages[2].text, "Etto arriva. Ora Etto accompagna Lia.");
   assert.deepEqual(
     book.pages[2].scene.layers.map((layer) => layer.role),
     ["helper", "protagonist"]
   );
+  assert.equal(book.cover.title, "Il bosco dei sussurri");
   assert.equal(book.cover.subtitle, "Un’avventura di Lia");
+  assert.equal(book.cover.layout, null);
+  assert.equal(book.cover.brand_variant, null);
   assert.equal((bookToMarkdown(book).match(/---/g) || []).length, 2);
 });
 

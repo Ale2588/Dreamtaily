@@ -13,10 +13,10 @@
 html,body{margin:0;min-height:100%;background:var(--cream);color:var(--brown);font-family:Nunito,system-ui,sans-serif}
 body{padding:14px 14px 92px}
 .shell{width:min(1180px,100%);margin:0 auto}
-.brand{display:flex;justify-content:center;align-items:center;gap:8px;margin:4px 0 14px;font-family:"Baloo 2",sans-serif;font-size:20px;font-weight:800}
-.brand i{width:25px;height:25px;border-radius:50%;background:var(--coral);display:inline-block;position:relative}
-.brand i:after{content:"";position:absolute;width:10px;height:10px;border-radius:50% 50% 50% 0;background:#f4c75d;left:7px;top:7px;transform:rotate(45deg)}
+.brand{display:flex;justify-content:center;align-items:center;gap:8px;margin:4px 0 14px;font-family:"Baloo 2",sans-serif;font-size:20px;font-weight:800;color:inherit;text-decoration:none}
+.brand img{width:30px;height:30px;border-radius:50%;object-fit:cover;background:#fff}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:24px;box-shadow:0 18px 42px rgba(58,40,29,.10);overflow:hidden}
+.layout-card{width:100%;background:var(--paper)}
 .spread{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);min-height:calc(100vh - 150px)}
 .visual{background:#eee5d8;min-height:520px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .visual img{width:100%;height:100%;object-fit:cover;display:block}
@@ -40,27 +40,41 @@ button:disabled{opacity:.35;cursor:default}
 .count{flex:1;text-align:center;color:var(--muted);font-size:13px;font-weight:800}
 .end{text-align:center;padding:74px 26px}.end .big{font:800 44px "Baloo 2",sans-serif;color:var(--coral)}.end p{font-family:Lora,serif;color:var(--muted);line-height:1.7}
 #print-book{display:none}
+.pdf-export-root{position:fixed;left:-100000px;top:0;width:1240px;background:#fff;pointer-events:none}
+.pdf-export-root .print-book-spread{position:relative;width:1240px;height:465px;background:#fff;overflow:hidden}
+.pdf-export-root .print-full-spread .layout-card,.pdf-export-root .print-full-spread .dtb-doppia{width:1240px!important;height:465px!important;max-width:none!important;margin:0!important}
+.pdf-export-root .print-story-title{display:grid;grid-template-columns:620px 620px}
+.pdf-export-root .print-story-title .print-cover-front,.pdf-export-root .print-story-title .layout-card,.pdf-export-root .print-story-title .dtc-cover{width:620px!important;height:465px!important;max-width:none!important;margin:0!important}
+.pdf-export-root .print-cover-sheet{display:grid;grid-template-columns:620px 620px;background:#fdf8f0}
+.pdf-export-root .print-cover-back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:56px;color:#22321f;text-align:center;font-family:Faustina,Georgia,serif}
+.pdf-export-root .print-cover-back img{width:58px;height:58px;border-radius:50%;object-fit:cover;background:#fff}
+.pdf-export-root .print-cover-back strong{font-size:38px}.pdf-export-root .print-cover-back p{font-size:21px;line-height:1.5;max-width:390px}
+.pdf-export-root .print-cover-front,.pdf-export-root .print-cover-front .layout-card,.pdf-export-root .print-cover-front .dtc-cover{width:620px!important;height:465px!important;max-width:none!important;margin:0!important}
 @media(max-width:780px){
   body{padding:8px 8px 86px}.card{border-radius:18px}.spread{display:block;min-height:0}
   .visual{min-height:0;aspect-ratio:4/3}.copy{max-height:none;padding:24px 21px 30px}.story{font-size:17px;line-height:1.75}
 }
 @media print{
-  @page{size:A4 landscape;margin:8mm}
   html,body{background:#fff!important;padding:0!important}
   .brand,#book,.nav{display:none!important}
   #print-book{display:block!important}
-  .print-page{width:100%;height:190mm;display:grid;grid-template-columns:58% 42%;background:#fff;page-break-after:always;break-after:page;overflow:hidden}
-  .print-page:last-child{page-break-after:auto;break-after:auto}
-  .print-visual{overflow:hidden;background:#eee5d8}.print-visual img{width:100%;height:100%;object-fit:cover}
-  .print-copy{padding:12mm 10mm;overflow:hidden}.print-copy .story{font-size:11.5pt;line-height:1.42;margin-top:5mm}
-  .print-copy h1{font-size:30pt}.print-copy h2{font-size:22pt}
-  .print-cover .print-copy{display:flex;flex-direction:column;justify-content:center;text-align:center}
+  .print-book-spread{position:relative;width:480mm;height:180mm;background:#fff;overflow:hidden;page-break-after:always;break-after:page}
+  .print-book-spread:last-child{page-break-after:auto;break-after:auto}
+  .print-book-spread .card{border:0;border-radius:0;box-shadow:none;margin:0}
+  .print-full-spread .layout-card,.print-full-spread .dtb-doppia{width:480mm!important;height:180mm!important;max-width:none!important;margin:0!important}
+  .print-story-title{display:grid;grid-template-columns:240mm 240mm}
+  .print-story-title .print-cover-front,.print-story-title .layout-card,.print-story-title .dtc-cover{width:240mm!important;height:180mm!important;max-width:none!important;margin:0!important}
+  .print-cover-sheet{display:grid;grid-template-columns:240mm 240mm;background:#fdf8f0}
+  .print-cover-back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5mm;padding:22mm;color:#22321f;text-align:center;font-family:Faustina,Georgia,serif}
+  .print-cover-back img{width:22mm;height:22mm;border-radius:50%;object-fit:cover;background:#fff}
+  .print-cover-back strong{font-size:22pt}.print-cover-back p{font-size:12pt;line-height:1.5;max-width:150mm}
+  .print-cover-front,.print-cover-front .layout-card,.print-cover-front .dtc-cover{width:240mm!important;height:180mm!important;max-width:none!important;margin:0!important}
 }
 </style>
 </head>
 <body>
 <div class="shell">
-  <div class="brand"><i></i>Dream<span style="color:var(--coral)">Taily</span></div>
+  <a class="brand" href="index.html"><img src="assets/brand/dreamtaily-icon.png" alt=""><span>Dream<span style="color:var(--coral)">Taily</span></span></a>
   <main id="book"><div class="card state"><h2>Carico il tuo libro…</h2><p>Un momento.</p></div></main>
 </div>
 <div id="print-book"></div>
@@ -68,25 +82,65 @@ button:disabled{opacity:.35;cursor:default}
   <div class="nav-in">
     <button id="prev">← Indietro</button>
     <div class="count" id="count"></div>
-    <button id="print">Stampa PDF</button>
+    <button id="print">Scarica PDF del libro</button>
     <button class="primary" id="next">Avanti →</button>
   </div>
 </div>
-<script>
+<script type="module">
+import {caricaGabbie,gabbiaPerNome} from "./src/book/gabbie.js";
+import {renderDoppia,stiliDoppia} from "./src/book/doppia.js";
+import {inizializzaGabbieCopertina,gabbiaCopertinaPerNome,renderCopertina,stiliCopertina} from "./src/book/cover-layout.js";
+import {buildImagePdf} from "./src/book/pdf-export.js";
+
 const DELIVERY_URL="https://hirzbtruxvjzmcnncvmv.supabase.co/functions/v1/deliver-book";
 let slides=[], current=0;
+let gabbieReady=false;
+let coverLayoutsReady=false;
+const style=document.createElement("style");style.textContent=stiliDoppia+stiliCopertina;document.head.appendChild(style);
 const esc=(value)=>String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 function state(title,body){document.getElementById("nav").hidden=true;document.getElementById("book").innerHTML=`<div class="card state"><h2>${esc(title)}</h2><p>${esc(body)}</p></div>`;}
-function spread(page,isCover=false){return `<article class="card spread ${isCover?"cover":""}"><div class="visual"><img src="${esc(page.image_url)}" alt=""></div><div class="copy"><div class="eyebrow">${isCover?"DreamTaily":`Capitolo ${esc(page.chapter??"")}`}</div>${isCover?`<h1>${esc(page.title||"")}</h1><div class="subtitle">${esc(page.text||"")}</div>`:`<h2>${esc(page.title||"")}</h2><div class="story">${esc(page.text||"")}</div><div class="page-number">— ${esc(page.chapter??"")} —</div>`}</div></article>`;}
-function printPage(page,isCover=false){return `<section class="print-page ${isCover?"print-cover":""}"><div class="print-visual"><img src="${esc(page.image_url)}" alt=""></div><div class="print-copy"><div class="eyebrow">${isCover?"DreamTaily":`Capitolo ${esc(page.chapter??"")}`}</div>${isCover?`<h1>${esc(page.title||"")}</h1><div class="subtitle">${esc(page.text||"")}</div>`:`<h2>${esc(page.title||"")}</h2><div class="story">${esc(page.text||"")}</div>`}</div></section>`;}
+function spread(page,isCover=false,portraitOverride=null){
+  const globalCover=portraitOverride??(page.page_id==="book__cover"||page.format==="portrait");
+  if(isCover&&coverLayoutsReady&&page.layout?.gabbia){
+    const gabbia=gabbiaCopertinaPerNome(page.layout.gabbia,"front");
+    if(gabbia)return `<article class="card layout-card">${renderCopertina({gabbia,image:page.image_url,title:page.title||"",subtitle:page.text||"",brandVariant:page.brand_variant||"dark",portrait:globalCover})}</article>`;
+  }
+  if(!isCover&&gabbieReady&&page.layout?.gabbia){
+    const gabbia=gabbiaPerNome(page.layout.gabbia);
+    if(gabbia)return `<article class="card layout-card">${renderDoppia({
+      gabbia,
+      immagine:page.image_url,
+      figura:page.image_url,
+      testo:page.text||"",
+      specchiata:page.layout.specchiata===true
+    })}</article>`;
+  }
+  return `<article class="card spread ${isCover?"cover":""}"><div class="visual"><img src="${esc(page.image_url)}" alt=""></div><div class="copy"><div class="eyebrow">${isCover?"DreamTaily":`Capitolo ${esc(page.chapter??"")}`}</div>${isCover?`<h1>${esc(page.title||"")}</h1><div class="subtitle">${esc(page.text||"")}</div>`:`<div class="story">${esc(page.text||"")}</div><div class="page-number">— ${esc(page.chapter??"")} —</div>`}</div></article>`;
+}
+function buildCoverPrint(page){
+  if(!page) return "";
+  return `<section class="print-book-spread print-cover-sheet"><div class="print-cover-back"><img src="assets/brand/dreamtaily-icon.png" alt=""><strong>DreamTaily</strong><p>Storie illustrate da vivere, scegliere e rileggere insieme.</p></div><div class="print-cover-front">${spread(page,true,false)}</div></section>`;
+}
+function buildUnifiedPrint(pages){
+  const sheets=[];
+  const globalCover=pages.find(page=>page.page_id==="book__cover");
+  if(globalCover) sheets.push(buildCoverPrint(globalCover));
+  for(const page of pages.filter(item=>item.page_id!=="book__cover")){
+    if(page.kind==="cover") sheets.push(`<section class="print-book-spread print-story-title"><div></div><div class="print-cover-front">${spread(page,true,false)}</div></section>`);
+    else sheets.push(`<section class="print-book-spread print-full-spread">${spread(page,false)}</section>`);
+  }
+  return sheets.join("");
+}
 function build(book){
   const pages=Array.isArray(book.pages)?book.pages:[];
-  const cover=pages.find(p=>p.kind==="cover"); const storyPages=pages.filter(p=>p.kind!=="cover");
-  slides=[]; const printPages=[];
-  if(cover){slides.push(spread(cover,true));printPages.push(printPage(cover,true));}
-  storyPages.forEach(p=>{slides.push(spread(p,false));printPages.push(printPage(p,false));});
-  slides.push(`<article class="card end"><div class="big">Fine ✨</div><p>Questa storia appartiene a ${esc(book.protagonist||"te")}.<br>Puoi rileggerla tutte le volte che vuoi.</p><button onclick="printWholeBook()">🖨 Stampa il libro</button></article>`);
-  document.getElementById("print-book").innerHTML=printPages.join("");
+  slides=[];
+  pages.forEach(page=>{
+    const isCover=page.kind==="cover";
+    slides.push(spread(page,isCover));
+  });
+  slides.push(`<article class="card end"><div class="big">Fine ✨</div><p>Questa storia appartiene a ${esc(book.protagonist||"te")}.<br>Puoi rileggerla tutte le volte che vuoi.</p><button onclick="printWholeBook()">Scarica PDF del libro</button></article>`);
+  window.dtPrintBook=buildUnifiedPrint(pages);
+  window.dtBookPages=pages;
 }
 function render(){
   document.getElementById("book").innerHTML=slides[current]||"";
@@ -97,14 +151,125 @@ function render(){
   window.scrollTo({top:0,behavior:"instant"});
 }
 function go(delta){const n=current+delta;if(n<0||n>=slides.length)return;current=n;render();}
-function printWholeBook(){
-  const imgs=[...document.querySelectorAll("#print-book img")];
-  Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(r=>{img.onload=r;img.onerror=r;}))).then(()=>window.print());
+const EXPORT_WIDTH=5669;
+const EXPORT_HEIGHT=2126;
+const PDF_WIDTH=1360.63;
+const PDF_HEIGHT=510.24;
+const imageCache=new Map();
+async function loadBitmap(src){
+  if(imageCache.has(src))return imageCache.get(src);
+  const response=await fetch(src,{cache:"force-cache"});
+  if(!response.ok)throw new Error(`PDF_ASSET_HTTP_${response.status}`);
+  const blob=await response.blob();
+  const bitmap=await createImageBitmap(blob);
+  imageCache.set(src,bitmap);
+  return bitmap;
 }
+function objectPosition(value){
+  const parts=String(value||"center").trim().split(/\s+/);
+  const parse=(token,axis)=>token?.endsWith("%")?Number.parseFloat(token)/100:token==="left"||token==="top"?0:token==="right"||token==="bottom"?1:.5;
+  if(parts.length===1)return {x:parse(parts[0],"x"),y:.5};
+  return {x:parse(parts[0],"x"),y:parse(parts[1],"y")};
+}
+function drawCoverImage(context,image,rect,position="center",mirror=false){
+  const scale=Math.max(rect.w/image.width,rect.h/image.height);
+  const width=image.width*scale,height=image.height*scale,pos=objectPosition(position);
+  context.save();context.beginPath();context.rect(rect.x,rect.y,rect.w,rect.h);context.clip();
+  if(mirror){context.translate(rect.x*2+rect.w,0);context.scale(-1,1);}
+  context.drawImage(image,rect.x-(width-rect.w)*pos.x,rect.y-(height-rect.h)*pos.y,width,height);
+  context.restore();
+}
+function wrapLines(context,text,maxWidth,maxLines=99){
+  const paragraphs=String(text||"").split(/\n/),lines=[];
+  for(const paragraph of paragraphs){
+    const words=paragraph.trim().split(/\s+/).filter(Boolean);let line="";
+    for(const word of words){const candidate=line?`${line} ${word}`:word;if(line&&context.measureText(candidate).width>maxWidth){lines.push(line);line=word;}else line=candidate;}
+    if(line)lines.push(line);
+    if(lines.length>=maxLines)break;
+  }
+  return lines.slice(0,maxLines);
+}
+function drawText(context,text,area,{size=17,lineHeight=1.6,align="left",weight="400",style="normal",maxLines=99,color="#22321f"}={}){
+  context.save();context.fillStyle=color;context.font=`${style} ${weight} ${size}px Georgia,serif`;context.textAlign=align;context.textBaseline="top";
+  const lines=wrapLines(context,text,area.w,maxLines),x=align==="center"?area.x+area.w/2:align==="right"?area.x+area.w:area.x;
+  lines.forEach((line,index)=>context.fillText(line,x,area.y+index*size*lineHeight));context.restore();
+}
+function splitText(value,boxes){
+  const words=String(value||"").trim().split(/\s+/).filter(Boolean);if(boxes.length===1)return [words.join(" ")];
+  const total=boxes.reduce((sum,item)=>sum+(item.max||1),0),parts=[];let cursor=0;
+  for(let index=0;index<boxes.length;index+=1){if(index===boxes.length-1){parts.push(words.slice(cursor).join(" "));break;}const target=Math.round(String(value||"").length*((boxes[index].max||1)/total)),selected=[];while(cursor<words.length&&(selected.join(" ").length<target||!selected.length))selected.push(words[cursor++]);parts.push(selected.join(" "));}
+  return parts;
+}
+function fadeImageEdge(context,item){
+  if(!item.mask)return;
+  let gradient;
+  if(item.mask.includes("90deg"))gradient=context.createLinearGradient(item.x+item.w*.4,0,item.x+item.w*.82,0);
+  else if(item.mask.includes("to bottom"))gradient=context.createLinearGradient(0,item.y,0,item.y+item.h*.55);
+  else if(item.mask.includes("to left"))gradient=context.createLinearGradient(item.x+item.w,item.y,item.x,item.y);
+  else gradient=context.createLinearGradient(item.x,item.y+item.h,item.x+item.w,item.y);
+  if(item.mask.includes("to bottom")){gradient.addColorStop(0,"#fdf5e6");gradient.addColorStop(1,"rgba(253,245,230,0)");}
+  else if(item.mask.includes("to left")){gradient.addColorStop(0,"rgba(253,245,230,0)");gradient.addColorStop(.55,"rgba(253,245,230,0)");gradient.addColorStop(1,"#fdf5e6");}
+  else{gradient.addColorStop(0,"rgba(253,245,230,0)");gradient.addColorStop(1,"#fdf5e6");}
+  context.fillStyle=gradient;context.fillRect(item.x,item.y,item.w,item.h);
+}
+async function drawNarrative(context,page){
+  context.fillStyle="#fdf5e6";context.fillRect(0,0,1240,465);
+  const base=gabbiaPerNome(page.layout?.gabbia),layout=page.layout?.specchiata&&base?.specchiata?base.specchiata:base;
+  if(!layout)throw new Error(`PDF_LAYOUT_MISSING_${page.page_id}`);
+  const image=await loadBitmap(page.image_url);
+  for(const item of layout.immagini||base.immagini||[]){drawCoverImage(context,image,item,item.position,item.specchiata);fadeImageEdge(context,item);}
+  const boxes=layout.testo||base.testo,parts=splitText(page.text,boxes);
+  boxes.forEach((box,index)=>drawText(context,parts[index],box,{size:box.fontSize,lineHeight:box.lineHeight}));
+}
+function coverGradient(context,veil,theme,offsetX){
+  const area={...veil.copre,x:veil.copre.x+offsetX},light=theme!=="light",rgb=light?"253,245,230":"14,22,20",alpha=light?veil.opacita_chiaro:veil.opacita_scuro;
+  if(veil.tipo==="pieno"){context.fillStyle=`rgba(${rgb},${alpha})`;context.fillRect(area.x,area.y,area.w,area.h);return;}
+  let gradient;if(veil.tipo==="verticale-alto")gradient=context.createLinearGradient(0,area.y,0,area.y+area.h);else if(veil.tipo==="verticale-basso")gradient=context.createLinearGradient(0,area.y+area.h,0,area.y);else gradient=context.createLinearGradient(area.x,0,area.x+area.w,0);
+  gradient.addColorStop(0,`rgba(${rgb},${alpha})`);gradient.addColorStop(1,`rgba(${rgb},0)`);context.fillStyle=gradient;context.fillRect(area.x,area.y,area.w,area.h);
+}
+async function drawCover(context,page,offsetX){
+  const layout=gabbiaCopertinaPerNome(page.layout?.gabbia,"front")||gabbiaCopertinaPerNome("Ritratto","front");if(!layout)throw new Error("PDF_COVER_CATALOG_MISSING");
+  const image=await loadBitmap(page.image_url);drawCoverImage(context,image,{x:offsetX,y:0,w:620,h:465});
+  (layout.veil||[]).forEach(veil=>coverGradient(context,veil,page.brand_variant,offsetX));
+  const ink=page.brand_variant==="light"?"#fdf5e6":"#22321f",area=value=>({...value,x:value.x+offsetX});
+  drawText(context,page.title,area(layout.title_area),{size:layout.title_area.corpo,lineHeight:layout.title_area.interlinea/layout.title_area.corpo,align:layout.title_area.allineamento,weight:"700",maxLines:layout.title_area.righe_max,color:ink});
+  drawText(context,page.text,area(layout.subtitle_area),{size:layout.subtitle_area.corpo,lineHeight:layout.subtitle_area.interlinea/layout.subtitle_area.corpo,align:layout.subtitle_area.allineamento,style:"italic",maxLines:layout.subtitle_area.righe_max,color:ink});
+  const brand=area(layout.brand_area),logo=await loadBitmap("assets/brand/dreamtaily-icon.png"),logoSize=26,centered=layout.brand_area.allineamento==="center",start=centered?brand.x+brand.w/2-65:brand.x;
+  context.save();context.beginPath();context.arc(start+logoSize/2,brand.y+brand.h/2,logoSize/2,0,Math.PI*2);context.clip();context.drawImage(logo,start,brand.y+(brand.h-logoSize)/2,logoSize,logoSize);context.restore();
+  drawText(context,"DreamTaily",{x:start+34,y:brand.y+8,w:115,h:brand.h},{size:20,lineHeight:1,weight:"700",color:ink});
+}
+async function sheetJpeg(page,isGlobalCover=false){
+  const canvas=document.createElement("canvas");canvas.width=EXPORT_WIDTH;canvas.height=EXPORT_HEIGHT;
+  const context=canvas.getContext("2d",{alpha:false});context.scale(EXPORT_WIDTH/1240,EXPORT_HEIGHT/465);context.fillStyle="#fff";context.fillRect(0,0,1240,465);
+  if(isGlobalCover){context.fillStyle="#fdf8f0";context.fillRect(0,0,620,465);const logo=await loadBitmap("assets/brand/dreamtaily-icon.png");context.save();context.beginPath();context.arc(310,182,29,0,Math.PI*2);context.clip();context.drawImage(logo,281,153,58,58);context.restore();drawText(context,"DreamTaily",{x:210,y:225,w:200,h:50},{size:38,align:"center",weight:"700"});drawText(context,"Storie illustrate da vivere, scegliere e rileggere insieme.",{x:115,y:285,w:390,h:70},{size:18,lineHeight:1.5,align:"center"});await drawCover(context,page,620);}
+  else if(page.kind==="cover")await drawCover(context,page,620);else await drawNarrative(context,page);
+  const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error("PDF_CANVAS_EMPTY")),"image/jpeg",.94));
+  return new Uint8Array(await blob.arrayBuffer());
+}
+async function exportBookPdf(pages){
+  const button=document.getElementById("print");
+  try{
+    button.disabled=true;button.textContent="Preparo il PDF…";
+    await document.fonts.ready;
+    const ordered=[],globalCover=pages.find(page=>page.page_id==="book__cover");if(globalCover)ordered.push({page:globalCover,global:true});pages.filter(page=>page.page_id!=="book__cover").forEach(page=>ordered.push({page,global:false}));
+    if(!ordered.length)throw new Error("PDF_PAGES_EMPTY");
+    const jpegs=[];
+    for(let index=0;index<ordered.length;index+=1){button.textContent=`Creo pagina ${index+1} di ${ordered.length}…`;jpegs.push(await sheetJpeg(ordered[index].page,ordered[index].global));}
+    const pdf=buildImagePdf({jpegs,width:PDF_WIDTH,height:PDF_HEIGHT,imageWidth:EXPORT_WIDTH,imageHeight:EXPORT_HEIGHT});
+    const link=document.createElement("a");link.href=URL.createObjectURL(pdf);link.download=`${document.title.replace(/[^a-z0-9à-ž _—-]/gi,"").trim()||"DreamTaily"}.pdf`;link.click();
+    setTimeout(()=>URL.revokeObjectURL(link.href),30000);
+  }catch(error){console.error(error);alert(`Non riesco a preparare il PDF (${error?.message||"errore sconosciuto"}).`);}
+  finally{button.disabled=false;button.textContent="Scarica PDF del libro";}
+}
+function printWholeBook(){return exportBookPdf(window.dtBookPages||[]);}
+window.printWholeBook=printWholeBook;
 async function load(){
   const slug=new URLSearchParams(location.search).get("slug")||"";
   if(!/^[a-f0-9]{48,96}$/i.test(slug)){state("Libro non trovato","Il link non è valido o è incompleto.");return;}
   try{
+    const [catalogResponse,coverCatalogResponse]=await Promise.all([fetch("./src/book/gabbie.json",{cache:"no-store"}),fetch("./src/book/gabbie-copertina.json",{cache:"no-store"})]);
+    if(catalogResponse.ok){caricaGabbie(await catalogResponse.json());gabbieReady=true;}
+    if(coverCatalogResponse.ok){inizializzaGabbieCopertina(await coverCatalogResponse.json());coverLayoutsReady=true;}
     const response=await fetch(`${DELIVERY_URL}?slug=${encodeURIComponent(slug)}&v=3`,{method:"GET",headers:{"Accept":"application/json"},cache:"no-store"});
     const payload=await response.json().catch(()=>null);
     if(response.status===404){state("Libro non trovato","Questo libro non è disponibile.");return;}

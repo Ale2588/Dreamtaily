@@ -21,6 +21,13 @@ test('checkout freezes story versions, content, cast and private reference paths
   assert.match(checkout,/path_choices:story\.path_choices/);
   assert.match(checkout,/identity_prompt:character\.identity_prompt/);
   assert.match(checkout,/storage_path:reference\.storage_path/);
+  assert.match(checkout,/buildBookCover/);
+  assert.match(checkout,/cover,stories:snapshotStories/);
+});
+
+test('checkout freezes cover backgrounds as server-fetchable absolute URLs',async()=>{
+  const module=await import('../src/book/book-cover-selection.js');
+  for(const color of module.bookCoverPalette) assert.match(color.asset_ref,/^https:\/\//);
 });
 
 test('checkout transition is atomic and service-role only',()=>{
@@ -44,10 +51,37 @@ test('renderer requires checkout and stays idle while queued',()=>{
   assert.doesNotMatch(renderer,/book_snapshot:ctx\.snapshot/);
 });
 
+test('full rendering starts explicitly and resumes page by page',()=>{
+  assert.match(html,/Genera il libro/);
+  assert.match(html,/Continua la generazione/);
+  assert.match(html,/window\.startDtFullRender=async function/);
+  const full=html.match(/window\.startDtFullRender=async function\(\)[\s\S]*?window\.startDtPilotRender/)?.[0]||'';
+  assert.match(full,/functions\.invoke\("render-book"/);
+  assert.match(full,/mode:"full"/);
+  assert.match(full,/while\(dtPendingRender\?\.status==='queued'\|\|dtPendingRender\?\.status==='running'\|\|dtPendingRender\?\.status==='review'\)/);
+  assert.match(full,/Le pagine completate sono salve/);
+  assert.match(renderer,/job\.status==="queued"\|\|job\.status==="review"/);
+  assert.match(renderer,/status:"queued",attempts:0,error:null/);
+  assert.match(html,/Riprova la generazione/);
+});
+
+test('legacy pilot entry point remains compatible with existing sessions',()=>{
+  assert.match(html,/window\.startDtPilotRender=async function/);
+  const pilot=html.match(/window\.startDtPilotRender=async function\(\)[\s\S]*?window\.completeDtCheckout/)?.[0]||'';
+  assert.match(pilot,/functions\.invoke\("render-book"/);
+  assert.match(pilot,/start:true/);
+  assert.match(pilot,/idempotency_key:`checkout-\$\{app\.bookId\}`/);
+});
+
 test('status page supports refresh and starting another book',()=>{
   assert.match(html,/window\.renderDtBookStatus=async function/);
   assert.match(html,/dtLoadRenderStatus/);
   assert.match(html,/Crea un altro libro/);
-  assert.match(html,/La generazione IA è volutamente sospesa/);
   assert.match(html,/\["draft","ready_for_checkout","paid","generating","ready","failed"\]/);
+});
+
+test('ready books expose cover-only regeneration',()=>{
+  assert.match(html,/Rigenera solo la copertina/);
+  assert.match(html,/window\.regenerateDtBookCover=async function/);
+  assert.match(html,/regenerate_page_id:"book__cover"/);
 });

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DreamTaily · Gabbie libro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Faustina:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#e9e2d6;color:#22321f;font-family:system-ui,sans-serif}
+    header{max-width:1280px;margin:auto;padding:32px 24px 18px}h1{margin:0 0 8px;font-family:Faustina,serif;font-size:42px}.intro{margin:0;color:#59645a}
+    main{max-width:1280px;margin:auto;padding:16px 24px 80px;display:grid;gap:34px}.demo{display:grid;gap:10px}.label{display:flex;justify-content:space-between;gap:15px;align-items:end}.label h2{margin:0;font:600 25px Faustina,serif}.label span{font-size:13px;color:#667065}
+    .foglio{box-shadow:0 16px 42px rgba(41,45,37,.16)}
+    .errore{padding:30px;background:white;color:#a43222;border-radius:12px}
+  </style>
+</head>
+<body>
+  <header><h1>Le 15 gabbie DreamTaily</h1><p class="intro">Demo deterministica con una scena piatta e un personaggio scontornato. Nessuna AI.</p></header>
+  <main id="demo"></main>
+  <script type="module">
+    import { caricaGabbie } from "../src/book/gabbie.js";
+    import { renderDoppia, stiliDoppia } from "../src/book/doppia.js";
+
+    const root=document.querySelector("#demo");
+    const style=document.createElement("style");style.textContent=stiliDoppia;document.head.append(style);
+    try{
+      const catalogo=caricaGabbie(await fetch("../src/book/gabbie.json").then(response=>response.json()));
+      for(const gabbia of catalogo.gabbie){
+        const testo=("Nel cuore del bosco [Nome] seguì una piccola luce, mentre le foglie di carta danzavano piano intorno al sentiero. ").repeat(20).slice(0,gabbia.max);
+        const section=document.createElement("section");section.className="demo";
+        section.innerHTML=`<div class="label"><h2>${gabbia.n}. ${gabbia.nome}</h2><span>${gabbia.famiglia} · massimo ${gabbia.max} caratteri</span></div><div class="foglio">${renderDoppia({gabbia,immagine:"book/scena-albo-small.png",figura:"book/bambino-carta.png",testo})}</div>`;
+        root.append(section);
+      }
+    }catch(error){root.innerHTML=`<div class="errore">${error.message}</div>`}
+  </script>
+</body>
+</html>

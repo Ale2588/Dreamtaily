@@ -5,6 +5,12 @@
   "scripts": {
     "test:composer": "node --test tests/story-composer.test.mjs",
     "test:reader": "node --test tests/book-reader.test.mjs",
+    "test:book-gabbie": "node --test tests/book-gabbie.test.mjs",
+    "test:editor-layout": "node --test tests/editor-layout.test.mjs",
+    "test:final-layout": "node --test tests/final-layout.test.mjs",
+    "test:cover-layout": "node --test tests/cover-layout.test.mjs",
+    "test:book-cover-selection": "node --test tests/book-cover-selection.test.mjs",
+    "test:narrative-copy": "node --test tests/narrative-labels-and-markers.test.mjs",
     "test:golden": "node tools/test_story_composer_golden.mjs .",
     "test:gate-d-live": "node --test tests/gate-d-runtime-live.test.mjs",
     "test:book-instances": "node --test tests/book-instances.test.mjs",
@@ -14,7 +20,9 @@
     "test:backoffice-shell": "node --test tests/backoffice-shell.test.mjs",
     "test:identity": "node --test tests/identity-prompt.test.mjs",
     "test:mask": "node --test tests/scene-mask.test.mjs",
-    "test:render-engine": "npm run test:identity && npm run test:mask",
-    "test": "npm run test:composer && npm run test:authoring-validator && npm run test:authoring-api && npm run test:authoring-publish && npm run test:reader && npm run test:book-instances && npm run test:render-engine"
+    "test:render-planning": "node --test tests/render-prompts.test.mjs tests/render-job.test.mjs",
+    "test:render-function": "node --test tests/render-book-multi-story.test.mjs tests/checkout-boundary.test.mjs tests/final-delivery.test.mjs",
+    "test:render-engine": "npm run test:identity && npm run test:mask && npm run test:render-planning && npm run test:render-function",
+    "test": "npm run test:composer && npm run test:authoring-validator && npm run test:authoring-api && npm run test:authoring-publish && npm run test:reader && npm run test:book-gabbie && npm run test:editor-layout && npm run test:final-layout && npm run test:cover-layout && npm run test:book-cover-selection && npm run test:narrative-copy && npm run test:backoffice-shell && npm run test:book-instances && npm run test:render-engine"
   }
 }

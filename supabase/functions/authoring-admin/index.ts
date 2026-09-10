@@ -202,7 +202,7 @@ async function createProject(req: Request, uid: string) {
       version_number: 1,
       status: "draft",
       source_story: sourceStory,
-      source_scenes: { version: 1, scenes: {} },
+      source_scenes: { version: 1, cover: { background_ref: null, environment_prompt: "", moment_prompt: "", authoring_note: "", slots: [{ role: "protagonist", pose: "in_piedi", x: 0.5, y: 0.9, scale: 0.5, z: 2 }] }, scenes: {} },
       content_by_ref: {},
       validation_report: { status: "not_validated" },
     })
@@ -295,7 +295,7 @@ async function createVersion(req: Request, uid: string, admin: boolean) {
 async function getVersion(versionId: string, uid: string, admin: boolean) {
   const access = await ownedVersion(versionId, uid, admin);
   if (access.response) return access.response;
-  return reply(200, { version: access.version });
+  return reply(200, { version: access.version, preview_catalog: await activeCatalog() });
 }
 
 async function saveVersion(req: Request, versionId: string, uid: string, admin: boolean) {
@@ -381,19 +381,7 @@ async function publishVersion(req: Request, versionId: string, uid: string, admi
     return reply(409, { error: "VALIDATION_REQUIRED", validation: report });
   }
 
-  const { data: characters, error: catalogError } = await svc
-    .from("catalog_characters")
-    .select("key,name,species,identity_prompt,canonical_markers,art")
-    .eq("status", "active")
-    .order("key");
-  if (catalogError) throw catalogError;
-  const catalog = Object.fromEntries((characters || []).map((character) => [character.key, {
-    name: character.name,
-    species: character.species,
-    identity_prompt: character.identity_prompt,
-    canonical_markers: character.canonical_markers,
-    art: character.art,
-  }]));
+  const catalog = await activeCatalog();
   const publishedContract = {
     contract_version: 1,
     story: access.version.source_story,
@@ -413,6 +401,23 @@ async function publishVersion(req: Request, versionId: string, uid: string, admi
     throw error;
   }
   return reply(200, { publication: data?.[0] || null });
+}
+
+async function activeCatalog() {
+  const { data: characters, error: catalogError } = await svc
+    .from("catalog_characters")
+    .select("key,name,species,identity_prompt,canonical_markers,art")
+    .eq("status", "active")
+    .order("key");
+  if (catalogError) throw catalogError;
+  const catalog = Object.fromEntries((characters || []).map((character) => [character.key, {
+    name: character.name,
+    species: character.species,
+    identity_prompt: character.identity_prompt,
+    canonical_markers: character.canonical_markers,
+    art: character.art,
+  }]));
+  return catalog;
 }
 
 Deno.serve(async (req) => {

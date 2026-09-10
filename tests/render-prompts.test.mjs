@@ -75,3 +75,36 @@ test("authoring prompts support a scene unknown to the legacy Bosco pack", () =>
   assert.match(prompt,/glowing forest path/);
   assert.match(prompt,/firefly points toward home/);
 });
+
+test("dynamic cast, author direction and editorial layout compile into one scene prompt", () => {
+  const prompt=buildPageRenderPrompt({
+    sceneId:"p7",
+    environmentOverride:"a moonlit garden",
+    momentOverride:"the two friends lift a lantern together",
+    authoringNote:"The lantern must remain clearly visible.",
+    layout:{gabbia:"Figura",specchiata:true},
+    characters:[
+      {slotKey:"protagonist",identity:"a child in a red coat",pose:"si_china"},
+      {slotKey:"personaggio_2",identity:"a small blue dragon",pose:"cammina",featured:true}
+    ]
+  });
+  assert.match(prompt,/Image 2 is the PROTAGONIST identity reference/);
+  assert.match(prompt,/Image 3 is the PERSONAGGIO_2 identity reference/);
+  assert.match(prompt,/AUTHOR'S DIRECTION: The lantern must remain clearly visible/);
+  assert.match(prompt,/EDITORIAL LAYOUT: Figura/);
+  assert.match(prompt,/layout is mirrored/);
+  assert.match(prompt,/FEATURED character/);
+  assert.match(prompt,/SINGLE finished illustration, not separate cutouts/);
+});
+
+test("dynamic cast rejects a character without a canonical identity", () => {
+  assert.throws(()=>buildPageRenderPrompt({
+    characters:[{slotKey:"protagonist",identity:""}]
+  }),/CHARACTER_IDENTITY_REQUIRED/);
+});
+
+test("cover catalog instruction overrides generic narrative layout hints", () => {
+  const prompt=buildPageRenderPrompt({sceneId:"cover",characters:[{slotKey:"protagonist",identity:"a child with red boots",pose:"in_piedi"}],layout:{gabbia:"Ritratto",prompt_layout_instruction:"Keep the top and bottom bands visually calm."}});
+  assert.match(prompt,/Keep the top and bottom bands visually calm/);
+  assert.match(prompt,/Do NOT render text/);
+});

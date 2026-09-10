@@ -1,0 +1,232 @@
+{
+  "catalogo": "DreamTaily — gabbie di copertina",
+  "versione": 2,
+  "data": "2026-09-09",
+  "separato_da": "handoff_gabbie_libro/gabbie.json (15 gabbie narrative — non toccate)",
+  "tipi": {
+    "front": "copertina frontale",
+    "back": "quarta di copertina (retro)",
+    "dorso": "NON fa parte di questo catalogo: il dorso tipografico stretto della rilegatura non è progettato"
+  },
+  "sistema_di_misura": {
+    "unita": "punti su una singola copertina",
+    "larghezza": 620,
+    "altezza": 465,
+    "proporzioni": "4:3",
+    "origine": "alto a sinistra",
+    "abbondanza": 12,
+    "margine_sicurezza": 26,
+    "margine_tipografico": 62,
+    "safe_box": { "x": 26, "y": 26, "w": 568, "h": 413 },
+    "bleed_box": { "x": -12, "y": -12, "w": 644, "h": 489 },
+    "conversione_responsive": "x% = x / 620 * 100 · y% = y / 465 * 100",
+    "corpi": "il campo corpo è in punti sullo stesso sistema; in CSS diventa corpo / 620 * 100 cqw"
+  },
+  "regole_globali": {
+    "immagine": "una sola scena coerente, generata come immagine unica; i personaggi sono integrati nella scena mentre compiono l'azione, non scontornati e sovrapposti",
+    "testi": "titolo, sottotitolo, descrizione, frase personalizzata, logo e wordmark sono sovrapposti dal renderer in HTML/CSS o SVG sopra l'immagine finale — mai generati dall'AI, mai disegnati dentro l'immagine",
+    "marchio": "sempre presente in fondo alla copertina frontale; sulla quarta è facoltativo e secondario",
+    "leggibilita": "ogni gabbia dichiara in veil i veli che il renderer applica sotto il testo quando l'immagine è chiara, scura o visivamente complessa; il velo è un gradiente o un campo uniforme, mai un box con bordo o ombra",
+    "volti": "nessun volto o dettaglio essenziale dentro avoid_zones; le subject_zones delimitano i dettagli essenziali, estensione_ammessa delimita ciò che può uscirne",
+    "dorso": "non progettato in questa iterazione"
+  },
+  "tema": {
+    "font": "Faustina",
+    "chiaro": { "inchiostro": "#22321f", "inchiostro_soft": "rgba(34,50,31,0.66)", "carta": "#fdf5e6", "accento": "#d8503f" },
+    "scuro": { "inchiostro": "#fdf5e6", "inchiostro_soft": "rgba(253,245,230,0.72)", "carta": "#20302c", "accento": "#f0a08c" }
+  },
+  "asset_marchio": {
+    "logo": { "slot": "brand.logo", "file": null, "formato_atteso": "SVG monocromatico, area quadrata", "placeholder_demo": "rettangolo etichettato LOGO DREAMTAILY" },
+    "wordmark": { "slot": "brand.wordmark", "testo": "DreamTaily", "reso_come": "testo del renderer o SVG fornito" },
+    "varianti": ["chiara", "scura"],
+    "regola": "il logo esistente non va reinventato né ridisegnato; se l'asset manca, la demo mostra il placeholder etichettato"
+  },
+  "campi_obbligatori": [
+    "nome", "tipo", "registro", "formato", "image_area", "title_area", "subtitle_area",
+    "description_area", "brand_area", "technical_area", "safe_zones", "subject_zones",
+    "avoid_zones", "max_title", "max_subtitle", "max_description",
+    "supports_multiple_characters", "prompt_layout_instruction"
+  ],
+  "gabbie": [
+    {
+      "nome": "Ritratto",
+      "tipo": "front",
+      "registro": "protagonista centrale, titolo in alto",
+      "formato": { "larghezza": 620, "altezza": 465, "proporzioni": "4:3" },
+      "image_area": { "x": 0, "y": 0, "w": 620, "h": 465, "abbondanza": true },
+      "title_area": { "x": 62, "y": 44, "w": 496, "h": 86, "allineamento": "center", "corpo": 44, "interlinea": 50, "righe_max": 2 },
+      "subtitle_area": { "x": 62, "y": 138, "w": 496, "h": 30, "allineamento": "center", "corpo": 16, "interlinea": 22, "righe_max": 1 },
+      "description_area": null,
+      "brand_area": { "x": 62, "y": 381, "w": 496, "h": 40, "allineamento": "center", "facoltativo": false },
+      "technical_area": null,
+      "panel_area": null,
+      "safe_zones": [{ "x": 26, "y": 26, "w": 568, "h": 413, "nota": "margine di sicurezza esterno" }],
+      "subject_zones": [{
+        "x": 155, "y": 178, "w": 310, "h": 195,
+        "ruolo": "protagonista",
+        "nota": "volto e dettagli essenziali qui: sotto il sottotitolo, sopra la banda del marchio",
+        "estensione_ammessa": { "x": 120, "y": 178, "w": 380, "h": 299, "nota": "il corpo può scendere fino all'abbondanza inferiore, ma niente volti o dettagli essenziali sotto y=373" }
+      }],
+      "avoid_zones": [
+        { "x": 40, "y": 30, "w": 540, "h": 150, "nota": "banda del titolo e del sottotitolo" },
+        { "x": 40, "y": 365, "w": 540, "h": 70, "nota": "banda del marchio" }
+      ],
+      "veil": [
+        { "area": "title_area", "tipo": "verticale-alto", "copre": { "x": 0, "y": 0, "w": 620, "h": 210 }, "opacita_chiaro": 0.9, "opacita_scuro": 0.82 },
+        { "area": "brand_area", "tipo": "verticale-basso", "copre": { "x": 0, "y": 335, "w": 620, "h": 130 }, "opacita_chiaro": 0.88, "opacita_scuro": 0.8 }
+      ],
+      "max_title": 44,
+      "max_subtitle": 60,
+      "max_description": null,
+      "supports_multiple_characters": true,
+      "esempio": {
+        "titolo": "Nina e la balena di vetro",
+        "sottotitolo": "Una storia scritta per Nina, cinque anni",
+        "descrizione": null,
+        "frase_personalizzata": null
+      },
+      "prompt_layout_instruction": "Single coherent full-bleed 4:3 scene. Place the main character centred in the middle band of the frame, full or half figure, facing the viewer, with the head well below the upper third. Keep the top third and the bottom strip visually calm and uncluttered — open sky, soft light, low contrast, no faces or key details there. Secondary characters may stand slightly behind and to the sides of the protagonist, smaller in scale."
+    },
+    {
+      "nome": "Margine",
+      "tipo": "front",
+      "registro": "composizione laterale, titolo nello spazio negativo",
+      "formato": { "larghezza": 620, "altezza": 465, "proporzioni": "4:3" },
+      "image_area": { "x": 0, "y": 0, "w": 620, "h": 465, "abbondanza": true },
+      "title_area": { "x": 58, "y": 150, "w": 268, "h": 120, "allineamento": "left", "corpo": 40, "interlinea": 46, "righe_max": 3 },
+      "subtitle_area": { "x": 58, "y": 282, "w": 240, "h": 44, "allineamento": "left", "corpo": 16, "interlinea": 22, "righe_max": 2 },
+      "description_area": null,
+      "brand_area": { "x": 58, "y": 381, "w": 240, "h": 40, "allineamento": "left", "facoltativo": false },
+      "technical_area": null,
+      "panel_area": null,
+      "safe_zones": [{ "x": 26, "y": 26, "w": 568, "h": 413, "nota": "margine di sicurezza esterno" }],
+      "subject_zones": [{
+        "x": 330, "y": 80, "w": 260, "h": 359,
+        "ruolo": "protagonista",
+        "nota": "volto e dettagli essenziali solo dentro questo rettangolo, che coincide con la zona sicura della metà destra",
+        "estensione_ammessa": { "x": 330, "y": 80, "w": 302, "h": 397, "nota": "il corpo, i piedi e la silhouette possono uscire fino all'abbondanza a destra (x=632) e in basso (y=477): lì può cadere solo materia non essenziale, nessun volto e nessun dettaglio necessario alla riconoscibilità" }
+      }],
+      "avoid_zones": [{ "x": 40, "y": 130, "w": 300, "h": 320, "nota": "colonna di testo a sinistra: solo fondo, nessun volto" }],
+      "veil": [
+        { "area": "title_area", "tipo": "orizzontale-sinistra", "copre": { "x": 0, "y": 0, "w": 420, "h": 465 }, "opacita_chiaro": 0.9, "opacita_scuro": 0.84 }
+      ],
+      "max_title": 38,
+      "max_subtitle": 72,
+      "max_description": null,
+      "supports_multiple_characters": true,
+      "esempio": {
+        "titolo": "Il bosco che non dormiva",
+        "sottotitolo": "Con Marco, Elsa e un lupo che aveva paura del buio",
+        "descrizione": null,
+        "frase_personalizzata": null
+      },
+      "prompt_layout_instruction": "Single coherent full-bleed 4:3 scene with an asymmetric composition. Push the main character and all key action into the right half of the frame, full figure, in profile or three-quarter view; the face and all identifying detail must sit well inside the frame, never near the right or bottom edge, though the body and feet may run off the edge. Leave the left half as quiet negative space — open ground, mist, wall, water or sky — with no faces, no readable detail and low contrast. Secondary characters sit deeper in the right half, smaller."
+    },
+    {
+      "nome": "Pannello",
+      "tipo": "front",
+      "registro": "scena immersiva, titolo in un pannello editoriale leggero",
+      "formato": { "larghezza": 620, "altezza": 465, "proporzioni": "4:3" },
+      "image_area": { "x": 0, "y": 0, "w": 620, "h": 465, "abbondanza": true },
+      "title_area": { "x": 90, "y": 238, "w": 440, "h": 84, "allineamento": "center", "corpo": 38, "interlinea": 42, "righe_max": 2, "dentro_pannello": true },
+      "subtitle_area": { "x": 90, "y": 330, "w": 440, "h": 30, "allineamento": "center", "corpo": 16, "interlinea": 22, "righe_max": 1, "dentro_pannello": true },
+      "description_area": null,
+      "brand_area": { "x": 62, "y": 398, "w": 496, "h": 36, "allineamento": "center", "facoltativo": false, "dentro_pannello": true },
+      "technical_area": null,
+      "panel_area": { "x": 62, "y": 214, "w": 496, "h": 220, "trattamento": "velo unico, senza bordo e senza ombra portata", "contiene": ["title_area", "subtitle_area", "brand_area"], "nota": "il pannello arriva a y=434 e comprende il marchio: titolo, sottotitolo e marchio stanno tutti dentro lo stesso velo" },
+      "safe_zones": [{ "x": 26, "y": 26, "w": 568, "h": 413, "nota": "margine di sicurezza esterno" }],
+      "subject_zones": [{
+        "x": 150, "y": 40, "w": 320, "h": 170,
+        "ruolo": "protagonista",
+        "nota": "protagonista nella metà alta, dentro la scena, non in primissimo piano",
+        "estensione_ammessa": { "x": 100, "y": 28, "w": 420, "h": 186, "nota": "la figura può allargarsi fino al bordo del pannello (y=214); niente volti sotto quella linea" }
+      }],
+      "avoid_zones": [{ "x": 40, "y": 200, "w": 540, "h": 235, "nota": "pannello e marchio: nessun volto né dettaglio essenziale" }],
+      "veil": [
+        { "area": "panel_area", "tipo": "pieno", "copre": { "x": 62, "y": 214, "w": 496, "h": 220 }, "opacita_chiaro": 0.9, "opacita_scuro": 0.8 }
+      ],
+      "max_title": 42,
+      "max_subtitle": 56,
+      "max_description": null,
+      "supports_multiple_characters": true,
+      "esempio": {
+        "titolo": "Tobia e il treno delle nuvole",
+        "sottotitolo": "Un viaggio in sette fermate",
+        "descrizione": null,
+        "frase_personalizzata": null
+      },
+      "prompt_layout_instruction": "Single coherent full-bleed 4:3 scene, immersive and wide, with real depth. Place the main character and the action in the upper half, at medium distance inside the environment. Keep the lower half simple and even in tone — ground, water, foliage mass, snow — with no faces or essential detail below the middle line. Secondary characters may appear in the upper half at similar or smaller scale."
+    },
+    {
+      "nome": "Fascia",
+      "tipo": "back",
+      "registro": "quarta a spazio negativo, illustrazione in fascia bassa",
+      "formato": { "larghezza": 620, "altezza": 465, "proporzioni": "4:3" },
+      "image_area": { "x": 0, "y": 238, "w": 620, "h": 162, "abbondanza": "solo lati" },
+      "title_area": null,
+      "subtitle_area": { "x": 62, "y": 54, "w": 466, "h": 28, "ruolo": "frase personalizzata", "allineamento": "left", "corpo": 18, "interlinea": 26, "righe_max": 1 },
+      "description_area": { "x": 62, "y": 100, "w": 368, "h": 126, "allineamento": "left", "corpo": 15, "interlinea": 22, "righe_max": 6 },
+      "brand_area": { "x": 428, "y": 404, "w": 130, "h": 32, "allineamento": "right", "facoltativo": true },
+      "technical_area": { "x": 62, "y": 404, "w": 120, "h": 32, "contenuto": null, "nota": "riservata, vuota in questa iterazione; interamente dentro la zona sicura" },
+      "panel_area": null,
+      "safe_zones": [
+        { "x": 26, "y": 26, "w": 568, "h": 413, "nota": "margine di sicurezza esterno" },
+        { "x": 0, "y": 0, "w": 620, "h": 238, "nota": "carta piena: nessuna illustrazione" }
+      ],
+      "subject_zones": [{
+        "x": 180, "y": 250, "w": 260, "h": 150,
+        "ruolo": "protagonista secondario",
+        "nota": "dentro la fascia, in secondo piano; continuità di ambiente e luce con la copertina",
+        "estensione_ammessa": { "x": 120, "y": 250, "w": 380, "h": 150, "nota": "la figura può allargarsi nella fascia, ma non oltre i suoi bordi orizzontali" }
+      }],
+      "avoid_zones": [{ "x": 0, "y": 238, "w": 620, "h": 24, "nota": "bordo superiore della fascia: nessun volto tagliato dal taglio" }],
+      "veil": null,
+      "max_title": null,
+      "max_subtitle": 64,
+      "max_description": 340,
+      "supports_multiple_characters": true,
+      "esempio": {
+        "titolo": null,
+        "sottotitolo": null,
+        "descrizione": "Una notte di settembre Nina trova una balena di vetro incagliata fra gli scogli. Per riportarla al largo dovrà attraversare tre correnti, convincere un granchio testardo e imparare che certe cose si salvano soltanto insieme.",
+        "frase_personalizzata": "Per Nina, che non ha paura dell'acqua profonda."
+      },
+      "prompt_layout_instruction": "Single coherent horizontal band, 620 × 162, same world, light and palette as the front cover. Quiet, low-contrast, wide establishing view of the same setting seen from further away. Keep the main character small and secondary, standing in the middle of the band with clear space above the head; no cropped faces near the top edge of the band."
+    },
+    {
+      "nome": "Continuo",
+      "tipo": "back",
+      "registro": "quarta in continuità, scena attenuata a tutta pagina",
+      "formato": { "larghezza": 620, "altezza": 465, "proporzioni": "4:3" },
+      "image_area": { "x": 0, "y": 0, "w": 620, "h": 465, "abbondanza": true },
+      "title_area": null,
+      "subtitle_area": { "x": 62, "y": 86, "w": 290, "h": 32, "ruolo": "frase personalizzata", "allineamento": "left", "corpo": 18, "interlinea": 26, "righe_max": 1 },
+      "description_area": { "x": 62, "y": 140, "w": 290, "h": 190, "allineamento": "left", "corpo": 15, "interlinea": 22, "righe_max": 8 },
+      "brand_area": { "x": 62, "y": 388, "w": 290, "h": 36, "allineamento": "left", "facoltativo": true },
+      "technical_area": { "x": 400, "y": 404, "w": 158, "h": 32, "contenuto": null, "nota": "riservata, vuota in questa iterazione" },
+      "panel_area": null,
+      "safe_zones": [{ "x": 26, "y": 26, "w": 568, "h": 413, "nota": "margine di sicurezza esterno" }],
+      "subject_zones": [{
+        "x": 360, "y": 110, "w": 232, "h": 282,
+        "ruolo": "protagonista di spalle o secondari",
+        "nota": "presenza discreta a destra; niente primi piani; sopra l'area tecnica",
+        "estensione_ammessa": { "x": 360, "y": 110, "w": 272, "h": 302, "nota": "la figura può uscire a destra nell'abbondanza; niente dettagli essenziali oltre x=592" }
+      }],
+      "avoid_zones": [{ "x": 40, "y": 70, "w": 330, "h": 340, "nota": "colonna di lettura a sinistra: fondo calmo obbligatorio" }],
+      "veil": [
+        { "area": "description_area", "tipo": "orizzontale-sinistra", "copre": { "x": 0, "y": 0, "w": 400, "h": 465 }, "opacita_chiaro": 0.9, "opacita_scuro": 0.84 }
+      ],
+      "max_title": null,
+      "max_subtitle": 56,
+      "max_description": 420,
+      "supports_multiple_characters": true,
+      "esempio": {
+        "titolo": null,
+        "sottotitolo": null,
+        "descrizione": "Il treno delle nuvole parte solo quando qualcuno ha davvero bisogno di andare da qualche parte. Tobia sale alla prima fermata con una valigia troppo grande e scende alla settima con una cosa sola: il coraggio di dire quello che pensa. Sette fermate, sette incontri, e una città che dall'alto sembra piccolissima.",
+        "frase_personalizzata": "Buon compleanno, Tobia."
+      },
+      "prompt_layout_instruction": "Single coherent full-bleed 4:3 scene continuing the front cover: same world, same light, seen a moment later or from behind. Keep the whole left half almost empty and even in tone for text. Place any figure in the right half, small, seen from behind or at a distance, with no faces in focus and no high-contrast detail anywhere on the left."
+    }
+  ]
+}

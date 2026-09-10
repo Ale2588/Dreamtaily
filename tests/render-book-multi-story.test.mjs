@@ -18,9 +18,48 @@ test("render pages are namespaced and retain their story context",()=>{
   assert.match(source,/storyById\.get\(page\.book_story_id\)/);
 });
 
-test("each story uses its own protagonist reference",()=>{
-  assert.match(source,/protagonistByStory\.set\(story\.book_story_id/);
-  assert.match(source,/protagonistByStory\.get\(page\.book_story_id\)/);
+test("each page resolves every planned character from its frozen story cast",()=>{
+  assert.match(source,/async function characterInputs\(page:any,story:any\)/);
+  assert.match(source,/story\.cast\|\|\[\]/);
+  assert.match(source,/entry\.slot_key===item\.slot_key/);
+  assert.match(source,/characters:cast\.map/);
+  assert.doesNotMatch(source,/protagonistByStory/);
+});
+
+test("the image API receives one background followed by all character references",()=>{
+  assert.match(source,/\.\.\.cast\.map\(\(item:any\)=>item\.blob\)/);
+  assert.match(source,/`character-\$\{i\}\.png`/);
+  assert.match(source,/compiled_prompt:prompt/);
+});
+
+test("each resumable invocation generates at most one illustration",()=>{
+  assert.match(source,/const MAX_CONCURRENCY = 1/);
+  assert.match(source,/\.slice\(0,MAX_CONCURRENCY\)/);
+});
+
+test("renderer resumes frozen relative cover assets from scaffolding",()=>{
+  assert.match(source,/clean\.startsWith\("assets\/book-cover\/"\)/);
+  assert.match(source,/Dreamtaily\/scaffolding/);
+});
+
+test("global cover is portrait and can be regenerated on its own",()=>{
+  assert.match(source,/format:"portrait"/);
+  assert.match(source,/page\.format==="portrait"\?"1024x1536":SIZE/);
+  assert.match(source,/regenerate_page_id/);
+  assert.match(source,/regeneratePageId!=="book__cover"/);
+  assert.match(source,/page\.page_id===regeneratePageId/);
+});
+
+test("pilot mode validates a narrative spread before the cover",()=>{
+  assert.match(source,/firstNarrative=candidates\.find/);
+  assert.match(source,/page\.kind==="page"/);
+  assert.match(source,/firstNarrative\?\[firstNarrative\]:candidates/);
+});
+
+test("full mode follows book order and skips durable ready pages",()=>{
+  assert.match(source,/const full=body\.mode==="full"/);
+  assert.match(source,/page\.render\?\.status!=="ready"/);
+  assert.match(source,/const ordered=full\?candidates/);
 });
 
 test("completed stories persist their snapshots before checkout",()=>{

@@ -42,7 +42,13 @@ Deno.serve(async(req:Request)=>{
 
     const pages=rawPages.map((p:any,index:number)=>({
       page_id:p.page_id,kind:p.kind,chapter:p.chapter,title:p.title||"",text:p.text||"",
-      scene_id:p.scene_id||null,image_url:signed?.[index]?.signedUrl||null
+      scene_id:p.scene_id||null,
+      book_story_id:p.book_story_id||null,
+      story_slug:p.story_slug||null,
+      layout:p.layout||null,
+      format:p.format||null,
+      brand_variant:p.brand_variant||null,
+      image_url:signed?.[index]?.signedUrl||null
     }));
     const snapshot=render.book_snapshot||{};
     return reply(200,{

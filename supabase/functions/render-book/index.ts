@@ -1,6 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { buildIdentityPrompt } from "../../../src/identity-prompt.js";
-import { buildPageRenderPrompt } from "../../../src/render-prompts.js";
+import { buildPageRenderPrompt, getHelperIdentity } from "../../../src/render-prompts.js";
 import { allPagesReady, planBookRender } from "../../../src/render-job.js";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -14,7 +14,9 @@ const MODEL = Deno.env.get("OPENAI_IMAGE_MODEL") || "gpt-image-2";
 const SIZE = Deno.env.get("OPENAI_IMAGE_SIZE") || "1536x1024";
 const QUALITY = Deno.env.get("OPENAI_IMAGE_QUALITY") || "medium";
 const MAX_ATTEMPTS = 3;
-const MAX_CONCURRENCY = 3;
+// Each invocation renders one durable page. The browser can safely resume the
+// sequence without repeating pages already stored in Storage.
+const MAX_CONCURRENCY = 1;
 
 const cors = {
   "Access-Control-Allow-Origin":"*",
@@ -31,7 +33,15 @@ async function sha256(s:string){
   const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
   return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
-function abs(ref:string){ return /^https?:\/\//i.test(ref) ? ref : `${ASSET_BASE}/${String(ref).replace(/^\/+/, "")}`; }
+function abs(ref:string){
+  if(/^https?:\/\//i.test(ref)) return ref;
+  const clean=String(ref).replace(/^\/+/, "");
+  // New book-cover assets are versioned on scaffolding; legacy shared assets
+  // remain on main. This also keeps already-frozen relative snapshots resumable.
+  if(clean.startsWith("assets/book-cover/"))
+    return `https://raw.githubusercontent.com/Ale2588/Dreamtaily/scaffolding/${clean}`;
+  return `${ASSET_BASE}/${clean}`;
+}
 async function fetchBlob(ref:string,label:string){
   const r=await fetch(abs(ref));
   if(!r.ok) throw new Error(`${label}_HTTP_${r.status}`);
@@ -111,27 +121,30 @@ async function loadContext(bookId:string,userId:string){
   return {book,stories:contexts,snapshot:{meta:{book_id:book.id,title:book.title},stories:contexts.map((x:any)=>({book_story_id:x.book_story_id,story_slug:x.story_slug,position:x.position,content:x.snapshot}))}};
 }
 
-function planMultiStoryRender(contexts:any[]){
-  return contexts.flatMap((context:any)=>planBookRender(context.snapshot).map((page:any)=>({
+function planMultiStoryRender(contexts:any[],bookCover:any=null){
+  const globalCover=bookCover?planBookRender({meta:{title:bookCover.title},cover:bookCover,pages:[]}).map((page:any)=>({...page,page_id:"book__cover",local_page_id:"cover",book_story_id:null,story_slug:null,format:"portrait",characters:(bookCover.characters||[]).map((item:any)=>({slot_key:item.slot_key,character_id:item.character_asset_id,pose:"in_piedi",featured:true})),cover_characters:bookCover.characters||[]})):[];
+  const storyPages=contexts.flatMap((context:any)=>planBookRender(context.snapshot).map((page:any)=>({
     ...page,
     page_id:`${context.book_story_id}__${page.page_id}`,
     local_page_id:page.page_id,
     book_story_id:context.book_story_id,
     story_slug:context.story_slug
   })));
+  return [...globalCover,...storyPages];
 }
 
 function contextsFromCheckoutSnapshot(snapshot:any){
   if(snapshot?.schema_version!=="checkout-book-v1"||!Array.isArray(snapshot?.stories))
     throw new Error("CHECKOUT_SNAPSHOT_REQUIRED");
   return snapshot.stories.map((story:any)=>{
-    const protagonist=(story.cast||[]).find((item:any)=>item.slot_key==="protagonist")?.character;
+    const cast=story.cast||[];
+    const protagonist=cast.find((item:any)=>item.slot_key==="protagonist")?.character;
     if(!story.content?.meta||!Array.isArray(story.content?.pages))
       throw new Error(`BOOK_SNAPSHOT_MISSING:${story.book_story_id}`);
     if(!protagonist?.identity_prompt) throw new Error(`PROTAGONIST_IDENTITY_MISSING:${story.book_story_id}`);
     if(!protagonist?.reference?.storage_path) throw new Error(`PROTAGONIST_REFERENCE_MISSING:${story.book_story_id}`);
     return {book_story_id:story.book_story_id,story_slug:story.story_slug,position:story.position,
-      snapshot:story.content,identity:protagonist.identity_prompt,reference:protagonist.reference};
+      snapshot:story.content,identity:protagonist.identity_prompt,reference:protagonist.reference,cast};
   });
 }
 
@@ -141,11 +154,47 @@ async function protagonistBlob(path:string){
   return data;
 }
 
-async function openAIEdit(images:Blob[],prompt:string){
+async function characterInputs(page:any,story:any){
+  if(Array.isArray(page.cover_characters)&&page.cover_characters.length)return await Promise.all(page.cover_characters.map(async(item:any)=>({slotKey:item.slot_key,identity:item.character.identity_prompt,pose:"in_piedi",featured:true,blob:await protagonistBlob(item.character.reference.storage_path)})));
+  const planned=Array.isArray(page.characters)&&page.characters.length?page.characters:[{
+    slot_key:"protagonist",character_id:"protagonist",pose:page.protagonist_pose||"in_piedi"
+  }];
+  const inputs=[];
+  for(const item of planned){
+    const assignment=(story.cast||[]).find((entry:any)=>entry.slot_key===item.slot_key);
+    const character=assignment?.character;
+    if(character?.identity_prompt&&character?.reference?.storage_path){
+      inputs.push({
+        slotKey:item.slot_key,
+        identity:character.identity_prompt,
+        pose:item.pose||"in_piedi",
+        featured:item.featured===true,
+        blob:await protagonistBlob(character.reference.storage_path)
+      });
+      continue;
+    }
+    const catalogId=assignment?.catalog_character_id||item.character_id;
+    const catalogIdentity=getHelperIdentity(catalogId)?.identity_prompt;
+    if(catalogIdentity){
+      inputs.push({
+        slotKey:item.slot_key,
+        identity:catalogIdentity,
+        pose:item.pose||"in_piedi",
+        featured:item.featured===true,
+        blob:await fetchBlob(item.asset_ref||helperRef(catalogId,item.pose||"in_piedi"),`CHARACTER_${item.slot_key}`)
+      });
+      continue;
+    }
+    throw new Error(`CHARACTER_REFERENCE_MISSING:${story.book_story_id}:${item.slot_key}`);
+  }
+  return inputs;
+}
+
+async function openAIEdit(images:Blob[],prompt:string,size=SIZE){
   const f=new FormData();
-  f.append("model",MODEL); f.append("prompt",prompt); f.append("size",SIZE);
+  f.append("model",MODEL); f.append("prompt",prompt); f.append("size",size);
   f.append("quality",QUALITY); f.append("output_format","png");
-  images.forEach((b,i)=>f.append("image[]",b,["background.png","protagonist.png","helper.png"][i]||`ref-${i}.png`));
+  images.forEach((b,i)=>f.append("image[]",b,i===0?"background.png":`character-${i}.png`));
   const r=await fetch("https://api.openai.com/v1/images/edits",{
     method:"POST",headers:{Authorization:`Bearer ${OPENAI}`},body:f
   });
@@ -165,30 +214,31 @@ async function store(renderId:string,pageId:string,bytes:Uint8Array){
   return {path,url:data.signedUrl};
 }
 
-async function renderOne(renderId:string,page:any,protagonist:Blob,identity:string){
+async function renderOne(renderId:string,page:any,story:any){
+  const cast=await characterInputs(page,story);
   const prompt=buildPageRenderPrompt({
     sceneId:page.scene_id, styleId:page.style_id||"paper",
-    protagonistIdentity:identity, protagonistPose:page.protagonist_pose||"in_piedi",
-    helperId:page.helper_id||null, helperPose:page.helper_pose||"in_piedi",
     environmentOverride:page.prompt_environment||null,
-    momentOverride:page.prompt_moment||null
+    momentOverride:page.prompt_moment||null,
+    authoringNote:page.authoring_note||null,
+    layout:page.layout||null,
+    characters:cast.map(({blob,...item})=>item)
   });
   const ph=await sha256(prompt);
   let last="";
   for(let attempt=Number(page.render?.attempts||0)+1;attempt<=MAX_ATTEMPTS;attempt++){
     try{
-      const imgs:Blob[]=[await fetchBlob(page.background_ref,"BACKGROUND"),protagonist];
-      if(page.helper_id) imgs.push(await fetchBlob(helperRef(page.helper_id,page.helper_pose||"in_piedi"),"HELPER"));
-      const bytes=await openAIEdit(imgs,prompt);
+      const imgs:Blob[]=[await fetchBlob(page.background_ref,"BACKGROUND"),...cast.map((item:any)=>item.blob)];
+      const bytes=await openAIEdit(imgs,prompt,page.format==="portrait"?"1024x1536":SIZE);
       const s=await store(renderId,page.page_id,bytes);
       return {...page,render:{status:"ready",generated_image_url:s.url,generated_image_path:s.path,
-        attempts:attempt,prompt_hash:ph,error:null}};
+        attempts:attempt,prompt_hash:ph,compiled_prompt:prompt,error:null}};
     }catch(e){
       last=msg(e);
       if(attempt<MAX_ATTEMPTS) await new Promise(r=>setTimeout(r,1000*Math.pow(2,attempt-1)));
     }
   }
-  return {...page,render:{...page.render,status:"failed",attempts:MAX_ATTEMPTS,prompt_hash:ph,error:last||"UNKNOWN_RENDER_ERROR"}};
+  return {...page,render:{...page.render,status:"failed",attempts:MAX_ATTEMPTS,prompt_hash:ph,compiled_prompt:prompt,error:last||"UNKNOWN_RENDER_ERROR"}};
 }
 
 Deno.serve(async(req:Request)=>{
@@ -200,6 +250,8 @@ Deno.serve(async(req:Request)=>{
     const bookId=String(body.book_id||"").trim();
     const key=String(body.idempotency_key||"").trim();
     const start=body.start===true;
+    const full=body.mode==="full";
+    const regeneratePageId=String(body.regenerate_page_id||"").trim();
     if(!bookId) return reply(400,{error:"BOOK_ID_REQUIRED"});
     if(!key) return reply(400,{error:"IDEMPOTENCY_KEY_REQUIRED"});
 
@@ -210,16 +262,37 @@ Deno.serve(async(req:Request)=>{
     const {data:owned,error:ownedError}=await svc.from("books").select("id").eq("id",bookId).eq("profile_id",user.id).maybeSingle();
     if(ownedError) throw ownedError;
     if(!owned) throw new Error("BOOK_NOT_FOUND");
+    if(regeneratePageId){
+      if(regeneratePageId!=="book__cover") return reply(400,{error:"REGENERATE_PAGE_NOT_ALLOWED"});
+      if(!start) return reply(400,{error:"REGENERATE_START_REQUIRED"});
+      if(!["ready","review"].includes(job.status)) return reply(409,{error:"REGENERATE_RENDER_NOT_STABLE"});
+      const target=(job.pages||[]).find((page:any)=>page.page_id===regeneratePageId);
+      if(!target) return reply(404,{error:"REGENERATE_PAGE_NOT_FOUND"});
+      const pages=(job.pages||[]).map((page:any)=>page.page_id===regeneratePageId?{
+        ...page,format:"portrait",render:{...page.render,status:"queued",attempts:0,error:null,generated_image_url:null,generated_image_path:null}
+      }:page);
+      const now=new Date().toISOString();
+      const {data:restarted,error:restartError}=await svc.from("book_renders")
+        .update({status:"running",pages,error:null,finished_at:null,updated_at:now})
+        .eq("id",job.id).eq("status",job.status).select("*").single();
+      if(restartError) throw restartError;
+      job=restarted;
+      const {error:bookRestartError}=await svc.from("books").update({status:"generating",updated_at:now}).eq("id",bookId);
+      if(bookRestartError) throw bookRestartError;
+    }
     if(job.status==="queued"&&!start) return reply(202,{
       render_id:job.id,status:job.status,pages:job.pages,permalink_slug:job.permalink_slug,idempotent:true
     });
-    if(job.status==="queued"&&start){
+    if((job.status==="queued"||job.status==="review")&&start){
       if(!OPENAI) throw new Error("OPENAI_API_KEY_MISSING");
       const contexts=contextsFromCheckoutSnapshot(job.book_snapshot);
       const now=new Date().toISOString();
+      const restartPages=job.status==="review"?(job.pages||[]).map((page:any)=>page.render?.status==="failed"?{
+        ...page,render:{...page.render,status:"queued",attempts:0,error:null}
+      }:page):planMultiStoryRender(contexts,job.book_snapshot?.cover);
       const {data:started,error:startError}=await svc.from("book_renders")
-        .update({status:"running",pages:planMultiStoryRender(contexts),started_at:now,updated_at:now})
-        .eq("id",job.id).eq("status","queued").select("*").single();
+        .update({status:"running",pages:restartPages,error:null,finished_at:null,started_at:job.started_at||now,updated_at:now})
+        .eq("id",job.id).eq("status",job.status).select("*").single();
       if(startError) throw startError;
       job=started;
       const {error:bookStartError}=await svc.from("books").update({status:"generating",updated_at:now}).eq("id",bookId);
@@ -234,21 +307,21 @@ Deno.serve(async(req:Request)=>{
 
     await ensureBucket();
     const storyById=new Map(contexts.map((story:any)=>[story.book_story_id,story]));
-    const protagonistByStory=new Map();
-    for(const story of contexts){
-      protagonistByStory.set(story.book_story_id,await protagonistBlob(story.reference.storage_path));
-    }
-    const pages=(job.pages?.length?job.pages:planMultiStoryRender(contexts)).map((p:any)=>({...p,render:{...p.render}}));
+    const pages=(job.pages?.length?job.pages:planMultiStoryRender(contexts,job.book_snapshot?.cover)).map((p:any)=>({...p,render:{...p.render}}));
 
-    const pending=pages.map((page:any,index:number)=>({page,index}))
-      .filter(({page}:any)=>page.render?.status!=="ready"&&Number(page.render?.attempts||0)<MAX_ATTEMPTS)
-      .slice(0,MAX_CONCURRENCY);
+    const candidates=pages.map((page:any,index:number)=>({page,index}))
+      .filter(({page}:any)=>page.render?.status!=="ready"&&Number(page.render?.attempts||0)<MAX_ATTEMPTS);
+    // Pilot mode validates a narrative spread. Full mode follows book order;
+    // each subsequent invocation skips every page already marked ready.
+    const firstNarrative=candidates.find(({page}:any)=>page.kind==="page");
+    const ordered=full?candidates:(firstNarrative?[firstNarrative]:candidates);
+    const pending=ordered.slice(0,MAX_CONCURRENCY);
 
     if(pending.length){
       const results=await Promise.all(pending.map(({page}:any)=>{
-        const story:any=storyById.get(page.book_story_id);
-        if(!story) throw new Error(`RENDER_STORY_CONTEXT_MISSING:${page.book_story_id}`);
-        return renderOne(job.id,page,protagonistByStory.get(page.book_story_id),story.identity);
+        const story:any=page.page_id==="book__cover"?null:storyById.get(page.book_story_id);
+        if(!story&&page.page_id!=="book__cover") throw new Error(`RENDER_STORY_CONTEXT_MISSING:${page.book_story_id}`);
+        return renderOne(job.id,page,story);
       }));
       results.forEach((r:any,i:number)=>pages[pending[i].index]=r);
       const {error}=await svc.from("book_renders").update({pages,updated_at:new Date().toISOString()}).eq("id",job.id);

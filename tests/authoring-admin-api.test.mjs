@@ -75,3 +75,9 @@ test("publishing revalidates and delegates the atomic transition to Postgres", (
   assert.match(source, /contentByRef: access\.version\.content_by_ref/);
   assert.match(source, /versionMatch\[2\] === "publish"/);
 });
+
+test("new drafts keep only the story cover in authoring",()=>{
+  assert.doesNotMatch(source,/book_cover:/);
+  assert.match(source,/cover_ref: null/);
+  assert.match(source,/source_scenes: \{ version: 1, cover:/);
+});
