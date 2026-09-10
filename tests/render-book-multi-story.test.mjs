@@ -37,6 +37,11 @@ test("each resumable invocation generates at most one illustration",()=>{
   assert.match(source,/\.slice\(0,MAX_CONCURRENCY\)/);
 });
 
+test("renderer resumes frozen relative cover assets from scaffolding",()=>{
+  assert.match(source,/clean\.startsWith\("assets\/book-cover\/"\)/);
+  assert.match(source,/Dreamtaily\/scaffolding/);
+});
+
 test("pilot mode validates a narrative spread before the cover",()=>{
   assert.match(source,/firstNarrative=candidates\.find/);
   assert.match(source,/page\.kind==="page"/);

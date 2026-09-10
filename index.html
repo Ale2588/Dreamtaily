@@ -2339,7 +2339,7 @@ function renderComposerStep(){
             <button type="button"
               class="decision-option ${saved===option.key?'selected':''}"
               onclick="selectBranchChoice('${escapeHtml(decision.key)}','${escapeHtml(option.key)}')">
-              ${escapeHtml(option.label)}
+              ${escapeHtml(dtOptionLabel(option))}
             </button>
           `).join('')}
         </div>
@@ -2902,6 +2902,14 @@ function dtOptionDescription(option){
   return dtReplaceName(destination?.composer_summary||"");
 }
 
+function dtOptionLabel(option){
+  const authored=String(option?.label||"").trim();
+  const generic=/^(?:opzione\s*\d+|prima opzione|seconda opzione|terza opzione|quarta opzione)$/i.test(authored);
+  const destination=(app.activeStoryDefinition?.steps||[]).find(step=>step.key===option?.next);
+  const destinationTitle=String(destination?.title||"").trim();
+  return dtReplaceName(generic&&destinationTitle?destinationTitle:(authored||destinationTitle||option?.key||"Scegli"));
+}
+
 async function dtLoadSceneContract(){
   if(dtSceneContract) return dtSceneContract;
   if(app.activeStoryContract?.scenes){
@@ -3047,7 +3055,7 @@ function dtDecisionHtml(step){
         ${(decision.options||[]).map(option=>{const description=dtOptionDescription(option);return`
           <button type="button" class="dt-decision-option ${selected===option.key?"selected":""}"
             onclick="selectDtNarrativeChoice('${escapeHtml(decision.key)}','${escapeHtml(option.key)}')">
-            <strong>${escapeHtml(dtReplaceName(option.label))}</strong>
+            <strong>${escapeHtml(dtOptionLabel(option))}</strong>
             ${description?`<small>${escapeHtml(description)}</small>`:""}
           </button>`}).join("")}
       </div>
@@ -3562,7 +3570,7 @@ window.renderDtBookStatus=async function(render=null){
         :'Il lavoro è salvato e potrà essere ripreso senza rigenerare le pagine già completate.'}</p>
       <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
         ${ready?`<button class="btn btn-primary" onclick="window.location.href='libro.html?slug=${encodeURIComponent(job.permalink_slug)}'">Apri il libro</button>`:''}
-        ${job.status==='queued'||job.status==='running'?`<button id="dt-full-render" class="btn btn-primary" onclick="startDtFullRender()">${job.status==='queued'?'Genera il libro':'Continua la generazione'}</button>`:''}
+        ${['queued','running','review'].includes(job.status)?`<button id="dt-full-render" class="btn btn-primary" onclick="startDtFullRender()">${job.status==='queued'?'Genera il libro':job.status==='review'?'Riprova la generazione':'Continua la generazione'}</button>`:''}
         <button class="btn btn-soft" onclick="renderDtBookStatus()">Aggiorna stato</button>
         <button class="btn btn-primary" onclick="startNewBook()">Crea un altro libro</button>
         <button class="btn btn-ghost" onclick="showScreen('landing')">Torna alla home</button>

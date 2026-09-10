@@ -4,10 +4,10 @@ const FRONT_LAYOUTS=Object.freeze({
   Pannello:{max_title:42,prompt_layout_instruction:"Single coherent full-bleed 4:3 scene. Place every unique protagonist in the upper half at medium distance. Keep the lower half simple and even in tone, with no faces or essential details."}
 });
 const PALETTE=Object.freeze({
-  cream:{label:"Crema",hex:"#FDF8F0",asset_ref:"assets/book-cover/cream.png",brand_variant:"dark"},
-  coral:{label:"Corallo",hex:"#E8735A",asset_ref:"assets/book-cover/coral.png",brand_variant:"light"},
-  teal:{label:"Teal",hex:"#5B9EA0",asset_ref:"assets/book-cover/teal.png",brand_variant:"light"},
-  gold:{label:"Oro",hex:"#F2C14E",asset_ref:"assets/book-cover/gold.png",brand_variant:"dark"}
+  cream:{label:"Crema",hex:"#FDF8F0",asset_ref:"https://raw.githubusercontent.com/Ale2588/Dreamtaily/scaffolding/assets/book-cover/cream.png",brand_variant:"dark"},
+  coral:{label:"Corallo",hex:"#E8735A",asset_ref:"https://raw.githubusercontent.com/Ale2588/Dreamtaily/scaffolding/assets/book-cover/coral.png",brand_variant:"light"},
+  teal:{label:"Teal",hex:"#5B9EA0",asset_ref:"https://raw.githubusercontent.com/Ale2588/Dreamtaily/scaffolding/assets/book-cover/teal.png",brand_variant:"light"},
+  gold:{label:"Oro",hex:"#F2C14E",asset_ref:"https://raw.githubusercontent.com/Ale2588/Dreamtaily/scaffolding/assets/book-cover/gold.png",brand_variant:"dark"}
 });
 const clone=value=>value==null?value:JSON.parse(JSON.stringify(value));
 export const bookCoverLayouts=Object.freeze(Object.keys(FRONT_LAYOUTS));

@@ -25,6 +25,11 @@ test('checkout freezes story versions, content, cast and private reference paths
   assert.match(checkout,/cover,stories:snapshotStories/);
 });
 
+test('checkout freezes cover backgrounds as server-fetchable absolute URLs',async()=>{
+  const module=await import('../src/book/book-cover-selection.js');
+  for(const color of module.bookCoverPalette) assert.match(color.asset_ref,/^https:\/\//);
+});
+
 test('checkout transition is atomic and service-role only',()=>{
   assert.match(migration,/for update/);
   assert.match(migration,/insert into public\.book_renders/);
@@ -55,6 +60,9 @@ test('full rendering starts explicitly and resumes page by page',()=>{
   assert.match(full,/mode:"full"/);
   assert.match(full,/while\(dtPendingRender\?\.status==='queued'\|\|dtPendingRender\?\.status==='running'\)/);
   assert.match(full,/Le pagine completate sono salve/);
+  assert.match(renderer,/job\.status==="queued"\|\|job\.status==="review"/);
+  assert.match(renderer,/status:"queued",attempts:0,error:null/);
+  assert.match(html,/Riprova la generazione/);
 });
 
 test('legacy pilot entry point remains compatible with existing sessions',()=>{

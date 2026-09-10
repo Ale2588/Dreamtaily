@@ -33,7 +33,15 @@ async function sha256(s:string){
   const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
   return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
-function abs(ref:string){ return /^https?:\/\//i.test(ref) ? ref : `${ASSET_BASE}/${String(ref).replace(/^\/+/, "")}`; }
+function abs(ref:string){
+  if(/^https?:\/\//i.test(ref)) return ref;
+  const clean=String(ref).replace(/^\/+/, "");
+  // New book-cover assets are versioned on scaffolding; legacy shared assets
+  // remain on main. This also keeps already-frozen relative snapshots resumable.
+  if(clean.startsWith("assets/book-cover/"))
+    return `https://raw.githubusercontent.com/Ale2588/Dreamtaily/scaffolding/${clean}`;
+  return `${ASSET_BASE}/${clean}`;
+}
 async function fetchBlob(ref:string,label:string){
   const r=await fetch(abs(ref));
   if(!r.ok) throw new Error(`${label}_HTTP_${r.status}`);
@@ -256,13 +264,16 @@ Deno.serve(async(req:Request)=>{
     if(job.status==="queued"&&!start) return reply(202,{
       render_id:job.id,status:job.status,pages:job.pages,permalink_slug:job.permalink_slug,idempotent:true
     });
-    if(job.status==="queued"&&start){
+    if((job.status==="queued"||job.status==="review")&&start){
       if(!OPENAI) throw new Error("OPENAI_API_KEY_MISSING");
       const contexts=contextsFromCheckoutSnapshot(job.book_snapshot);
       const now=new Date().toISOString();
+      const restartPages=job.status==="review"?(job.pages||[]).map((page:any)=>page.render?.status==="failed"?{
+        ...page,render:{...page.render,status:"queued",attempts:0,error:null}
+      }:page):planMultiStoryRender(contexts,job.book_snapshot?.cover);
       const {data:started,error:startError}=await svc.from("book_renders")
-        .update({status:"running",pages:planMultiStoryRender(contexts,job.book_snapshot?.cover),started_at:now,updated_at:now})
-        .eq("id",job.id).eq("status","queued").select("*").single();
+        .update({status:"running",pages:restartPages,error:null,finished_at:null,started_at:job.started_at||now,updated_at:now})
+        .eq("id",job.id).eq("status",job.status).select("*").single();
       if(startError) throw startError;
       job=started;
       const {error:bookStartError}=await svc.from("books").update({status:"generating",updated_at:now}).eq("id",bookId);
