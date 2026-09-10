@@ -70,3 +70,8 @@ test("deterministic exporter draws assets and every spread directly at 300 DPI",
   assert.doesNotMatch(reader,/foreignObject/);
   assert.doesNotMatch(reader,/XMLSerializer/);
 });
+
+test("legacy story covers without an authored cover layout use Ritratto",()=>{
+  assert.match(reader,/gabbiaCopertinaPerNome\(page\.layout\?\.gabbia,"front"\)\|\|gabbiaCopertinaPerNome\("Ritratto","front"\)/);
+  assert.doesNotMatch(reader,/PDF_COVER_LAYOUT_MISSING_/);
+});

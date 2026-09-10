@@ -228,7 +228,7 @@ function coverGradient(context,veil,theme,offsetX){
   gradient.addColorStop(0,`rgba(${rgb},${alpha})`);gradient.addColorStop(1,`rgba(${rgb},0)`);context.fillStyle=gradient;context.fillRect(area.x,area.y,area.w,area.h);
 }
 async function drawCover(context,page,offsetX){
-  const layout=gabbiaCopertinaPerNome(page.layout?.gabbia,"front");if(!layout)throw new Error(`PDF_COVER_LAYOUT_MISSING_${page.page_id}`);
+  const layout=gabbiaCopertinaPerNome(page.layout?.gabbia,"front")||gabbiaCopertinaPerNome("Ritratto","front");if(!layout)throw new Error("PDF_COVER_CATALOG_MISSING");
   const image=await loadBitmap(page.image_url);drawCoverImage(context,image,{x:offsetX,y:0,w:620,h:465});
   (layout.veil||[]).forEach(veil=>coverGradient(context,veil,page.brand_variant,offsetX));
   const ink=page.brand_variant==="light"?"#fdf5e6":"#22321f",area=value=>({...value,x:value.x+offsetX});
