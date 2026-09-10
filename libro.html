@@ -45,16 +45,21 @@ button:disabled{opacity:.35;cursor:default}
   .visual{min-height:0;aspect-ratio:4/3}.copy{max-height:none;padding:24px 21px 30px}.story{font-size:17px;line-height:1.75}
 }
 @media print{
-  @page{size:A4 landscape;margin:8mm}
+  @page dt-cover{size:A4 portrait;margin:0}
+  @page dt-spread{size:A4 landscape;margin:0}
   html,body{background:#fff!important;padding:0!important}
   .brand,#book,.nav{display:none!important}
   #print-book{display:block!important}
-  .print-page{width:100%;height:190mm;display:grid;grid-template-columns:58% 42%;background:#fff;page-break-after:always;break-after:page;overflow:hidden}
-  .print-page:last-child{page-break-after:auto;break-after:auto}
-  .print-visual{overflow:hidden;background:#eee5d8}.print-visual img{width:100%;height:100%;object-fit:cover}
-  .print-copy{padding:12mm 10mm;overflow:hidden}.print-copy .story{font-size:11.5pt;line-height:1.42;margin-top:5mm}
-  .print-copy h1{font-size:30pt}.print-copy h2{font-size:22pt}
-  .print-cover .print-copy{display:flex;flex-direction:column;justify-content:center;text-align:center}
+  .print-sheet{display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden;page-break-after:always;break-after:page}
+  .print-sheet:last-child{page-break-after:auto;break-after:auto}
+  .print-sheet.dt-print-cover{page:dt-cover;width:210mm;height:297mm}
+  .print-sheet.dt-print-spread{page:dt-spread;width:297mm;height:210mm}
+  .print-sheet .card{border:0;border-radius:0;box-shadow:none;margin:0}
+  .print-sheet.dt-print-cover .layout-card{width:198mm;height:297mm}
+  .print-sheet.dt-print-cover .dtc-cover{width:198mm!important;height:297mm!important;max-width:none!important;margin:0!important}
+  .print-sheet.dt-print-spread .layout-card{width:280mm;height:210mm}
+  .print-sheet.dt-print-spread .dtb-doppia,.print-sheet.dt-print-spread .dtc-cover{width:280mm!important;height:210mm!important;max-width:none!important;margin:0!important}
+  .print-sheet.dt-print-spread .spread{width:280mm;height:210mm;min-height:0}
 }
 </style>
 </head>
@@ -102,7 +107,10 @@ function spread(page,isCover=false){
   }
   return `<article class="card spread ${isCover?"cover":""}"><div class="visual"><img src="${esc(page.image_url)}" alt=""></div><div class="copy"><div class="eyebrow">${isCover?"DreamTaily":`Capitolo ${esc(page.chapter??"")}`}</div>${isCover?`<h1>${esc(page.title||"")}</h1><div class="subtitle">${esc(page.text||"")}</div>`:`<div class="story">${esc(page.text||"")}</div><div class="page-number">— ${esc(page.chapter??"")} —</div>`}</div></article>`;
 }
-function printPage(page,isCover=false){return `<section class="print-page ${isCover?"print-cover":""}"><div class="print-visual"><img src="${esc(page.image_url)}" alt=""></div><div class="print-copy"><div class="eyebrow">${isCover?"DreamTaily":`Capitolo ${esc(page.chapter??"")}`}</div>${isCover?`<h1>${esc(page.title||"")}</h1><div class="subtitle">${esc(page.text||"")}</div>`:`<h2>${esc(page.title||"")}</h2><div class="story">${esc(page.text||"")}</div>`}</div></section>`;}
+function printPage(page,isCover=false){
+  const globalCover=page.page_id==="book__cover"||page.format==="portrait";
+  return `<section class="print-sheet ${globalCover?"dt-print-cover":"dt-print-spread"}">${spread(page,isCover)}</section>`;
+}
 function build(book){
   const pages=Array.isArray(book.pages)?book.pages:[];
   slides=[]; const printPages=[];

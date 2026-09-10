@@ -38,3 +38,14 @@ test("reader logo links home and every DreamTaily logo is circular",()=>{
   assert.match(reader,/<a class="brand" href="index\.html">/);
   assert.match(reader,/\.brand img\{[^}]*border-radius:50%/);
 });
+
+test("PDF reuses the exact digital cover and spread renderers",()=>{
+  assert.match(reader,/function printPage\(page,isCover=false\)/);
+  assert.match(reader,/\$\{spread\(page,isCover\)\}/);
+  assert.doesNotMatch(reader,/class="print-visual"/);
+  assert.doesNotMatch(reader,/class="print-copy"/);
+  assert.match(reader,/@page dt-cover\{size:A4 portrait/);
+  assert.match(reader,/@page dt-spread\{size:A4 landscape/);
+  assert.match(reader,/\.print-sheet\.dt-print-cover \.dtc-cover/);
+  assert.match(reader,/\.print-sheet\.dt-print-spread \.dtb-doppia/);
+});
