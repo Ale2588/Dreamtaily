@@ -39,23 +39,27 @@ test("reader logo links home and every DreamTaily logo is circular",()=>{
   assert.match(reader,/\.brand img\{[^}]*border-radius:50%/);
 });
 
-test("printer export splits canonical spreads without changing their ratio",()=>{
-  assert.match(reader,/function spreadLeaf\(page,side\)/);
-  assert.match(reader,/print-spread-art print-\$\{side\}/);
-  assert.match(reader,/\.print-spread-art\{[^}]*width:480mm;height:180mm/);
-  assert.match(reader,/\.print-spread-art\.print-right\{left:-240mm\}/);
-  assert.match(reader,/\.print-spread-art \.layout-card,.print-spread-art \.dtb-doppia\{width:480mm!important;height:180mm!important/);
-  assert.match(reader,/while\(leaves\.length%4!==0\) leaves\.push\(blankLeaf\(\)\)/);
-  assert.match(reader,/if\(leaves\.length%2===1\) leaves\.push\(blankLeaf\(\)\)/);
+test("printer export keeps every sheet horizontal and preserves canonical spreads",()=>{
+  assert.match(reader,/\.print-book-spread\{[^}]*width:480mm;height:180mm/);
+  assert.match(reader,/\.print-full-spread \.layout-card,.print-full-spread \.dtb-doppia\{width:480mm!important;height:180mm!important/);
+  assert.match(reader,/function buildUnifiedPrint\(pages\)/);
+  assert.match(reader,/print-story-title/);
   assert.doesNotMatch(reader,/class="print-visual"/);
   assert.doesNotMatch(reader,/class="print-copy"/);
 });
 
-test("printer receives separate interior and wrap-cover PDFs",()=>{
-  assert.match(reader,/PDF interni/);
-  assert.match(reader,/PDF copertina/);
-  assert.match(reader,/printDocument\(window\.dtPrintInterior\|\|"","240mm 180mm"\)/);
-  assert.match(reader,/printDocument\(window\.dtPrintCover\|\|"","480mm 180mm"\)/);
+test("printer receives one unified horizontal PDF",()=>{
+  assert.match(reader,/Scarica PDF del libro/);
+  assert.doesNotMatch(reader,/PDF interni/);
+  assert.doesNotMatch(reader,/PDF copertina/);
+  assert.match(reader,/printDocument\(window\.dtPrintBook\|\|"","480mm 180mm"\)/);
   assert.match(reader,/print-cover-back/);
   assert.match(reader,/print-cover-front/);
+});
+
+test("printing waits for fonts and fully decoded images",()=>{
+  assert.match(reader,/await document\.fonts\.ready/);
+  assert.match(reader,/if\(img\.decode\) await img\.decode\(\)/);
+  assert.match(reader,/if\(!img\.naturalWidth\) throw new Error\("PRINT_IMAGE_MISSING"\)/);
+  assert.match(reader,/requestAnimationFrame\(\(\)=>requestAnimationFrame\(resolve\)\)/);
 });
