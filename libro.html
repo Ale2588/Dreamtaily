@@ -45,21 +45,22 @@ button:disabled{opacity:.35;cursor:default}
   .visual{min-height:0;aspect-ratio:4/3}.copy{max-height:none;padding:24px 21px 30px}.story{font-size:17px;line-height:1.75}
 }
 @media print{
-  @page dt-cover{size:A4 portrait;margin:0}
-  @page dt-spread{size:A4 landscape;margin:0}
   html,body{background:#fff!important;padding:0!important}
   .brand,#book,.nav{display:none!important}
   #print-book{display:block!important}
-  .print-sheet{display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden;page-break-after:always;break-after:page}
+  .print-sheet{position:relative;width:240mm;height:180mm;background:#fff;overflow:hidden;page-break-after:always;break-after:page}
   .print-sheet:last-child{page-break-after:auto;break-after:auto}
-  .print-sheet.dt-print-cover{page:dt-cover;width:210mm;height:297mm}
-  .print-sheet.dt-print-spread{page:dt-spread;width:297mm;height:210mm}
   .print-sheet .card{border:0;border-radius:0;box-shadow:none;margin:0}
-  .print-sheet.dt-print-cover .layout-card{width:198mm;height:297mm}
-  .print-sheet.dt-print-cover .dtc-cover{width:198mm!important;height:297mm!important;max-width:none!important;margin:0!important}
-  .print-sheet.dt-print-spread .layout-card{width:280mm;height:210mm}
-  .print-sheet.dt-print-spread .dtb-doppia,.print-sheet.dt-print-spread .dtc-cover{width:280mm!important;height:210mm!important;max-width:none!important;margin:0!important}
-  .print-sheet.dt-print-spread .spread{width:280mm;height:210mm;min-height:0}
+  .print-single-art,.print-single-art .layout-card,.print-single-art .dtc-cover{width:240mm!important;height:180mm!important;max-width:none!important;margin:0!important}
+  .print-spread-art{position:absolute;top:0;width:480mm;height:180mm}
+  .print-spread-art.print-left{left:0}.print-spread-art.print-right{left:-240mm}
+  .print-spread-art .layout-card,.print-spread-art .dtb-doppia{width:480mm!important;height:180mm!important;max-width:none!important;margin:0!important}
+  .print-blank{background:#fff}
+  .print-cover-sheet{position:relative;width:480mm;height:180mm;display:grid;grid-template-columns:240mm 240mm;background:#fdf8f0;overflow:hidden}
+  .print-cover-back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5mm;padding:22mm;color:#22321f;text-align:center;font-family:Faustina,Georgia,serif}
+  .print-cover-back img{width:22mm;height:22mm;border-radius:50%;object-fit:cover;background:#fff}
+  .print-cover-back strong{font-size:22pt}.print-cover-back p{font-size:12pt;line-height:1.5;max-width:150mm}
+  .print-cover-front,.print-cover-front .layout-card,.print-cover-front .dtc-cover{width:240mm!important;height:180mm!important;max-width:none!important;margin:0!important}
 }
 </style>
 </head>
@@ -73,7 +74,8 @@ button:disabled{opacity:.35;cursor:default}
   <div class="nav-in">
     <button id="prev">← Indietro</button>
     <div class="count" id="count"></div>
-    <button id="print">Stampa PDF</button>
+    <button id="print-interior">PDF interni</button>
+    <button id="print-cover">PDF copertina</button>
     <button class="primary" id="next">Avanti →</button>
   </div>
 </div>
@@ -89,8 +91,8 @@ let coverLayoutsReady=false;
 const style=document.createElement("style");style.textContent=stiliDoppia+stiliCopertina;document.head.appendChild(style);
 const esc=(value)=>String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 function state(title,body){document.getElementById("nav").hidden=true;document.getElementById("book").innerHTML=`<div class="card state"><h2>${esc(title)}</h2><p>${esc(body)}</p></div>`;}
-function spread(page,isCover=false){
-  const globalCover=page.page_id==="book__cover"||page.format==="portrait";
+function spread(page,isCover=false,portraitOverride=null){
+  const globalCover=portraitOverride??(page.page_id==="book__cover"||page.format==="portrait");
   if(isCover&&coverLayoutsReady&&page.layout?.gabbia){
     const gabbia=gabbiaCopertinaPerNome(page.layout.gabbia,"front");
     if(gabbia)return `<article class="card layout-card">${renderCopertina({gabbia,image:page.image_url,title:page.title||"",subtitle:page.text||"",brandVariant:page.brand_variant||"dark",portrait:globalCover})}</article>`;
@@ -107,20 +109,36 @@ function spread(page,isCover=false){
   }
   return `<article class="card spread ${isCover?"cover":""}"><div class="visual"><img src="${esc(page.image_url)}" alt=""></div><div class="copy"><div class="eyebrow">${isCover?"DreamTaily":`Capitolo ${esc(page.chapter??"")}`}</div>${isCover?`<h1>${esc(page.title||"")}</h1><div class="subtitle">${esc(page.text||"")}</div>`:`<div class="story">${esc(page.text||"")}</div><div class="page-number">— ${esc(page.chapter??"")} —</div>`}</div></article>`;
 }
-function printPage(page,isCover=false){
-  const globalCover=page.page_id==="book__cover"||page.format==="portrait";
-  return `<section class="print-sheet ${globalCover?"dt-print-cover":"dt-print-spread"}">${spread(page,isCover)}</section>`;
+const blankLeaf=()=>`<section class="print-sheet print-blank"></section>`;
+function singleLeaf(page){return `<section class="print-sheet"><div class="print-single-art">${spread(page,true,false)}</div></section>`;}
+function spreadLeaf(page,side){return `<section class="print-sheet"><div class="print-spread-art print-${side}">${spread(page,false)}</div></section>`;}
+function buildInteriorPrint(pages){
+  const leaves=[];
+  for(const page of pages.filter(item=>item.page_id!=="book__cover")){
+    if(page.kind==="cover"){
+      if(leaves.length%2===1) leaves.push(blankLeaf());
+      leaves.push(singleLeaf(page));
+    }else{
+      leaves.push(spreadLeaf(page,"left"),spreadLeaf(page,"right"));
+    }
+  }
+  while(leaves.length%4!==0) leaves.push(blankLeaf());
+  return leaves.join("");
+}
+function buildCoverPrint(page){
+  if(!page) return "";
+  return `<section class="print-cover-sheet"><div class="print-cover-back"><img src="assets/brand/dreamtaily-icon.png" alt=""><strong>DreamTaily</strong><p>Storie illustrate da vivere, scegliere e rileggere insieme.</p></div><div class="print-cover-front">${spread(page,true,false)}</div></section>`;
 }
 function build(book){
   const pages=Array.isArray(book.pages)?book.pages:[];
-  slides=[]; const printPages=[];
+  slides=[];
   pages.forEach(page=>{
     const isCover=page.kind==="cover";
     slides.push(spread(page,isCover));
-    printPages.push(printPage(page,isCover));
   });
-  slides.push(`<article class="card end"><div class="big">Fine ✨</div><p>Questa storia appartiene a ${esc(book.protagonist||"te")}.<br>Puoi rileggerla tutte le volte che vuoi.</p><button onclick="printWholeBook()">🖨 Stampa il libro</button></article>`);
-  document.getElementById("print-book").innerHTML=printPages.join("");
+  slides.push(`<article class="card end"><div class="big">Fine ✨</div><p>Questa storia appartiene a ${esc(book.protagonist||"te")}.<br>Puoi rileggerla tutte le volte che vuoi.</p><button onclick="printInteriorBook()">PDF interni</button> <button onclick="printBookCover()">PDF copertina</button></article>`);
+  window.dtPrintInterior=buildInteriorPrint(pages);
+  window.dtPrintCover=buildCoverPrint(pages.find(page=>page.page_id==="book__cover"));
 }
 function render(){
   document.getElementById("book").innerHTML=slides[current]||"";
@@ -131,11 +149,17 @@ function render(){
   window.scrollTo({top:0,behavior:"instant"});
 }
 function go(delta){const n=current+delta;if(n<0||n>=slides.length)return;current=n;render();}
-function printWholeBook(){
+function printDocument(content,pageSize){
+  document.getElementById("print-book").innerHTML=content;
+  let pageStyle=document.getElementById("dt-print-page-size");
+  if(!pageStyle){pageStyle=document.createElement("style");pageStyle.id="dt-print-page-size";document.head.appendChild(pageStyle);}
+  pageStyle.textContent=`@page{size:${pageSize};margin:0}`;
   const imgs=[...document.querySelectorAll("#print-book img")];
   Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(r=>{img.onload=r;img.onerror=r;}))).then(()=>window.print());
 }
-window.printWholeBook=printWholeBook;
+function printInteriorBook(){printDocument(window.dtPrintInterior||"","240mm 180mm");}
+function printBookCover(){printDocument(window.dtPrintCover||"","480mm 180mm");}
+window.printInteriorBook=printInteriorBook;window.printBookCover=printBookCover;
 async function load(){
   const slug=new URLSearchParams(location.search).get("slug")||"";
   if(!/^[a-f0-9]{48,96}$/i.test(slug)){state("Libro non trovato","Il link non è valido o è incompleto.");return;}
@@ -155,7 +179,8 @@ async function load(){
 }
 document.getElementById("prev").onclick=()=>go(-1);
 document.getElementById("next").onclick=()=>go(1);
-document.getElementById("print").onclick=printWholeBook;
+document.getElementById("print-interior").onclick=printInteriorBook;
+document.getElementById("print-cover").onclick=printBookCover;
 document.addEventListener("keydown",e=>{if(e.key==="ArrowRight")go(1);if(e.key==="ArrowLeft")go(-1);});
 load();
 </script>

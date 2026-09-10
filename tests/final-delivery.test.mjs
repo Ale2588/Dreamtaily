@@ -39,13 +39,23 @@ test("reader logo links home and every DreamTaily logo is circular",()=>{
   assert.match(reader,/\.brand img\{[^}]*border-radius:50%/);
 });
 
-test("PDF reuses the exact digital cover and spread renderers",()=>{
-  assert.match(reader,/function printPage\(page,isCover=false\)/);
-  assert.match(reader,/\$\{spread\(page,isCover\)\}/);
+test("printer export splits canonical spreads without changing their ratio",()=>{
+  assert.match(reader,/function spreadLeaf\(page,side\)/);
+  assert.match(reader,/print-spread-art print-\$\{side\}/);
+  assert.match(reader,/\.print-spread-art\{[^}]*width:480mm;height:180mm/);
+  assert.match(reader,/\.print-spread-art\.print-right\{left:-240mm\}/);
+  assert.match(reader,/\.print-spread-art \.layout-card,.print-spread-art \.dtb-doppia\{width:480mm!important;height:180mm!important/);
+  assert.match(reader,/while\(leaves\.length%4!==0\) leaves\.push\(blankLeaf\(\)\)/);
+  assert.match(reader,/if\(leaves\.length%2===1\) leaves\.push\(blankLeaf\(\)\)/);
   assert.doesNotMatch(reader,/class="print-visual"/);
   assert.doesNotMatch(reader,/class="print-copy"/);
-  assert.match(reader,/@page dt-cover\{size:A4 portrait/);
-  assert.match(reader,/@page dt-spread\{size:A4 landscape/);
-  assert.match(reader,/\.print-sheet\.dt-print-cover \.dtc-cover/);
-  assert.match(reader,/\.print-sheet\.dt-print-spread \.dtb-doppia/);
+});
+
+test("printer receives separate interior and wrap-cover PDFs",()=>{
+  assert.match(reader,/PDF interni/);
+  assert.match(reader,/PDF copertina/);
+  assert.match(reader,/printDocument\(window\.dtPrintInterior\|\|"","240mm 180mm"\)/);
+  assert.match(reader,/printDocument\(window\.dtPrintCover\|\|"","480mm 180mm"\)/);
+  assert.match(reader,/print-cover-back/);
+  assert.match(reader,/print-cover-front/);
 });
