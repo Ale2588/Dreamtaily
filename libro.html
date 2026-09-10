@@ -167,7 +167,7 @@ async function freezeSheet(sheet){
   const copies=[clone,...clone.querySelectorAll("*")];
   for(let index=0;index<originals.length;index+=1){
     const computed=getComputedStyle(originals[index]);
-    copies[index].style.cssText=[...computed].map(name=>`${name}:${computed.getPropertyValue(name)};`).join("");
+    copies[index].style.cssText=Array.from(computed).map(name=>`${name}:${computed.getPropertyValue(name)};`).join("");
   }
   const originalImages=[...sheet.querySelectorAll("img")];
   const clonedImages=[...clone.querySelectorAll("img")];
@@ -205,7 +205,7 @@ async function exportBookPdf(content){
     const pdf=buildImagePdf({jpegs,width:PDF_WIDTH,height:PDF_HEIGHT,imageWidth:EXPORT_WIDTH,imageHeight:EXPORT_HEIGHT});
     const link=document.createElement("a");link.href=URL.createObjectURL(pdf);link.download=`${document.title.replace(/[^a-z0-9à-ž _—-]/gi,"").trim()||"DreamTaily"}.pdf`;link.click();
     setTimeout(()=>URL.revokeObjectURL(link.href),30000);
-  }catch(error){console.error(error);alert("Non riesco a preparare il PDF. Riprova tra qualche secondo.");}
+  }catch(error){console.error(error);alert(`Non riesco a preparare il PDF (${error?.message||"errore sconosciuto"}).`);}
   finally{root.remove();button.disabled=false;button.textContent="Scarica PDF del libro";}
 }
 function printWholeBook(){return exportBookPdf(window.dtPrintBook||"");}

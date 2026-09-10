@@ -64,6 +64,7 @@ test("deterministic exporter freezes fonts, assets and every spread at 300 DPI",
   assert.match(reader,/const EXPORT_WIDTH=5669/);
   assert.match(reader,/const EXPORT_HEIGHT=2126/);
   assert.match(reader,/await dataUrl\(img\.currentSrc\|\|img\.src\)/);
+  assert.match(reader,/Array\.from\(computed\)/);
   assert.match(reader,/new XMLSerializer\(\)\.serializeToString\(clone\)/);
   assert.match(reader,/canvas\.toBlob/);
   assert.match(reader,/requestAnimationFrame\(\(\)=>requestAnimationFrame\(resolve\)\)/);
