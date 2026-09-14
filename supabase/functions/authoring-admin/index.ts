@@ -4,7 +4,7 @@ import { validateAuthoringContract } from "../_shared/story-authoring-validator.
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const AGE_RANGES = new Set(["3–5 anni", "4–7 anni", "4–8 anni", "5–9 anni", "6–10 anni"]);
+const AGE_RANGES = new Set(["0-2", "3-4", "4-5", "6+", "3–5 anni", "4–7 anni", "4–8 anni", "5–9 anni", "6–10 anni"]);
 const TONES = new Set(["Dolce e luminoso", "Caldo e rassicurante", "Avventuroso e rassicurante", "Curiosità e amicizia", "Coraggio e ascolto", "Fiabesco e contemplativo"]);
 const IMAGE_TYPES: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
 const ASSET_BASE = (Deno.env.get("DREAMTAILY_ASSET_BASE_URL") || "https://ale2588.github.io/Dreamtaily/").replace(/\/+$/, "") + "/";

@@ -10,7 +10,14 @@ test('la shell usa la sessione Supabase e authoring-admin',()=>{
   assert.match(html,/client\.auth\.getSession\(\)/);
   assert.match(html,/client\.auth\.signInWithOtp/);
   assert.match(html,/functions\/v1\/authoring-admin/);
-  assert.match(html,/Authorization:`Bearer \$\{state\.session\.access_token\}`/);
+  assert.match(html,/Authorization:`Bearer \$\{session\.access_token\}`/);
+});
+
+test('ogni richiesta usa la sessione Supabase più recente',()=>{
+  assert.match(html,/const \{data:\{session\},error:sessionError\}=await client\.auth\.getSession\(\)/);
+  assert.match(html,/Authorization:`Bearer \$\{session\.access_token\}`/);
+  assert.match(html,/state\.session=session/);
+  assert.match(html,/HTTP_401:'La sessione è scaduta/);
 });
 
 test('tutte le scritture editoriali passano dalla Edge Function',()=>{
@@ -48,6 +55,10 @@ test('l’editor presenta metadati editoriali e mai JSON',()=>{
 
 test('fascia, tono e immagini sono gestiti senza percorsi tecnici',()=>{
   assert.match(html,/<select id="age-range" required>/);
+  for(const range of ['0-2','3-4','4-5','6+']){
+    assert.match(html,new RegExp(`<option>${range.replace('+','\\+')}<\\/option>`));
+    assert.match(editor,new RegExp(`<option>${range.replace('+','\\+')}<\\/option>`));
+  }
   assert.match(html,/<select id="tone" required>/);
   assert.match(editor,/<select id="age-range" required>/);
   assert.match(editor,/<select id="tone" required>/);

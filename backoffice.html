@@ -50,7 +50,7 @@ img[src*="dreamtaily-icon.png"]{border-radius:50%;object-fit:cover;background:#f
       <div class="field full"><label for="internal-title">Titolo di lavoro</label><input id="internal-title" required maxlength="160" placeholder="Il bosco delle lanterne"></div>
       <div class="field full"><label for="slug">Indirizzo della storia</label><input id="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="il-bosco-delle-lanterne"><small class="statusline">Solo lettere minuscole, numeri e trattini.</small></div>
       <div class="field"><label for="public-title">Titolo pubblico</label><input id="public-title" maxlength="160" placeholder="Il bosco delle lanterne"></div>
-      <div class="field"><label for="age-range">Fascia d’età</label><select id="age-range" required><option value="">Seleziona</option><option>3–5 anni</option><option>4–7 anni</option><option>4–8 anni</option><option>5–9 anni</option><option>6–10 anni</option></select></div>
+      <div class="field"><label for="age-range">Fascia d’età</label><select id="age-range" required><option value="">Seleziona</option><option>0-2</option><option>3-4</option><option>4-5</option><option>6+</option></select></div>
       <div class="field full"><label for="tone">Tono</label><select id="tone" required><option value="">Seleziona</option><option>Dolce e luminoso</option><option>Caldo e rassicurante</option><option>Avventuroso e rassicurante</option><option>Curiosità e amicizia</option><option>Coraggio e ascolto</option><option>Fiabesco e contemplativo</option></select></div>
       <div class="field full"><label for="description">Descrizione</label><textarea id="description" rows="4" maxlength="1200" placeholder="Una breve sintesi editoriale della storia"></textarea></div>
       <div id="project-message" class="full"></div>
@@ -73,11 +73,13 @@ img[src*="dreamtaily-icon.png"]{border-radius:50%;object-fit:cover;background:#f
       target.innerHTML=text?`<div class="${type}">${esc(text)}</div>`:'';
     }
     function translateError(code){
-      return ({AUTH_REQUIRED:'Devi accedere per continuare.',AUTH_INVALID:'La sessione è scaduta. Accedi di nuovo.',PROJECT_FORBIDDEN:'Non hai accesso a questo progetto.',SLUG_ALREADY_EXISTS:'Esiste già una storia con questo indirizzo.',SLUG_INVALID:'L’indirizzo della storia non è valido.',INTERNAL_TITLE_INVALID:'Inserisci un titolo di lavoro valido.',VERSION_CONFLICT_RETRY:'Qualcuno ha appena creato una versione. Aggiorna e riprova.',AUTHORING_ADMIN_FAILED:'Il servizio editoriale non ha completato l’operazione.'})[code]||'Non sono riuscito a completare l’operazione.';
+      return ({AUTH_REQUIRED:'Devi accedere per continuare.',AUTH_INVALID:'La sessione è scaduta. Accedi di nuovo.',HTTP_401:'La sessione è scaduta. Aggiorna la pagina o accedi di nuovo.',PROJECT_FORBIDDEN:'Non hai accesso a questo progetto.',SLUG_ALREADY_EXISTS:'Esiste già una storia con questo indirizzo.',SLUG_INVALID:'L’indirizzo della storia non è valido.',AGE_RANGE_INVALID:'Seleziona una fascia d’età valida.',TONE_INVALID:'Seleziona un tono valido.',INTERNAL_TITLE_INVALID:'Inserisci un titolo di lavoro valido.',VERSION_CONFLICT_RETRY:'Qualcuno ha appena creato una versione. Aggiorna e riprova.',AUTHORING_ADMIN_FAILED:'Il servizio editoriale non ha completato l’operazione.'})[code]||'Non sono riuscito a completare l’operazione.';
     }
     async function api(path='',options={}){
-      if(!state.session?.access_token) throw new Error('AUTH_REQUIRED');
-      const response=await fetch(`${API}${path}`,{...options,headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${state.session.access_token}`,'Content-Type':'application/json',...(options.headers||{})}});
+      const {data:{session},error:sessionError}=await client.auth.getSession();
+      if(sessionError||!session?.access_token) throw new Error('AUTH_REQUIRED');
+      state.session=session;
+      const response=await fetch(`${API}${path}`,{...options,headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${session.access_token}`,'Content-Type':'application/json',...(options.headers||{})}});
       const payload=await response.json().catch(()=>({}));
       if(!response.ok){const error=new Error(payload.error||`HTTP_${response.status}`);error.status=response.status;throw error}
       return payload;
@@ -126,7 +128,11 @@ img[src*="dreamtaily-icon.png"]{border-radius:50%;object-fit:cover;background:#f
     $('internal-title').addEventListener('input',()=>{if(!$('slug').dataset.edited)$('slug').value=slugify($('internal-title').value);if(!$('public-title').value)$('public-title').placeholder=$('internal-title').value});
     $('slug').addEventListener('input',()=>{$('slug').dataset.edited='true'});
     $('project-form').addEventListener('submit',async(event)=>{event.preventDefault();const button=$('create-project');button.disabled=true;message($('project-message'),'');try{const payload={internal_title:$('internal-title').value.trim(),slug:$('slug').value.trim(),public_title:$('public-title').value.trim()||$('internal-title').value.trim(),age_range:$('age-range').value.trim()||null,tone:$('tone').value.trim()||null,description:$('description').value.trim()||null,language:'it'};const data=await api('/projects',{method:'POST',body:JSON.stringify(payload)});$('project-dialog').close();await loadProjects();openVersion(data.version.id)}catch(error){message($('project-message'),translateError(error.message))}finally{button.disabled=false}});
-    client.auth.onAuthStateChange((_event,session)=>{if(Boolean(session)!==Boolean(state.session)){state.session=session;queueMicrotask(boot)}});
+    client.auth.onAuthStateChange((_event,session)=>{
+      const authenticationChanged=Boolean(session)!==Boolean(state.session);
+      state.session=session;
+      if(authenticationChanged) queueMicrotask(boot);
+    });
     boot();
   })();
   </script>

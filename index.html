@@ -3563,28 +3563,31 @@ let dtFullRenderActive=false;
 window.renderDtBookStatus=async function(render=null){
   const job=render||await dtLoadRenderStatus();
   if(!job){ await renderBookWorkspace(); return; }
-  dtPendingRender=job;
-  const pages=Array.isArray(job.pages)?job.pages:[];
+  // checkout-book e render-book espongono l'identificativo come render_id,
+  // mentre il record letto da Supabase usa id. Normalizziamo qui affinché
+  // tutte le CTA funzionino già alla prima risposta, senza refresh manuali.
+  dtPendingRender={...job,id:job.id||job.render_id};
+  const currentJob=dtPendingRender;
+  const pages=Array.isArray(currentJob.pages)?currentJob.pages:[];
   const readyPages=pages.filter(page=>page?.render?.status==="ready").length;
   const labels={queued:"In attesa",running:"In creazione",ready:"Pronto",failed:"Interrotto",review:"Da verificare"};
-  const ready=job.status==="ready"&&job.permalink_slug;
+  const ready=currentJob.status==="ready"&&currentJob.permalink_slug;
   const screen=document.getElementById("screen-render-status");
   screen.innerHTML=`<div class="shell" style="max-width:760px">
     <div class="topbar"><button class="brand-dark" onclick="showScreen('landing')"><img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span></button><div class="phase">Stato del libro</div></div>
     <div class="panel" style="padding:clamp(28px,5vw,52px);text-align:center">
-      <div style="font-size:58px">${ready?'🎉':job.status==='failed'||job.status==='review'?'🛠️':'✨'}</div>
-      <div class="phase">${escapeHtml(labels[job.status]||job.status)}</div>
+      <div style="font-size:58px">${ready?'🎉':currentJob.status==='failed'||currentJob.status==='review'?'🛠️':'✨'}</div>
+      <div class="phase">${escapeHtml(labels[currentJob.status]||currentJob.status)}</div>
       <h1 class="step-title">${ready?'Il tuo libro è pronto':'Il tuo libro è stato confermato'}</h1>
-      <p class="intro">${job.status==='queued'
+      <p class="intro">${currentJob.status==='queued'
         ?'Contenuti e personaggi sono congelati. La generazione IA è volutamente sospesa durante questo collaudo.'
-        :job.status==='running'?`Pagine completate: ${readyPages} su ${pages.length}. Puoi chiudere questa pagina e tornare più tardi.`
+        :currentJob.status==='running'?`Pagine completate: ${readyPages} su ${pages.length}. Puoi chiudere questa pagina e tornare più tardi.`
         :ready?'La generazione è terminata e il libro può essere aperto.'
         :'Il lavoro è salvato e potrà essere ripreso senza rigenerare le pagine già completate.'}</p>
       <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
-        ${ready?`<button class="btn btn-primary" onclick="window.location.href='libro.html?slug=${encodeURIComponent(job.permalink_slug)}'">Apri il libro</button>`:''}
+        ${ready?`<button class="btn btn-primary" onclick="window.location.href='libro.html?slug=${encodeURIComponent(currentJob.permalink_slug)}'">Apri il libro</button>`:''}
         ${ready?`<button id="dt-regenerate-cover" class="btn btn-soft" onclick="regenerateDtBookCover()">Rigenera solo la copertina</button>`:''}
-        ${['queued','running','review'].includes(job.status)?`<button id="dt-full-render" class="btn btn-primary" onclick="startDtFullRender()">${job.status==='queued'?'Genera il libro':job.status==='review'?'Riprova la generazione':'Continua la generazione'}</button>`:''}
-        <button class="btn btn-soft" onclick="renderDtBookStatus()">Aggiorna stato</button>
+        ${['queued','running','review'].includes(currentJob.status)?`<button id="dt-full-render" class="btn btn-primary" onclick="startDtFullRender()">${currentJob.status==='queued'?'Genera il libro':currentJob.status==='review'?'Riprova la generazione':'Continua la generazione'}</button>`:''}
         <button class="btn btn-primary" onclick="startNewBook()">Crea un altro libro</button>
         <button class="btn btn-ghost" onclick="showScreen('landing')">Torna alla home</button>
       </div>

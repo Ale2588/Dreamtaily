@@ -1,6 +1,6 @@
 const PERSON_MARKER_PATTERN = /\[PERSONAGGIO:([A-Za-z0-9_-]+)\]/g;
 const ENTRANCE_MARKER_PATTERN = /\[ENTRATA:([A-Za-z0-9_-]+)\]/g;
-const AGE_RANGES = new Set(["3–5 anni", "4–7 anni", "4–8 anni", "5–9 anni", "6–10 anni"]);
+const AGE_RANGES = new Set(["0-2", "3-4", "4-5", "6+", "3–5 anni", "4–7 anni", "4–8 anni", "5–9 anni", "6–10 anni"]);
 const TONES = new Set(["Dolce e luminoso", "Caldo e rassicurante", "Avventuroso e rassicurante", "Curiosità e amicizia", "Coraggio e ascolto", "Fiabesco e contemplativo"]);
 
 function successors(step) {

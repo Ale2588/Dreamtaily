@@ -6,7 +6,7 @@ function contract(afterLeftText = "Il viaggio continua.") {
   const story = {
     title: "Storia di prova",
     editorial: {
-      age_range: "4–7 anni",
+      age_range: "3-4",
       tone: "Dolce e luminoso",
       summary: "Una promessa narrativa.",
       description: "Una sinossi editoriale completa.",
