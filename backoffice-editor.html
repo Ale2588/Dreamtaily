@@ -11,7 +11,11 @@ img[src*="dreamtaily-icon.png"]{border-radius:50%;object-fit:cover;background:#f
     .gabbie-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}.gabbia-card{border:2px solid var(--line);border-radius:14px;background:#fff;padding:11px;text-align:left;color:var(--ink);cursor:pointer}.gabbia-card.selected{border-color:var(--violet);box-shadow:0 0 0 3px #e6e0ff}.gabbia-card strong{display:block;margin-bottom:2px}.gabbia-preview{margin-top:9px;overflow:hidden;border-radius:8px;background:#fdf5e6}.gabbia-preview .dtb-doppia{width:100%}.layout-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:16px 0}.layout-warning{background:#fff0ed;color:var(--red);border-radius:11px;padding:11px 13px;margin:13px 0}.layout-ok{background:#edf9f4;color:#146046;border-radius:11px;padding:11px 13px;margin:13px 0}.orientation{display:flex;gap:7px}.orientation button.active{background:var(--violet);color:#fff}.count{font-weight:900;color:var(--violet)}
     .cover-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:16px}.cover-card{border:2px solid var(--line);border-radius:14px;background:#fff;padding:10px;text-align:left;color:var(--ink);cursor:pointer}.cover-card.selected{border-color:var(--violet);box-shadow:0 0 0 3px #e6e0ff}.cover-card .dtc-cover{margin-top:8px;border-radius:8px}.cover-warning{background:#fff0ed;color:var(--red);border-radius:11px;padding:11px 13px;margin:13px 0}
     @media(max-width:920px){.layout{grid-template-columns:1fr}.nav{grid-template-columns:repeat(3,1fr)}.checklist{order:3}}@media(max-width:680px){.page-layout{grid-template-columns:1fr}.option-row{grid-template-columns:1fr}.editor-head{flex-direction:column}.form{grid-template-columns:1fr}.field.full{grid-column:auto}.nav{grid-template-columns:1fr 1fr}.topbar>span{display:none}}
-  </style>
+</style>
+<style>
+  .page-layout{align-items:start}
+  #page-editor{position:sticky;top:18px;align-self:start;max-height:calc(100vh - 36px);overflow:auto;scrollbar-gutter:stable;padding-right:4px}
+</style>
 </head>
 <body>
   <header class="shell topbar"><div class="brand"><img src="assets/brand/dreamtaily-icon.png" alt="">DreamTaily · Atelier</div><span id="user-email"></span><button class="btn ghost" type="button" onclick="location.href='backoffice.html'">Torna ai progetti</button></header>
