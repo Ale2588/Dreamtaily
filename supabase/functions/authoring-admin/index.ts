@@ -19,7 +19,7 @@ const svc = createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: false,
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization,apikey,content-type,x-client-info",
-  "Access-Control-Allow-Methods": "GET,POST,PUT,OPTIONS",
+  "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
 };
 
 function reply(status: number, body: unknown) {
@@ -99,7 +99,7 @@ async function json(req: Request) {
 async function ownedProject(projectId: string, uid: string, admin: boolean) {
   const { data, error } = await svc
     .from("story_projects")
-    .select("id,owner_id")
+    .select("id,owner_id,slug")
     .eq("id", projectId)
     .maybeSingle();
   if (error) throw error;
@@ -213,6 +213,54 @@ async function createProject(req: Request, uid: string) {
     throw versionError;
   }
   return reply(201, { project, version });
+}
+
+async function deleteProject(projectId: string, uid: string, admin: boolean) {
+  const access = await ownedProject(projectId, uid, admin);
+  if (access.response) return access.response;
+
+  const { data: versions, error: versionsError } = await svc
+    .from("story_versions")
+    .select("id")
+    .eq("story_project_id", projectId);
+  if (versionsError) throw versionsError;
+
+  const versionIds = (versions || []).map((version) => version.id);
+  if (versionIds.length) {
+    const { count, error: usageError } = await svc
+      .from("book_stories")
+      .select("id", { count: "exact", head: true })
+      .in("story_version_id", versionIds);
+    if (usageError) throw usageError;
+    if ((count || 0) > 0) return reply(409, { error: "PROJECT_IN_USE" });
+  }
+
+  const { error } = await svc
+    .from("story_projects")
+    .delete()
+    .eq("id", projectId);
+  if (error) {
+    if (error.code === "23503") return reply(409, { error: "PROJECT_IN_USE" });
+    throw error;
+  }
+
+  const assetPaths: string[] = [];
+  for (const versionId of versionIds) {
+    const base = `authoring/${access.project.slug}/${versionId}`;
+    const [{ data: rootFiles, error: rootError }, { data: sceneFiles, error: sceneError }] = await Promise.all([
+      svc.storage.from("story-images").list(base, { limit: 100 }),
+      svc.storage.from("story-images").list(`${base}/scenes`, { limit: 1000 }),
+    ]);
+    if (rootError) console.error("authoring-admin asset cleanup", rootError);
+    if (sceneError) console.error("authoring-admin scene cleanup", sceneError);
+    for (const file of rootFiles || []) if (file.id) assetPaths.push(`${base}/${file.name}`);
+    for (const file of sceneFiles || []) if (file.id) assetPaths.push(`${base}/scenes/${file.name}`);
+  }
+  if (assetPaths.length) {
+    const { error: cleanupError } = await svc.storage.from("story-images").remove(assetPaths);
+    if (cleanupError) console.error("authoring-admin asset cleanup", cleanupError);
+  }
+  return reply(200, { deleted: true, project_id: projectId });
 }
 
 function decodeBase64(value: unknown) {
@@ -427,10 +475,12 @@ Deno.serve(async (req) => {
     const admin = isAdmin(user);
     const path = new URL(req.url).pathname.replace(/\/+$/, "");
     const base = path.endsWith("/authoring-admin");
+    const projectMatch = path.match(/\/authoring-admin\/projects\/([0-9a-f-]{36})$/i);
     const versionMatch = path.match(/\/authoring-admin\/versions\/([0-9a-f-]{36})(?:\/(validate|publish|assets))?$/i);
 
     if (req.method === "GET" && base) return reply(200, { projects: await listProjects(user.id, admin) });
     if (req.method === "POST" && path.endsWith("/authoring-admin/projects")) return createProject(req, user.id);
+    if (projectMatch && req.method === "DELETE") return deleteProject(projectMatch[1], user.id, admin);
     if (req.method === "POST" && path.endsWith("/authoring-admin/versions")) return createVersion(req, user.id, admin);
     if (versionMatch && req.method === "GET" && !versionMatch[2]) return getVersion(versionMatch[1], user.id, admin);
     if (versionMatch && req.method === "PUT" && !versionMatch[2]) return saveVersion(req, versionMatch[1], user.id, admin);

@@ -18,6 +18,9 @@ test('ogni richiesta usa la sessione Supabase più recente',()=>{
   assert.match(html,/Authorization:`Bearer \$\{session\.access_token\}`/);
   assert.match(html,/state\.session=session/);
   assert.match(html,/HTTP_401:'La sessione è scaduta/);
+  assert.match(editor,/const \{data:\{session\},error:sessionError\}=await client\.auth\.getSession\(\)/);
+  assert.match(editor,/Authorization:`Bearer \$\{session\.access_token\}`/);
+  assert.match(editor,/\['AUTH_REQUIRED','AUTH_INVALID','HTTP_401'\]\.includes\(error\.message\)/);
 });
 
 test('tutte le scritture editoriali passano dalla Edge Function',()=>{
@@ -25,6 +28,14 @@ test('tutte le scritture editoriali passano dalla Edge Function',()=>{
   assert.match(html,/api\('\/versions',\{method:'POST'/);
   assert.doesNotMatch(html,/\.from\(['"]story_(?:projects|versions)['"]\)/);
   assert.doesNotMatch(html,/SERVICE_ROLE/);
+});
+
+test('la lista permette di eliminare una storia con conferma esplicita',()=>{
+  assert.match(html,/data-delete-project/);
+  assert.match(html,/id="delete-dialog"/);
+  assert.match(html,/Elimina definitivamente/);
+  assert.match(html,/api\(`\/projects\/\$\{encodeURIComponent\(projectId\)\}`\s*,\s*\{method:'DELETE'\}/);
+  assert.match(html,/PROJECT_IN_USE:'Questa storia è già utilizzata in un libro/);
 });
 
 test('la shell espone il primo workflow editoriale senza JSON',()=>{

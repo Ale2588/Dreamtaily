@@ -19,6 +19,17 @@ test("authoring API exposes the draft bundle lifecycle", () => {
   assert.match(source, /versionMatch\[2\] === "assets"/);
 });
 
+test("project deletion is authenticated, ownership checked and blocks stories used by books", () => {
+  const deletion = source.match(/async function deleteProject[\s\S]*?function decodeBase64/)?.[0] || "";
+  assert.match(deletion, /ownedProject\(projectId, uid, admin\)/);
+  assert.match(deletion, /\.from\("book_stories"\)/);
+  assert.match(deletion, /PROJECT_IN_USE/);
+  assert.match(deletion, /\.from\("story_projects"\)[\s\S]*?\.delete\(\)/);
+  assert.match(deletion, /storage\.from\("story-images"\)\.remove\(assetPaths\)/);
+  assert.match(source, /req\.method === "DELETE"/);
+  assert.match(source, /GET,POST,PUT,DELETE,OPTIONS/);
+});
+
 test("new projects copy controlled metadata into the initial draft", () => {
   assert.match(source, /const AGE_RANGES = new Set/);
   assert.match(source, /const TONES = new Set/);
