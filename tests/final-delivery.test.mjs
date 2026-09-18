@@ -75,3 +75,10 @@ test("legacy story covers without an authored cover layout use Ritratto",()=>{
   assert.match(reader,/gabbiaCopertinaPerNome\(page\.layout\?\.gabbia,"front"\)\|\|gabbiaCopertinaPerNome\("Ritratto","front"\)/);
   assert.doesNotMatch(reader,/PDF_COVER_LAYOUT_MISSING_/);
 });
+
+test("legacy narrative pages without a layout use a deterministic PDF recovery spread",()=>{
+  assert.match(reader,/function fittedTextSize\(context,text,area/);
+  assert.match(reader,/if\(!layout\)\{/);
+  assert.match(reader,/const imageArea=\{x:0,y:0,w:620,h:465\}/);
+  assert.doesNotMatch(reader,/PDF_LAYOUT_MISSING_\$\{page\.page_id\}/);
+});

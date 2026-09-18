@@ -133,6 +133,10 @@ function planMultiStoryRender(contexts:any[],bookCover:any=null){
   return [...globalCover,...storyPages];
 }
 
+function missingNarrativeLayouts(pages:any[]){
+  return (pages||[]).filter((page:any)=>page.kind==="page"&&!String(page.layout?.gabbia||"").trim());
+}
+
 function contextsFromCheckoutSnapshot(snapshot:any){
   if(snapshot?.schema_version!=="checkout-book-v1"||!Array.isArray(snapshot?.stories))
     throw new Error("CHECKOUT_SNAPSHOT_REQUIRED");
@@ -290,6 +294,8 @@ Deno.serve(async(req:Request)=>{
       const restartPages=job.status==="review"?(job.pages||[]).map((page:any)=>page.render?.status==="failed"?{
         ...page,render:{...page.render,status:"queued",attempts:0,error:null}
       }:page):planMultiStoryRender(contexts,job.book_snapshot?.cover);
+      const missingLayouts=missingNarrativeLayouts(restartPages);
+      if(missingLayouts.length) throw new Error(`BOOK_LAYOUT_MISSING:${missingLayouts.map((page:any)=>page.page_id).join(",")}`);
       const {data:started,error:startError}=await svc.from("book_renders")
         .update({status:"running",pages:restartPages,error:null,finished_at:null,started_at:job.started_at||now,updated_at:now})
         .eq("id",job.id).eq("status",job.status).select("*").single();
@@ -328,11 +334,12 @@ Deno.serve(async(req:Request)=>{
       if(error) throw error;
     }
 
-    const ready=allPagesReady(pages);
-    const exhausted=!ready&&pages.some((p:any)=>p.render?.status==="failed"&&Number(p.render?.attempts||0)>=MAX_ATTEMPTS);
+    const missingLayouts=missingNarrativeLayouts(pages);
+    const ready=missingLayouts.length===0&&allPagesReady(pages);
+    const exhausted=!ready&&(missingLayouts.length>0||pages.some((p:any)=>p.render?.status==="failed"&&Number(p.render?.attempts||0)>=MAX_ATTEMPTS));
     const status=ready?"ready":exhausted?"review":"running";
     const slug=ready?(job.permalink_slug||`${crypto.randomUUID()}${crypto.randomUUID()}`.replaceAll("-","")):job.permalink_slug||null;
-    const payload:any={status,pages,permalink_slug:slug,error:exhausted?"ONE_OR_MORE_PAGES_FAILED":null,updated_at:new Date().toISOString()};
+    const payload:any={status,pages,permalink_slug:slug,error:missingLayouts.length?`BOOK_LAYOUT_MISSING:${missingLayouts.map((page:any)=>page.page_id).join(",")}`:exhausted?"ONE_OR_MORE_PAGES_FAILED":null,updated_at:new Date().toISOString()};
     if(ready||exhausted) payload.finished_at=new Date().toISOString();
 
     const {data:done,error:de}=await svc.from("book_renders").update(payload).eq("id",job.id).select("*").single();

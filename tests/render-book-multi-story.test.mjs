@@ -62,6 +62,12 @@ test("full mode follows book order and skips durable ready pages",()=>{
   assert.match(source,/const ordered=full\?candidates/);
 });
 
+test("new renders cannot start or become ready with missing narrative layouts",()=>{
+  assert.match(source,/function missingNarrativeLayouts\(pages:any\[\]\)/);
+  assert.match(source,/BOOK_LAYOUT_MISSING:/);
+  assert.match(source,/missingLayouts\.length===0&&allPagesReady\(pages\)/);
+});
+
 test("completed stories persist their snapshots before checkout",()=>{
   const finish=html.match(/window\.finishStoryComposer=async function\(\)[\s\S]*?function dtBookSequence/)?.[0]||"";
   assert.match(finish,/await dtPersistContentSnapshot\(dtComposedBook\)/);
