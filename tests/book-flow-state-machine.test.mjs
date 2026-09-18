@@ -57,10 +57,21 @@ test('editing the current story reopens the first narrative moment', () => {
 
 test('the book workspace owns add-story and checkout actions', () => {
   const workspace = between('window.renderBookWorkspace=async function(){', 'window.renderBookSummary=function(){');
-  assert.match(workspace, /Aggiungi un’altra storia/);
-  assert.match(workspace, /Concludi il libro e vai al checkout/);
+  assert.match(workspace, /Come vuoi continuare il tuo libro/);
+  assert.match(workspace, /Stesso protagonista/);
+  assert.match(workspace, /Un altro personaggio/);
+  assert.match(workspace, /Il libro è completo/);
   assert.match(workspace, /item\.status==='ready'/);
   assert.match(workspace, /item\.content_snapshot\?\.meta/);
+});
+
+test('the same-protagonist path keeps the active draft and skips character selection', () => {
+  const flow = between('window.beginAddStoryWithSameProtagonist=async function(){', 'window.renderBookWorkspace=async function(){');
+  assert.match(flow, /app\.bookFlowMode='add_story'/);
+  assert.match(flow, /app\.characterAssetId=character\.id/);
+  assert.match(flow, /app\.candidateCharacterAssetId=character\.id/);
+  assert.match(flow, /await prepareStories\(\)/);
+  assert.doesNotMatch(flow, /dtClearOnlyActiveBook|resetActiveBookState/);
 });
 
 test('checkout requires every story to be composed and complete', () => {

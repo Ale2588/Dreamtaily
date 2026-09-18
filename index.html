@@ -253,6 +253,19 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 .story-empty-icon{font-size:40px;margin-bottom:8px}
 .story-empty-state h2{font-family:'Faustina',Georgia,serif;font-size:25px;line-height:1.1;margin:0 0 8px}
 .story-empty-state p{color:var(--muted);max-width:560px;margin:0 auto}
+.dt-next-heading{margin:28px 0 14px;padding-top:24px;border-top:1px solid var(--line)}
+.dt-next-heading h2{font-family:'Faustina',Georgia,serif;font-size:clamp(25px,4vw,36px);line-height:1.08;margin:4px 0 7px}
+.dt-next-heading p{color:var(--muted);margin:0;line-height:1.5}
+.dt-next-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.dt-next-card{border:1px solid var(--line);border-radius:18px;background:#fffaf4;padding:18px;text-align:left;color:var(--ink);min-height:150px;transition:.18s transform,.18s border-color,.18s box-shadow}
+.dt-next-card:hover{transform:translateY(-2px);border-color:var(--coral);box-shadow:0 12px 26px rgba(61,43,31,.08)}
+.dt-next-card.primary{background:#fff3ed;border-color:#f0b6a7}
+.dt-next-card strong{display:block;font-family:'Faustina',Georgia,serif;font-size:20px;line-height:1.1;margin:7px 0}
+.dt-next-card span{display:block;color:var(--muted);font-size:12px;line-height:1.45}
+.dt-next-icon{font-size:25px;line-height:1}
+.dt-cast-line{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.dt-cast-name{display:inline-flex!important;width:max-content;padding:4px 8px;border-radius:999px;background:#f0e9df;color:#67594b!important;font-size:10px!important;font-weight:800}
+@media(max-width:760px){.dt-next-grid{grid-template-columns:1fr}.dt-next-card{min-height:auto}}
 .story-actions{flex-wrap:wrap}
 
 
@@ -2777,7 +2790,6 @@ window.DreamTailyCharacterFlow={
 (function(){
 "use strict";
 
-const DT_STORY_ROOT="stories/il-bosco-dei-sussurri";
 const DT_HELPERS={
   etto:{name:"Etto",image:"assets/char/paper/etto_in_piedi.png",art:{paper:{in_piedi:"assets/char/paper/etto_in_piedi.png",seduto:"assets/char/paper/etto_seduto.png",cammina:"assets/char/paper/etto_cammina.png",si_china:"assets/char/paper/etto_si_china.png"},papercut:{in_piedi:"assets/char/paper/etto_in_piedi.png",seduto:"assets/char/paper/etto_seduto.png",cammina:"assets/char/paper/etto_cammina.png",si_china:"assets/char/paper/etto_si_china.png"}}},
   briciola:{name:"Briciola",image:"assets/char/paper/briciola_in_piedi.png",art:{paper:{in_piedi:"assets/char/paper/briciola_in_piedi.png",seduto:"assets/char/paper/briciola_seduto.png",cammina:"assets/char/paper/briciola_cammina.png",si_china:"assets/char/paper/briciola_si_china.png"},papercut:{in_piedi:"assets/char/paper/briciola_in_piedi.png",seduto:"assets/char/paper/briciola_seduto.png",cammina:"assets/char/paper/briciola_cammina.png",si_china:"assets/char/paper/briciola_si_china.png"}}},
@@ -2928,10 +2940,7 @@ async function dtLoadSceneContract(){
     dtSceneContract=structuredClone(app.activeStoryContract.scenes);
     return dtSceneContract;
   }
-  const response=await fetch(`${DT_STORY_ROOT}/scene-pilot.json?v=20260730-fix3`,{cache:"no-store"});
-  if(!response.ok) throw new Error(`SCENE_HTTP_${response.status}`);
-  dtSceneContract=await response.json();
-  return dtSceneContract;
+  throw new Error("STORY_SCENES_MISSING");
 }
 
 function dtPrefixStoryRef(ref){
@@ -2939,7 +2948,8 @@ function dtPrefixStoryRef(ref){
   if(/^(?:https?:|data:|blob:|\/)/.test(ref)) return ref;
 
   if(ref.startsWith("stories/")) return ref;
-  const slug=app.activeStoryDefinition?.slug||"il-bosco-dei-sussurri";
+  const slug=app.activeStoryDefinition?.slug;
+  if(!slug) throw new Error("STORY_SLUG_MISSING");
   return `stories/${slug}/${ref}`;
 }
 
@@ -3208,23 +3218,7 @@ async function dtLoadContent(){
     dtContentByRef=structuredClone(app.activeStoryContract.contentByRef);
     return dtContentByRef;
   }
-  const refs=new Set();
-  for(const step of app.activeStoryDefinition?.steps||[]){
-    if(step.content_ref) refs.add(step.content_ref);
-    for(const variants of Object.values(step.variant_refs||{})){
-      for(const ref of Object.values(variants||{})) refs.add(ref);
-    }
-    for(const entry of step.decision?.catalog_roster||[]){
-      if(entry.entrance_ref) refs.add(entry.entrance_ref);
-    }
-  }
-  dtContentByRef={};
-  await Promise.all([...refs].map(async ref=>{
-    const response=await fetch(`${DT_STORY_ROOT}/${ref}`,{cache:"no-store"});
-    if(!response.ok) throw new Error(`CONTENT_HTTP_${response.status}:${ref}`);
-    dtContentByRef[ref]=await response.text();
-  }));
-  return dtContentByRef;
+  throw new Error("STORY_CONTENT_MISSING");
 }
 
 function dtPrefixedSceneContract(){
@@ -3350,6 +3344,40 @@ window.beginAddStory=async function(){
   await openCharacterLibrary();
 };
 
+function dtBookStoryCastNames(bookStory){
+  const contract=bookStory?.content_snapshot||{};
+  const catalog=contract.catalog||{};
+  return (bookStory?.story_cast_assignments||[]).map(assignment=>{
+    if(assignment.character_asset_id){
+      return getSavedCharacterById(assignment.character_asset_id)?.name||null;
+    }
+    if(assignment.catalog_character_id){
+      return catalog[assignment.catalog_character_id]?.name||assignment.catalog_character_id;
+    }
+    return null;
+  }).filter(Boolean);
+}
+
+window.beginAddStoryWithSameProtagonist=async function(){
+  const current=app.bookStories.find(item=>item.id===app.activeBookStoryId)||app.bookStories.at(-1);
+  const assignment=getStoryProtagonistAssignment(current);
+  const character=getSavedCharacterById(assignment?.character_asset_id);
+  if(!character){await beginAddStory();return}
+  app.bookFlowMode='add_story';
+  app.characterAssetId=character.id;
+  app.candidateCharacterAssetId=character.id;
+  app.previewUrl=character.image_url;
+  app.selectedStoryId=null;
+  app.activeStoryDefinition=null;
+  app.activeStoryContract=null;
+  app.activeBookStoryId=null;
+  app.setupChoices={};
+  app.compositionChoices={};
+  dtComposedBook=null;
+  await prepareStories();
+  showScreen('stories');
+};
+
 window.renderBookWorkspace=async function(){
   await loadBookStories();
   await ensureBookCharactersHydrated();
@@ -3358,9 +3386,11 @@ window.renderBookWorkspace=async function(){
     const story=storyForBookStory(bookStory);
     const assignment=getStoryProtagonistAssignment(bookStory);
     const character=getSavedCharacterById(assignment?.character_asset_id);
+    const castNames=dtBookStoryCastNames(bookStory);
     return `<div class="book-story-item">
       <div><h3>${index+1}. ${escapeHtml(story?.title||bookStory.story_slug)}</h3>
-      <p>Protagonista: ${escapeHtml(character?.name||'Non assegnato')} · ${bookStory.status==='ready'?'storia completata':'da completare'}</p></div>
+      <p>Protagonista: ${escapeHtml(character?.name||'Non assegnato')} · ${bookStory.status==='ready'?'storia completata':'da completare'}</p>
+      ${castNames.length?`<div class="dt-cast-line">${castNames.map(name=>`<span class="dt-cast-name">${escapeHtml(name)}</span>`).join('')}</div>`:''}</div>
       <button class="icon-btn" type="button" title="Rimuovi storia" onclick="removeBookStory('${bookStory.id}')">×</button>
     </div>`;
   }).join('');
@@ -3372,12 +3402,23 @@ window.renderBookWorkspace=async function(){
     <div class="panel book-summary" style="max-width:900px;margin:0 auto">
       <div class="phase">Bozza salvata</div>
       <h1 class="step-title">${app.bookStories.length===1?'Una storia nel libro':`${app.bookStories.length} storie nel libro`}</h1>
-      <p class="intro">Puoi aggiungere altre storie, anche con protagonisti diversi. Concludi il libro solo quando è completo.</p>
+      <p class="intro">Qui trovi tutto ciò che hai già costruito: ogni storia conserva il proprio protagonista, il cast e le scelte.</p>
       <div class="book-story-list">${rows}</div>
-      <div class="form-actions" style="flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="beginAddStory()">Aggiungi un’altra storia →</button>
-        <button class="btn btn-soft" onclick="openDtCheckout()" ${allComplete?'':'disabled'}>Concludi il libro e vai al checkout →</button>
-        <button class="btn btn-ghost" onclick="openCharacterLibrary()">Vai alla libreria</button>
+      <div class="dt-next-heading">
+        <div class="phase">Il prossimo passo</div>
+        <h2>Come vuoi continuare il tuo libro?</h2>
+        <p>Puoi raccontare un’altra avventura con lo stesso protagonista, cambiare personaggio oppure concludere il libro.</p>
+      </div>
+      <div class="dt-next-grid">
+        <button class="dt-next-card primary" type="button" onclick="beginAddStoryWithSameProtagonist()">
+          <span class="dt-next-icon">↻</span><strong>Stesso protagonista</strong><span>Aggiungi una nuova storia mantenendo il protagonista appena utilizzato.</span>
+        </button>
+        <button class="dt-next-card" type="button" onclick="beginAddStory()">
+          <span class="dt-next-icon">＋</span><strong>Un altro personaggio</strong><span>Scegli un personaggio della famiglia oppure creane uno nuovo.</span>
+        </button>
+        <button class="dt-next-card" type="button" onclick="openDtCheckout()" ${allComplete?'':'disabled'}>
+          <span class="dt-next-icon">✓</span><strong>Il libro è completo</strong><span>${allComplete?'Scegli la copertina e prepara il libro.':'Completa prima tutte le storie già inserite.'}</span>
+        </button>
       </div>
       ${allComplete?'':'<div class="book-note">Completa tutte le storie prima del checkout.</div>'}
     </div>

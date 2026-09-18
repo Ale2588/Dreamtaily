@@ -19,7 +19,9 @@ test("Book Creator loads every published story and pins its immutable version", 
 });
 
 test("dynamic stories prefix only relative assets with their own slug", () => {
-  assert.match(html, /const slug=app\.activeStoryDefinition\?\.slug\|\|"il-bosco-dei-sussurri"/);
+  assert.doesNotMatch(html, /DT_STORY_ROOT|activeStoryDefinition\?\.slug\|\|"il-bosco-dei-sussurri"/);
+  assert.match(html, /throw new Error\("STORY_SCENES_MISSING"\)/);
+  assert.match(html, /throw new Error\("STORY_CONTENT_MISSING"\)/);
   assert.match(html, /return `stories\/\$\{slug\}\/\$\{ref\}`/);
   const prefixer = html.match(/function dtPrefixedSceneContract\(\)[\s\S]*?window\.finishStoryComposer/)?.[0] || "";
   assert.doesNotMatch(prefixer, /if\(app\.activeStoryContract\?\.scenes\) return scenes/);
@@ -49,12 +51,12 @@ test("the public catalog uses the authoring cover before the fallback", () => {
   assert.match(publishedStorySource, /story\.title\|\|p\.public_title/);
 });
 
-test("the live catalog exposes Bosco and Lucciola", async () => {
+test("the live catalog hides archived Bosco and exposes Lucciola", async () => {
   const response = await fetch(endpoint, { headers });
   assert.equal(response.status, 200);
   const payload = await response.json();
   const slugs = payload.stories.map((story) => story.slug);
-  assert.ok(slugs.includes("il-bosco-dei-sussurri"));
+  assert.ok(!slugs.includes("il-bosco-dei-sussurri"));
   assert.ok(slugs.includes("collaudo-pubblicazione-bo-08"));
 });
 
