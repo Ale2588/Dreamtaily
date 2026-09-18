@@ -190,7 +190,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 }
 
 
-.library-screen{min-height:100svh;background:var(--cream)}
+.library-screen,.books-screen{min-height:100svh;background:var(--cream)}
 .library-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin:18px 0 28px}
 .saved-character-entry{
   display:flex;justify-content:space-between;align-items:center;gap:18px;
@@ -390,7 +390,6 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dt-saved-book-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
 .dt-saved-book-actions .btn{padding:10px 13px;border-radius:12px;font-size:13px}
 .dt-books-empty{padding:24px;border:1px dashed #d8cab5;border-radius:20px;background:rgba(255,253,248,.65);text-align:center;color:var(--muted);grid-column:1/-1}
-.dt-library-separator{height:1px;background:var(--line);margin:34px 0}
 @media(max-width:760px){.dt-books-grid{grid-template-columns:1fr}.dt-saved-book{grid-template-columns:105px 1fr}}
 
 .dt-loading{padding:14px;border-radius:13px;background:#e4f0ef;color:#356f70;font-weight:800;margin-top:12px}
@@ -705,9 +704,9 @@ body.dreamtaily-configurator-open{overflow:hidden}
       <a href="#dth-passi">Come funziona</a>
       <a href="#dth-reveal">Gli stili</a>
       <a href="#dth-passi">Le storie</a>
-      <button type="button" class="dth-nav-cta" onclick="openCharacterLibrary()">Accedi</button>
+      <button type="button" class="dth-nav-cta" onclick="openBookLibrary()">Accedi</button>
     </nav>
-    <button class="dth-burger" type="button" aria-label="Menu" onclick="openCharacterLibrary()">
+    <button class="dth-burger" type="button" aria-label="Menu" onclick="openBookLibrary()">
       <span></span><span></span>
     </button>
   </header>
@@ -726,7 +725,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 
       <div class="dth-ctarow">
         <button class="dth-cta" onclick="showScreen('creator')">Crea il suo personaggio</button>
-        <button class="dth-link" onclick="openCharacterLibrary()">Apri la libreria</button>
+        <button class="dth-link" onclick="openBookLibrary()">Apri la libreria</button>
       </div>
       <p class="dth-hand">pronto in pochi minuti — e puoi rifarlo</p>
     </div>
@@ -830,7 +829,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
         </h2>
         <div class="dth-ctarow">
           <button class="dth-cta" onclick="showScreen('creator')">Crea il suo personaggio</button>
-          <button class="dth-link" onclick="openCharacterLibrary()">Apri la libreria</button>
+          <button class="dth-link" onclick="openBookLibrary()">Apri la libreria</button>
         </div>
       </div>
       <ul class="dth-assure">
@@ -1005,13 +1004,13 @@ body.dreamtaily-configurator-open{overflow:hidden}
   </div>
 </section>
 
-<section class="screen library-screen" id="screen-library">
+<section class="screen books-screen" id="screen-books">
   <div class="shell">
     <div class="topbar">
       <button class="brand-dark" onclick="showScreen('landing')">
         <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
       </button>
-      <div class="phase">I tuoi personaggi</div>
+      <button class="btn btn-soft" type="button" onclick="openCharacterLibrary()">I tuoi personaggi →</button>
     </div>
 
     <section class="dt-books-section">
@@ -1026,10 +1025,19 @@ body.dreamtaily-configurator-open{overflow:hidden}
       <div class="dt-books-grid" id="saved-books-grid"></div>
       <div class="error" id="saved-books-error"></div>
     </section>
+  </div>
+</section>
 
-    <div class="dt-library-separator"></div>
+<section class="screen library-screen" id="screen-library">
+  <div class="shell">
+    <div class="topbar">
+      <button class="brand-dark" onclick="showScreen('landing')">
+        <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
+      </button>
+      <button class="btn btn-soft" type="button" onclick="openBookLibrary()">I tuoi libri →</button>
+    </div>
 
-    <div class="library-heading" id="character-library-heading">
+    <div class="library-heading">
       <div>
         <div class="phase">Il cast della famiglia</div>
         <h1 class="step-title">Chi parte per la prossima avventura?</h1>
@@ -1681,6 +1689,11 @@ function escapeHtml(value){
 async function openCharacterLibrary(){
   showScreen('library');
   await loadSavedCharacters();
+}
+
+async function openBookLibrary(){
+  showScreen('books');
+  await dtLoadSavedBooks();
 }
 
 function applyCharacterToForm(character){
@@ -3360,10 +3373,6 @@ window.beginAddStory=async function(){
   app.compositionChoices={};
   dtComposedBook=null;
   await openCharacterLibrary();
-  window.requestAnimationFrame(()=>{
-    document.getElementById('character-library-heading')
-      ?.scrollIntoView({behavior:'smooth',block:'start'});
-  });
 };
 
 function dtBookStoryCastNames(bookStory){
@@ -3492,7 +3501,7 @@ window.renderBookSummary=function(){
       <div class="dt-reader-nav" style="margin:0 0 16px">
         <button class="btn btn-ghost" ${dtBookPage===0?"disabled":""}
           onclick="goToDtBookPage(${dtBookPage-1})">← Indietro</button>
-        <button class="btn btn-soft" onclick="openCharacterLibrary()">Libreria</button>
+        <button class="btn btn-soft" onclick="openBookLibrary()">I tuoi libri</button>
         ${last
           ?`<button class="btn btn-primary" onclick="renderBookWorkspace()">Storia completata · Vai al libro →</button>`
           :`<button class="btn btn-primary" onclick="goToDtBookPage(${dtBookPage+1})">Avanti →</button>`}
@@ -3793,7 +3802,7 @@ window.renderDtDelivered=function(){
       <div class="dt-delivery-link"><code id="dt-link">${escapeHtml(permanent)}</code><button class="btn btn-soft" onclick="copyDtLink()">Copia</button></div>
       <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="window.location.href=document.getElementById('dt-link').textContent">Apri il libro finale</button>
-        <button class="btn btn-ghost" onclick="openCharacterLibrary()">Torna alla libreria</button>
+        <button class="btn btn-ghost" onclick="openBookLibrary()">Torna ai tuoi libri</button>
         <button class="btn btn-soft" onclick="showScreen('landing')">Torna alla home</button>
       </div>
     </div>
@@ -3975,7 +3984,7 @@ window.dtOpenSavedBook=async function(bookId){
   }catch(error){
     console.error("[DreamTaily] Open saved book error:",error);
     showError("saved-books-error","Non sono riuscito ad aprire questo libro.");
-    showScreen("library");
+    showScreen("books");
   }
 };
 
@@ -4020,7 +4029,7 @@ window.dtEditSavedBook=async function(bookId){
   }catch(error){
     console.error("[DreamTaily] Edit saved book error:",error);
     showError("saved-books-error","Non sono riuscito a modificare questo libro.");
-    showScreen("library");
+    showScreen("books");
   }
 };
 
@@ -4059,16 +4068,6 @@ window.dtDeleteSavedBook=async function(bookId){
     console.error("[DreamTaily] Delete saved book error:",error);
     showError("saved-books-error","Non sono riuscito a eliminare questo libro.");
   }
-};
-
-/*
- * Estende l'apertura della libreria, senza sostituire il flusso originale:
- * prima apre e carica i personaggi come sempre, poi carica i libri.
- */
-const dtOriginalOpenCharacterLibrary=window.openCharacterLibrary;
-window.openCharacterLibrary=async function(){
-  await dtOriginalOpenCharacterLibrary();
-  await dtLoadSavedBooks();
 };
 
 /* Avvio nel flusso reale, senza iframe e senza pagine parallele. */

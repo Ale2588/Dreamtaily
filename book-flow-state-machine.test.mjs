@@ -74,12 +74,27 @@ test('the same-protagonist path keeps the active draft and skips character selec
   assert.doesNotMatch(flow, /dtClearOnlyActiveBook|resetActiveBookState/);
 });
 
-test('the different-character path opens the library at the character section', () => {
+test('the different-character path opens the dedicated character library', () => {
   const flow = between('window.beginAddStory=async function(){', 'function dtBookStoryCastNames(');
   assert.match(flow, /await openCharacterLibrary\(\)/);
-  assert.match(flow, /getElementById\('character-library-heading'\)/);
-  assert.match(flow, /scrollIntoView\(\{behavior:'smooth',block:'start'\}\)/);
-  assert.match(html, /id="character-library-heading"/);
+  assert.doesNotMatch(flow, /scrollIntoView|character-library-heading/);
+});
+
+test('books and characters have separate library screens', () => {
+  const books = between('<section class="screen books-screen" id="screen-books">', '<section class="screen library-screen" id="screen-library">');
+  const characters = between('<section class="screen library-screen" id="screen-library">', '<section class="screen stories-screen" id="screen-stories">');
+  assert.match(books, /id="saved-books-grid"/);
+  assert.doesNotMatch(books, /id="character-library-grid"/);
+  assert.match(characters, /id="character-library-grid"/);
+  assert.doesNotMatch(characters, /id="saved-books-grid"/);
+  const openBooks = between('async function openBookLibrary(){', 'function applyCharacterToForm');
+  assert.match(openBooks, /showScreen\('books'\)/);
+  assert.match(openBooks, /dtLoadSavedBooks\(\)/);
+  assert.doesNotMatch(openBooks, /loadSavedCharacters\(\)/);
+  const openCharacters = between('async function openCharacterLibrary(){', 'async function openBookLibrary(){');
+  assert.match(openCharacters, /showScreen\('library'\)/);
+  assert.match(openCharacters, /loadSavedCharacters\(\)/);
+  assert.doesNotMatch(openCharacters, /dtLoadSavedBooks\(\)/);
 });
 
 test('an in-progress multi-story book stays visible throughout composition', () => {
