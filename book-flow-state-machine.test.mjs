@@ -82,6 +82,20 @@ test('the different-character path opens the library at the character section', 
   assert.match(html, /id="character-library-heading"/);
 });
 
+test('an in-progress multi-story book stays visible throughout composition', () => {
+  assert.match(html, /id="dt-book-context"/);
+  assert.match(html, /Il tuo libro in corso/);
+  assert.match(html, /Vedi riepilogo/);
+  const context = between('function renderDtBookContext(screenName=null){', 'window.beginAddStoryWithSameProtagonist=async function(){');
+  assert.match(context, /\['library','stories','setup','composer','wow','creator'\]/);
+  assert.match(context, /app\.bookId&&app\.bookStories\.length/);
+  assert.match(context, /flatMap\(dtBookStoryCastNames\)/);
+  assert.match(context, /storia già inserita/);
+  assert.match(context, /Cast:/);
+  assert.match(html, /renderDtBookContext\(name\)/);
+  assert.match(html, /onclick="renderBookWorkspace\(\)"/);
+});
+
 test('checkout requires every story to be composed and complete', () => {
   const checkout = between('window.openDtCheckout=async function(){', 'window.updateDtPayButton=function(){');
   assert.match(checkout, /app\.bookStories\.every/);

@@ -265,7 +265,12 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 .dt-next-icon{font-size:25px;line-height:1}
 .dt-cast-line{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
 .dt-cast-name{display:inline-flex!important;width:max-content;padding:4px 8px;border-radius:999px;background:#f0e9df;color:#67594b!important;font-size:10px!important;font-weight:800}
-@media(max-width:760px){.dt-next-grid{grid-template-columns:1fr}.dt-next-card{min-height:auto}}
+.dt-book-context{position:fixed;right:22px;bottom:22px;z-index:80;width:min(390px,calc(100vw - 32px));display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;padding:15px 16px;border:1px solid #dccfbe;border-radius:19px;background:rgba(255,250,244,.96);box-shadow:0 18px 48px rgba(44,33,25,.18);backdrop-filter:blur(12px)}
+.dt-book-context[hidden]{display:none}.dt-book-context-copy{min-width:0}.dt-book-context-eyebrow{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--coral)}
+.dt-book-context-title{display:block;font-family:'Faustina',Georgia,serif;font-size:18px;line-height:1.1;margin:3px 0 4px}.dt-book-context-cast{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:12px}
+.dt-book-context .btn{padding:10px 12px;white-space:nowrap}.dt-has-book-context .screen.active{padding-bottom:120px}
+@media(max-width:760px){.dt-next-grid{grid-template-columns:1fr}.dt-next-card{min-height:auto}.dt-book-context{right:16px;bottom:16px}}
+@media(max-width:480px){.dt-book-context{grid-template-columns:1fr}.dt-book-context .btn{width:100%}.dt-has-book-context .screen.active{padding-bottom:165px}}
 .story-actions{flex-wrap:wrap}
 
 
@@ -1178,6 +1183,15 @@ body.dreamtaily-configurator-open{overflow:hidden}
 <section class="screen" id="screen-render-status"></section>
 <section class="screen" id="screen-delivered"></section>
 
+<aside class="dt-book-context" id="dt-book-context" aria-live="polite" hidden>
+  <div class="dt-book-context-copy">
+    <span class="dt-book-context-eyebrow">Il tuo libro in corso</span>
+    <strong class="dt-book-context-title" id="dt-book-context-title">1 storia già inserita</strong>
+    <span class="dt-book-context-cast" id="dt-book-context-cast">Cast: —</span>
+  </div>
+  <button class="btn btn-soft" type="button" onclick="renderBookWorkspace()">Vedi riepilogo</button>
+</aside>
+
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="story-validator.js"></script>
 <script>
@@ -1218,6 +1232,7 @@ let supabaseClient = null;
 function showScreen(name){
   document.querySelectorAll('.screen').forEach(screen=>screen.classList.remove('active'));
   document.getElementById('screen-'+name)?.classList.add('active');
+  renderDtBookContext(name);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -1596,6 +1611,7 @@ async function loadSavedCharacters(){
     app.savedCharacters=hydrated;
     updateRevealCharactersCta(hydrated.length>0);
     renderSavedCharacters();
+    renderDtBookContext();
   }catch(error){
     console.error('[DreamTaily] Character library error:',error);
     status.textContent='';
@@ -1899,6 +1915,7 @@ async function getOrCreateDraftBook(){
 async function loadBookStories(){
   if(!app.bookId){
     app.bookStories=[];
+    renderDtBookContext();
     return [];
   }
 
@@ -1927,6 +1944,7 @@ async function loadBookStories(){
 
   if(error) throw error;
   app.bookStories=data||[];
+  renderDtBookContext();
   return app.bookStories;
 }
 
@@ -3360,6 +3378,24 @@ function dtBookStoryCastNames(bookStory){
     }
     return null;
   }).filter(Boolean);
+}
+
+function renderDtBookContext(screenName=null){
+  const context=document.getElementById('dt-book-context');
+  if(!context) return;
+  const activeName=screenName||document.querySelector('.screen.active')?.id?.replace(/^screen-/, '')||'';
+  const compositionScreens=new Set(['library','stories','setup','composer','wow','creator']);
+  const visible=Boolean(app.bookId&&app.bookStories.length&&compositionScreens.has(activeName));
+  context.hidden=!visible;
+  document.body.classList.toggle('dt-has-book-context',visible);
+  if(!visible) return;
+
+  const storyCount=app.bookStories.length;
+  const cast=[...new Set(app.bookStories.flatMap(dtBookStoryCastNames))];
+  document.getElementById('dt-book-context-title').textContent=
+    `${storyCount} ${storyCount===1?'storia già inserita':'storie già inserite'}`;
+  document.getElementById('dt-book-context-cast').textContent=
+    cast.length?`Cast: ${cast.join(', ')}`:'Cast già assegnato';
 }
 
 window.beginAddStoryWithSameProtagonist=async function(){
