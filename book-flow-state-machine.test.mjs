@@ -89,12 +89,13 @@ test('books and characters have separate library screens', () => {
   assert.doesNotMatch(characters, /id="saved-books-grid"/);
   const openBooks = between('async function openBookLibrary(){', 'function applyCharacterToForm');
   assert.match(openBooks, /showScreen\('books'\)/);
-  assert.match(openBooks, /dtLoadSavedBooks\(\)/);
+  assert.match(openBooks, /window\.dtLoadSavedBooks\(\)/);
   assert.doesNotMatch(openBooks, /loadSavedCharacters\(\)/);
   const openCharacters = between('async function openCharacterLibrary(){', 'async function openBookLibrary(){');
   assert.match(openCharacters, /showScreen\('library'\)/);
   assert.match(openCharacters, /loadSavedCharacters\(\)/);
   assert.doesNotMatch(openCharacters, /dtLoadSavedBooks\(\)/);
+  assert.match(html, /window\.dtLoadSavedBooks=dtLoadSavedBooks/);
 });
 
 test('an in-progress multi-story book stays visible throughout composition', () => {

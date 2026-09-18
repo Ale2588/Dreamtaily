@@ -1693,7 +1693,7 @@ async function openCharacterLibrary(){
 
 async function openBookLibrary(){
   showScreen('books');
-  await dtLoadSavedBooks();
+  await window.dtLoadSavedBooks();
 }
 
 function applyCharacterToForm(character){
@@ -3875,6 +3875,7 @@ async function dtLoadSavedBooks(){
     showError("saved-books-error","Non sono riuscito a recuperare i libri.");
   }
 }
+window.dtLoadSavedBooks=dtLoadSavedBooks;
 
 function dtRenderSavedBooks(){
   const status=document.getElementById("saved-books-status");
