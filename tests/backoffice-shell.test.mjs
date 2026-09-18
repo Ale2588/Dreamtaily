@@ -30,12 +30,16 @@ test('tutte le scritture editoriali passano dalla Edge Function',()=>{
   assert.doesNotMatch(html,/SERVICE_ROLE/);
 });
 
-test('la lista permette di eliminare una storia con conferma esplicita',()=>{
-  assert.match(html,/data-delete-project/);
-  assert.match(html,/id="delete-dialog"/);
-  assert.match(html,/Elimina definitivamente/);
-  assert.match(html,/api\(`\/projects\/\$\{encodeURIComponent\(projectId\)\}`\s*,\s*\{method:'DELETE'\}/);
-  assert.match(html,/PROJECT_IN_USE:'Questa storia è già utilizzata in un libro/);
+test('la lista separa storie attive e archiviate e permette archivio e ripristino',()=>{
+  assert.match(html,/data-project-filter="active"/);
+  assert.match(html,/data-project-filter="archived"/);
+  assert.match(html,/data-archive-project/);
+  assert.match(html,/data-restore-project/);
+  assert.match(html,/id="archive-dialog"/);
+  assert.match(html,/Archivia storia/);
+  assert.match(html,/api\(`\/projects\/\$\{encodeURIComponent\(projectId\)\}\/archive`\s*,\s*\{method:'POST'\}/);
+  assert.match(html,/api\(`\/projects\/\$\{encodeURIComponent\(projectId\)\}\/restore`\s*,\s*\{method:'POST'\}/);
+  assert.doesNotMatch(html,/Elimina definitivamente|data-delete-project|method:'DELETE'/);
 });
 
 test('la shell espone il primo workflow editoriale senza JSON',()=>{
