@@ -1024,7 +1024,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 
     <div class="dt-library-separator"></div>
 
-    <div class="library-heading">
+    <div class="library-heading" id="character-library-heading">
       <div>
         <div class="phase">Il cast della famiglia</div>
         <h1 class="step-title">Chi parte per la prossima avventura?</h1>
@@ -3342,6 +3342,10 @@ window.beginAddStory=async function(){
   app.compositionChoices={};
   dtComposedBook=null;
   await openCharacterLibrary();
+  window.requestAnimationFrame(()=>{
+    document.getElementById('character-library-heading')
+      ?.scrollIntoView({behavior:'smooth',block:'start'});
+  });
 };
 
 function dtBookStoryCastNames(bookStory){
