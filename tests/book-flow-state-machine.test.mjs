@@ -47,6 +47,14 @@ test('finishing one story returns to the book instead of opening checkout', () =
   assert.doesNotMatch(reader, /onclick="openDtCheckout\(\)"/);
 });
 
+test('editing the current story reopens the first narrative moment', () => {
+  const edit = between('window.modifyDtBook=function(){', 'function dtChoiceLabel(');
+  assert.match(edit, /dtTrailIndex=0/);
+  assert.match(edit, /app\.currentStepKey=dtTrail\[0\]\|\|app\.activeStoryDefinition\?\.start\|\|null/);
+  assert.doesNotMatch(edit, /dtTrail\.length-1/);
+  assert.match(edit, /showScreen\("composer"\)/);
+});
+
 test('the book workspace owns add-story and checkout actions', () => {
   const workspace = between('window.renderBookWorkspace=async function(){', 'window.renderBookSummary=function(){');
   assert.match(workspace, /Aggiungi un’altra storia/);

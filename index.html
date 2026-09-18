@@ -3450,8 +3450,8 @@ window.renderBookSummary=function(){
 
 window.modifyDtBook=function(){
   dtBuildTrail();
-  dtTrailIndex=Math.max(0,dtTrail.length-1);
-  app.currentStepKey=dtTrail[dtTrailIndex];
+  dtTrailIndex=0;
+  app.currentStepKey=dtTrail[0]||app.activeStoryDefinition?.start||null;
   renderComposerStep();
   showScreen("composer");
 };
