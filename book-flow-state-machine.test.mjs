@@ -107,7 +107,8 @@ test('an in-progress multi-story book stays visible throughout composition', () 
   assert.match(context, /flatMap\(dtBookStoryCastNames\)/);
   assert.match(context, /storia già inserita/);
   assert.match(context, /Cast:/);
-  assert.match(html, /renderDtBookContext\(name\)/);
+  assert.match(html, /window\.renderDtBookContext\?\.\(name\)/);
+  assert.match(context, /window\.renderDtBookContext=renderDtBookContext/);
   assert.match(html, /onclick="renderBookWorkspace\(\)"/);
 });
 

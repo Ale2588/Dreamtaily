@@ -1240,7 +1240,7 @@ let supabaseClient = null;
 function showScreen(name){
   document.querySelectorAll('.screen').forEach(screen=>screen.classList.remove('active'));
   document.getElementById('screen-'+name)?.classList.add('active');
-  renderDtBookContext(name);
+  window.renderDtBookContext?.(name);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -1619,7 +1619,7 @@ async function loadSavedCharacters(){
     app.savedCharacters=hydrated;
     updateRevealCharactersCta(hydrated.length>0);
     renderSavedCharacters();
-    renderDtBookContext();
+    window.renderDtBookContext?.();
   }catch(error){
     console.error('[DreamTaily] Character library error:',error);
     status.textContent='';
@@ -1928,7 +1928,7 @@ async function getOrCreateDraftBook(){
 async function loadBookStories(){
   if(!app.bookId){
     app.bookStories=[];
-    renderDtBookContext();
+    window.renderDtBookContext?.();
     return [];
   }
 
@@ -1957,7 +1957,7 @@ async function loadBookStories(){
 
   if(error) throw error;
   app.bookStories=data||[];
-  renderDtBookContext();
+  window.renderDtBookContext?.();
   return app.bookStories;
 }
 
@@ -3406,6 +3406,7 @@ function renderDtBookContext(screenName=null){
   document.getElementById('dt-book-context-cast').textContent=
     cast.length?`Cast: ${cast.join(', ')}`:'Cast già assegnato';
 }
+window.renderDtBookContext=renderDtBookContext;
 
 window.beginAddStoryWithSameProtagonist=async function(){
   const current=app.bookStories.find(item=>item.id===app.activeBookStoryId)||app.bookStories.at(-1);
