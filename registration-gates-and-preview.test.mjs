@@ -28,6 +28,16 @@ test("registration gate is centered, illustrated and reassures about saved work"
   assert.match(html,/Quello che hai fatto finora è già al sicuro/);
 });
 
+test("email confirmation waits for Supabase and returns to the interrupted journey",()=>{
+  assert.match(html,/async function waitForDtPermanentUser/);
+  assert.match(html,/onAuthStateChange/);
+  assert.match(html,/async function handleDtAuthReturn/);
+  assert.match(html,/Il tuo spazio è pronto/);
+  assert.match(html,/if\(sessionStorage\.getItem\('dreamtaily\.auth\.pending_action'\)\)return resumeDtAuthAction\(\)/);
+  assert.match(html,/return openBookLibrary\(\)/);
+  assert.match(html,/await detectDraftBook\(\);await detectSavedCharactersForHomepage\(\);await handleDtAuthReturn\(\)/);
+});
+
 test("book reader and checkout distinguish preview from final AI generation",()=>{
   assert.match(html,/Questa è un’anteprima del tuo libro/);
   assert.match(html,/genererà con l’IA le illustrazioni finali/);
