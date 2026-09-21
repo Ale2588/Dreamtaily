@@ -383,6 +383,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dt-books-heading h2{font-family:'Faustina',Georgia,serif;font-size:clamp(28px,4vw,40px);line-height:1.05}
 .dt-books-heading p{color:var(--muted);line-height:1.55;margin-top:4px}
 .dt-books-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.dt-books-tools{display:grid;grid-template-columns:minmax(180px,1fr) auto auto;gap:10px;margin:0 0 16px}.dt-books-tools input,.dt-books-tools select{border:1px solid var(--line);border-radius:13px;background:#fff;padding:11px 13px;font:inherit}.dt-books-tabs{display:flex;gap:8px;margin:0 0 14px}.dt-books-tab{border:1px solid var(--line);border-radius:999px;background:#fff;padding:8px 13px;font-weight:800;cursor:pointer}.dt-books-tab.active{background:var(--brown);color:#fff}.dt-books-more{display:block;margin:18px auto 0}.dt-saved-book.archived{opacity:.76}
 .dt-saved-book{display:grid;grid-template-columns:120px 1fr;background:var(--paper);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 10px 28px rgba(61,43,31,.08)}
 .dt-saved-book-cover{position:relative;min-height:175px;background:linear-gradient(160deg,#29465a,#7d9474);overflow:hidden}
 .dt-saved-book-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -393,7 +394,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dt-saved-book-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
 .dt-saved-book-actions .btn{padding:10px 13px;border-radius:12px;font-size:13px}
 .dt-books-empty{padding:24px;border:1px dashed #d8cab5;border-radius:20px;background:rgba(255,253,248,.65);text-align:center;color:var(--muted);grid-column:1/-1}
-@media(max-width:760px){.dt-books-grid{grid-template-columns:1fr}.dt-saved-book{grid-template-columns:105px 1fr}}
+@media(max-width:760px){.dt-books-grid{grid-template-columns:1fr}.dt-saved-book{grid-template-columns:105px 1fr}.dt-books-tools{grid-template-columns:1fr}.dt-books-tools input,.dt-books-tools select{width:100%}}
 
 .dt-loading{padding:14px;border-radius:13px;background:#e4f0ef;color:#356f70;font-weight:800;margin-top:12px}
 .dt-decision-option.asset-error{background:#f8f3ea;min-height:110px}
@@ -1024,8 +1025,15 @@ body.dreamtaily-configurator-open{overflow:hidden}
           <p>Apri un libro concluso, riprendi una bozza oppure eliminalo.</p>
         </div>
       </div>
+      <div class="dt-books-tabs"><button class="dt-books-tab active" data-book-view="active" type="button" onclick="dtSetBookView('active')">In libreria</button><button class="dt-books-tab" data-book-view="archived" type="button" onclick="dtSetBookView('archived')">Archiviati</button></div>
+      <div class="dt-books-tools">
+        <input id="saved-books-search" type="search" placeholder="Cerca per titolo o protagonista" oninput="dtUpdateBookFilters()">
+        <select id="saved-books-filter" onchange="dtUpdateBookFilters()"><option value="all">Tutti gli stati</option><option value="continue">Da continuare</option><option value="creating">In creazione</option><option value="ready">Pronti</option><option value="failed">Con problemi</option></select>
+        <select id="saved-books-order" onchange="dtUpdateBookFilters()"><option value="priority">Prima quelli da continuare</option><option value="recent">Più recenti</option><option value="oldest">Meno recenti</option><option value="title">Titolo A–Z</option></select>
+      </div>
       <div class="library-status" id="saved-books-status">Caricamento dei libri…</div>
       <div class="dt-books-grid" id="saved-books-grid"></div>
+      <button class="btn btn-soft dt-books-more" id="saved-books-more" type="button" onclick="dtShowMoreBooks()" hidden>Mostra altri libri</button>
       <div class="error" id="saved-books-error"></div>
     </section>
   </div>
@@ -3852,6 +3860,24 @@ window.copyDtLink=async function(){
 
 
 let dtSavedBooks=[];
+const dtBookLibrary={view:"active",query:"",status:"all",order:"priority",limit:8};
+
+window.dtSetBookView=function(view){dtBookLibrary.view=view==="archived"?"archived":"active";dtBookLibrary.limit=8;dtRenderSavedBooks()};
+window.dtUpdateBookFilters=function(){dtBookLibrary.query=document.getElementById("saved-books-search")?.value.trim().toLocaleLowerCase("it")||"";dtBookLibrary.status=document.getElementById("saved-books-filter")?.value||"all";dtBookLibrary.order=document.getElementById("saved-books-order")?.value||"priority";dtBookLibrary.limit=8;dtRenderSavedBooks()};
+window.dtShowMoreBooks=function(){dtBookLibrary.limit+=8;dtRenderSavedBooks()};
+
+function dtBookStatusGroup(book){if(book.status==="draft"||book.status==="ready_for_checkout")return"continue";if(book.status==="failed")return"failed";if(book.status==="ready")return"ready";return"creating"}
+function dtBookPriority(book){return({failed:0,draft:1,ready_for_checkout:1,generating:2,paid:2,ready:3})[book.status]??4}
+function dtVisibleBooks(){
+  const filtered=dtSavedBooks.filter(book=>{
+    if((dtBookLibrary.view==="archived")!==Boolean(book.archived_at))return false;
+    if(dtBookLibrary.status!=="all"&&dtBookStatusGroup(book)!==dtBookLibrary.status)return false;
+    if(!dtBookLibrary.query)return true;
+    const protagonists=(book.book_stories||[]).flatMap(story=>(story.story_cast_assignments||[]).filter(item=>item.slot_key==="protagonist").map(item=>app.savedCharacters.find(character=>character.id===item.character_asset_id)?.name||""));
+    return [book.title,...protagonists].join(" ").toLocaleLowerCase("it").includes(dtBookLibrary.query);
+  });
+  return filtered.sort((left,right)=>{if(dtBookLibrary.order==="title")return String(left.title||"").localeCompare(String(right.title||""),"it");const leftDate=new Date(left.updated_at||left.created_at||0),rightDate=new Date(right.updated_at||right.created_at||0);if(dtBookLibrary.order==="oldest")return leftDate-rightDate;if(dtBookLibrary.order==="recent")return rightDate-leftDate;return dtBookPriority(left)-dtBookPriority(right)||rightDate-leftDate});
+}
 
 async function dtLoadSavedBooks(){
   const status=document.getElementById("saved-books-status");
@@ -3873,6 +3899,7 @@ async function dtLoadSavedBooks(){
         current_style,
         created_at,
         updated_at,
+        archived_at,
         book_stories (
           id,
           story_slug,
@@ -3917,18 +3944,21 @@ function dtRenderSavedBooks(){
   const grid=document.getElementById("saved-books-grid");
   if(!status||!grid) return;
 
-  status.textContent="";
-  if(!dtSavedBooks.length){
+  document.querySelectorAll("[data-book-view]").forEach(button=>button.classList.toggle("active",button.dataset.bookView===dtBookLibrary.view));
+  const visible=dtVisibleBooks(),books=visible.slice(0,dtBookLibrary.limit),more=document.getElementById("saved-books-more");
+  if(more)more.hidden=books.length>=visible.length;
+  status.textContent=visible.length?`${visible.length} ${visible.length===1?"libro":"libri"}`:"";
+  if(!visible.length){
     grid.innerHTML=`
       <div class="dt-books-empty">
         <div style="font-size:38px;margin-bottom:8px">📚</div>
-        <strong>Non hai ancora creato libri.</strong>
-        <p style="margin-top:5px">Usa un personaggio qui sotto per iniziare la prima avventura.</p>
+        <strong>${dtBookLibrary.view==="archived"?"Nessun libro archiviato.":"Nessun libro corrisponde alla ricerca."}</strong>
+        <p style="margin-top:5px">${dtBookLibrary.view==="archived"?"I libri che nasconderai dalla libreria resteranno recuperabili qui.":"Cambia ricerca o filtro per vedere gli altri libri."}</p>
       </div>`;
     return;
   }
 
-  grid.innerHTML=dtSavedBooks.map(book=>{
+  grid.innerHTML=books.map(book=>{
     const stories=(book.book_stories||[]).slice()
       .sort((a,b)=>(a.position||0)-(b.position||0));
     const latest=stories.at(-1)||null;
@@ -3946,7 +3976,7 @@ function dtRenderSavedBooks(){
       .toLocaleDateString("it-IT",{day:"2-digit",month:"short",year:"numeric"});
 
     return `
-      <article class="dt-saved-book">
+      <article class="dt-saved-book ${book.archived_at?'archived':''}">
         <div class="dt-saved-book-cover">
           <img src="${escapeHtml(image)}" alt="" onerror="this.src='assets/char/water/rabbit.png'">
           <span class="dt-saved-book-status">${statusLabel}</span>
@@ -3963,6 +3993,7 @@ function dtRenderSavedBooks(){
               ${ready?"Apri":draft?"Riprendi":"Controlla"}
             </button>
             ${draft?`<button class="btn btn-ghost" style="color:#a8402e" onclick="dtDeleteSavedBook('${book.id}')">Elimina</button>`:""}
+            ${!draft?`<button class="btn btn-ghost" onclick="dtManageSavedBook('${book.id}','${book.archived_at?'restore':'archive'}')">${book.archived_at?'Ripristina':'Archivia'}</button>`:""}
           </div>
         </div>
       </article>`;
@@ -4023,6 +4054,17 @@ window.dtOpenSavedBook=async function(bookId){
     showError("saved-books-error","Non sono riuscito ad aprire questo libro.");
     showScreen("books");
   }
+};
+
+window.dtManageSavedBook=async function(bookId,action){
+  const book=dtSavedBooks.find(item=>item.id===bookId),verb=action==="restore"?"ripristinare":"archiviare";
+  if(!confirm(`Vuoi ${verb} "${book?.title||"questo libro"}"?`))return;
+  try{
+    const {data,error}=await getSupabase().functions.invoke("manage-book",{body:{book_id:bookId,action}});
+    if(error||!data?.book)throw error||new Error("BOOK_MANAGEMENT_FAILED");
+    if(app.bookId===bookId&&action==="archive")dtClearOnlyActiveBook();
+    await dtLoadSavedBooks();
+  }catch(error){console.error("[DreamTaily] Manage saved book error:",error);showError("saved-books-error","Non sono riuscito ad aggiornare questo libro.")}
 };
 
 window.dtEditSavedBook=async function(bookId){

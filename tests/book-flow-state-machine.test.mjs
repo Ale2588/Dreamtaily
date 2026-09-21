@@ -74,6 +74,45 @@ test('the same-protagonist path keeps the active draft and skips character selec
   assert.doesNotMatch(flow, /dtClearOnlyActiveBook|resetActiveBookState/);
 });
 
+test('the different-character path opens the dedicated character library', () => {
+  const flow = between('window.beginAddStory=async function(){', 'function dtBookStoryCastNames(');
+  assert.match(flow, /await openCharacterLibrary\(\)/);
+  assert.doesNotMatch(flow, /scrollIntoView|character-library-heading/);
+});
+
+test('books and characters have separate library screens', () => {
+  const books = between('<section class="screen books-screen" id="screen-books">', '<section class="screen library-screen" id="screen-library">');
+  const characters = between('<section class="screen library-screen" id="screen-library">', '<section class="screen stories-screen" id="screen-stories">');
+  assert.match(books, /id="saved-books-grid"/);
+  assert.doesNotMatch(books, /id="character-library-grid"/);
+  assert.match(characters, /id="character-library-grid"/);
+  assert.doesNotMatch(characters, /id="saved-books-grid"/);
+  const openBooks = between('async function openBookLibrary(){', 'function applyCharacterToForm');
+  assert.match(openBooks, /showScreen\('books'\)/);
+  assert.match(openBooks, /window\.dtLoadSavedBooks\(\)/);
+  assert.doesNotMatch(openBooks, /loadSavedCharacters\(\)/);
+  const openCharacters = between('async function openCharacterLibrary(){', 'async function openBookLibrary(){');
+  assert.match(openCharacters, /showScreen\('library'\)/);
+  assert.match(openCharacters, /loadSavedCharacters\(\)/);
+  assert.doesNotMatch(openCharacters, /dtLoadSavedBooks\(\)/);
+  assert.match(html, /window\.dtLoadSavedBooks=dtLoadSavedBooks/);
+});
+
+test('an in-progress multi-story book stays visible throughout composition', () => {
+  assert.match(html, /id="dt-book-context"/);
+  assert.match(html, /Il tuo libro in corso/);
+  assert.match(html, /Vedi riepilogo/);
+  const context = between('function renderDtBookContext(screenName=null){', 'window.beginAddStoryWithSameProtagonist=async function(){');
+  assert.match(context, /\['library','stories','setup','composer','wow','creator'\]/);
+  assert.match(context, /app\.bookId&&app\.bookStories\.length/);
+  assert.match(context, /flatMap\(dtBookStoryCastNames\)/);
+  assert.match(context, /storia già inserita/);
+  assert.match(context, /Cast:/);
+  assert.match(html, /window\.renderDtBookContext\?\.\(name\)/);
+  assert.match(context, /window\.renderDtBookContext=renderDtBookContext/);
+  assert.match(html, /onclick="renderBookWorkspace\(\)"/);
+});
+
 test('checkout requires every story to be composed and complete', () => {
   const checkout = between('window.openDtCheckout=async function(){', 'window.updateDtPayButton=function(){');
   assert.match(checkout, /app\.bookStories\.every/);
