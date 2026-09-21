@@ -63,19 +63,19 @@ test('l’editor carica e salva il bundle con controllo di revisione',()=>{
 });
 
 test('l’editor presenta metadati editoriali e mai JSON',()=>{
-  for(const label of ['Titolo pubblico','Fascia d’età','Tono','Promessa narrativa','Sinossi editoriale']) assert.match(editor,new RegExp(label));
+  for(const label of ['Titolo pubblico','Età minima','Età massima','Tipologie','Tono','Promessa narrativa','Sinossi editoriale']) assert.match(editor,new RegExp(label));
   assert.doesNotMatch(editor,/type=["']application\/json["']/);
   assert.doesNotMatch(editor,/SERVICE_ROLE/);
 });
 
 test('fascia, tono e immagini sono gestiti senza percorsi tecnici',()=>{
-  assert.match(html,/<select id="age-range" required>/);
-  for(const range of ['0-2','3-4','4-5','6+']){
-    assert.match(html,new RegExp(`<option>${range.replace('+','\\+')}<\\/option>`));
-    assert.match(editor,new RegExp(`<option>${range.replace('+','\\+')}<\\/option>`));
-  }
+  assert.match(html,/<select id="min-age" required>/);
+  assert.match(html,/<select id="max-age" required>/);
+  assert.match(html,/name="story-type"/);
   assert.match(html,/<select id="tone" required>/);
-  assert.match(editor,/<select id="age-range" required>/);
+  assert.match(editor,/<select id="min-age" required>/);
+  assert.match(editor,/<select id="max-age" required>/);
+  assert.match(editor,/name="story-type"/);
   assert.match(editor,/<select id="tone" required>/);
   assert.match(editor,/id="cover-file" type="file"/);
   assert.match(editor,/id="scene-file" type="file"/);

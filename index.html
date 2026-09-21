@@ -128,6 +128,9 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 .cast-chip span{display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:800}
 .cast-chip strong{display:block;font-family:'Faustina',Georgia,serif;font-size:18px}
 .story-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.story-filters{margin:0 0 22px;padding:16px 18px;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.72)}
+.story-filter-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:7px 0}.story-filter-label{min-width:76px;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.story-filter-chip{border:1px solid var(--line);border-radius:999px;background:#fff;padding:8px 12px;font-weight:800;color:var(--brown);cursor:pointer}.story-filter-chip.active{border-color:var(--coral);background:#fff0ec;color:#9b402d}.story-filter-summary{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted)}.story-filter-reset{border:0;background:transparent;color:var(--coral);font-weight:900;cursor:pointer}
 .story-card{
   position:relative;overflow:hidden;border:2px solid transparent;border-radius:25px;background:white;
   box-shadow:0 14px 34px rgba(61,43,31,.08);transition:.22s;text-align:left
@@ -1080,6 +1083,11 @@ body.dreamtaily-configurator-open{overflow:hidden}
       </div>
     </div>
 
+    <div class="story-filters" id="story-filters">
+      <div class="story-filter-row" id="story-age-filters"><span class="story-filter-label">Età</span></div>
+      <div class="story-filter-row" id="story-type-filters"><span class="story-filter-label">Tipologia</span></div>
+      <div class="story-filter-summary"><span id="story-result-count"></span><button class="story-filter-reset" id="story-filter-reset" type="button" onclick="resetStoryFilters()" hidden>Azzera filtri</button></div>
+    </div>
     <div class="story-grid" id="story-grid"></div>
 
     <div class="story-empty-state" id="story-empty-state" hidden>
@@ -1741,6 +1749,30 @@ async function useSavedCharacter(characterId){
 
 
 let STORY_TEMPLATES = [];
+const STORY_AGE_FILTERS=[{id:'0-2',label:'0–2',min:0,max:2},{id:'3-5',label:'3–5',min:3,max:5},{id:'6-8',label:'6–8',min:6,max:8},{id:'9-12',label:'9+',min:9,max:12}];
+const storyCatalogFilters={ages:new Set(),types:new Set()};
+
+function normalizedStoryAges(story){
+  if(Number.isInteger(story.min_age)&&Number.isInteger(story.max_age))return{min:story.min_age,max:story.max_age};
+  const text=String(story.age||'').replace(/anni/gi,'').trim(),numbers=(text.match(/\d+/g)||[]).map(Number);
+  return{min:numbers[0]??null,max:numbers[1]??(text.includes('+')?12:numbers[0]??null)};
+}
+function storyMatchesFilters(story){
+  const ages=normalizedStoryAges(story),types=Array.isArray(story.story_types)?story.story_types:[];
+  const ageMatch=!storyCatalogFilters.ages.size||STORY_AGE_FILTERS.some(filter=>storyCatalogFilters.ages.has(filter.id)&&ages.min!=null&&ages.max!=null&&ages.min<=filter.max&&ages.max>=filter.min);
+  const typeMatch=!storyCatalogFilters.types.size||types.some(type=>storyCatalogFilters.types.has(type));
+  return ageMatch&&typeMatch;
+}
+function toggleStoryFilter(group,value){const selected=storyCatalogFilters[group];selected.has(value)?selected.delete(value):selected.add(value);renderStories()}
+function resetStoryFilters(){storyCatalogFilters.ages.clear();storyCatalogFilters.types.clear();renderStories()}
+function renderStoryFilters(resultCount){
+  const types=[...new Set(STORY_TEMPLATES.flatMap(story=>Array.isArray(story.story_types)?story.story_types:[]))].sort((a,b)=>a.localeCompare(b,'it'));
+  document.getElementById('story-age-filters').innerHTML='<span class="story-filter-label">Età</span>'+STORY_AGE_FILTERS.map(filter=>`<button type="button" class="story-filter-chip ${storyCatalogFilters.ages.has(filter.id)?'active':''}" onclick="toggleStoryFilter('ages','${filter.id}')">${filter.label}</button>`).join('');
+  document.getElementById('story-type-filters').innerHTML='<span class="story-filter-label">Tipologia</span>'+types.map(type=>`<button type="button" class="story-filter-chip ${storyCatalogFilters.types.has(type)?'active':''}" onclick="toggleStoryFilter('types','${escapeHtml(type)}')">${escapeHtml(type)}</button>`).join('');
+  document.getElementById('story-type-filters').hidden=!types.length;
+  document.getElementById('story-result-count').textContent=`${resultCount} ${resultCount===1?'storia disponibile':'storie disponibili'}`;
+  document.getElementById('story-filter-reset').hidden=!(storyCatalogFilters.ages.size||storyCatalogFilters.types.size);
+}
 
 async function loadStoryCatalog(){
   if(STORY_TEMPLATES.length) return STORY_TEMPLATES;
@@ -1836,11 +1868,13 @@ async function prepareStories(){
 
 function renderStories(){
   const grid=document.getElementById('story-grid');
-  const availableStories=STORY_TEMPLATES.filter(
+  const filteredStories=STORY_TEMPLATES.filter(storyMatchesFilters);
+  const availableStories=filteredStories.filter(
     story=>!app.bookStories.some(item=>item.story_slug===story.id)
   );
+  renderStoryFilters(filteredStories.length);
 
-  grid.innerHTML=STORY_TEMPLATES.map(story=>{
+  grid.innerHTML=filteredStories.map(story=>{
     const alreadyAdded=app.bookStories.some(item=>item.story_slug===story.id);
     return `
     <button class="story-card ${app.selectedStoryId===story.id?'selected':''} ${alreadyAdded?'is-added':''}"
@@ -1854,15 +1888,16 @@ function renderStories(){
         <h3>${story.title}</h3>
         <p>${story.description}</p>
         <div class="story-meta">
+          ${(story.story_types||[]).map(type=>`<span>${escapeHtml(type)}</span>`).join('')}
           <span>${story.tone}</span>
           <span>${story.length}</span>
         </div>
       </div>
     </button>
-  `}).join('');
+  `}).join('')||'<div class="story-empty-state" style="grid-column:1/-1"><h2>Nessuna storia corrisponde ai filtri.</h2><p>Prova a cambiare età o tipologia, oppure azzera i filtri.</p></div>';
 
   const hasBook=app.bookStories.length>0;
-  const allAdded=availableStories.length===0;
+  const allAdded=STORY_TEMPLATES.length>0&&STORY_TEMPLATES.every(story=>app.bookStories.some(item=>item.story_slug===story.id));
   document.getElementById('story-go-book').hidden=!hasBook;
   document.getElementById('story-empty-state').hidden=!allAdded;
   document.getElementById('story-continue').hidden=allAdded;

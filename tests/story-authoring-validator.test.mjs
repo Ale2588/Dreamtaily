@@ -121,3 +121,17 @@ test("rejects incomplete editorial identity and missing cover", () => {
     ["AGE_RANGE_INVALID", "TONE_INVALID", "SUMMARY_REQUIRED", "DESCRIPTION_REQUIRED", "COVER_REQUIRED"]
   );
 });
+
+test("accepts min/max ages and multiple controlled story types", () => {
+  const input = contract();
+  delete input.story.editorial.age_range;
+  input.story.editorial.min_age = 3;
+  input.story.editorial.max_age = 7;
+  input.story.editorial.story_types = ["Avventura", "Amicizia"];
+  assert.equal(validateAuthoringContract(input).valid, true);
+  input.story.editorial.min_age = 8;
+  assert.ok(validateAuthoringContract(input).errors.some((error) => error.code === "AGE_RANGE_INVALID"));
+  input.story.editorial.min_age = 3;
+  input.story.editorial.story_types = ["Non prevista"];
+  assert.ok(validateAuthoringContract(input).errors.some((error) => error.code === "STORY_TYPES_INVALID"));
+});

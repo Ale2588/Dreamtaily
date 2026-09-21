@@ -6,6 +6,7 @@ const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const AGE_RANGES = new Set(["0-2", "3-4", "4-5", "6+", "3–5 anni", "4–7 anni", "4–8 anni", "5–9 anni", "6–10 anni"]);
 const TONES = new Set(["Dolce e luminoso", "Caldo e rassicurante", "Avventuroso e rassicurante", "Curiosità e amicizia", "Coraggio e ascolto", "Fiabesco e contemplativo"]);
+const STORY_TYPES = new Set(["Avventura", "Amicizia", "Emozioni", "Mistero", "Natura", "Buonanotte"]);
 const IMAGE_TYPES: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
 const ASSET_BASE = (Deno.env.get("DREAMTAILY_ASSET_BASE_URL") || "https://ale2588.github.io/Dreamtaily/").replace(/\/+$/, "") + "/";
 const ASSET_HOSTS = new Set([new URL(ASSET_BASE).host, new URL(SUPABASE_URL).host]);
@@ -157,7 +158,12 @@ async function createProject(req: Request, uid: string) {
   const internalTitle = String(body.internal_title || "").trim();
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return reply(400, { error: "SLUG_INVALID" });
   if (!internalTitle || internalTitle.length > 160) return reply(400, { error: "INTERNAL_TITLE_INVALID" });
-  if (!AGE_RANGES.has(String(body.age_range || ""))) return reply(400, { error: "AGE_RANGE_INVALID" });
+  const minAge = Number(body.min_age);
+  const maxAge = Number(body.max_age);
+  const storyTypes = Array.isArray(body.story_types) ? [...new Set(body.story_types.map((value: unknown) => String(value)))] : [];
+  const modernAudience = Number.isInteger(minAge) && Number.isInteger(maxAge) && minAge >= 0 && maxAge <= 12 && minAge <= maxAge;
+  if (!modernAudience && !AGE_RANGES.has(String(body.age_range || ""))) return reply(400, { error: "AGE_RANGE_INVALID" });
+  if (!storyTypes.length || storyTypes.some((type) => !STORY_TYPES.has(type))) return reply(400, { error: "STORY_TYPES_INVALID" });
   if (!TONES.has(String(body.tone || ""))) return reply(400, { error: "TONE_INVALID" });
 
   const { data: project, error: projectError } = await svc
@@ -167,7 +173,7 @@ async function createProject(req: Request, uid: string) {
       internal_title: internalTitle,
       public_title: String(body.public_title || internalTitle).trim(),
       language: String(body.language || "it").trim(),
-      age_range: body.age_range || null,
+      age_range: body.age_range || `${minAge}-${maxAge}`,
       tone: body.tone || null,
       description: body.description || null,
       status: "active",
@@ -186,6 +192,9 @@ async function createProject(req: Request, uid: string) {
     title: String(body.public_title || internalTitle).trim(),
     editorial: {
       age_range: body.age_range,
+      min_age: modernAudience ? minAge : null,
+      max_age: modernAudience ? maxAge : null,
+      story_types: storyTypes,
       tone: body.tone,
       summary: body.description || null,
       description: body.description || null,

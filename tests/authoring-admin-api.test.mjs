@@ -37,6 +37,9 @@ test("new projects copy controlled metadata into the initial draft", () => {
   assert.match(source, /editorial: \{/);
   assert.match(source, /cover_ref: null/);
   assert.match(source, /AGE_RANGE_INVALID/);
+  assert.match(source, /STORY_TYPES_INVALID/);
+  assert.match(source, /min_age: modernAudience \? minAge : null/);
+  assert.match(source, /story_types: storyTypes/);
   assert.match(source, /TONE_INVALID/);
 });
 
