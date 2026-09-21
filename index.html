@@ -394,6 +394,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dt-saved-book-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
 .dt-saved-book-actions .btn{padding:10px 13px;border-radius:12px;font-size:13px}
 .dt-books-empty{padding:24px;border:1px dashed #d8cab5;border-radius:20px;background:rgba(255,253,248,.65);text-align:center;color:var(--muted);grid-column:1/-1}
+.dt-preview-notice{display:flex;gap:12px;align-items:flex-start;margin:0 0 16px;padding:14px 16px;border:1px solid #efc78e;border-radius:16px;background:#fff7df;color:#694b20}.dt-preview-notice strong{display:block;margin-bottom:2px}.dt-preview-badge{flex:0 0 auto;border-radius:999px;background:#7a5422;color:#fff;padding:5px 8px;font-size:10px;font-weight:900;letter-spacing:.08em}.dt-auth-dialog{width:min(540px,calc(100% - 30px));border:0;border-radius:24px;padding:0;box-shadow:0 28px 90px rgba(32,24,18,.32)}.dt-auth-dialog::backdrop{background:rgba(30,24,20,.58)}.dt-auth-body{padding:clamp(24px,5vw,38px)}.dt-auth-body h2{font-family:'Faustina',Georgia,serif;font-size:34px;line-height:1.05;margin:8px 0 10px}.dt-auth-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
 @media(max-width:760px){.dt-books-grid{grid-template-columns:1fr}.dt-saved-book{grid-template-columns:105px 1fr}.dt-books-tools{grid-template-columns:1fr}.dt-books-tools input,.dt-books-tools select{width:100%}}
 
 .dt-loading{padding:14px;border-radius:13px;background:#e4f0ef;color:#356f70;font-weight:800;margin-top:12px}
@@ -850,6 +851,19 @@ body.dreamtaily-configurator-open{overflow:hidden}
 
 </div>
 </section>
+
+<dialog class="dt-auth-dialog" id="dt-auth-dialog">
+  <form class="dt-auth-body" id="dt-auth-form">
+    <div class="phase">Il tuo spazio DreamTaily</div>
+    <h2>Salva il mondo che hai creato</h2>
+    <p class="intro">Crea gratuitamente il tuo spazio personale: conserveremo il personaggio e il racconto che hai già creato, così potrai aggiungere nuove avventure senza perdere il lavoro fatto.</p>
+    <label for="dt-auth-email">Email</label>
+    <input class="input" id="dt-auth-email" type="email" required autocomplete="email" placeholder="nome@esempio.it">
+    <div class="error" id="dt-auth-error"></div>
+    <div class="dt-auth-actions"><button class="btn btn-ghost" type="button" onclick="closeDtAuthGate()">Non ora</button><button class="btn btn-primary" id="dt-auth-submit" type="submit">Crea il mio spazio</button></div>
+    <p class="small" style="margin-top:12px">Ti invieremo un link di conferma. Questo dispositivo conserverà il lavoro durante il passaggio.</p>
+  </form>
+</dialog>
 
 
 <section class="screen" id="screen-creator">
@@ -1359,6 +1373,46 @@ function ensureUser(){
   }
   return authInFlight;
 }
+
+async function dtPermanentUser(){
+  const user=await ensureUser();
+  return user&&!user.is_anonymous&&Boolean(user.email);
+}
+
+async function requireDtAccount(action){
+  if(await dtPermanentUser()) return true;
+  sessionStorage.setItem('dreamtaily.auth.pending_action',action);
+  const dialog=document.getElementById('dt-auth-dialog');
+  showError('dt-auth-error',null);
+  if(dialog&&!dialog.open)dialog.showModal();
+  return false;
+}
+
+window.closeDtAuthGate=function(){document.getElementById('dt-auth-dialog')?.close()};
+
+async function resumeDtAuthAction(){
+  const action=sessionStorage.getItem('dreamtaily.auth.pending_action');
+  if(!action||!await dtPermanentUser())return;
+  sessionStorage.removeItem('dreamtaily.auth.pending_action');
+  history.replaceState({},'',location.pathname+location.search.replace(/[?&]auth_resume=1(?:&|$)/,'').replace(/[?&]$/,''));
+  if(action==='add_story_same')return window.beginAddStoryWithSameProtagonist?.();
+  if(action==='add_story_character')return window.beginAddStory?.();
+  if(action==='checkout')return window.openDtCheckout?.();
+  if(action==='new_character')return startAnother(true);
+}
+
+document.getElementById('dt-auth-form')?.addEventListener('submit',async event=>{
+  event.preventDefault();
+  const button=document.getElementById('dt-auth-submit'),email=document.getElementById('dt-auth-email').value.trim();
+  button.disabled=true;showError('dt-auth-error',null);
+  try{
+    const redirect=new URL(location.href);redirect.searchParams.set('auth_resume','1');
+    const {error}=await getSupabase().auth.updateUser({email},{emailRedirectTo:redirect.href});
+    if(error)throw error;
+    showError('dt-auth-error','Controlla la posta e apri il link: il personaggio e il racconto resteranno qui.');
+    document.getElementById('dt-auth-error').classList.add('visible');
+  }catch(error){console.error('[DreamTaily] Account link error:',error);showError('dt-auth-error',String(error?.message||'').toLowerCase().includes('already')?'Questa email appartiene già a un account. Il recupero sicuro del lavoro richiede l’accesso dall’area personale.':'Non sono riuscito a inviare il link. Controlla l’email e riprova.')}finally{button.disabled=false}
+});
 
 async function getAccessToken(){
   await ensureUser();
@@ -2834,7 +2888,8 @@ async function resumeDraftBook(){
 }
 
 
-function startAnother(){
+async function startAnother(accountConfirmed=false){
+  if(!accountConfirmed&&app.savedCharacters.length>=1&&!await requireDtAccount('new_character'))return;
   app.style=MVP_VISUAL_STYLE_ID;app.type='real_person';app.previewId=null;app.previewUrl=null;app.characterAssetId=null;app.candidateCharacterAssetId=null;app.selectedStoryId=null;
   document.querySelectorAll('input,textarea').forEach(el=>el.value='');
   document.getElementById('age-group').value='';
@@ -2844,7 +2899,7 @@ function startAnother(){
   selectStyle(MVP_VISUAL_STYLE_ID);selectType('real_person');showScreen('creator');
 }
 
-document.addEventListener('DOMContentLoaded',async()=>{await loadStoryCatalog();detectDraftBook();detectSavedCharactersForHomepage()});
+document.addEventListener('DOMContentLoaded',async()=>{await loadStoryCatalog();detectDraftBook();detectSavedCharactersForHomepage();await resumeDtAuthAction()});
 window.DreamTailyCharacterFlow={
   generate:generateCharacter,
   save:saveCharacter,
@@ -3407,6 +3462,7 @@ window.goToDtBookPage=function(index){
 };
 
 window.beginAddStory=async function(){
+  if(!await requireDtAccount('add_story_character'))return;
   app.bookFlowMode='add_story';
   app.selectedStoryId=null;
   app.activeStoryDefinition=null;
@@ -3452,6 +3508,7 @@ function renderDtBookContext(screenName=null){
 window.renderDtBookContext=renderDtBookContext;
 
 window.beginAddStoryWithSameProtagonist=async function(){
+  if(!await requireDtAccount('add_story_same'))return;
   const current=app.bookStories.find(item=>item.id===app.activeBookStoryId)||app.bookStories.at(-1);
   const assignment=getStoryProtagonistAssignment(current);
   const character=getSavedCharacterById(assignment?.character_asset_id);
@@ -3510,7 +3567,7 @@ window.renderBookWorkspace=async function(){
           <span class="dt-next-icon">＋</span><strong>Un altro personaggio</strong><span>Scegli un personaggio della famiglia oppure creane uno nuovo.</span>
         </button>
         <button class="dt-next-card" type="button" onclick="openDtCheckout()" ${allComplete?'':'disabled'}>
-          <span class="dt-next-icon">✓</span><strong>Il libro è completo</strong><span>${allComplete?'Scegli la copertina e prepara il libro.':'Completa prima tutte le storie già inserite.'}</span>
+          <span class="dt-next-icon">✨</span><strong>Continua e genera il libro finale</strong><span>${allComplete?'Conferma il progetto e avvia la generazione IA delle illustrazioni finali.':'Completa prima tutte le storie già inserite.'}</span>
         </button>
       </div>
       ${allComplete?'':'<div class="book-note">Completa tutte le storie prima del checkout.</div>'}
@@ -3542,6 +3599,7 @@ window.renderBookSummary=function(){
     </div>
 
     <div class="dt-reader-shell ${spread?'with-spread':''}">
+      <div class="dt-preview-notice"><span class="dt-preview-badge">ANTEPRIMA</span><div><strong>Questa è un’anteprima del tuo libro</strong>Testi, scelte e composizione sono già quelli della tua storia. Dopo la conferma, DreamTaily genererà con l’IA le illustrazioni finali personalizzate con i tuoi personaggi.</div></div>
       <div class="dt-reader-nav" style="margin:0 0 16px">
         <button class="btn btn-ghost" ${dtBookPage===0?"disabled":""}
           onclick="goToDtBookPage(${dtBookPage-1})">← Indietro</button>
@@ -3575,7 +3633,7 @@ window.renderBookSummary=function(){
 
       <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
         <button class="btn btn-soft" onclick="modifyDtBook()">← Modifica questa storia</button>
-        <button class="btn btn-primary" onclick="beginAddStory()">Aggiungi un’altra storia</button>
+        <button class="btn btn-primary" onclick="beginAddStory()">Aggiungi un altro racconto</button>
         <button class="btn btn-ghost" onclick="renderBookWorkspace()">Riepilogo libro</button>
       </div>
     </div>
@@ -3607,6 +3665,7 @@ window.selectDtBookCoverLayout=async function(name){updateDtPayButton();dtBookCo
 window.selectDtBookCoverColor=async function(id){updateDtPayButton();dtBookCoverSelection={...dtBookCoverSelection,color_id:id};await openDtCheckout()};
 
 window.openDtCheckout=async function(){
+  if(!await requireDtAccount('checkout'))return;
   await loadBookStories();
   const complete=app.bookStories.length>0&&app.bookStories.every(item=>
     item.status==='ready'&&item.content_snapshot?.meta&&Array.isArray(item.content_snapshot?.pages)
@@ -3636,6 +3695,7 @@ window.openDtCheckout=async function(){
         <div class="phase">Libro digitale · €9,90</div>
         <h1 class="step-title">Scegli la copertina del libro</h1>
         <p class="intro">Inserisci il titolo generale. In copertina compariranno automaticamente tutti i protagonisti del libro, una sola volta ciascuno.</p>
+        <div class="dt-preview-notice"><span class="dt-preview-badge">LIBRO FINALE</span><div><strong>La conferma avvierà la generazione tramite IA</strong>Le illustrazioni definitive saranno create dopo la conferma usando i personaggi e le scelte approvate nell’anteprima.</div></div>
         <label for="dt-cover-title">Titolo del libro</label><input class="input" id="dt-cover-title" maxlength="${selectedLayout?.max_title||44}" value="${escapeHtml(dtBookCoverSelection.title)}" oninput="updateDtBookCoverField('title',this.value)">
         <h3 style="margin:20px 0 4px">Colore di fondo</h3><div class="dt-cover-colors">${colors}</div><div class="dt-cover-picker">${cards}</div>
         <p class="book-note">Solo i protagonisti unici entreranno nell’immagine. Titolo, logo e DreamTaily saranno applicati dopo la generazione.</p>

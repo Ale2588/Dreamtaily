@@ -60,7 +60,7 @@ test('the book workspace owns add-story and checkout actions', () => {
   assert.match(workspace, /Come vuoi continuare il tuo libro/);
   assert.match(workspace, /Stesso protagonista/);
   assert.match(workspace, /Un altro personaggio/);
-  assert.match(workspace, /Il libro è completo/);
+  assert.match(workspace, /Continua e genera il libro finale/);
   assert.match(workspace, /item\.status==='ready'/);
   assert.match(workspace, /item\.content_snapshot\?\.meta/);
 });
