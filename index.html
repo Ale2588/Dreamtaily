@@ -394,8 +394,20 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dt-saved-book-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
 .dt-saved-book-actions .btn{padding:10px 13px;border-radius:12px;font-size:13px}
 .dt-books-empty{padding:24px;border:1px dashed #d8cab5;border-radius:20px;background:rgba(255,253,248,.65);text-align:center;color:var(--muted);grid-column:1/-1}
-.dt-preview-notice{display:flex;gap:12px;align-items:flex-start;margin:0 0 16px;padding:14px 16px;border:1px solid #efc78e;border-radius:16px;background:#fff7df;color:#694b20}.dt-preview-notice strong{display:block;margin-bottom:2px}.dt-preview-badge{flex:0 0 auto;border-radius:999px;background:#7a5422;color:#fff;padding:5px 8px;font-size:10px;font-weight:900;letter-spacing:.08em}.dt-auth-dialog{width:min(540px,calc(100% - 30px));border:0;border-radius:24px;padding:0;box-shadow:0 28px 90px rgba(32,24,18,.32)}.dt-auth-dialog::backdrop{background:rgba(30,24,20,.58)}.dt-auth-body{padding:clamp(24px,5vw,38px)}.dt-auth-body h2{font-family:'Faustina',Georgia,serif;font-size:34px;line-height:1.05;margin:8px 0 10px}.dt-auth-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
-@media(max-width:760px){.dt-books-grid{grid-template-columns:1fr}.dt-saved-book{grid-template-columns:105px 1fr}.dt-books-tools{grid-template-columns:1fr}.dt-books-tools input,.dt-books-tools select{width:100%}}
+.dt-preview-notice{display:flex;gap:12px;align-items:flex-start;margin:0 0 16px;padding:14px 16px;border:1px solid #efc78e;border-radius:16px;background:#fff7df;color:#694b20}.dt-preview-notice strong{display:block;margin-bottom:2px}.dt-preview-badge{flex:0 0 auto;border-radius:999px;background:#7a5422;color:#fff;padding:5px 8px;font-size:10px;font-weight:900;letter-spacing:.08em}
+.dt-auth-dialog{position:fixed;inset:0;width:min(840px,calc(100% - 32px));max-height:min(680px,calc(100% - 32px));margin:auto;border:0;border-radius:30px;padding:0;overflow:hidden;background:#fffaf0;box-shadow:0 32px 100px rgba(32,24,18,.38)}
+.dt-auth-dialog::backdrop{background:rgba(30,24,20,.66);backdrop-filter:blur(5px)}
+.dt-auth-shell{display:grid;grid-template-columns:minmax(270px,.88fr) minmax(360px,1.12fr);min-height:520px}
+.dt-auth-art{position:relative;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;padding:34px;color:#fff;background:linear-gradient(155deg,#315b58 0%,#517e72 54%,#e6b56d 135%)}
+.dt-auth-art::before,.dt-auth-art::after{content:"";position:absolute;border-radius:50%;background:rgba(255,239,196,.2)}
+.dt-auth-art::before{width:230px;height:230px;left:-96px;top:-72px}.dt-auth-art::after{width:150px;height:150px;right:-48px;top:80px}
+.dt-auth-art img{position:absolute;z-index:1;left:50%;top:45%;width:min(104%,350px);max-height:310px;object-fit:contain;transform:translate(-50%,-50%);filter:drop-shadow(0 18px 20px rgba(23,44,40,.24))}
+.dt-auth-art-copy{position:relative;z-index:2}.dt-auth-art-kicker{display:inline-flex;align-items:center;gap:7px;margin-bottom:10px;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.dt-auth-art-kicker::before{content:"\2726";color:#f8cf75;font-size:17px}.dt-auth-art h3{font-family:'Faustina',Georgia,serif;font-size:28px;line-height:1.08;margin:0 0 9px}.dt-auth-art p{font-size:14px;line-height:1.55;color:rgba(255,255,255,.86)}
+.dt-auth-body{position:relative;display:flex;flex-direction:column;justify-content:center;padding:clamp(30px,5vw,54px)}
+.dt-auth-close{position:absolute;top:18px;right:18px;width:38px;height:38px;border:1px solid #e4d7c5;border-radius:50%;background:#fffaf0;color:#6f5b47;font-size:22px;line-height:1;cursor:pointer}.dt-auth-close:hover{background:#f5ead9;color:#3a2a1d}
+.dt-auth-body h2{font-family:'Faustina',Georgia,serif;font-size:clamp(32px,4vw,42px);line-height:1.02;margin:9px 0 13px;color:#34271d}.dt-auth-body .intro{margin-bottom:24px;line-height:1.6}.dt-auth-body label{font-weight:800;margin-bottom:7px}.dt-auth-body .input{background:#fff;border-color:#d9c9b3}.dt-auth-promise{display:flex;align-items:flex-start;gap:9px;margin:15px 0 0;padding:11px 13px;border-radius:13px;background:#edf5ef;color:#3e6657;font-size:13px;line-height:1.45}.dt-auth-promise::before{content:"\2713";display:grid;place-items:center;flex:0 0 20px;height:20px;border-radius:50%;background:#5b8874;color:#fff;font-size:12px;font-weight:900}
+.dt-auth-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}.dt-auth-actions .btn-primary{box-shadow:0 8px 18px rgba(194,87,67,.2)}
+@media(max-width:760px){.dt-books-grid{grid-template-columns:1fr}.dt-saved-book{grid-template-columns:105px 1fr}.dt-books-tools{grid-template-columns:1fr}.dt-books-tools input,.dt-books-tools select{width:100%}.dt-auth-dialog{width:min(520px,calc(100% - 20px));max-height:calc(100% - 20px);border-radius:24px;overflow:auto}.dt-auth-shell{grid-template-columns:1fr;min-height:0}.dt-auth-art{min-height:190px;padding:22px 26px}.dt-auth-art img{width:190px;max-height:170px;left:auto;right:-4px;top:48%;transform:translateY(-50%);opacity:.92}.dt-auth-art-copy{max-width:61%}.dt-auth-art h3{font-size:23px}.dt-auth-art p{display:none}.dt-auth-body{padding:30px 25px 26px}.dt-auth-close{top:13px;right:13px}.dt-auth-body h2{font-size:32px;padding-right:22px}}
 
 .dt-loading{padding:14px;border-radius:13px;background:#e4f0ef;color:#356f70;font-weight:800;margin-top:12px}
 .dt-decision-option.asset-error{background:#f8f3ea;min-height:110px}
@@ -852,17 +864,29 @@ body.dreamtaily-configurator-open{overflow:hidden}
 </div>
 </section>
 
-<dialog class="dt-auth-dialog" id="dt-auth-dialog">
-  <form class="dt-auth-body" id="dt-auth-form">
-    <div class="phase">Il tuo spazio DreamTaily</div>
-    <h2>Salva il mondo che hai creato</h2>
-    <p class="intro">Crea gratuitamente il tuo spazio personale: conserveremo il personaggio e il racconto che hai già creato, così potrai aggiungere nuove avventure senza perdere il lavoro fatto.</p>
-    <label for="dt-auth-email">Email</label>
-    <input class="input" id="dt-auth-email" type="email" required autocomplete="email" placeholder="nome@esempio.it">
-    <div class="error" id="dt-auth-error"></div>
-    <div class="dt-auth-actions"><button class="btn btn-ghost" type="button" onclick="closeDtAuthGate()">Non ora</button><button class="btn btn-primary" id="dt-auth-submit" type="submit">Crea il mio spazio</button></div>
-    <p class="small" style="margin-top:12px">Ti invieremo un link di conferma. Questo dispositivo conserverà il lavoro durante il passaggio.</p>
-  </form>
+<dialog class="dt-auth-dialog" id="dt-auth-dialog" aria-labelledby="dt-auth-title">
+  <div class="dt-auth-shell">
+    <aside class="dt-auth-art" aria-hidden="true">
+      <img src="assets/home/bambino-carta.webp" alt="">
+      <div class="dt-auth-art-copy">
+        <div class="dt-auth-art-kicker">La storia continua</div>
+        <h3>Il tuo piccolo mondo resta con te.</h3>
+        <p>Personaggi, racconti e nuove avventure, riuniti in un posto tutto vostro.</p>
+      </div>
+    </aside>
+    <form class="dt-auth-body" id="dt-auth-form">
+      <button class="dt-auth-close" type="button" onclick="closeDtAuthGate()" aria-label="Chiudi">×</button>
+      <div class="phase">Il tuo spazio DreamTaily</div>
+      <h2 id="dt-auth-title">Salva il mondo che hai creato</h2>
+      <p class="intro">Crea gratuitamente il tuo spazio personale per aggiungere nuove avventure senza perdere il personaggio e il racconto che hai già creato.</p>
+      <label for="dt-auth-email">La tua email</label>
+      <input class="input" id="dt-auth-email" type="email" required autocomplete="email" placeholder="nome@esempio.it">
+      <div class="dt-auth-promise">Quello che hai fatto finora è già al sicuro e resterà collegato al tuo spazio.</div>
+      <div class="error" id="dt-auth-error"></div>
+      <div class="dt-auth-actions"><button class="btn btn-ghost" type="button" onclick="closeDtAuthGate()">Non ora</button><button class="btn btn-primary" id="dt-auth-submit" type="submit">Crea il mio spazio</button></div>
+      <p class="small" style="margin-top:12px">Ti invieremo un link di conferma. Nessuna password da ricordare.</p>
+    </form>
+  </div>
 </dialog>
 
 
