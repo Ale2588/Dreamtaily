@@ -1774,6 +1774,7 @@ async function saveCharacter(){
     if(referenceError) throw referenceError;
 
     app.characterAssetId=asset.id;
+    app.candidateCharacterAssetId=asset.id;
     app.previewUrl=canonical.signed_url||app.previewUrl;
     document.getElementById('wow-image').src=app.previewUrl;
     document.getElementById('saved-note').classList.add('visible');
@@ -2239,7 +2240,7 @@ async function persistSelectedStory(){
   if(!story) throw new Error('STORY_REQUIRED');
   await loadStoryDefinition(story);
   if(!story._versionId||!story._contract) throw new Error('STORY_VERSION_REQUIRED');
-  const candidateCharacterId=app.candidateCharacterAssetId||app.characterAssetId;
+  const candidateCharacterId=app.characterAssetId||app.candidateCharacterAssetId;
   if(!candidateCharacterId) throw new Error('CHARACTER_ASSET_REQUIRED');
 
   const client=getSupabase();
