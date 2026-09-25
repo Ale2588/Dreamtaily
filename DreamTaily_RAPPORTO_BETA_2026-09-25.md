@@ -1,6 +1,6 @@
 # DreamTaily — Rapporto attività beta chiusa
 
-Data: 25 settembre 2026  
+Data: 25 settembre 2026
 Direttiva: `DreamTaily_istruzioni_Codex_beta_chiusa.md`
 
 ## Sintesi

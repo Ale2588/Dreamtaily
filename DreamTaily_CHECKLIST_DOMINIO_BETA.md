@@ -1,6 +1,6 @@
 # DreamTaily — Checklist dominio reale e autenticazione beta
 
-Data: 25 settembre 2026  
+Data: 25 settembre 2026
 Progetto Supabase: `hirzbtruxvjzmcnncvmv`
 
 ## Esito della verifica sul codice
