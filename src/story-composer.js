@@ -372,10 +372,14 @@ export function composeStory({
   }
 
   const path = resolveStoryPath(story, choices);
-  const pages = path.map((step, index) => ({
+  // Branch steps belong to the interactive composition flow: they select the
+  // next story step, but they are not narrative pages of the finished book.
+  // Filtering here keeps reader, renderer and PDF on the same canonical list.
+  const narrativePath = path.filter((step) => step.decision?.type !== "branch");
+  const pages = narrativePath.map((step, index) => ({
     id: `p${index + 1}`,
     step_key: step.key,
-    chapter: step.chapter ?? index + 1,
+    chapter: index + 1,
     title: resolveStoryMarkers(step.title, choices, catalog),
     text: resolveStepText({ step, choices, contentByRef, catalog }),
     scene: resolveScene({ stepKey: step.key, choices, scenes, catalog }),

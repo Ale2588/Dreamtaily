@@ -250,6 +250,7 @@ Deno.serve(async(req:Request)=>{
   if(req.method!=="POST") return reply(405,{error:"METHOD_NOT_ALLOWED"});
   try{
     const user=await authenticate(req);
+    if(user.is_anonymous===true) return reply(403,{error:"AUTH_ANONYMOUS"});
     const body=await req.json().catch(()=>({}));
     const bookId=String(body.book_id||"").trim();
     const key=String(body.idempotency_key||"").trim();
@@ -266,6 +267,11 @@ Deno.serve(async(req:Request)=>{
     const {data:owned,error:ownedError}=await svc.from("books").select("id").eq("id",bookId).eq("profile_id",user.id).maybeSingle();
     if(ownedError) throw ownedError;
     if(!owned) throw new Error("BOOK_NOT_FOUND");
+    const {data:entitlement,error:entitlementError}=await svc.from("book_entitlements")
+      .select("id").eq("id",job.entitlement_id).eq("book_id",bookId)
+      .eq("user_id",user.id).eq("state","consumed").maybeSingle();
+    if(entitlementError) throw entitlementError;
+    if(!entitlement) throw new Error("ENTITLEMENT_REQUIRED");
     if(regeneratePageId){
       if(regeneratePageId!=="book__cover") return reply(400,{error:"REGENERATE_PAGE_NOT_ALLOWED"});
       if(!start) return reply(400,{error:"REGENERATE_START_REQUIRED"});
@@ -355,7 +361,8 @@ Deno.serve(async(req:Request)=>{
     });
   }catch(e){
     const d=msg(e);
-    const status=d.startsWith("AUTH_")?401:d==="BOOK_NOT_FOUND"?404:/SNAPSHOT|CHECKOUT_REQUIRED|MISSING/.test(d)?409:500;
+    const status=d==="AUTH_ANONYMOUS"||d==="ENTITLEMENT_REQUIRED"?403:
+      d.startsWith("AUTH_")?401:d==="BOOK_NOT_FOUND"?404:/SNAPSHOT|CHECKOUT_REQUIRED|MISSING/.test(d)?409:500;
     console.error("render-book-v5",d);
     return reply(status,{error:d});
   }

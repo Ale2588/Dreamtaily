@@ -137,23 +137,25 @@ test("composes resolved pages and visual layers", () => {
     },
   });
 
-  assert.equal(book.pages.length, 3);
+  assert.equal(book.pages.length, 2);
+  assert.deepEqual(book.pages.map((page) => page.step_key), ["s1", "s3_felci"]);
+  assert.deepEqual(book.pages.map((page) => page.chapter), [1, 2]);
   assert.equal(book.pages[0].text, "Ciao Lia.");
   assert.equal(book.pages[0].scene.bg, "s1.png");
   assert.equal(book.pages[0].scene.prompt_environment, "Bosco quieto");
   assert.equal(book.pages[0].scene.prompt_moment, "Lia ascolta");
   assert.equal(book.pages[0].scene.authoring_note, "La campanella deve restare visibile accanto a Lia");
   assert.deepEqual(book.meta.choices.setup, {});
-  assert.equal(book.pages[2].text, "Etto arriva. Ora Etto accompagna Lia.");
+  assert.equal(book.pages[1].text, "Etto arriva. Ora Etto accompagna Lia.");
   assert.deepEqual(
-    book.pages[2].scene.layers.map((layer) => layer.role),
+    book.pages[1].scene.layers.map((layer) => layer.role),
     ["helper", "protagonist"]
   );
   assert.equal(book.cover.title, "Il bosco dei sussurri");
   assert.equal(book.cover.subtitle, "Un’avventura di Lia");
   assert.equal(book.cover.layout, null);
   assert.equal(book.cover.brand_variant, null);
-  assert.equal((bookToMarkdown(book).match(/---/g) || []).length, 2);
+  assert.equal((bookToMarkdown(book).match(/---/g) || []).length, 1);
 });
 
 test("rejects a missing branch choice", () => {
@@ -170,6 +172,44 @@ test("rejects a missing branch choice", () => {
       error instanceof StoryCompositionError &&
       error.code === "BRANCH_CHOICE_REQUIRED"
   );
+});
+
+test("three branch choices steer the path but create zero final question pages", () => {
+  const branchingStory = {
+    slug: "three-forks",
+    title: "Tre scelte",
+    start: "q1",
+    steps: [
+      { key: "q1", title: "Prima domanda", content_ref: "q1", decision: { type: "branch", key: "one", options: [{ key: "a", next: "a1" }, { key: "x", next: "x1" }] } },
+      { key: "a1", title: "Conseguenza A", content_ref: "a1", next: "q2" },
+      { key: "x1", title: "Conseguenza X", content_ref: "x1", next: "q2" },
+      { key: "q2", title: "Seconda domanda", content_ref: "q2", decision: { type: "branch", key: "two", options: [{ key: "b", next: "b1" }, { key: "y", next: "y1" }] } },
+      { key: "b1", title: "Conseguenza B", content_ref: "b1", next: "q3" },
+      { key: "y1", title: "Conseguenza Y", content_ref: "y1", next: "q3" },
+      { key: "q3", title: "Terza domanda", content_ref: "q3", decision: { type: "branch", key: "three", options: [{ key: "c", next: "c1" }, { key: "z", next: "z1" }] } },
+      { key: "c1", title: "Conseguenza C", content_ref: "c1", next: null },
+      { key: "z1", title: "Conseguenza Z", content_ref: "z1", next: null },
+    ],
+  };
+  const refs = Object.fromEntries(branchingStory.steps.map((step) => [step.content_ref, `Testo ${step.key}`]));
+  const branchingScenes = { scenes: Object.fromEntries(branchingStory.steps.map((step) => [step.key, {
+    background_ref: `${step.key}.png`,
+    slots: [{ role: "protagonist", pose: "in_piedi", x: .5, y: .9, scale: .3, z: 1 }],
+  }])) };
+  const book = composeStory({
+    story: branchingStory,
+    scenes: branchingScenes,
+    contentByRef: refs,
+    choices: {
+      story: branchingStory.slug,
+      protagonist: { name: "Lia", asset_ref: "lia.png" },
+      branches: { one: "a", two: "b", three: "c" },
+    },
+  });
+
+  assert.deepEqual(book.pages.map((page) => page.step_key), ["a1", "b1", "c1"]);
+  assert.equal(book.pages.filter((page) => page.step_key.startsWith("q")).length, 0);
+  assert.deepEqual(book.pages.map((page) => page.chapter), [1, 2, 3]);
 });
 
 test("rejects a helper unavailable on the chosen branch", () => {

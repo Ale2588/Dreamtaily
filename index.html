@@ -4124,12 +4124,22 @@ window.completeDtCheckout=async function(){
     const {data,error}=await getSupabase().functions.invoke("checkout-book",{
       body:{book_id:app.bookId,email:dtCheckoutEmail,idempotency_key:`checkout-${app.bookId}`,cover:dtBookCoverSelection}
     });
-    if(error) throw error;
+    if(error){
+      let code="";
+      try{code=String((await error.context?.clone?.().json())?.error||"");}catch(_ignored){}
+      const checkoutError=new Error(code||error.message||"CHECKOUT_FAILED");
+      checkoutError.code=code;
+      throw checkoutError;
+    }
     if(!data?.render_id) throw new Error("CHECKOUT_EMPTY_RESPONSE");
     await renderDtBookStatus(data);
   }catch(error){
     console.error("[DreamTaily] Checkout confirmation error:",error);
-    showError("checkout-error","Non sono riuscito a confermare il libro. La bozza è intatta: puoi riprovare senza perdere nulla.");
+    const code=error?.code||error?.message||"";
+    const invitedOnly=code.includes("ENTITLEMENT_REQUIRED")||code.includes("AUTH_ANONYMOUS");
+    showError("checkout-error",invitedOnly
+      ?"La creazione dei libri completi è aperta solo ai tester invitati. Scrivici per partecipare. Il tuo lavoro è salvo."
+      :"Non sono riuscito a confermare il libro. La bozza è intatta: puoi riprovare senza perdere nulla.");
     button.disabled=false; button.textContent="Riprova la conferma";
   }
 };

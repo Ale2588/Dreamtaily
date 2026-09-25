@@ -18,9 +18,8 @@ test('preview respects allowed catalog and requires explicit choices',()=>{
 test('real composer preserves selected cast, markers, path and image layers without mutating draft',()=>{
  const before=JSON.stringify(bundle);
  const first=composeEditorPreview(bundle,catalog,cast,0),second=composeEditorPreview(bundle,catalog,cast,1);
- assert.equal(first.pages[0].title,'Cosa decide Luca?');
- assert.equal(first.pages[0].text,'Luca segue Macchia.');
- assert.equal(first.pages[1].text,'Impronte');assert.equal(second.pages[1].text,'Sentiero');
+ assert.equal(first.pages.some(page=>page.step_key==='a'),false);
+ assert.equal(first.pages[0].text,'Impronte');assert.equal(second.pages[0].text,'Sentiero');
  assert.equal(first.pages[0].scene.layers[1].src,'assets/macchia.png');
  assert.equal(first.pages[0].scene.bg,'stories/test/scene.png');
  assert.equal(JSON.stringify(bundle),before);

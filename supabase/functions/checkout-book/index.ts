@@ -32,6 +32,7 @@ Deno.serve(async(req:Request)=>{
   if(req.method!=="POST") return reply(405,{error:"METHOD_NOT_ALLOWED"});
   try{
     const user=await authenticate(req);
+    if(user.is_anonymous===true) return reply(403,{error:"AUTH_ANONYMOUS"});
     const body=await req.json().catch(()=>({}));
     const bookId=String(body.book_id||"").trim();
     const email=String(body.email||"").trim().toLowerCase();
@@ -120,7 +121,8 @@ Deno.serve(async(req:Request)=>{
     return reply(201,finalized);
   }catch(error){
     const detail=message(error);
-    const status=detail.startsWith("AUTH_")?401:detail==="BOOK_NOT_FOUND"?404:
+    const status=detail==="AUTH_ANONYMOUS"||detail.includes("ENTITLEMENT_REQUIRED")?403:
+      detail.startsWith("AUTH_")?401:detail==="BOOK_NOT_FOUND"?404:
       /INCOMPLETE|NOT_EDITABLE|MISSING/.test(detail)?409:500;
     console.error("checkout-book-v1",detail);
     return reply(status,{error:detail});

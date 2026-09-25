@@ -16,6 +16,7 @@
     "test:homepage-feedback": "node --test tests/homepage-feedback.test.mjs",
     "test:golden": "node tools/test_story_composer_golden.mjs .",
     "test:gate-d-live": "node --test tests/gate-d-runtime-live.test.mjs",
+    "test:live": "node tools/run-tests.mjs live",
     "test:book-instances": "node --test tests/book-instances.test.mjs",
     "test:authoring-validator": "node --test tests/story-authoring-validator.test.mjs",
     "test:authoring-api": "node --test tests/authoring-admin-api.test.mjs",
@@ -26,6 +27,6 @@
     "test:render-planning": "node --test tests/render-prompts.test.mjs tests/render-job.test.mjs",
     "test:render-function": "node --test tests/render-book-multi-story.test.mjs tests/checkout-boundary.test.mjs tests/final-delivery.test.mjs",
     "test:render-engine": "npm run test:identity && npm run test:mask && npm run test:render-planning && npm run test:render-function",
-    "test": "npm run test:composer && npm run test:authoring-validator && npm run test:authoring-api && npm run test:authoring-publish && npm run test:reader && npm run test:book-gabbie && npm run test:editor-layout && npm run test:final-layout && npm run test:cover-layout && npm run test:book-cover-selection && npm run test:book-status-cta && npm run test:editor-story-map && npm run test:narrative-copy && npm run test:homepage-feedback && npm run test:backoffice-shell && npm run test:book-instances && npm run test:render-engine"
+    "test": "node tools/run-tests.mjs unit"
   }
 }

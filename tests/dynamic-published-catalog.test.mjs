@@ -2,12 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-import { composeStory } from "../src/story-composer.js";
-
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const publishedStorySource = await readFile(new URL("../supabase/functions/published-story/index.ts", import.meta.url), "utf8");
-const endpoint = "https://hirzbtruxvjzmcnncvmv.supabase.co/functions/v1/published-story";
-const headers = { apikey: "sb_publishable_baZvlGyMLBkkiOwHina6CA_HB59Lclw" };
 
 test("Book Creator loads every published story and pins its immutable version", () => {
   assert.match(html, /fetch\(`\$\{SUPABASE_URL\}\/functions\/v1\/published-story`/);
@@ -63,41 +59,4 @@ test("catalog filters use OR within groups and AND between groups", () => {
   assert.match(html, /return ageMatch&&typeMatch/);
   assert.match(html, /Azzera filtri/);
   assert.match(html, /story-result-count/);
-});
-
-test("the live catalog hides archived Bosco and exposes Lucciola", async () => {
-  const response = await fetch(endpoint, { headers });
-  assert.equal(response.status, 200);
-  const payload = await response.json();
-  const slugs = payload.stories.map((story) => story.slug);
-  assert.ok(!slugs.includes("il-bosco-dei-sussurri"));
-  assert.ok(slugs.includes("collaudo-pubblicazione-bo-08"));
-});
-
-test("the published Lucciola contract composes without setup or branch choices", async () => {
-  const response = await fetch(`${endpoint}?slug=collaudo-pubblicazione-bo-08`, { headers });
-  assert.equal(response.status, 200);
-  const payload = await response.json();
-
-  assert.ok(payload.version_id);
-  assert.ok(payload.version_number >= 2);
-  assert.equal(payload.contract.story.title, "La Lucciola di Prova");
-
-  const book = composeStory({
-    story: payload.contract.story,
-    scenes: payload.contract.scenes,
-    contentByRef: payload.contract.contentByRef,
-    catalog: payload.contract.catalog,
-    choices: {
-      story: payload.contract.story.slug,
-      style: "papercut",
-      protagonist: { name: "Etto", asset_ref: "assets/test/etto.png" },
-      setup: {},
-      cast: {},
-      branches: {},
-    },
-  });
-
-  assert.equal(book.pages.length, 1);
-  assert.equal(book.pages.some((page) => /\[[^\]]+\]/.test(page.text)), false);
 });
