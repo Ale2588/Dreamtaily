@@ -1,4 +1,5 @@
 import { catalogoGabbie } from "./gabbie.js";
+import { testoCompatibileConGabbia } from "./testo-gabbia.js";
 
 export const FAMIGLIE_ATTIVE = Object.freeze({ scena: true, figura: true, dissolvenza: true });
 
@@ -25,9 +26,13 @@ export function gabbieDisponibili(testo, contesto = {}) {
     ? gabbie.find((item) => item.nome === contesto.gabbiaPrecedente)
     : contesto.gabbiaPrecedente;
   const usate = new Set(contesto.gabbieUsate || []);
+  const variantiTesto = typeof testo === "string"
+    ? [testo]
+    : Object.values(testo || {}).filter((value) => typeof value === "string");
 
   return gabbie
     .filter((gabbia) => lunghezza <= gabbia.max)
+    .filter((gabbia) => variantiTesto.every((value) => testoCompatibileConGabbia(gabbia, value)))
     .filter((gabbia) => famiglie[gabbia.famiglia] !== false)
     .filter((gabbia) => !(gabbia.nome === "Panoramica" && contesto.voltoInPiega === true))
     .filter((gabbia) => !(gabbia.nome === "Velo" && usate.has("Velo")))

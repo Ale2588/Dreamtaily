@@ -1,6 +1,7 @@
 import { caricaGabbie, catalogoGabbie, gabbiaPerNome } from "./gabbie.js";
 import { latoDellaGabbia, lunghezzaEditoriale } from "./selettore.js";
 import { renderDoppia, stiliDoppia } from "./doppia.js";
+import { testoCompatibileConGabbia } from "./testo-gabbia.js";
 
 export function inizializzaEditorGabbie(json) {
   return caricaGabbie(json);
@@ -47,6 +48,7 @@ export function modelloImpaginazione({ story, scenes, contentByRef, stepKey }) {
 
   const gabbie = catalogoGabbie().gabbie.flatMap((gabbia) => {
     if (lunghezza > gabbia.max) return [];
+    if (!testoCompatibileConGabbia(gabbia, testo)) return [];
     if (gabbia.famiglia === "figura" && !sceneSlots.length) return [];
     if (gabbia.nome === "Velo" && usedElsewhere.has("Velo")) return [];
     if (previous.some((item) => {
@@ -79,6 +81,8 @@ export function validaImpaginazione({ story, scenes, contentByRef }) {
     }
     if (lunghezzaEditoriale(testoStep(contentByRef, step)) > gabbia.max) {
       issues.push({ code: "LAYOUT_TEXT_OVERFLOW", step: step.key, max: gabbia.max });
+    } else if (!testoCompatibileConGabbia(gabbia, testoStep(contentByRef, step), scelta.specchiata === true)) {
+      issues.push({ code: "LAYOUT_TEXT_DIVISION", step: step.key });
     }
     if (gabbia.famiglia === "figura") {
       const available = slotsScena(scenes, step.key);

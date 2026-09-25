@@ -40,7 +40,7 @@ test("the editor rejects missing, overflowing and incomplete figure choices", ()
     { key: "a", content_ref: "chapters/a.md" },
     { key: "b", content_ref: "chapters/b.md", layout: { gabbia: "Ritratto" } },
   ] };
-  const longContent = { ...contentByRef, "chapters/b.md": "x".repeat(71) };
+  const longContent = { ...contentByRef, "chapters/b.md": "x".repeat(91) };
   const codes = validaImpaginazione({ story, scenes, contentByRef: longContent }).map((issue) => issue.code);
   assert.ok(codes.includes("LAYOUT_REQUIRED"));
   assert.ok(codes.includes("LAYOUT_TEXT_OVERFLOW"));
@@ -49,7 +49,7 @@ test("the editor rejects missing, overflowing and incomplete figure choices", ()
 
 test("an invalid saved choice remains in the model so the UI can explain it", () => {
   const story = { steps: [{ key: "a", content_ref: "chapters/a.md", layout: { gabbia: "Ritratto", figura_slot: "protagonist" } }] };
-  const longContent = { "chapters/a.md": "x".repeat(71) };
+  const longContent = { "chapters/a.md": "x".repeat(91) };
   const model = modelloImpaginazione({ story, scenes, contentByRef: longContent, stepKey: "a" });
   assert.equal(model.scelta.gabbia, "Ritratto");
   assert.ok(!model.gabbie.some((item) => item.nome === "Ritratto"));

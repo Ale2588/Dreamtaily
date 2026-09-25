@@ -1,4 +1,6 @@
 {
+  "versione": "beta30",
+  "stato": "Valori definitivi. Sostituiscono src/book/gabbie.json dopo l’approvazione della tavola.",
   "formato": {
     "doppia": {
       "w": 1240,
@@ -30,6 +32,30 @@
       "facciataReale": "240 × 180 mm"
     }
   },
+  "griglia": {
+    "colonnaSinistra": {
+      "x": 62,
+      "w": 436
+    },
+    "colonnaDestra": {
+      "x": 742,
+      "w": 436
+    },
+    "attacchi": {
+      "alto": 62,
+      "prosa": 90,
+      "medio": 118,
+      "didascalia": 150
+    },
+    "limiteTesto": {
+      "xSinistraMax": 566,
+      "xDestraMin": 674,
+      "yMin": 46,
+      "yMax": 419
+    },
+    "appoggioFigura": 419,
+    "regola": "Due colonne da 436, specchiate rispetto alla piega. Ogni altezza di testo è un numero intero di righe del proprio registro."
+  },
   "colori": {
     "carta": "#fdf5e6",
     "testo": "#22321f",
@@ -37,6 +63,12 @@
   },
   "tipografia": {
     "famiglia": "Faustina",
+    "allineamento": "sinistra, bandiera a destra, senza sillabazione automatica",
+    "corpoMinimo": 17,
+    "interlinea": [
+      1.5,
+      1.65
+    ],
     "prosa": {
       "fontSize": 17,
       "lineHeight": 1.65,
@@ -51,9 +83,10 @@
     },
     "didascalia": {
       "fontSize": 22,
-      "lineHeight": 1.45
+      "lineHeight": 1.5
     },
-    "regola": "La misura di riga viene prima del taglio: se non ci stanno 55 battute, la gabbia non esiste."
+    "contrastoMinimo": 4.5,
+    "regola": "Nessun ridimensionamento sotto il corpo del registro. Se il testo non entra, la gabbia non si propone."
   },
   "tagli": {
     "larga": {
@@ -71,14 +104,81 @@
     "quadra": {
       "w": 465,
       "h": 465,
-      "position": "22% center",
+      "position": "20% center",
       "costo": "-25% larghezza"
+    },
+    "colonna": {
+      "w": 400,
+      "h": 465,
+      "position": "20% center",
+      "costo": "-35% larghezza"
     },
     "alta": {
       "w": 349,
       "h": 465,
-      "position": "15% center",
-      "costo": "-44% larghezza"
+      "position": "20% center",
+      "costo": "-44% larghezza",
+      "usatoDa": [
+        7
+      ]
+    }
+  },
+  "pannello": {
+    "colore": "#fdf5e6",
+    "opacita": 0.94,
+    "padding": 20,
+    "regola": "Obbligatorio quando il testo cade sopra un'immagine. Nessuna ombra, nessun bordo, nessun raggio."
+  },
+  "archetipi": {
+    "S1": {
+      "nome": "Mezza pagina",
+      "gabbie": [
+        3,
+        4,
+        5
+      ]
+    },
+    "S2": {
+      "nome": "Colonna visiva",
+      "gabbie": [
+        6,
+        8
+      ]
+    },
+    "S3": {
+      "nome": "Focus breve",
+      "gabbie": [
+        1,
+        2
+      ]
+    },
+    "S4": {
+      "nome": "Scena immersiva",
+      "gabbie": [
+        12,
+        14,
+        15
+      ]
+    },
+    "S5": {
+      "nome": "Fascia narrativa",
+      "gabbie": [
+        13
+      ]
+    },
+    "S6": {
+      "nome": "Doppio dettaglio",
+      "gabbie": [
+        7
+      ]
+    },
+    "F1": {
+      "nome": "Figura editoriale",
+      "gabbie": [
+        9,
+        10,
+        11
+      ]
     }
   },
   "asset": {
@@ -91,7 +191,7 @@
       ]
     },
     "figura": {
-      "tipo": "personaggio solo, corpo intero coi piedi, fondo trasparente, nessuna ombra portata",
+      "tipo": "personaggio solo, corpo intero coi piedi, fondo trasparente, nessuna ombra portata, 2:3, rivolto verso destra",
       "usatoDa": [
         9,
         10,
@@ -105,6 +205,8 @@
       "n": 1,
       "nome": "Panoramica",
       "famiglia": "scena",
+      "archetipo": "S3",
+      "fonte": "crop",
       "max": 90,
       "registro": "didascalia",
       "taglio": "larga",
@@ -119,22 +221,71 @@
       ],
       "testo": [
         {
-          "x": 864,
-          "y": 104,
-          "w": 314,
-          "h": 130,
+          "x": 858,
+          "y": 150,
+          "w": 320,
+          "h": 165,
           "max": 90,
           "fontSize": 22,
-          "lineHeight": 1.45
+          "lineHeight": 1.5
         }
       ],
-      "note": "L'unica che attraversa la piega: sconfina di 190. Non selezionare se un volto cade nella banda di piega."
+      "fuoco": [
+        {
+          "x": 62,
+          "y": 46,
+          "w": 478,
+          "h": 373
+        }
+      ],
+      "specchiata": {
+        "immagini": [
+          {
+            "x": 430,
+            "y": 0,
+            "w": 810,
+            "h": 465,
+            "position": "center 85%"
+          }
+        ],
+        "testo": [
+          {
+            "x": 62,
+            "y": 150,
+            "w": 320,
+            "h": 165,
+            "max": 90,
+            "fontSize": 22,
+            "lineHeight": 1.5
+          }
+        ],
+        "fuoco": [
+          {
+            "x": 700,
+            "y": 46,
+            "w": 478,
+            "h": 373
+          }
+        ]
+      },
+      "scheda": {
+        "crop": "Larga, center 85%: toglie il cielo, tiene la terra. Soggetto nel fuoco x 62–540.",
+        "rischi": [
+          "Unica immagine che attraversa la piega: nessun volto, occhio o mano tra x 540 e 700.",
+          "Didascalia: oltre 90 caratteri la gabbia non si propone.",
+          "Testo su carta: contrasto pieno, nessun pannello."
+        ],
+        "motivazione": "Il culmine del capitolo: il paesaggio passa la piega e la frase resta una didascalia."
+      },
+      "note": "Sconfina di 190 oltre la piega. Il fuoco si ferma 52 prima della banda."
     },
     {
       "n": 2,
       "nome": "Dettaglio",
       "famiglia": "scena",
-      "max": 140,
+      "archetipo": "S3",
+      "fonte": "crop",
+      "max": 160,
       "registro": "medio",
       "taglio": "quadra",
       "immagini": [
@@ -143,18 +294,26 @@
           "y": 0,
           "w": 465,
           "h": 465,
-          "position": "22% center"
+          "position": "20% center"
         }
       ],
       "testo": [
         {
-          "x": 682,
-          "y": 104,
+          "x": 742,
+          "y": 118,
           "w": 436,
-          "h": 180,
-          "max": 140,
+          "h": 151,
+          "max": 160,
           "fontSize": 19,
-          "lineHeight": 1.56
+          "lineHeight": 1.58
+        }
+      ],
+      "fuoco": [
+        {
+          "x": 62,
+          "y": 46,
+          "w": 357,
+          "h": 373
         }
       ],
       "specchiata": {
@@ -164,28 +323,46 @@
             "y": 0,
             "w": 465,
             "h": 465,
-            "position": "22% center"
+            "position": "20% center"
           }
         ],
         "testo": [
           {
             "x": 62,
-            "y": 104,
+            "y": 118,
             "w": 436,
-            "h": 180,
-            "max": 140,
+            "h": 151,
+            "max": 160,
             "fontSize": 19,
-            "lineHeight": 1.56
+            "lineHeight": 1.58
+          }
+        ],
+        "fuoco": [
+          {
+            "x": 821,
+            "y": 46,
+            "w": 357,
+            "h": 373
           }
         ]
       },
-      "note": "155 di carta prima della piega."
+      "scheda": {
+        "crop": "Quadra, 20% center. Soggetto entro 46 dal bordo del taglio.",
+        "rischi": [
+          "155 di carta prima della piega: nessun contatto con la banda.",
+          "Quadra toglie il 25% della larghezza: un secondo personaggio sul lato destro dell'illustrazione si perde."
+        ],
+        "motivazione": "Il fermo immagine: il quadrato ferma la scena, il testo breve la commenta."
+      },
+      "note": "Specchiata esattamente simmetrica: testo a 62 dal taglio in entrambe le varianti."
     },
     {
       "n": 3,
       "nome": "Apertura",
       "famiglia": "scena",
-      "max": 200,
+      "archetipo": "S1",
+      "fonte": "scena",
+      "max": 220,
       "registro": "medio",
       "taglio": "facciata",
       "immagini": [
@@ -199,75 +376,38 @@
       ],
       "testo": [
         {
-          "x": 682,
-          "y": 96,
+          "x": 742,
+          "y": 198,
           "w": 436,
-          "h": 250,
-          "max": 200,
+          "h": 181,
+          "max": 220,
           "fontSize": 19,
           "lineHeight": 1.58
         }
       ],
-      "blocco": [
-        "numero in Caveat 24 accento",
-        "titolo Faustina 32/1.14",
-        "testo 19/1.58"
-      ],
-      "note": "Apre il capitolo. L'immagine intera è esattamente una facciata: nessun taglio."
-    },
-    {
-      "n": 4,
-      "nome": "Mezzo",
-      "famiglia": "scena",
-      "max": 300,
-      "registro": "prosa",
-      "taglio": "facciata",
-      "immagini": [
-        {
-          "x": 620,
-          "y": 0,
-          "w": 620,
-          "h": 465,
-          "position": "center"
-        }
-      ],
-      "testo": [
+      "intestazione": {
+        "x": 742,
+        "y": 90,
+        "w": 436,
+        "h": 96,
+        "numero": {
+          "famiglia": "Caveat",
+          "fontSize": 24
+        },
+        "titolo": {
+          "fontSize": 32,
+          "lineHeight": 1.14,
+          "max": 26,
+          "righe": 1
+        },
+        "opzionale": true
+      },
+      "fuoco": [
         {
           "x": 62,
-          "y": 72,
-          "w": 436,
-          "h": 290,
-          "max": 300,
-          "fontSize": 17,
-          "lineHeight": 1.65
-        }
-      ]
-    },
-    {
-      "n": 5,
-      "nome": "Campo",
-      "famiglia": "scena",
-      "max": 450,
-      "registro": "prosa",
-      "taglio": "facciata",
-      "immagini": [
-        {
-          "x": 0,
-          "y": 0,
-          "w": 620,
-          "h": 465,
-          "position": "center"
-        }
-      ],
-      "testo": [
-        {
-          "x": 682,
           "y": 46,
-          "w": 436,
-          "h": 382,
-          "max": 450,
-          "fontSize": 17,
-          "lineHeight": 1.65
+          "w": 476,
+          "h": 373
         }
       ],
       "specchiata": {
@@ -283,155 +423,467 @@
         "testo": [
           {
             "x": 62,
-            "y": 46,
+            "y": 198,
             "w": 436,
-            "h": 382,
-            "max": 450,
-            "fontSize": 17,
-            "lineHeight": 1.65
+            "h": 181,
+            "max": 220,
+            "fontSize": 19,
+            "lineHeight": 1.58
+          }
+        ],
+        "intestazione": {
+          "x": 62,
+          "y": 90,
+          "w": 436,
+          "h": 96
+        },
+        "fuoco": [
+          {
+            "x": 702,
+            "y": 46,
+            "w": 476,
+            "h": 373
           }
         ]
       },
-      "note": "La gabbia più frequente. Due paragrafi, gap 16."
+      "blocco": [
+        "numero in Caveat 24 accento",
+        "titolo Faustina 32/1.14, una riga",
+        "testo 19/1.58"
+      ],
+      "scheda": {
+        "crop": "Facciata, center: nessun taglio.",
+        "rischi": [
+          "Titolo su una sola riga, massimo 26 caratteri: se va a capo invade il testo.",
+          "Senza intestazione il testo resta nella stessa cornice: la gerarchia è opzionale, il contratto narrativo no."
+        ],
+        "motivazione": "Apre il capitolo con la scena intera e una gerarchia numero, titolo, testo."
+      },
+      "note": "Stessa colonna di Mezzo e Campo."
     },
     {
-      "n": 6,
-      "nome": "Vignetta",
+      "n": 4,
+      "nome": "Mezzo",
       "famiglia": "scena",
-      "max": 520,
+      "archetipo": "S1",
+      "fonte": "scena",
+      "max": 380,
       "registro": "prosa",
-      "taglio": "alta",
+      "taglio": "facciata",
       "immagini": [
         {
-          "x": 891,
+          "x": 620,
           "y": 0,
-          "w": 349,
+          "w": 620,
           "h": 465,
-          "position": "15% center"
+          "position": "center"
         }
       ],
       "testo": [
         {
           "x": 62,
-          "y": 96,
-          "w": 470,
-          "h": 290,
+          "y": 90,
+          "w": 436,
+          "h": 253,
+          "max": 380,
+          "fontSize": 17,
+          "lineHeight": 1.65
+        }
+      ],
+      "fuoco": [
+        {
+          "x": 702,
+          "y": 46,
+          "w": 476,
+          "h": 373
+        }
+      ],
+      "specchiata": {
+        "immagini": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 620,
+            "h": 465,
+            "position": "center"
+          }
+        ],
+        "testo": [
+          {
+            "x": 742,
+            "y": 90,
+            "w": 436,
+            "h": 253,
+            "max": 380,
+            "fontSize": 17,
+            "lineHeight": 1.65
+          }
+        ],
+        "fuoco": [
+          {
+            "x": 62,
+            "y": 46,
+            "w": 476,
+            "h": 373
+          }
+        ]
+      },
+      "scheda": {
+        "crop": "Facciata, center: nessun taglio.",
+        "rischi": [
+          "Immagine al vivo sulla piega: soggetto entro x 702–1178.",
+          "Nove righe: sotto i 150 caratteri la colonna resta vuota, preferire Dettaglio."
+        ],
+        "motivazione": "Dialogo e azione: il peso passa sull'altra facciata e rompe il ritmo dopo un Campo."
+      },
+      "note": "Stessa griglia di Apertura, attacco prosa a y 90, nove righe."
+    },
+    {
+      "n": 5,
+      "nome": "Campo",
+      "famiglia": "scena",
+      "archetipo": "S1",
+      "fonte": "scena",
+      "max": 520,
+      "registro": "prosa",
+      "taglio": "facciata",
+      "immagini": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 620,
+          "h": 465,
+          "position": "center"
+        }
+      ],
+      "testo": [
+        {
+          "x": 742,
+          "y": 62,
+          "w": 436,
+          "h": 337,
           "max": 520,
           "fontSize": 17,
           "lineHeight": 1.65
         }
       ],
-      "note": "Colonna unica sulla facciata sinistra: 65 battute. La carta accanto alla banda non prende testo."
+      "fuoco": [
+        {
+          "x": 62,
+          "y": 46,
+          "w": 476,
+          "h": 373
+        }
+      ],
+      "specchiata": {
+        "immagini": [
+          {
+            "x": 620,
+            "y": 0,
+            "w": 620,
+            "h": 465,
+            "position": "center"
+          }
+        ],
+        "testo": [
+          {
+            "x": 62,
+            "y": 62,
+            "w": 436,
+            "h": 337,
+            "max": 520,
+            "fontSize": 17,
+            "lineHeight": 1.65
+          }
+        ],
+        "fuoco": [
+          {
+            "x": 702,
+            "y": 46,
+            "w": 476,
+            "h": 373
+          }
+        ]
+      },
+      "scheda": {
+        "crop": "Facciata, center: nessun taglio.",
+        "rischi": [
+          "Dodici righe: la colonna più alta del catalogo. Un testo breve qui resta perso.",
+          "Soggetto fuori dagli ultimi 54 punti verso la piega."
+        ],
+        "motivazione": "La gabbia più frequente: una facciata di scena, una di prosa piena."
+      },
+      "note": "Stessa colonna di Mezzo, attacco alto a y 62."
+    },
+    {
+      "n": 6,
+      "nome": "Vignetta",
+      "famiglia": "scena",
+      "archetipo": "S2",
+      "fonte": "crop",
+      "max": 520,
+      "registro": "prosa",
+      "taglio": "colonna",
+      "immagini": [
+        {
+          "x": 840,
+          "y": 0,
+          "w": 400,
+          "h": 465,
+          "position": "20% center"
+        }
+      ],
+      "testo": [
+        {
+          "x": 62,
+          "y": 62,
+          "w": 436,
+          "h": 337,
+          "max": 520,
+          "fontSize": 17,
+          "lineHeight": 1.65
+        }
+      ],
+      "fuoco": [
+        {
+          "x": 886,
+          "y": 46,
+          "w": 292,
+          "h": 373
+        }
+      ],
+      "specchiata": {
+        "immagini": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 400,
+            "h": 465,
+            "position": "20% center"
+          }
+        ],
+        "testo": [
+          {
+            "x": 742,
+            "y": 62,
+            "w": 436,
+            "h": 337,
+            "max": 520,
+            "fontSize": 17,
+            "lineHeight": 1.65
+          }
+        ],
+        "fuoco": [
+          {
+            "x": 62,
+            "y": 46,
+            "w": 292,
+            "h": 373
+          }
+        ]
+      },
+      "scheda": {
+        "crop": "Colonna 400, 20% center: toglie il 35% della larghezza invece del 44%.",
+        "rischi": [
+          "I 220 punti tra immagine e piega restano carta: a quella larghezza non c'è misura leggibile.",
+          "Fuoco largo 292: un solo personaggio, mai due affiancati."
+        ],
+        "motivazione": "Il testo lungo accompagnato da un'immagine verticale che non gli fa concorrenza."
+      },
+      "note": "Condivide immagine e crop con Colonna; cambia la quantità di testo."
     },
     {
       "n": 7,
       "nome": "Coro",
       "famiglia": "scena",
+      "archetipo": "S6",
+      "fonte": "crop",
       "max": 120,
       "registro": "medio",
       "taglio": "alta",
+      "scenaUnica": true,
       "immagini": [
         {
           "x": 0,
           "y": 0,
           "w": 349,
           "h": 465,
-          "position": "15% center"
+          "position": "20% center"
         },
         {
           "x": 891,
           "y": 0,
           "w": 349,
           "h": 465,
-          "position": "15% center",
-          "specchiata": true
+          "position": "80% center"
         }
       ],
       "testo": [
         {
-          "x": 411,
-          "y": 166,
-          "w": 200,
-          "h": 140,
+          "x": 387,
+          "y": 172,
+          "w": 179,
+          "h": 121,
           "max": 60,
           "fontSize": 19,
-          "lineHeight": 1.55
+          "lineHeight": 1.58
         },
         {
           "x": 674,
-          "y": 166,
-          "w": 200,
-          "h": 140,
+          "y": 172,
+          "w": 179,
+          "h": 121,
           "max": 60,
           "fontSize": 19,
-          "lineHeight": 1.55
+          "lineHeight": 1.58
         }
       ],
-      "note": "Chiede DUE immagini, una per facciata. Non porta prosa: due frasi brevi, tre righe ciascuna."
+      "fuoco": [
+        {
+          "x": 62,
+          "y": 46,
+          "w": 241,
+          "h": 373
+        },
+        {
+          "x": 937,
+          "y": 46,
+          "w": 241,
+          "h": 373
+        }
+      ],
+      "scheda": {
+        "crop": "Due crop Alta della stessa scena: 20% center a sinistra, 80% center a destra. L'immagine non si capovolge.",
+        "rischi": [
+          "Blocchi da 179: circa 20 battute per riga. Parole oltre 17 lettere non entrano.",
+          "Ogni blocco è una frase autonoma: il testo non continua attraverso la piega.",
+          "La scena deve avere due punti d'interesse separati, uno per lato."
+        ],
+        "motivazione": "Due dettagli della stessa scena che si rispondono attraverso la piega."
+      },
+      "note": "Simmetrica per costruzione: nessuna variante specchiata."
     },
     {
       "n": 8,
       "nome": "Colonna",
       "famiglia": "scena",
+      "archetipo": "S2",
+      "fonte": "crop",
       "max": 380,
       "registro": "prosa",
-      "taglio": "alta",
+      "taglio": "colonna",
       "immagini": [
         {
           "x": 0,
           "y": 0,
-          "w": 349,
+          "w": 400,
           "h": 465,
-          "position": "15% center"
+          "position": "20% center"
         }
       ],
       "testo": [
         {
-          "x": 682,
-          "y": 80,
+          "x": 742,
+          "y": 90,
           "w": 436,
-          "h": 240,
+          "h": 253,
           "max": 380,
           "fontSize": 17,
           "lineHeight": 1.65
         }
       ],
-      "note": "I 168 punti accanto alla banda restano carta: a quella larghezza non esiste misura leggibile."
+      "fuoco": [
+        {
+          "x": 62,
+          "y": 46,
+          "w": 292,
+          "h": 373
+        }
+      ],
+      "specchiata": {
+        "immagini": [
+          {
+            "x": 840,
+            "y": 0,
+            "w": 400,
+            "h": 465,
+            "position": "20% center"
+          }
+        ],
+        "testo": [
+          {
+            "x": 62,
+            "y": 90,
+            "w": 436,
+            "h": 253,
+            "max": 380,
+            "fontSize": 17,
+            "lineHeight": 1.65
+          }
+        ],
+        "fuoco": [
+          {
+            "x": 886,
+            "y": 46,
+            "w": 292,
+            "h": 373
+          }
+        ]
+      },
+      "scheda": {
+        "crop": "Colonna 400, 20% center, come Vignetta.",
+        "rischi": [
+          "Stesso crop di Vignetta: non usarle in doppie consecutive.",
+          "I 220 punti accanto alla piega restano carta."
+        ],
+        "motivazione": "La versione misurata di Vignetta: stesso crop, nove righe invece di dodici."
+      },
+      "note": "Coordinate immagine identiche a Vignetta specchiata."
     },
     {
       "n": 9,
       "nome": "Figura",
       "famiglia": "figura",
+      "archetipo": "F1",
+      "fonte": "figura",
       "max": 380,
       "registro": "prosa",
       "immagini": [
         {
-          "x": 120,
-          "y": 35,
-          "w": 287,
-          "h": 430,
+          "x": 186,
+          "y": 46,
+          "w": 249,
+          "h": 373,
           "position": "center bottom",
           "asset": "figura"
         }
       ],
       "testo": [
         {
-          "x": 682,
-          "y": 80,
+          "x": 742,
+          "y": 90,
           "w": 436,
-          "h": 240,
+          "h": 253,
           "max": 380,
           "fontSize": 17,
           "lineHeight": 1.65
         }
       ],
+      "fuoco": [
+        {
+          "x": 186,
+          "y": 46,
+          "w": 249,
+          "h": 373
+        }
+      ],
       "specchiata": {
         "immagini": [
           {
-            "x": 834,
-            "y": 35,
-            "w": 287,
-            "h": 430,
+            "x": 805,
+            "y": 46,
+            "w": 249,
+            "h": 373,
             "position": "center bottom",
             "asset": "figura",
             "specchiata": true
@@ -440,57 +892,126 @@
         "testo": [
           {
             "x": 62,
-            "y": 80,
+            "y": 90,
             "w": 436,
-            "h": 240,
+            "h": 253,
             "max": 380,
             "fontSize": 17,
             "lineHeight": 1.65
           }
+        ],
+        "fuoco": [
+          {
+            "x": 805,
+            "y": 46,
+            "w": 249,
+            "h": 373
+          }
         ]
       },
-      "note": "La figura si specchia davvero: guarda sempre verso il testo."
+      "scheda": {
+        "crop": "Figura intera 249 × 373 (2:3), piedi a y 419. Rivolta verso il testo: si capovolge quando il testo è a sinistra.",
+        "rischi": [
+          "Richiede un personaggio scelto esplicitamente.",
+          "Piedi a 46 dal piede della pagina: mai tagliati."
+        ],
+        "motivazione": "Il personaggio solo sulla carta, rivolto verso il testo che parla di lui."
+      },
+      "note": "Figura centrata sulla facciata, a 186 dal taglio e 157 dalla piega."
     },
     {
       "n": 10,
       "nome": "Ritratto",
       "famiglia": "figura",
-      "max": 70,
+      "archetipo": "F1",
+      "fonte": "figura",
+      "max": 90,
       "registro": "didascalia",
       "immagini": [
         {
-          "x": 786,
-          "y": 35,
-          "w": 287,
-          "h": 430,
+          "x": 805,
+          "y": 46,
+          "w": 249,
+          "h": 373,
           "position": "center bottom",
-          "asset": "figura"
+          "asset": "figura",
+          "specchiata": true
         }
       ],
       "testo": [
         {
           "x": 62,
-          "y": 186,
+          "y": 150,
           "w": 436,
-          "h": 124,
-          "max": 70,
+          "h": 165,
+          "max": 90,
           "fontSize": 22,
-          "lineHeight": 1.45
+          "lineHeight": 1.5
         }
-      ]
+      ],
+      "fuoco": [
+        {
+          "x": 805,
+          "y": 46,
+          "w": 249,
+          "h": 373
+        }
+      ],
+      "specchiata": {
+        "immagini": [
+          {
+            "x": 186,
+            "y": 46,
+            "w": 249,
+            "h": 373,
+            "position": "center bottom",
+            "asset": "figura"
+          }
+        ],
+        "testo": [
+          {
+            "x": 742,
+            "y": 150,
+            "w": 436,
+            "h": 165,
+            "max": 90,
+            "fontSize": 22,
+            "lineHeight": 1.5
+          }
+        ],
+        "fuoco": [
+          {
+            "x": 186,
+            "y": 46,
+            "w": 249,
+            "h": 373
+          }
+        ]
+      },
+      "scheda": {
+        "crop": "Stessa figura di Figura, sull'altra facciata, rivolta verso il testo.",
+        "rischi": [
+          "Didascalia: oltre 90 caratteri non si propone.",
+          "Figura e testo si specchiano sempre insieme."
+        ],
+        "motivazione": "Un momento del personaggio, detto in una frase."
+      },
+      "note": "Geometria della figura identica a Figura specchiata."
     },
     {
       "n": 11,
       "nome": "Cammino",
       "famiglia": "figura",
-      "max": 520,
+      "archetipo": "F1",
+      "fonte": "figura",
+      "max": 640,
       "registro": "prosa",
       "immagini": [
         {
-          "x": 96,
-          "y": 165,
-          "w": 200,
-          "h": 300,
+          "x": 247,
+          "y": 229,
+          "w": 127,
+          "h": 190,
           "position": "center bottom",
           "asset": "figura"
         }
@@ -500,27 +1021,90 @@
           "x": 62,
           "y": 62,
           "w": 436,
-          "h": 140,
+          "h": 141,
           "max": 180,
           "fontSize": 17,
           "lineHeight": 1.65
         },
         {
-          "x": 682,
+          "x": 742,
           "y": 62,
           "w": 436,
-          "h": 260,
-          "max": 340,
+          "h": 337,
+          "max": 520,
           "fontSize": 17,
           "lineHeight": 1.65
         }
       ],
-      "note": "L'unica gabbia in cui la figura non arriva alla testa, e l'unica in cui il testo occupa entrambe le facciate."
+      "divisione": {
+        "regola": "confine-frase",
+        "descrizione": "Il primo blocco prende le frasi intere che stanno in 180 caratteri. Se nessuna frase ci sta, la gabbia non si propone."
+      },
+      "fuoco": [
+        {
+          "x": 247,
+          "y": 229,
+          "w": 127,
+          "h": 190
+        }
+      ],
+      "specchiata": {
+        "immagini": [
+          {
+            "x": 866,
+            "y": 229,
+            "w": 127,
+            "h": 190,
+            "position": "center bottom",
+            "asset": "figura",
+            "specchiata": true
+          }
+        ],
+        "testo": [
+          {
+            "x": 62,
+            "y": 62,
+            "w": 436,
+            "h": 337,
+            "max": 520,
+            "fontSize": 17,
+            "lineHeight": 1.65
+          },
+          {
+            "x": 742,
+            "y": 62,
+            "w": 436,
+            "h": 141,
+            "max": 180,
+            "fontSize": 17,
+            "lineHeight": 1.65
+          }
+        ],
+        "fuoco": [
+          {
+            "x": 866,
+            "y": 229,
+            "w": 127,
+            "h": 190
+          }
+        ]
+      },
+      "scheda": {
+        "crop": "Figura piccola 127 × 190, piedi a y 419, sotto il primo blocco.",
+        "rischi": [
+          "Divisione solo su confine di frase: il max 640 tiene conto della perdita di riempimento del primo blocco.",
+          "26 punti tra il primo blocco e la testa della figura: il blocco non può crescere."
+        ],
+        "motivazione": "Il testo lungo che segue il personaggio da una facciata all'altra."
+      },
+      "note": "Nella specchiata i blocchi restano in ordine di lettura: prima il blocco lungo a sinistra."
     },
     {
       "n": 12,
       "nome": "Orizzonte",
       "famiglia": "dissolvenza",
+      "archetipo": "S4",
+      "fonte": "scena",
       "max": 300,
       "registro": "prosa",
       "immagini": [
@@ -535,31 +1119,92 @@
       ],
       "testo": [
         {
-          "x": 790,
-          "y": 96,
-          "w": 388,
-          "h": 250,
+          "x": 742,
+          "y": 90,
+          "w": 436,
+          "h": 253,
           "max": 300,
           "fontSize": 17,
           "lineHeight": 1.65
         }
       ],
-      "note": "Piena fino a 372, svanita a 762: muore 148 oltre la piega."
+      "pannello": {
+        "x": 722,
+        "y": 70,
+        "w": 476,
+        "h": 293
+      },
+      "fuoco": [
+        {
+          "x": 62,
+          "y": 46,
+          "w": 478,
+          "h": 373
+        }
+      ],
+      "specchiata": {
+        "immagini": [
+          {
+            "x": 310,
+            "y": 0,
+            "w": 930,
+            "h": 465,
+            "position": "center 85%",
+            "mask": "linear-gradient(270deg, #000 0 40%, transparent 82%)"
+          }
+        ],
+        "testo": [
+          {
+            "x": 62,
+            "y": 90,
+            "w": 436,
+            "h": 253,
+            "max": 300,
+            "fontSize": 17,
+            "lineHeight": 1.65
+          }
+        ],
+        "pannello": {
+          "x": 42,
+          "y": 70,
+          "w": 476,
+          "h": 293
+        },
+        "fuoco": [
+          {
+            "x": 700,
+            "y": 46,
+            "w": 478,
+            "h": 373
+          }
+        ]
+      },
+      "scheda": {
+        "crop": "930 × 465, center 85%. Piena fino a x 372, svanita a x 762.",
+        "rischi": [
+          "Il pannello di carta al 94% copre la coda della dissolvenza da x 722: contrasto garantito su qualunque fondo.",
+          "Limite 300 su nove righe: breve o medio, mai prosa piena sopra un'immagine."
+        ],
+        "motivazione": "La scena che sfuma verso le parole, con il testo protetto da un pannello di carta."
+      },
+      "note": "Cornice di testo identica a Colonna e Figura."
     },
     {
       "n": 13,
       "nome": "Fascia",
       "famiglia": "dissolvenza",
+      "archetipo": "S5",
+      "fonte": "scena",
       "max": 450,
       "registro": "prosa",
       "immagini": [
         {
           "x": 0,
-          "y": 210,
+          "y": 232,
           "w": 1240,
-          "h": 255,
+          "h": 233,
           "position": "center bottom",
-          "mask": "linear-gradient(to bottom, transparent 0, #000 55%)"
+          "mask": "linear-gradient(to bottom, transparent 0, #000 45%)"
         }
       ],
       "testo": [
@@ -567,58 +1212,149 @@
           "x": 62,
           "y": 62,
           "w": 436,
-          "h": 124,
-          "max": 220,
+          "h": 169,
+          "max": 240,
           "fontSize": 17,
           "lineHeight": 1.65
         },
         {
-          "x": 682,
+          "x": 742,
           "y": 62,
           "w": 436,
-          "h": 124,
-          "max": 230,
+          "h": 169,
+          "max": 240,
           "fontSize": 17,
           "lineHeight": 1.65
         }
       ],
-      "note": "L'unica che tocca entrambi i tagli esterni. Perde il cielo perché è verso il cielo che svanisce."
+      "divisione": {
+        "regola": "confine-frase",
+        "descrizione": "Due colonne solo se il testo si divide su un confine di frase entro 240 caratteri per colonna. Altrimenti la gabbia non si propone."
+      },
+      "fuoco": [
+        {
+          "x": 62,
+          "y": 300,
+          "w": 478,
+          "h": 119
+        },
+        {
+          "x": 700,
+          "y": 300,
+          "w": 478,
+          "h": 119
+        }
+      ],
+      "scheda": {
+        "crop": "Fascia 1240 × 233, center bottom, piena da y 337.",
+        "rischi": [
+          "Attraversa la piega: soggetti nei due fuochi, mai tra x 540 e 700.",
+          "Perde il cielo: l'illustrazione deve avere il soggetto nella metà bassa.",
+          "Testo e immagine non si toccano: il testo finisce a y 231, l'immagine comincia a 232 trasparente."
+        ],
+        "motivazione": "Il paesaggio come terreno sotto il racconto."
+      },
+      "note": "Simmetrica per costruzione: nessuna variante specchiata."
     },
     {
       "n": 14,
       "nome": "Deriva",
       "famiglia": "dissolvenza",
-      "max": 340,
+      "archetipo": "S4",
+      "fonte": "scena",
+      "max": 380,
       "registro": "prosa",
       "immagini": [
         {
-          "x": 520,
+          "x": 546,
           "y": 0,
-          "w": 720,
+          "w": 694,
           "h": 465,
           "position": "center",
-          "mask": "linear-gradient(to left, #000 0 55%, transparent 100%)"
+          "mask": "linear-gradient(to left, #000 0 70%, transparent 100%)"
         }
       ],
       "testo": [
         {
           "x": 62,
-          "y": 110,
+          "y": 90,
           "w": 436,
-          "h": 250,
-          "max": 340,
+          "h": 253,
+          "max": 380,
           "fontSize": 17,
           "lineHeight": 1.65
         }
       ],
-      "note": "Non è la specchiata di Orizzonte: qui la sfumatura va verso il testo. Muore 94 oltre la piega."
+      "pannello": {
+        "x": 42,
+        "y": 70,
+        "w": 476,
+        "h": 293
+      },
+      "fuoco": [
+        {
+          "x": 754,
+          "y": 46,
+          "w": 424,
+          "h": 373
+        }
+      ],
+      "specchiata": {
+        "immagini": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 694,
+            "h": 465,
+            "position": "center",
+            "mask": "linear-gradient(to right, #000 0 70%, transparent 100%)"
+          }
+        ],
+        "testo": [
+          {
+            "x": 742,
+            "y": 90,
+            "w": 436,
+            "h": 253,
+            "max": 380,
+            "fontSize": 17,
+            "lineHeight": 1.65
+          }
+        ],
+        "pannello": {
+          "x": 722,
+          "y": 70,
+          "w": 476,
+          "h": 293
+        },
+        "fuoco": [
+          {
+            "x": 62,
+            "y": 46,
+            "w": 424,
+            "h": 373
+          }
+        ]
+      },
+      "scheda": {
+        "crop": "694 × 465, center. Piena da x 754, svanita a x 546.",
+        "rischi": [
+          "L'immagine muore 48 dopo la fine del testo: nessuna sovrapposizione.",
+          "Soggetto entro x 754–1178, dove l'immagine è piena."
+        ],
+        "motivazione": "La scena che arriva dal taglio esterno e si ferma prima delle parole."
+      },
+      "note": "Il pannello è dichiarato ma cade su carta: resta per uniformità con S4."
     },
     {
       "n": 15,
       "nome": "Velo",
       "famiglia": "dissolvenza",
+      "archetipo": "S4",
+      "fonte": "scena",
       "max": 200,
       "registro": "medio",
+      "unaPerLibro": true,
       "immagini": [
         {
           "x": 0,
@@ -632,15 +1368,38 @@
       "testo": [
         {
           "x": 742,
-          "y": 72,
+          "y": 62,
           "w": 436,
-          "h": 150,
+          "h": 181,
           "max": 200,
           "fontSize": 19,
-          "lineHeight": 1.6
+          "lineHeight": 1.58
         }
       ],
-      "note": "L'unica diagonale. Da usare una volta sola per libro — vincolo non implementato."
+      "pannello": {
+        "x": 722,
+        "y": 42,
+        "w": 476,
+        "h": 221
+      },
+      "fuoco": [
+        {
+          "x": 62,
+          "y": 230,
+          "w": 478,
+          "h": 189
+        }
+      ],
+      "scheda": {
+        "crop": "Doppia intera, center 76%, dissolvenza diagonale verso l'alto a destra.",
+        "rischi": [
+          "Una sola volta per libro: vincolo imposto dal sistema.",
+          "Pannello di carta al 94% sempre presente.",
+          "Soggetto in basso a sinistra: x 62–540, y 230–419."
+        ],
+        "motivazione": "L'eccezione: la scena occupa la doppia e il testo si posa su un velo di carta."
+      },
+      "note": "Nessuna specchiata: la diagonale ha una sola direzione di lettura."
     }
   ],
   "fuoriSistema": [
@@ -653,8 +1412,10 @@
     "filtro": "Il massimo di caratteri dice cosa ci sta, non cosa ci sta bene. La scelta finale è dell'autore sull'anteprima.",
     "vincoli": [
       "mai due volte lo stesso taglio di seguito",
-      "mai due volte di fila l'immagine sullo stesso lato",
-      "se un volto cade nella banda di piega, escludere Panoramica"
+      "mai due volte di fila l'immagine principale sullo stesso lato",
+      "se un volto cade nella banda di piega, escludere Panoramica e Fascia",
+      "Velo al massimo una volta per libro",
+      "Cammino e Fascia solo se il testo si divide su un confine di frase"
     ]
   },
   "scartate": [

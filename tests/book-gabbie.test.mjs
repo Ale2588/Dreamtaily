@@ -4,7 +4,7 @@ import test from "node:test";
 
 import { caricaGabbie, gabbiaPerNome } from "../src/book/gabbie.js";
 import { gabbieDisponibili, lunghezzaEditoriale, orientamentiDisponibili } from "../src/book/selettore.js";
-import { renderDoppia } from "../src/book/doppia.js";
+import { renderDoppia, stiliDoppia } from "../src/book/doppia.js";
 import { costruisciLibro } from "../src/book/foliazione.js";
 
 const raw = await readFile(new URL("../src/book/gabbie.json", import.meta.url), "utf8");
@@ -26,8 +26,8 @@ test("every text rectangle fits the 1240 by 465 spread", () => {
 });
 
 test("capacity uses the longest grammatical variant", () => {
-  const variants = { default: "breve", male: "x".repeat(120), female: "x".repeat(141) };
-  assert.equal(lunghezzaEditoriale(variants), 141);
+  const variants = { default: "breve", male: "x".repeat(120), female: "x".repeat(161) };
+  assert.equal(lunghezzaEditoriale(variants), 161);
   assert.ok(!gabbieDisponibili(variants).includes("Dettaglio"));
 });
 
@@ -40,8 +40,35 @@ test("520 characters only return layouts that can contain them", () => {
 test("the same crop is never proposed twice in succession", () => {
   const names = gabbieDisponibili("testo", { gabbiaPrecedente: "Vignetta" });
   assert.ok(!names.includes("Vignetta"));
-  assert.ok(!names.includes("Coro"));
   assert.ok(!names.includes("Colonna"));
+});
+
+test("text, images and panels stay inside the spread and text avoids the fold", () => {
+  const fold = { x: 592, w: 56 };
+  for (const gabbia of catalogo.gabbie) {
+    for (const variant of [gabbia, gabbia.specchiata].filter(Boolean)) {
+      for (const box of [...(variant.immagini || gabbia.immagini || []), ...(variant.testo || gabbia.testo), ...(variant.pannello ? [variant.pannello] : [])]) {
+        assert.ok(box.x >= 0 && box.y >= 0 && box.x + box.w <= 1240 && box.y + box.h <= 465, gabbia.nome);
+      }
+      for (const box of variant.testo || gabbia.testo) {
+        assert.ok(box.x + box.w <= fold.x || box.x >= fold.x + fold.w, `${gabbia.nome} intersects fold`);
+      }
+    }
+  }
+});
+
+test("immersive layouts render their contrast panel", () => {
+  const html = renderDoppia({ gabbia: gabbiaPerNome("Velo"), immagine: "scena.png", testo: "Una luce attraversò il bosco." });
+  assert.match(html, /class="dtb-pannello"/);
+  assert.match(stiliDoppia, /rgba\(253,245,230,\.94\)/);
+});
+
+test("sentence-boundary layouts reject text that cannot be split safely", () => {
+  const cammino = gabbiaPerNome("Cammino");
+  assert.throws(() => renderDoppia({ gabbia: cammino, figura: "figura.png", testo: "x".repeat(400) }), /TESTO_NON_DIVISIBILE/);
+  const html = renderDoppia({ gabbia: cammino, figura: "figura.png", testo: "Prima frase breve. " + "Seconda frase abbastanza lunga da occupare la seconda colonna." });
+  assert.match(html, /Prima frase breve\./);
+  assert.match(html, /Seconda frase/);
 });
 
 test("a mirrored layout remains available only on the side allowed by the sequence", () => {
