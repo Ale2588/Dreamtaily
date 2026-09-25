@@ -20,6 +20,12 @@ function reply(status:number,body:unknown){
 function validSlug(v:string){
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(v);
 }
+function legacyAges(value:unknown){
+  const text=String(value||"").replace(/anni/gi,"").trim();
+  const numbers=(text.match(/\d+/g)||[]).map(Number);
+  if(!numbers.length)return {min_age:null,max_age:null};
+  return {min_age:numbers[0],max_age:numbers[1]??(text.includes("+")?12:numbers[0])};
+}
 
 Deno.serve(async(req:Request)=>{
   if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
@@ -52,13 +58,18 @@ Deno.serve(async(req:Request)=>{
         const v:any=byId.get(p.current_published_version_id);
         if(!v?.published_contract)return null;
         const story=v.published_contract?.story||{};
+        const editorial=story.editorial||{};
+        const legacy=legacyAges(editorial.age_range||story.age_range||p.age_range);
         return {
           slug:p.slug,
           title:story.title||p.public_title||p.slug,
-          age:story.editorial?.age_range||story.age_range||p.age_range||null,
-          tone:story.editorial?.tone||story.tone||p.tone||null,
-          description:story.editorial?.summary||story.editorial?.description||story.summary||p.description||"",
-          image:story.editorial?.cover_ref||story.cover_image||"assets/char/water/bear.png",
+          age:editorial.age_range||story.age_range||p.age_range||null,
+          min_age:Number.isInteger(editorial.min_age)?editorial.min_age:legacy.min_age,
+          max_age:Number.isInteger(editorial.max_age)?editorial.max_age:legacy.max_age,
+          story_types:Array.isArray(editorial.story_types)?editorial.story_types:[],
+          tone:editorial.tone||story.tone||p.tone||null,
+          description:editorial.summary||editorial.description||story.summary||p.description||"",
+          image:editorial.cover_ref||story.cover_image||"assets/char/water/bear.png",
           length:"Percorso dinamico",
           version:v.version_number,
           published_at:v.published_at

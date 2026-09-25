@@ -6,7 +6,7 @@ function contract(afterLeftText = "Il viaggio continua.") {
   const story = {
     title: "Storia di prova",
     editorial: {
-      age_range: "4–7 anni",
+      age_range: "3-4",
       tone: "Dolce e luminoso",
       summary: "Una promessa narrativa.",
       description: "Una sinossi editoriale completa.",
@@ -120,4 +120,18 @@ test("rejects incomplete editorial identity and missing cover", () => {
     result.errors.filter((error) => ["AGE_RANGE_INVALID", "TONE_INVALID", "SUMMARY_REQUIRED", "DESCRIPTION_REQUIRED", "COVER_REQUIRED"].includes(error.code)).map((error) => error.code),
     ["AGE_RANGE_INVALID", "TONE_INVALID", "SUMMARY_REQUIRED", "DESCRIPTION_REQUIRED", "COVER_REQUIRED"]
   );
+});
+
+test("accepts min/max ages and multiple controlled story types", () => {
+  const input = contract();
+  delete input.story.editorial.age_range;
+  input.story.editorial.min_age = 3;
+  input.story.editorial.max_age = 7;
+  input.story.editorial.story_types = ["Avventura", "Amicizia"];
+  assert.equal(validateAuthoringContract(input).valid, true);
+  input.story.editorial.min_age = 8;
+  assert.ok(validateAuthoringContract(input).errors.some((error) => error.code === "AGE_RANGE_INVALID"));
+  input.story.editorial.min_age = 3;
+  input.story.editorial.story_types = ["Non prevista"];
+  assert.ok(validateAuthoringContract(input).errors.some((error) => error.code === "STORY_TYPES_INVALID"));
 });

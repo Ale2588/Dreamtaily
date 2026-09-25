@@ -19,12 +19,27 @@ test("authoring API exposes the draft bundle lifecycle", () => {
   assert.match(source, /versionMatch\[2\] === "assets"/);
 });
 
+test("project archiving is authenticated, ownership checked and reversible", () => {
+  const archive = source.match(/async function setProjectArchiveState[\s\S]*?function decodeBase64/)?.[0] || "";
+  assert.match(archive, /ownedProject\(projectId, uid, admin\)/);
+  assert.match(archive, /archived \? "archived" : "active"/);
+  assert.match(archive, /\.from\("story_projects"\)[\s\S]*?\.update\(\{ status: nextStatus \}\)/);
+  assert.match(archive, /\.eq\("owner_id", access\.project\.owner_id\)/);
+  assert.match(source, /\(archive\|restore\)/);
+  assert.match(source, /projectActionMatch\[2\] === "archive"/);
+  assert.doesNotMatch(source, /req\.method === "DELETE"/);
+  assert.match(source, /GET,POST,PUT,OPTIONS/);
+});
+
 test("new projects copy controlled metadata into the initial draft", () => {
   assert.match(source, /const AGE_RANGES = new Set/);
   assert.match(source, /const TONES = new Set/);
   assert.match(source, /editorial: \{/);
   assert.match(source, /cover_ref: null/);
   assert.match(source, /AGE_RANGE_INVALID/);
+  assert.match(source, /STORY_TYPES_INVALID/);
+  assert.match(source, /min_age: modernAudience \? minAge : null/);
+  assert.match(source, /story_types: storyTypes/);
   assert.match(source, /TONE_INVALID/);
 });
 

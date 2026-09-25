@@ -19,7 +19,9 @@ test("Book Creator loads every published story and pins its immutable version", 
 });
 
 test("dynamic stories prefix only relative assets with their own slug", () => {
-  assert.match(html, /const slug=app\.activeStoryDefinition\?\.slug\|\|"il-bosco-dei-sussurri"/);
+  assert.doesNotMatch(html, /DT_STORY_ROOT|activeStoryDefinition\?\.slug\|\|"il-bosco-dei-sussurri"/);
+  assert.match(html, /throw new Error\("STORY_SCENES_MISSING"\)/);
+  assert.match(html, /throw new Error\("STORY_CONTENT_MISSING"\)/);
   assert.match(html, /return `stories\/\$\{slug\}\/\$\{ref\}`/);
   const prefixer = html.match(/function dtPrefixedSceneContract\(\)[\s\S]*?window\.finishStoryComposer/)?.[0] || "";
   assert.doesNotMatch(prefixer, /if\(app\.activeStoryContract\?\.scenes\) return scenes/);
@@ -44,17 +46,31 @@ test("checkout summarizes the whole book instead of story-specific path details"
 });
 
 test("the public catalog uses the authoring cover before the fallback", () => {
-  assert.match(publishedStorySource, /story\.editorial\?\.cover_ref\|\|story\.cover_image/);
-  assert.match(publishedStorySource, /story\.editorial\?\.age_range\|\|story\.age_range\|\|p\.age_range/);
+  assert.match(publishedStorySource, /editorial\.cover_ref\|\|story\.cover_image/);
+  assert.match(publishedStorySource, /editorial\.age_range\|\|story\.age_range\|\|p\.age_range/);
   assert.match(publishedStorySource, /story\.title\|\|p\.public_title/);
 });
 
-test("the live catalog exposes Bosco and Lucciola", async () => {
+test("catalog normalizes legacy ages and exposes multiple story types", () => {
+  assert.match(publishedStorySource, /function legacyAges/);
+  assert.match(publishedStorySource, /min_age:Number\.isInteger\(editorial\.min_age\)/);
+  assert.match(publishedStorySource, /story_types:Array\.isArray\(editorial\.story_types\)/);
+});
+
+test("catalog filters use OR within groups and AND between groups", () => {
+  assert.match(html, /const ageMatch=!storyCatalogFilters\.ages\.size\|\|STORY_AGE_FILTERS\.some/);
+  assert.match(html, /const typeMatch=!storyCatalogFilters\.types\.size\|\|types\.some/);
+  assert.match(html, /return ageMatch&&typeMatch/);
+  assert.match(html, /Azzera filtri/);
+  assert.match(html, /story-result-count/);
+});
+
+test("the live catalog hides archived Bosco and exposes Lucciola", async () => {
   const response = await fetch(endpoint, { headers });
   assert.equal(response.status, 200);
   const payload = await response.json();
   const slugs = payload.stories.map((story) => story.slug);
-  assert.ok(slugs.includes("il-bosco-dei-sussurri"));
+  assert.ok(!slugs.includes("il-bosco-dei-sussurri"));
   assert.ok(slugs.includes("collaudo-pubblicazione-bo-08"));
 });
 

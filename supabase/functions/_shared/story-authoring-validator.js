@@ -1,7 +1,15 @@
 const PERSON_MARKER_PATTERN = /\[PERSONAGGIO:([A-Za-z0-9_-]+)\]/g;
 const ENTRANCE_MARKER_PATTERN = /\[ENTRATA:([A-Za-z0-9_-]+)\]/g;
-const AGE_RANGES = new Set(["3–5 anni", "4–7 anni", "4–8 anni", "5–9 anni", "6–10 anni"]);
+const AGE_RANGES = new Set(["0-2", "3-4", "4-5", "6+", "3–5 anni", "4–7 anni", "4–8 anni", "5–9 anni", "6–10 anni"]);
 const TONES = new Set(["Dolce e luminoso", "Caldo e rassicurante", "Avventuroso e rassicurante", "Curiosità e amicizia", "Coraggio e ascolto", "Fiabesco e contemplativo"]);
+const STORY_TYPES = new Set(["Avventura", "Amicizia", "Emozioni", "Mistero", "Natura", "Buonanotte"]);
+
+function validAudience(editorial) {
+  const min = Number(editorial.min_age);
+  const max = Number(editorial.max_age);
+  const modern = editorial.min_age != null && editorial.max_age != null && Number.isInteger(min) && Number.isInteger(max) && min >= 0 && max <= 12 && min <= max;
+  return modern || AGE_RANGES.has(String(editorial.age_range || ""));
+}
 
 function successors(step) {
   if (step.decision?.type === "branch") {
@@ -47,7 +55,10 @@ export function validateAuthoringContract({ story, scenes, contentByRef }) {
   const errors = [];
   const editorial = story?.editorial || {};
   if (!String(story?.title || "").trim()) errors.push({ code: "TITLE_REQUIRED" });
-  if (!AGE_RANGES.has(String(editorial.age_range || ""))) errors.push({ code: "AGE_RANGE_INVALID" });
+  if (!validAudience(editorial)) errors.push({ code: "AGE_RANGE_INVALID" });
+  if (editorial.story_types != null && (!Array.isArray(editorial.story_types) || !editorial.story_types.length || editorial.story_types.some((type) => !STORY_TYPES.has(String(type))))) {
+    errors.push({ code: "STORY_TYPES_INVALID" });
+  }
   if (!TONES.has(String(editorial.tone || ""))) errors.push({ code: "TONE_INVALID" });
   if (!String(editorial.summary || "").trim()) errors.push({ code: "SUMMARY_REQUIRED" });
   if (!String(editorial.description || "").trim()) errors.push({ code: "DESCRIPTION_REQUIRED" });

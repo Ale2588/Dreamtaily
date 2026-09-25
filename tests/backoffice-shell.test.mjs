@@ -10,7 +10,17 @@ test('la shell usa la sessione Supabase e authoring-admin',()=>{
   assert.match(html,/client\.auth\.getSession\(\)/);
   assert.match(html,/client\.auth\.signInWithOtp/);
   assert.match(html,/functions\/v1\/authoring-admin/);
-  assert.match(html,/Authorization:`Bearer \$\{state\.session\.access_token\}`/);
+  assert.match(html,/Authorization:`Bearer \$\{session\.access_token\}`/);
+});
+
+test('ogni richiesta usa la sessione Supabase più recente',()=>{
+  assert.match(html,/const \{data:\{session\},error:sessionError\}=await client\.auth\.getSession\(\)/);
+  assert.match(html,/Authorization:`Bearer \$\{session\.access_token\}`/);
+  assert.match(html,/state\.session=session/);
+  assert.match(html,/HTTP_401:'La sessione è scaduta/);
+  assert.match(editor,/const \{data:\{session\},error:sessionError\}=await client\.auth\.getSession\(\)/);
+  assert.match(editor,/Authorization:`Bearer \$\{session\.access_token\}`/);
+  assert.match(editor,/\['AUTH_REQUIRED','AUTH_INVALID','HTTP_401'\]\.includes\(error\.message\)/);
 });
 
 test('tutte le scritture editoriali passano dalla Edge Function',()=>{
@@ -18,6 +28,18 @@ test('tutte le scritture editoriali passano dalla Edge Function',()=>{
   assert.match(html,/api\('\/versions',\{method:'POST'/);
   assert.doesNotMatch(html,/\.from\(['"]story_(?:projects|versions)['"]\)/);
   assert.doesNotMatch(html,/SERVICE_ROLE/);
+});
+
+test('la lista separa storie attive e archiviate e permette archivio e ripristino',()=>{
+  assert.match(html,/data-project-filter="active"/);
+  assert.match(html,/data-project-filter="archived"/);
+  assert.match(html,/data-archive-project/);
+  assert.match(html,/data-restore-project/);
+  assert.match(html,/id="archive-dialog"/);
+  assert.match(html,/Archivia storia/);
+  assert.match(html,/api\(`\/projects\/\$\{encodeURIComponent\(projectId\)\}\/archive`\s*,\s*\{method:'POST'\}/);
+  assert.match(html,/api\(`\/projects\/\$\{encodeURIComponent\(projectId\)\}\/restore`\s*,\s*\{method:'POST'\}/);
+  assert.doesNotMatch(html,/Elimina definitivamente|data-delete-project|method:'DELETE'/);
 });
 
 test('la shell espone il primo workflow editoriale senza JSON',()=>{
@@ -41,15 +63,19 @@ test('l’editor carica e salva il bundle con controllo di revisione',()=>{
 });
 
 test('l’editor presenta metadati editoriali e mai JSON',()=>{
-  for(const label of ['Titolo pubblico','Fascia d’età','Tono','Promessa narrativa','Sinossi editoriale']) assert.match(editor,new RegExp(label));
+  for(const label of ['Titolo pubblico','Età minima','Età massima','Tipologie','Tono','Promessa narrativa','Sinossi editoriale']) assert.match(editor,new RegExp(label));
   assert.doesNotMatch(editor,/type=["']application\/json["']/);
   assert.doesNotMatch(editor,/SERVICE_ROLE/);
 });
 
 test('fascia, tono e immagini sono gestiti senza percorsi tecnici',()=>{
-  assert.match(html,/<select id="age-range" required>/);
+  assert.match(html,/<select id="min-age" required>/);
+  assert.match(html,/<select id="max-age" required>/);
+  assert.match(html,/name="story-type"/);
   assert.match(html,/<select id="tone" required>/);
-  assert.match(editor,/<select id="age-range" required>/);
+  assert.match(editor,/<select id="min-age" required>/);
+  assert.match(editor,/<select id="max-age" required>/);
+  assert.match(editor,/name="story-type"/);
   assert.match(editor,/<select id="tone" required>/);
   assert.match(editor,/id="cover-file" type="file"/);
   assert.match(editor,/id="scene-file" type="file"/);

@@ -194,6 +194,14 @@ function drawText(context,text,area,{size=17,lineHeight=1.6,align="left",weight=
   const lines=wrapLines(context,text,area.w,maxLines),x=align==="center"?area.x+area.w/2:align==="right"?area.x+area.w:area.x;
   lines.forEach((line,index)=>context.fillText(line,x,area.y+index*size*lineHeight));context.restore();
 }
+function fittedTextSize(context,text,area,{max=17,min=8,lineHeight=1.45}={}){
+  for(let size=max;size>=min;size-=1){
+    context.save();context.font=`400 ${size}px Georgia,serif`;
+    const lines=wrapLines(context,text,area.w,999);context.restore();
+    if(lines.length*size*lineHeight<=area.h)return size;
+  }
+  return min;
+}
 function splitText(value,boxes){
   const words=String(value||"").trim().split(/\s+/).filter(Boolean);if(boxes.length===1)return [words.join(" ")];
   const total=boxes.reduce((sum,item)=>sum+(item.max||1),0),parts=[];let cursor=0;
@@ -215,8 +223,14 @@ function fadeImageEdge(context,item){
 async function drawNarrative(context,page){
   context.fillStyle="#fdf5e6";context.fillRect(0,0,1240,465);
   const base=gabbiaPerNome(page.layout?.gabbia),layout=page.layout?.specchiata&&base?.specchiata?base.specchiata:base;
-  if(!layout)throw new Error(`PDF_LAYOUT_MISSING_${page.page_id}`);
   const image=await loadBitmap(page.image_url);
+  if(!layout){
+    const imageArea={x:0,y:0,w:620,h:465},textArea={x:675,y:38,w:510,h:389};
+    drawCoverImage(context,image,imageArea,"center",false);
+    const size=fittedTextSize(context,page.text,textArea,{max:17,min:8,lineHeight:1.45});
+    drawText(context,page.text,textArea,{size,lineHeight:1.45,maxLines:999});
+    return;
+  }
   for(const item of layout.immagini||base.immagini||[]){drawCoverImage(context,image,item,item.position,item.specchiata);fadeImageEdge(context,item);}
   const boxes=layout.testo||base.testo,parts=splitText(page.text,boxes);
   boxes.forEach((box,index)=>drawText(context,parts[index],box,{size:box.fontSize,lineHeight:box.lineHeight}));

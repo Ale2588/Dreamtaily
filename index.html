@@ -128,6 +128,9 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 .cast-chip span{display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:800}
 .cast-chip strong{display:block;font-family:'Faustina',Georgia,serif;font-size:18px}
 .story-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.story-filters{margin:0 0 22px;padding:16px 18px;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.72)}
+.story-filter-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:7px 0}.story-filter-label{min-width:76px;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.story-filter-chip{border:1px solid var(--line);border-radius:999px;background:#fff;padding:8px 12px;font-weight:800;color:var(--brown);cursor:pointer}.story-filter-chip.active{border-color:var(--coral);background:#fff0ec;color:#9b402d}.story-filter-summary{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted)}.story-filter-reset{border:0;background:transparent;color:var(--coral);font-weight:900;cursor:pointer}
 .story-card{
   position:relative;overflow:hidden;border:2px solid transparent;border-radius:25px;background:white;
   box-shadow:0 14px 34px rgba(61,43,31,.08);transition:.22s;text-align:left
@@ -190,7 +193,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 }
 
 
-.library-screen{min-height:100svh;background:var(--cream)}
+.library-screen,.books-screen{min-height:100svh;background:var(--cream)}
 .library-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin:18px 0 28px}
 .saved-character-entry{
   display:flex;justify-content:space-between;align-items:center;gap:18px;
@@ -253,6 +256,24 @@ label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0
 .story-empty-icon{font-size:40px;margin-bottom:8px}
 .story-empty-state h2{font-family:'Faustina',Georgia,serif;font-size:25px;line-height:1.1;margin:0 0 8px}
 .story-empty-state p{color:var(--muted);max-width:560px;margin:0 auto}
+.dt-next-heading{margin:28px 0 14px;padding-top:24px;border-top:1px solid var(--line)}
+.dt-next-heading h2{font-family:'Faustina',Georgia,serif;font-size:clamp(25px,4vw,36px);line-height:1.08;margin:4px 0 7px}
+.dt-next-heading p{color:var(--muted);margin:0;line-height:1.5}
+.dt-next-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.dt-next-card{border:1px solid var(--line);border-radius:18px;background:#fffaf4;padding:18px;text-align:left;color:var(--ink);min-height:150px;transition:.18s transform,.18s border-color,.18s box-shadow}
+.dt-next-card:hover{transform:translateY(-2px);border-color:var(--coral);box-shadow:0 12px 26px rgba(61,43,31,.08)}
+.dt-next-card.primary{background:#fff3ed;border-color:#f0b6a7}
+.dt-next-card strong{display:block;font-family:'Faustina',Georgia,serif;font-size:20px;line-height:1.1;margin:7px 0}
+.dt-next-card span{display:block;color:var(--muted);font-size:12px;line-height:1.45}
+.dt-next-icon{font-size:25px;line-height:1}
+.dt-cast-line{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.dt-cast-name{display:inline-flex!important;width:max-content;padding:4px 8px;border-radius:999px;background:#f0e9df;color:#67594b!important;font-size:10px!important;font-weight:800}
+.dt-book-context{position:fixed;right:22px;bottom:22px;z-index:80;width:min(390px,calc(100vw - 32px));display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;padding:15px 16px;border:1px solid #dccfbe;border-radius:19px;background:rgba(255,250,244,.96);box-shadow:0 18px 48px rgba(44,33,25,.18);backdrop-filter:blur(12px)}
+.dt-book-context[hidden]{display:none}.dt-book-context-copy{min-width:0}.dt-book-context-eyebrow{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--coral)}
+.dt-book-context-title{display:block;font-family:'Faustina',Georgia,serif;font-size:18px;line-height:1.1;margin:3px 0 4px}.dt-book-context-cast{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:12px}
+.dt-book-context .btn{padding:10px 12px;white-space:nowrap}.dt-has-book-context .screen.active{padding-bottom:120px}
+@media(max-width:760px){.dt-next-grid{grid-template-columns:1fr}.dt-next-card{min-height:auto}.dt-book-context{right:16px;bottom:16px}}
+@media(max-width:480px){.dt-book-context{grid-template-columns:1fr}.dt-book-context .btn{width:100%}.dt-has-book-context .screen.active{padding-bottom:165px}}
 .story-actions{flex-wrap:wrap}
 
 
@@ -362,6 +383,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dt-books-heading h2{font-family:'Faustina',Georgia,serif;font-size:clamp(28px,4vw,40px);line-height:1.05}
 .dt-books-heading p{color:var(--muted);line-height:1.55;margin-top:4px}
 .dt-books-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.dt-books-tools{display:grid;grid-template-columns:minmax(180px,1fr) auto auto;gap:10px;margin:0 0 16px}.dt-books-tools input,.dt-books-tools select{border:1px solid var(--line);border-radius:13px;background:#fff;padding:11px 13px;font:inherit}.dt-books-tabs{display:flex;gap:8px;margin:0 0 14px}.dt-books-tab{border:1px solid var(--line);border-radius:999px;background:#fff;padding:8px 13px;font-weight:800;cursor:pointer}.dt-books-tab.active{background:var(--brown);color:#fff}.dt-books-more{display:block;margin:18px auto 0}.dt-saved-book.archived{opacity:.76}
 .dt-saved-book{display:grid;grid-template-columns:120px 1fr;background:var(--paper);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 10px 28px rgba(61,43,31,.08)}
 .dt-saved-book-cover{position:relative;min-height:175px;background:linear-gradient(160deg,#29465a,#7d9474);overflow:hidden}
 .dt-saved-book-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -372,8 +394,22 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dt-saved-book-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
 .dt-saved-book-actions .btn{padding:10px 13px;border-radius:12px;font-size:13px}
 .dt-books-empty{padding:24px;border:1px dashed #d8cab5;border-radius:20px;background:rgba(255,253,248,.65);text-align:center;color:var(--muted);grid-column:1/-1}
-.dt-library-separator{height:1px;background:var(--line);margin:34px 0}
-@media(max-width:760px){.dt-books-grid{grid-template-columns:1fr}.dt-saved-book{grid-template-columns:105px 1fr}}
+.dt-preview-notice{display:flex;gap:12px;align-items:flex-start;margin:0 0 16px;padding:14px 16px;border:1px solid #efc78e;border-radius:16px;background:#fff7df;color:#694b20}.dt-preview-notice strong{display:block;margin-bottom:2px}.dt-preview-badge{flex:0 0 auto;border-radius:999px;background:#7a5422;color:#fff;padding:5px 8px;font-size:10px;font-weight:900;letter-spacing:.08em}
+.dt-auth-dialog{position:fixed;inset:0;width:min(840px,calc(100% - 32px));max-height:min(680px,calc(100% - 32px));margin:auto;border:0;border-radius:30px;padding:0;overflow:hidden;background:#fffaf0;box-shadow:0 32px 100px rgba(32,24,18,.38)}
+.dt-auth-dialog::backdrop{background:rgba(30,24,20,.66);backdrop-filter:blur(5px)}
+.dt-auth-shell{display:grid;grid-template-columns:minmax(270px,.88fr) minmax(360px,1.12fr);min-height:520px}
+.dt-auth-art{position:relative;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;padding:34px;color:#fff;background:linear-gradient(155deg,#315b58 0%,#517e72 54%,#e6b56d 135%)}
+.dt-auth-art::before,.dt-auth-art::after{content:"";position:absolute;border-radius:50%;background:rgba(255,239,196,.2)}
+.dt-auth-art::before{width:230px;height:230px;left:-96px;top:-72px}.dt-auth-art::after{width:150px;height:150px;right:-48px;top:80px}
+.dt-auth-art img{position:absolute;z-index:1;left:50%;top:45%;width:min(104%,350px);max-height:310px;object-fit:contain;transform:translate(-50%,-50%);filter:drop-shadow(0 18px 20px rgba(23,44,40,.24))}
+.dt-auth-art-copy{position:relative;z-index:2}.dt-auth-art-kicker{display:inline-flex;align-items:center;gap:7px;margin-bottom:10px;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.dt-auth-art-kicker::before{content:"\2726";color:#f8cf75;font-size:17px}.dt-auth-art h3{font-family:'Faustina',Georgia,serif;font-size:28px;line-height:1.08;margin:0 0 9px}.dt-auth-art p{font-size:14px;line-height:1.55;color:rgba(255,255,255,.86)}
+.dt-auth-body{position:relative;display:flex;flex-direction:column;justify-content:center;padding:clamp(30px,5vw,54px)}
+.dt-auth-close{position:absolute;top:18px;right:18px;width:38px;height:38px;border:1px solid #e4d7c5;border-radius:50%;background:#fffaf0;color:#6f5b47;font-size:22px;line-height:1;cursor:pointer}.dt-auth-close:hover{background:#f5ead9;color:#3a2a1d}
+.dt-auth-body h2{font-family:'Faustina',Georgia,serif;font-size:clamp(32px,4vw,42px);line-height:1.02;margin:9px 0 13px;color:#34271d}.dt-auth-body .intro{margin-bottom:24px;line-height:1.6}.dt-auth-body label{font-weight:800;margin-bottom:7px}.dt-auth-body .input{background:#fff;border-color:#d9c9b3}.dt-auth-promise{display:flex;align-items:flex-start;gap:9px;margin:15px 0 0;padding:11px 13px;border-radius:13px;background:#edf5ef;color:#3e6657;font-size:13px;line-height:1.45}.dt-auth-promise::before{content:"\2713";display:grid;place-items:center;flex:0 0 20px;height:20px;border-radius:50%;background:#5b8874;color:#fff;font-size:12px;font-weight:900}
+.dt-auth-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}.dt-auth-actions .btn-primary{box-shadow:0 8px 18px rgba(194,87,67,.2)}
+.dt-auth-switch{margin-top:14px;text-align:center;color:var(--muted);font-size:13px}.dt-auth-switch button{color:var(--coral);font-weight:900;text-decoration:underline;text-underline-offset:3px}
+.dt-auth-confirmed{position:fixed;inset:0;width:min(480px,calc(100% - 28px));margin:auto;border:0;border-radius:28px;padding:0;overflow:hidden;background:#fffaf0;text-align:center;box-shadow:0 32px 100px rgba(32,24,18,.38)}.dt-auth-confirmed::backdrop{background:rgba(30,24,20,.66);backdrop-filter:blur(5px)}.dt-auth-confirmed-body{padding:42px clamp(26px,6vw,48px)}.dt-auth-confirmed-mark{display:grid;place-items:center;width:68px;height:68px;margin:0 auto 18px;border-radius:50%;background:#e5f1e9;color:#47755f;font-size:32px;font-weight:900}.dt-auth-confirmed h2{font-family:'Faustina',Georgia,serif;font-size:36px;line-height:1.05;margin:8px 0 12px;color:#34271d}.dt-auth-confirmed p{color:var(--muted);line-height:1.6}.dt-auth-confirmed .btn{width:100%;margin-top:24px}
+@media(max-width:760px){.dt-books-grid{grid-template-columns:1fr}.dt-saved-book{grid-template-columns:105px 1fr}.dt-books-tools{grid-template-columns:1fr}.dt-books-tools input,.dt-books-tools select{width:100%}.dt-auth-dialog{width:min(520px,calc(100% - 20px));max-height:calc(100% - 20px);border-radius:24px;overflow:auto}.dt-auth-shell{grid-template-columns:1fr;min-height:0}.dt-auth-art{min-height:190px;padding:22px 26px}.dt-auth-art img{width:190px;max-height:170px;left:auto;right:-4px;top:48%;transform:translateY(-50%);opacity:.92}.dt-auth-art-copy{max-width:61%}.dt-auth-art h3{font-size:23px}.dt-auth-art p{display:none}.dt-auth-body{padding:30px 25px 26px}.dt-auth-close{top:13px;right:13px}.dt-auth-body h2{font-size:32px;padding-right:22px}}
 
 .dt-loading{padding:14px;border-radius:13px;background:#e4f0ef;color:#356f70;font-weight:800;margin-top:12px}
 .dt-decision-option.asset-error{background:#f8f3ea;min-height:110px}
@@ -434,6 +470,9 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dth-nav a:hover{color:var(--testo)}
 .dth-nav-cta{font-family:var(--serif);font-weight:600;font-size:17px;color:var(--testo);
   border-bottom:2px solid var(--evid);padding-bottom:2px}
+.dth-header-actions{display:flex;align-items:center;gap:26px}.dt-account-menu{position:relative}.dt-account-trigger{display:flex;align-items:center;gap:9px;padding:7px 12px 7px 8px;border:1px solid rgba(122,101,81,.25);border-radius:999px;background:rgba(255,253,248,.82);color:var(--testo);font:700 14px/1 var(--sans);box-shadow:0 5px 16px rgba(58,42,29,.07);cursor:pointer}.dt-account-trigger:hover,.dt-account-trigger[aria-expanded="true"]{background:#fff;border-color:rgba(122,101,81,.45)}.dt-account-avatar{display:grid;place-items:center;width:31px;height:31px;border-radius:50%;background:#315b58;color:#fff;font-family:var(--serif);font-size:15px;font-weight:700}.dt-account-chevron{font-size:11px;color:var(--testo-3);transition:transform .18s}.dt-account-trigger[aria-expanded="true"] .dt-account-chevron{transform:rotate(180deg)}
+.dt-account-panel{position:absolute;z-index:200;right:0;top:calc(100% + 10px);width:min(330px,calc(100vw - 28px));padding:19px;border:1px solid #e5d7c1;border-radius:20px;background:#fffaf0;box-shadow:0 22px 60px rgba(48,35,25,.2)}.dt-account-panel[hidden]{display:none}.dt-account-status{font-family:var(--serif);font-size:20px;font-weight:650;color:var(--testo)}.dt-account-email{margin-top:4px;color:var(--testo-3);font-size:13px;overflow-wrap:anywhere}.dt-account-note{margin:10px 0 15px;color:var(--testo-2);font-size:13px;line-height:1.5}.dt-account-links{display:grid;gap:7px}.dt-account-link{display:flex;align-items:center;justify-content:space-between;width:100%;padding:11px 12px;border-radius:12px;background:#f7eddd;color:var(--testo);font-weight:750;text-align:left}.dt-account-link:hover{background:#efe0c9}.dt-account-create{width:100%;margin-top:13px}.dt-account-divider{height:1px;margin:13px 0;background:#eadfce}.dt-account-logout{width:100%;padding:8px;color:#9a493b;font-weight:750;text-align:left}.dt-account-logout:hover{text-decoration:underline}
+.dt-logout-dialog{position:fixed;inset:0;width:min(440px,calc(100% - 28px));margin:auto;border:0;border-radius:26px;padding:0;background:#fffaf0;box-shadow:0 28px 90px rgba(32,24,18,.36)}.dt-logout-dialog::backdrop{background:rgba(30,24,20,.6);backdrop-filter:blur(4px)}.dt-logout-body{padding:34px}.dt-logout-body h2{font-family:var(--serif);font-size:31px;line-height:1.08;color:var(--testo);margin:7px 0 10px}.dt-logout-body p{color:var(--testo-2);line-height:1.55}.dt-logout-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px;flex-wrap:wrap}
 .dth-burger{display:none;flex-direction:column;gap:6px;padding:6px}
 .dth-burger span{display:block;width:22px;height:2px;background:var(--testo)}
 
@@ -516,6 +555,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dth-reveal.is-on .dth-caption{opacity:1}
 .dth-replay{font-family:var(--hand);font-size:21px;color:rgba(246,236,217,.65);
   border-bottom:1px solid rgba(246,236,217,.3);padding-bottom:2px}
+.dth-replay:disabled{opacity:.38;cursor:not-allowed;border-bottom-color:transparent}
 
 /* --- chiusura --- */
 .dth-close{background:var(--carta);padding:54px 64px 26px}
@@ -536,7 +576,8 @@ body.dreamtaily-configurator-open{overflow:hidden}
   .dth-logo img{width:30px;height:30px}
   .dth-logo span{font-size:20px}
   .dth-nav{display:none}
-  .dth-burger{display:flex}
+  .dth-burger{display:none}
+  .dth-header-actions{gap:0}.dt-account-trigger{padding:5px}.dt-account-trigger-label,.dt-account-chevron{display:none}.dt-account-panel{position:fixed;right:14px;top:68px}.dt-account-avatar{width:34px;height:34px}
 
   .dth-hero{grid-template-columns:1fr;padding:18px 22px 0;min-height:0;gap:0}
   .dth-hero-glow{width:420px;height:360px;left:-80px;top:-20px}
@@ -682,15 +723,31 @@ body.dreamtaily-configurator-open{overflow:hidden}
       <img src="assets/home/dreamtaily-icon.png" alt="" width="38" height="38">
       <span>DreamTaily</span>
     </button>
-    <nav class="dth-nav">
-      <a href="#dth-passi">Come funziona</a>
-      <a href="#dth-reveal">Gli stili</a>
-      <a href="#dth-passi">Le storie</a>
-      <button type="button" class="dth-nav-cta" onclick="openCharacterLibrary()">Accedi</button>
-    </nav>
-    <button class="dth-burger" type="button" aria-label="Menu" onclick="openCharacterLibrary()">
-      <span></span><span></span>
-    </button>
+    <div class="dth-header-actions">
+      <nav class="dth-nav">
+        <a href="#dth-passi">Come funziona</a>
+        <a href="#dth-reveal">Gli stili</a>
+        <a href="#dth-passi">Le storie</a>
+      </nav>
+      <div class="dt-account-menu">
+        <button class="dt-account-trigger" id="dt-account-trigger" type="button" aria-expanded="false" aria-controls="dt-account-panel" onclick="toggleDtAccountMenu(event)">
+          <span class="dt-account-avatar" id="dt-account-avatar" aria-hidden="true">D</span>
+          <span class="dt-account-trigger-label" id="dt-account-trigger-label">Il mio spazio</span>
+          <span class="dt-account-chevron" aria-hidden="true">⌄</span>
+        </button>
+        <div class="dt-account-panel" id="dt-account-panel" hidden>
+          <div class="dt-account-status" id="dt-account-status">Il tuo spazio gratuito</div>
+          <div class="dt-account-email" id="dt-account-email" hidden></div>
+          <p class="dt-account-note" id="dt-account-note">Puoi creare un personaggio e un racconto. Registrati quando vuoi conservarli e continuare le avventure.</p>
+          <div class="dt-account-links">
+            <button class="dt-account-link" type="button" onclick="closeDtAccountMenu();openBookLibrary()"><span>I miei libri</span><span aria-hidden="true">→</span></button>
+            <button class="dt-account-link" type="button" onclick="closeDtAccountMenu();openCharacterLibrary()"><span>I miei personaggi</span><span aria-hidden="true">→</span></button>
+          </div>
+          <button class="btn btn-primary dt-account-create" id="dt-account-create" type="button" onclick="openDtVoluntarySignup()">Crea il mio spazio</button>
+          <div id="dt-account-session-actions" hidden><div class="dt-account-divider"></div><button class="dt-account-logout" type="button" onclick="requestDtLogout()">Esci da questo dispositivo</button></div>
+        </div>
+      </div>
+    </div>
   </header>
 
   <!-- ============ HERO ============ -->
@@ -707,10 +764,8 @@ body.dreamtaily-configurator-open{overflow:hidden}
 
       <div class="dth-ctarow">
         <button class="dth-cta" onclick="showScreen('creator')">Crea il suo personaggio</button>
-        <button class="dth-link" onclick="openCharacterLibrary()">Apri la libreria</button>
+        <button class="dth-link" onclick="openBookLibrary()">Apri la libreria</button>
       </div>
-      <button class="dth-resume" id="resume-book-btn" onclick="resumeDraftBook()" style="display:none">Riprendi il tuo libro</button>
-
       <p class="dth-hand">pronto in pochi minuti — e puoi rifarlo</p>
     </div>
 
@@ -725,17 +780,11 @@ body.dreamtaily-configurator-open{overflow:hidden}
     </div>
   </section>
 
-  <div class="dth-groundrow">
-    <span class="dth-hand">tav. i — stile carta ritagliata</span>
-    <span class="dth-tiny">tutti i personaggi stanno sulla stessa linea</span>
-  </div>
-
   <!-- ============ TRE PASSI ============ -->
   <section class="dth-steps" id="dth-passi">
     <div class="dth-wrap">
       <div class="dth-steps-head">
         <h2 class="dth-h2">Un personaggio, tante avventure.</h2>
-        <span class="dth-hand dth-hand-red">tre passi, tre stili</span>
       </div>
 
       <div class="dth-steps-grid">
@@ -803,7 +852,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
         <p class="dth-body dth-body-dark">Lo componiamo mentre guardi: la luce si accende e lui è lì. Da quel momento è suo.</p>
         <div class="dth-ctarow">
           <button class="dth-cta dth-cta-dark" onclick="showScreen('creator')">Crea il suo personaggio</button>
-          <button class="dth-replay" type="button" id="dth-replay">rivedi il momento</button>
+          <button class="dth-replay" type="button" id="dth-characters-link" onclick="openCharacterLibrary()" disabled>Vai ai tuoi personaggi</button>
         </div>
       </div>
     </div>
@@ -819,13 +868,13 @@ body.dreamtaily-configurator-open{overflow:hidden}
         </h2>
         <div class="dth-ctarow">
           <button class="dth-cta" onclick="showScreen('creator')">Crea il suo personaggio</button>
-          <button class="dth-link" onclick="openCharacterLibrary()">Apri la libreria</button>
+          <button class="dth-link" onclick="openBookLibrary()">Apri la libreria</button>
         </div>
       </div>
       <ul class="dth-assure">
         <li><span class="dth-anum">1</span><span>Il personaggio si crea in pochi minuti e resta lo stesso in tutte le storie.</span></li>
         <li><span class="dth-anum">2</span><span>Se non ti somiglia, lo rifai: nessun limite di tentativi.</span></li>
-        <li><span class="dth-anum">3</span><span>La foto serve solo a creare il personaggio: la cancelliamo subito dopo.</span></li>
+        <li><span class="dth-anum">3</span><span>Puoi creare più personaggi per le tue storie.</span></li>
       </ul>
     </div>
     <footer class="dth-foot">
@@ -836,6 +885,52 @@ body.dreamtaily-configurator-open{overflow:hidden}
 
 </div>
 </section>
+
+<dialog class="dt-auth-dialog" id="dt-auth-dialog" aria-labelledby="dt-auth-title">
+  <div class="dt-auth-shell">
+    <aside class="dt-auth-art" aria-hidden="true">
+      <img src="assets/home/bambino-carta.webp" alt="">
+      <div class="dt-auth-art-copy">
+        <div class="dt-auth-art-kicker">La storia continua</div>
+        <h3>Il tuo piccolo mondo resta con te.</h3>
+        <p>Personaggi, racconti e nuove avventure, riuniti in un posto tutto vostro.</p>
+      </div>
+    </aside>
+    <form class="dt-auth-body" id="dt-auth-form">
+      <button class="dt-auth-close" type="button" onclick="closeDtAuthGate()" aria-label="Chiudi">×</button>
+      <div class="phase">Il tuo spazio DreamTaily</div>
+      <h2 id="dt-auth-title">Salva il mondo che hai creato</h2>
+      <p class="intro">Crea gratuitamente il tuo spazio personale per aggiungere nuove avventure senza perdere il personaggio e il racconto che hai già creato.</p>
+      <label for="dt-auth-email">La tua email</label>
+      <input class="input" id="dt-auth-email" type="email" required autocomplete="email" placeholder="nome@esempio.it">
+      <div class="dt-auth-promise">Quello che hai fatto finora è già al sicuro e resterà collegato al tuo spazio.</div>
+      <div class="error" id="dt-auth-error"></div>
+      <div class="dt-auth-actions"><button class="btn btn-ghost" type="button" onclick="closeDtAuthGate()">Non ora</button><button class="btn btn-primary" id="dt-auth-submit" type="submit">Crea il mio spazio</button></div>
+      <p class="dt-auth-switch" id="dt-auth-switch">Hai già uno spazio DreamTaily? <button type="button" onclick="selectDtAuthMode('login')">Accedi</button></p>
+      <p class="small" style="margin-top:12px">Ti invieremo un link di conferma. Nessuna password da ricordare.</p>
+    </form>
+  </div>
+</dialog>
+
+<dialog class="dt-auth-confirmed" id="dt-auth-confirmed" aria-labelledby="dt-auth-confirmed-title">
+  <div class="dt-auth-confirmed-body">
+    <div class="dt-auth-confirmed-mark" aria-hidden="true">✓</div>
+    <div class="phase">Registrazione completata</div>
+    <h2 id="dt-auth-confirmed-title">Il tuo spazio è pronto</h2>
+    <p id="dt-auth-confirmed-copy">Personaggio e racconto sono al sicuro. Ora puoi continuare esattamente da dove eri rimasto.</p>
+    <button class="btn btn-primary" id="dt-auth-confirmed-continue" type="button" onclick="continueDtAuthJourney()">Continua la tua avventura</button>
+  </div>
+</dialog>
+
+<dialog class="dt-logout-dialog" id="dt-logout-dialog" aria-labelledby="dt-logout-title">
+  <div class="dt-logout-body">
+    <div class="phase">Il tuo spazio DreamTaily</div>
+    <h2 id="dt-logout-title">Vuoi uscire?</h2>
+    <p>I tuoi libri e personaggi restano al sicuro. Su questo dispositivo ripartirai con un nuovo spazio gratuito.</p>
+    <div class="error" id="dt-logout-error"></div>
+    <div class="dt-logout-actions"><button class="btn btn-ghost" type="button" onclick="closeDtLogout()">Resta qui</button><button class="btn btn-primary" id="dt-logout-confirm" type="button" onclick="confirmDtLogout()">Esci</button></div>
+  </div>
+</dialog>
 
 
 <section class="screen" id="screen-creator">
@@ -994,13 +1089,13 @@ body.dreamtaily-configurator-open{overflow:hidden}
   </div>
 </section>
 
-<section class="screen library-screen" id="screen-library">
+<section class="screen books-screen" id="screen-books">
   <div class="shell">
     <div class="topbar">
       <button class="brand-dark" onclick="showScreen('landing')">
         <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
       </button>
-      <div class="phase">I tuoi personaggi</div>
+      <button class="btn btn-soft" type="button" onclick="openCharacterLibrary()">I tuoi personaggi →</button>
     </div>
 
     <section class="dt-books-section">
@@ -1011,12 +1106,28 @@ body.dreamtaily-configurator-open{overflow:hidden}
           <p>Apri un libro concluso, riprendi una bozza oppure eliminalo.</p>
         </div>
       </div>
+      <div class="dt-books-tabs"><button class="dt-books-tab active" data-book-view="active" type="button" onclick="dtSetBookView('active')">In libreria</button><button class="dt-books-tab" data-book-view="archived" type="button" onclick="dtSetBookView('archived')">Archiviati</button></div>
+      <div class="dt-books-tools">
+        <input id="saved-books-search" type="search" placeholder="Cerca per titolo o protagonista" oninput="dtUpdateBookFilters()">
+        <select id="saved-books-filter" onchange="dtUpdateBookFilters()"><option value="all">Tutti gli stati</option><option value="continue">Da continuare</option><option value="creating">In creazione</option><option value="ready">Pronti</option><option value="failed">Con problemi</option></select>
+        <select id="saved-books-order" onchange="dtUpdateBookFilters()"><option value="priority">Prima quelli da continuare</option><option value="recent">Più recenti</option><option value="oldest">Meno recenti</option><option value="title">Titolo A–Z</option></select>
+      </div>
       <div class="library-status" id="saved-books-status">Caricamento dei libri…</div>
       <div class="dt-books-grid" id="saved-books-grid"></div>
+      <button class="btn btn-soft dt-books-more" id="saved-books-more" type="button" onclick="dtShowMoreBooks()" hidden>Mostra altri libri</button>
       <div class="error" id="saved-books-error"></div>
     </section>
+  </div>
+</section>
 
-    <div class="dt-library-separator"></div>
+<section class="screen library-screen" id="screen-library">
+  <div class="shell">
+    <div class="topbar">
+      <button class="brand-dark" onclick="showScreen('landing')">
+        <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
+      </button>
+      <button class="btn btn-soft" type="button" onclick="openBookLibrary()">I tuoi libri →</button>
+    </div>
 
     <div class="library-heading">
       <div>
@@ -1061,6 +1172,11 @@ body.dreamtaily-configurator-open{overflow:hidden}
       </div>
     </div>
 
+    <div class="story-filters" id="story-filters">
+      <div class="story-filter-row" id="story-age-filters"><span class="story-filter-label">Età</span></div>
+      <div class="story-filter-row" id="story-type-filters"><span class="story-filter-label">Tipologia</span></div>
+      <div class="story-filter-summary"><span id="story-result-count"></span><button class="story-filter-reset" id="story-filter-reset" type="button" onclick="resetStoryFilters()" hidden>Azzera filtri</button></div>
+    </div>
     <div class="story-grid" id="story-grid"></div>
 
     <div class="story-empty-state" id="story-empty-state" hidden>
@@ -1172,6 +1288,15 @@ body.dreamtaily-configurator-open{overflow:hidden}
 <section class="screen" id="screen-render-status"></section>
 <section class="screen" id="screen-delivered"></section>
 
+<aside class="dt-book-context" id="dt-book-context" aria-live="polite" hidden>
+  <div class="dt-book-context-copy">
+    <span class="dt-book-context-eyebrow">Il tuo libro in corso</span>
+    <strong class="dt-book-context-title" id="dt-book-context-title">1 storia già inserita</strong>
+    <span class="dt-book-context-cast" id="dt-book-context-cast">Cast: —</span>
+  </div>
+  <button class="btn btn-soft" type="button" onclick="renderBookWorkspace()">Vedi riepilogo</button>
+</aside>
+
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="story-validator.js"></script>
 <script>
@@ -1212,6 +1337,7 @@ let supabaseClient = null;
 function showScreen(name){
   document.querySelectorAll('.screen').forEach(screen=>screen.classList.remove('active'));
   document.getElementById('screen-'+name)?.classList.add('active');
+  window.renderDtBookContext?.(name);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -1314,6 +1440,229 @@ function ensureUser(){
   }
   return authInFlight;
 }
+
+async function dtPermanentUser(){
+  const user=await ensureUser();
+  return user&&!user.is_anonymous&&Boolean(user.email);
+}
+
+async function requireDtAccount(action){
+  if(await dtPermanentUser()) return true;
+  sessionStorage.setItem('dreamtaily.auth.pending_action',action);
+  selectDtAuthMode('signup');
+  const dialog=document.getElementById('dt-auth-dialog');
+  showError('dt-auth-error',null);
+  if(dialog&&!dialog.open)dialog.showModal();
+  return false;
+}
+
+window.closeDtAuthGate=function(){document.getElementById('dt-auth-dialog')?.close()};
+
+let dtAuthMode='signup';
+window.selectDtAuthMode=function(mode){
+  dtAuthMode=mode==='login'?'login':'signup';
+  const login=dtAuthMode==='login';
+  document.getElementById('dt-auth-title').textContent=login?'Bentornato nel tuo spazio':'Salva il mondo che hai creato';
+  document.querySelector('#dt-auth-form .intro').textContent=login
+    ?'Accedi con la tua email: conserveremo anche il personaggio e il racconto che hai appena creato.'
+    :'Crea gratuitamente il tuo spazio personale per aggiungere nuove avventure senza perdere il personaggio e il racconto che hai già creato.';
+  document.getElementById('dt-auth-submit').textContent=login?'Inviami il link di accesso':'Crea il mio spazio';
+  document.getElementById('dt-auth-switch').innerHTML=login
+    ?'Non hai ancora uno spazio? <button type="button" onclick="selectDtAuthMode(\'signup\')">Crealo ora</button>'
+    :'Hai già uno spazio DreamTaily? <button type="button" onclick="selectDtAuthMode(\'login\')">Accedi</button>';
+  showError('dt-auth-error',null);
+};
+
+async function prepareDtExistingAccountMerge(){
+  const {data,error}=await getSupabase().functions.invoke('merge-account',{body:{action:'prepare'}});
+  if(error||!data?.claim_token)throw error||new Error('MERGE_PREPARE_FAILED');
+  sessionStorage.setItem('dreamtaily.auth.merge_claim',data.claim_token);
+  sessionStorage.setItem('dreamtaily.auth.merge_expires_at',data.expires_at||'');
+}
+
+async function finalizeDtExistingAccountMerge(){
+  const claimToken=sessionStorage.getItem('dreamtaily.auth.merge_claim');
+  if(!claimToken)return null;
+  const {data,error}=await getSupabase().functions.invoke('merge-account',{body:{action:'finalize',claim_token:claimToken}});
+  if(error||data?.error)throw error||new Error(data.error);
+  sessionStorage.removeItem('dreamtaily.auth.merge_claim');
+  sessionStorage.removeItem('dreamtaily.auth.merge_expires_at');
+  authInFlight=null;
+  app.savedCharacters=[];app.bookId=null;app.bookStories=[];
+  await detectDraftBook();
+  await detectSavedCharactersForHomepage();
+  return data;
+}
+
+async function resumeDtAuthAction(){
+  const action=sessionStorage.getItem('dreamtaily.auth.pending_action');
+  if(!action||!await dtPermanentUser())return;
+  sessionStorage.removeItem('dreamtaily.auth.pending_action');
+  if(action==='add_story_same')return window.beginAddStoryWithSameProtagonist?.();
+  if(action==='add_story_character')return window.beginAddStory?.();
+  if(action==='checkout')return window.openDtCheckout?.();
+  if(action==='new_character')return startAnother(true);
+  if(action==='account_home')return openBookLibrary();
+}
+
+function closeDtAccountMenu(){
+  const panel=document.getElementById('dt-account-panel'),trigger=document.getElementById('dt-account-trigger');
+  if(panel)panel.hidden=true;
+  trigger?.setAttribute('aria-expanded','false');
+}
+
+window.closeDtAccountMenu=closeDtAccountMenu;
+window.toggleDtAccountMenu=function(event){
+  event?.stopPropagation();
+  const panel=document.getElementById('dt-account-panel'),trigger=document.getElementById('dt-account-trigger');
+  if(!panel||!trigger)return;
+  panel.hidden=!panel.hidden;
+  trigger.setAttribute('aria-expanded',String(!panel.hidden));
+};
+
+async function refreshDtAccountUI(){
+  const {data:{session}}=await getSupabase().auth.getSession();
+  const user=session?.user;
+  const permanent=Boolean(user&&!user.is_anonymous&&user.email);
+  const email=document.getElementById('dt-account-email');
+  document.getElementById('dt-account-status').textContent=permanent?'Il tuo spazio DreamTaily':'Il tuo spazio gratuito';
+  document.getElementById('dt-account-note').textContent=permanent?'Libri, personaggi e nuove avventure sono raccolti qui.':'Puoi creare un personaggio e un racconto. Registrati quando vuoi conservarli e continuare le avventure.';
+  document.getElementById('dt-account-avatar').textContent=permanent?user.email.charAt(0).toUpperCase():'D';
+  document.getElementById('dt-account-trigger-label').textContent=permanent?'Il mio spazio':'Il mio spazio';
+  email.textContent=permanent?user.email:'';
+  email.hidden=!permanent;
+  document.getElementById('dt-account-create').hidden=permanent;
+  document.getElementById('dt-account-session-actions').hidden=!permanent;
+}
+
+window.openDtVoluntarySignup=async function(){
+  closeDtAccountMenu();
+  await requireDtAccount('account_home');
+};
+
+window.requestDtLogout=function(){
+  closeDtAccountMenu();showError('dt-logout-error',null);
+  document.getElementById('dt-logout-dialog')?.showModal();
+};
+window.closeDtLogout=function(){document.getElementById('dt-logout-dialog')?.close()};
+window.confirmDtLogout=async function(){
+  const button=document.getElementById('dt-logout-confirm');
+  button.disabled=true;showError('dt-logout-error',null);
+  try{
+    const {error}=await getSupabase().auth.signOut({scope:'local'});
+    if(error)throw error;
+    authInFlight=null;
+    sessionStorage.removeItem('dreamtaily.auth.pending_action');
+    location.replace(location.pathname);
+  }catch(error){
+    console.error('[DreamTaily] Logout error:',error);
+    showError('dt-logout-error','Non sono riuscito a uscire. Riprova tra un momento.');
+    button.disabled=false;
+  }
+};
+
+function initDtAccountUI(){
+  getSupabase().auth.onAuthStateChange(()=>setTimeout(()=>refreshDtAccountUI().catch(console.warn),0));
+  document.addEventListener('click',event=>{
+    if(!event.target.closest?.('.dt-account-menu'))closeDtAccountMenu();
+  });
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')closeDtAccountMenu()});
+  return refreshDtAccountUI();
+}
+
+function cleanDtAuthReturnUrl(){
+  const url=new URL(location.href);
+  url.searchParams.delete('auth_resume');
+  url.searchParams.delete('merge_resume');
+  history.replaceState({},'',url.pathname+url.search);
+}
+
+async function waitForDtPermanentUser(timeout=6500){
+  const client=getSupabase();
+  const current=(await client.auth.getSession()).data.session?.user;
+  if(current&&!current.is_anonymous&&current.email)return current;
+  return new Promise(resolve=>{
+    let settled=false,subscription=null,timer=null;
+    const finish=user=>{
+      if(settled)return;
+      settled=true;clearTimeout(timer);subscription?.unsubscribe();resolve(user||null);
+    };
+    const listener=client.auth.onAuthStateChange((_event,session)=>{
+      const user=session?.user;
+      if(user&&!user.is_anonymous&&user.email)finish(user);
+    });
+    subscription=listener.data.subscription;
+    timer=setTimeout(()=>finish(null),timeout);
+  });
+}
+
+async function handleDtAuthReturn(){
+  const url=new URL(location.href);
+  const isMergeReturn=url.searchParams.get('merge_resume')==='1';
+  const isReturn=url.searchParams.get('auth_resume')==='1'||isMergeReturn;
+  if(!isReturn)return resumeDtAuthAction();
+  const user=await waitForDtPermanentUser();
+  cleanDtAuthReturnUrl();
+  if(!user)return;
+  if(isMergeReturn){
+    try{
+      await finalizeDtExistingAccountMerge();
+    }catch(error){
+      console.error('[DreamTaily] Existing account merge error:',error);
+      const code=String(error?.message||error||'');
+      const expired=/EXPIRED|INACTIVE|NOT_FOUND/.test(code);
+      sessionStorage.removeItem('dreamtaily.auth.merge_claim');
+      sessionStorage.removeItem('dreamtaily.auth.merge_expires_at');
+      document.getElementById('dt-auth-confirmed-title').textContent='Accesso completato';
+      document.getElementById('dt-auth-confirmed-copy').textContent=expired
+        ?'Il collegamento del lavoro anonimo è scaduto. Il tuo account è al sicuro; puoi riprovare dalla sessione in cui hai creato il contenuto.'
+        :'Sei entrato nel tuo spazio, ma non sono riuscito a collegare automaticamente il lavoro anonimo. Non creare duplicati: riprova tra un momento.';
+      document.getElementById('dt-auth-confirmed')?.showModal();
+      return;
+    }
+    document.getElementById('dt-auth-confirmed-copy').textContent='Bentornato. Il personaggio e il racconto appena creati sono stati aggiunti al tuo spazio senza perdere il lavoro precedente.';
+  }
+  const action=sessionStorage.getItem('dreamtaily.auth.pending_action');
+  const button=document.getElementById('dt-auth-confirmed-continue');
+  if(!action){
+    document.getElementById('dt-auth-confirmed-copy').textContent='Il tuo spazio DreamTaily è attivo. Personaggi, racconti e libri ti aspettano nella tua libreria.';
+    button.textContent='Apri i miei libri';
+  }
+  document.getElementById('dt-auth-confirmed')?.showModal();
+}
+
+window.continueDtAuthJourney=async function(){
+  document.getElementById('dt-auth-confirmed')?.close();
+  if(sessionStorage.getItem('dreamtaily.auth.pending_action'))return resumeDtAuthAction();
+  return openBookLibrary();
+};
+
+document.getElementById('dt-auth-form')?.addEventListener('submit',async event=>{
+  event.preventDefault();
+  const button=document.getElementById('dt-auth-submit'),email=document.getElementById('dt-auth-email').value.trim();
+  button.disabled=true;showError('dt-auth-error',null);
+  try{
+    const redirect=new URL(location.href);
+    let error=null;
+    if(dtAuthMode==='login'){
+      await prepareDtExistingAccountMerge();
+      redirect.searchParams.set('merge_resume','1');
+      ({error}=await getSupabase().auth.signInWithOtp({email,options:{shouldCreateUser:false,emailRedirectTo:redirect.href}}));
+    }else{
+      redirect.searchParams.set('auth_resume','1');
+      ({error}=await getSupabase().auth.updateUser({email},{emailRedirectTo:redirect.href}));
+    }
+    if(error)throw error;
+    showError('dt-auth-error',dtAuthMode==='login'?'Controlla la posta e apri il link per entrare: collegheremo anche il lavoro appena creato.':'Controlla la posta e apri il link: il personaggio e il racconto resteranno qui.');
+    document.getElementById('dt-auth-error').classList.add('visible');
+  }catch(error){
+    console.error('[DreamTaily] Account link error:',error);
+    sessionStorage.removeItem('dreamtaily.auth.merge_claim');
+    sessionStorage.removeItem('dreamtaily.auth.merge_expires_at');
+    const already=String(error?.message||'').toLowerCase().includes('already');
+    showError('dt-auth-error',already?'Questa email appartiene già a uno spazio: scegli “Accedi”.':'Non sono riuscito a inviare il link. Controlla l’email e riprova.');
+  }finally{button.disabled=false}
+});
 
 async function getAccessToken(){
   await ensureUser();
@@ -1499,6 +1848,7 @@ async function saveCharacter(){
     if(referenceError) throw referenceError;
 
     app.characterAssetId=asset.id;
+    app.candidateCharacterAssetId=asset.id;
     app.previewUrl=canonical.signed_url||app.previewUrl;
     document.getElementById('wow-image').src=app.previewUrl;
     document.getElementById('saved-note').classList.add('visible');
@@ -1588,11 +1938,30 @@ async function loadSavedCharacters(){
     }
 
     app.savedCharacters=hydrated;
+    updateRevealCharactersCta(hydrated.length>0);
     renderSavedCharacters();
+    window.renderDtBookContext?.();
   }catch(error){
     console.error('[DreamTaily] Character library error:',error);
     status.textContent='';
     showError('library-error','Non sono riuscito a recuperare i personaggi salvati.');
+  }
+}
+
+function updateRevealCharactersCta(enabled){
+  const button=document.getElementById('dth-characters-link');
+  if(button) button.disabled=!enabled;
+}
+
+async function detectSavedCharactersForHomepage(){
+  updateRevealCharactersCta(false);
+  try{
+    await ensureUser();
+    const {data,error}=await getSupabase().from('character_assets').select('id').eq('status','ready').limit(1);
+    if(error) throw error;
+    updateRevealCharactersCta(Boolean(data?.length));
+  }catch(error){
+    console.warn('[DreamTaily] Homepage character detection skipped:',error);
   }
 }
 
@@ -1643,6 +2012,11 @@ async function openCharacterLibrary(){
   await loadSavedCharacters();
 }
 
+async function openBookLibrary(){
+  showScreen('books');
+  await window.dtLoadSavedBooks();
+}
+
 function applyCharacterToForm(character){
   const traits=character.traits||{};
   const appearance=traits.appearance||{};
@@ -1688,6 +2062,30 @@ async function useSavedCharacter(characterId){
 
 
 let STORY_TEMPLATES = [];
+const STORY_AGE_FILTERS=[{id:'0-2',label:'0–2',min:0,max:2},{id:'3-5',label:'3–5',min:3,max:5},{id:'6-8',label:'6–8',min:6,max:8},{id:'9-12',label:'9+',min:9,max:12}];
+const storyCatalogFilters={ages:new Set(),types:new Set()};
+
+function normalizedStoryAges(story){
+  if(Number.isInteger(story.min_age)&&Number.isInteger(story.max_age))return{min:story.min_age,max:story.max_age};
+  const text=String(story.age||'').replace(/anni/gi,'').trim(),numbers=(text.match(/\d+/g)||[]).map(Number);
+  return{min:numbers[0]??null,max:numbers[1]??(text.includes('+')?12:numbers[0]??null)};
+}
+function storyMatchesFilters(story){
+  const ages=normalizedStoryAges(story),types=Array.isArray(story.story_types)?story.story_types:[];
+  const ageMatch=!storyCatalogFilters.ages.size||STORY_AGE_FILTERS.some(filter=>storyCatalogFilters.ages.has(filter.id)&&ages.min!=null&&ages.max!=null&&ages.min<=filter.max&&ages.max>=filter.min);
+  const typeMatch=!storyCatalogFilters.types.size||types.some(type=>storyCatalogFilters.types.has(type));
+  return ageMatch&&typeMatch;
+}
+function toggleStoryFilter(group,value){const selected=storyCatalogFilters[group];selected.has(value)?selected.delete(value):selected.add(value);renderStories()}
+function resetStoryFilters(){storyCatalogFilters.ages.clear();storyCatalogFilters.types.clear();renderStories()}
+function renderStoryFilters(resultCount){
+  const types=[...new Set(STORY_TEMPLATES.flatMap(story=>Array.isArray(story.story_types)?story.story_types:[]))].sort((a,b)=>a.localeCompare(b,'it'));
+  document.getElementById('story-age-filters').innerHTML='<span class="story-filter-label">Età</span>'+STORY_AGE_FILTERS.map(filter=>`<button type="button" class="story-filter-chip ${storyCatalogFilters.ages.has(filter.id)?'active':''}" onclick="toggleStoryFilter('ages','${filter.id}')">${filter.label}</button>`).join('');
+  document.getElementById('story-type-filters').innerHTML='<span class="story-filter-label">Tipologia</span>'+types.map(type=>`<button type="button" class="story-filter-chip ${storyCatalogFilters.types.has(type)?'active':''}" onclick="toggleStoryFilter('types','${escapeHtml(type)}')">${escapeHtml(type)}</button>`).join('');
+  document.getElementById('story-type-filters').hidden=!types.length;
+  document.getElementById('story-result-count').textContent=`${resultCount} ${resultCount===1?'storia disponibile':'storie disponibili'}`;
+  document.getElementById('story-filter-reset').hidden=!(storyCatalogFilters.ages.size||storyCatalogFilters.types.size);
+}
 
 async function loadStoryCatalog(){
   if(STORY_TEMPLATES.length) return STORY_TEMPLATES;
@@ -1783,11 +2181,13 @@ async function prepareStories(){
 
 function renderStories(){
   const grid=document.getElementById('story-grid');
-  const availableStories=STORY_TEMPLATES.filter(
+  const filteredStories=STORY_TEMPLATES.filter(storyMatchesFilters);
+  const availableStories=filteredStories.filter(
     story=>!app.bookStories.some(item=>item.story_slug===story.id)
   );
+  renderStoryFilters(filteredStories.length);
 
-  grid.innerHTML=STORY_TEMPLATES.map(story=>{
+  grid.innerHTML=filteredStories.map(story=>{
     const alreadyAdded=app.bookStories.some(item=>item.story_slug===story.id);
     return `
     <button class="story-card ${app.selectedStoryId===story.id?'selected':''} ${alreadyAdded?'is-added':''}"
@@ -1801,15 +2201,16 @@ function renderStories(){
         <h3>${story.title}</h3>
         <p>${story.description}</p>
         <div class="story-meta">
+          ${(story.story_types||[]).map(type=>`<span>${escapeHtml(type)}</span>`).join('')}
           <span>${story.tone}</span>
           <span>${story.length}</span>
         </div>
       </div>
     </button>
-  `}).join('');
+  `}).join('')||'<div class="story-empty-state" style="grid-column:1/-1"><h2>Nessuna storia corrisponde ai filtri.</h2><p>Prova a cambiare età o tipologia, oppure azzera i filtri.</p></div>';
 
   const hasBook=app.bookStories.length>0;
-  const allAdded=availableStories.length===0;
+  const allAdded=STORY_TEMPLATES.length>0&&STORY_TEMPLATES.every(story=>app.bookStories.some(item=>item.story_slug===story.id));
   document.getElementById('story-go-book').hidden=!hasBook;
   document.getElementById('story-empty-state').hidden=!allAdded;
   document.getElementById('story-continue').hidden=allAdded;
@@ -1875,6 +2276,7 @@ async function getOrCreateDraftBook(){
 async function loadBookStories(){
   if(!app.bookId){
     app.bookStories=[];
+    window.renderDtBookContext?.();
     return [];
   }
 
@@ -1903,6 +2305,7 @@ async function loadBookStories(){
 
   if(error) throw error;
   app.bookStories=data||[];
+  window.renderDtBookContext?.();
   return app.bookStories;
 }
 
@@ -1911,7 +2314,7 @@ async function persistSelectedStory(){
   if(!story) throw new Error('STORY_REQUIRED');
   await loadStoryDefinition(story);
   if(!story._versionId||!story._contract) throw new Error('STORY_VERSION_REQUIRED');
-  const candidateCharacterId=app.candidateCharacterAssetId||app.characterAssetId;
+  const candidateCharacterId=app.characterAssetId||app.candidateCharacterAssetId;
   if(!candidateCharacterId) throw new Error('CHARACTER_ASSET_REQUIRED');
 
   const client=getSupabase();
@@ -2691,8 +3094,8 @@ async function detectDraftBook(){
     const button=document.getElementById('resume-book-btn');
     if(data?.id){
       app.bookId=data.id;
-      button.style.display='';
-    }else{
+      if(button) button.style.display='';
+    }else if(button){
       button.style.display='none';
     }
   }catch(error){
@@ -2736,7 +3139,8 @@ async function resumeDraftBook(){
 }
 
 
-function startAnother(){
+async function startAnother(accountConfirmed=false){
+  if(!accountConfirmed&&app.savedCharacters.length>=1&&!await requireDtAccount('new_character'))return;
   app.style=MVP_VISUAL_STYLE_ID;app.type='real_person';app.previewId=null;app.previewUrl=null;app.characterAssetId=null;app.candidateCharacterAssetId=null;app.selectedStoryId=null;
   document.querySelectorAll('input,textarea').forEach(el=>el.value='');
   document.getElementById('age-group').value='';
@@ -2746,7 +3150,7 @@ function startAnother(){
   selectStyle(MVP_VISUAL_STYLE_ID);selectType('real_person');showScreen('creator');
 }
 
-document.addEventListener('DOMContentLoaded',async()=>{await loadStoryCatalog();detectDraftBook()});
+document.addEventListener('DOMContentLoaded',async()=>{await loadStoryCatalog();await detectDraftBook();await detectSavedCharactersForHomepage();await handleDtAuthReturn();await initDtAccountUI()});
 window.DreamTailyCharacterFlow={
   generate:generateCharacter,
   save:saveCharacter,
@@ -2766,7 +3170,6 @@ window.DreamTailyCharacterFlow={
 (function(){
 "use strict";
 
-const DT_STORY_ROOT="stories/il-bosco-dei-sussurri";
 const DT_HELPERS={
   etto:{name:"Etto",image:"assets/char/paper/etto_in_piedi.png",art:{paper:{in_piedi:"assets/char/paper/etto_in_piedi.png",seduto:"assets/char/paper/etto_seduto.png",cammina:"assets/char/paper/etto_cammina.png",si_china:"assets/char/paper/etto_si_china.png"},papercut:{in_piedi:"assets/char/paper/etto_in_piedi.png",seduto:"assets/char/paper/etto_seduto.png",cammina:"assets/char/paper/etto_cammina.png",si_china:"assets/char/paper/etto_si_china.png"}}},
   briciola:{name:"Briciola",image:"assets/char/paper/briciola_in_piedi.png",art:{paper:{in_piedi:"assets/char/paper/briciola_in_piedi.png",seduto:"assets/char/paper/briciola_seduto.png",cammina:"assets/char/paper/briciola_cammina.png",si_china:"assets/char/paper/briciola_si_china.png"},papercut:{in_piedi:"assets/char/paper/briciola_in_piedi.png",seduto:"assets/char/paper/briciola_seduto.png",cammina:"assets/char/paper/briciola_cammina.png",si_china:"assets/char/paper/briciola_si_china.png"}}},
@@ -2917,10 +3320,7 @@ async function dtLoadSceneContract(){
     dtSceneContract=structuredClone(app.activeStoryContract.scenes);
     return dtSceneContract;
   }
-  const response=await fetch(`${DT_STORY_ROOT}/scene-pilot.json?v=20260730-fix3`,{cache:"no-store"});
-  if(!response.ok) throw new Error(`SCENE_HTTP_${response.status}`);
-  dtSceneContract=await response.json();
-  return dtSceneContract;
+  throw new Error("STORY_SCENES_MISSING");
 }
 
 function dtPrefixStoryRef(ref){
@@ -2928,7 +3328,8 @@ function dtPrefixStoryRef(ref){
   if(/^(?:https?:|data:|blob:|\/)/.test(ref)) return ref;
 
   if(ref.startsWith("stories/")) return ref;
-  const slug=app.activeStoryDefinition?.slug||"il-bosco-dei-sussurri";
+  const slug=app.activeStoryDefinition?.slug;
+  if(!slug) throw new Error("STORY_SLUG_MISSING");
   return `stories/${slug}/${ref}`;
 }
 
@@ -3197,23 +3598,7 @@ async function dtLoadContent(){
     dtContentByRef=structuredClone(app.activeStoryContract.contentByRef);
     return dtContentByRef;
   }
-  const refs=new Set();
-  for(const step of app.activeStoryDefinition?.steps||[]){
-    if(step.content_ref) refs.add(step.content_ref);
-    for(const variants of Object.values(step.variant_refs||{})){
-      for(const ref of Object.values(variants||{})) refs.add(ref);
-    }
-    for(const entry of step.decision?.catalog_roster||[]){
-      if(entry.entrance_ref) refs.add(entry.entrance_ref);
-    }
-  }
-  dtContentByRef={};
-  await Promise.all([...refs].map(async ref=>{
-    const response=await fetch(`${DT_STORY_ROOT}/${ref}`,{cache:"no-store"});
-    if(!response.ok) throw new Error(`CONTENT_HTTP_${response.status}:${ref}`);
-    dtContentByRef[ref]=await response.text();
-  }));
-  return dtContentByRef;
+  throw new Error("STORY_CONTENT_MISSING");
 }
 
 function dtPrefixedSceneContract(){
@@ -3328,6 +3713,7 @@ window.goToDtBookPage=function(index){
 };
 
 window.beginAddStory=async function(){
+  if(!await requireDtAccount('add_story_character'))return;
   app.bookFlowMode='add_story';
   app.selectedStoryId=null;
   app.activeStoryDefinition=null;
@@ -3339,6 +3725,60 @@ window.beginAddStory=async function(){
   await openCharacterLibrary();
 };
 
+function dtBookStoryCastNames(bookStory){
+  const contract=bookStory?.content_snapshot||{};
+  const catalog=contract.catalog||{};
+  return (bookStory?.story_cast_assignments||[]).map(assignment=>{
+    if(assignment.character_asset_id){
+      return getSavedCharacterById(assignment.character_asset_id)?.name||null;
+    }
+    if(assignment.catalog_character_id){
+      return catalog[assignment.catalog_character_id]?.name||assignment.catalog_character_id;
+    }
+    return null;
+  }).filter(Boolean);
+}
+
+function renderDtBookContext(screenName=null){
+  const context=document.getElementById('dt-book-context');
+  if(!context) return;
+  const activeName=screenName||document.querySelector('.screen.active')?.id?.replace(/^screen-/, '')||'';
+  const compositionScreens=new Set(['library','stories','setup','composer','wow','creator']);
+  const visible=Boolean(app.bookId&&app.bookStories.length&&compositionScreens.has(activeName));
+  context.hidden=!visible;
+  document.body.classList.toggle('dt-has-book-context',visible);
+  if(!visible) return;
+
+  const storyCount=app.bookStories.length;
+  const cast=[...new Set(app.bookStories.flatMap(dtBookStoryCastNames))];
+  document.getElementById('dt-book-context-title').textContent=
+    `${storyCount} ${storyCount===1?'storia già inserita':'storie già inserite'}`;
+  document.getElementById('dt-book-context-cast').textContent=
+    cast.length?`Cast: ${cast.join(', ')}`:'Cast già assegnato';
+}
+window.renderDtBookContext=renderDtBookContext;
+
+window.beginAddStoryWithSameProtagonist=async function(){
+  if(!await requireDtAccount('add_story_same'))return;
+  const current=app.bookStories.find(item=>item.id===app.activeBookStoryId)||app.bookStories.at(-1);
+  const assignment=getStoryProtagonistAssignment(current);
+  const character=getSavedCharacterById(assignment?.character_asset_id);
+  if(!character){await beginAddStory();return}
+  app.bookFlowMode='add_story';
+  app.characterAssetId=character.id;
+  app.candidateCharacterAssetId=character.id;
+  app.previewUrl=character.image_url;
+  app.selectedStoryId=null;
+  app.activeStoryDefinition=null;
+  app.activeStoryContract=null;
+  app.activeBookStoryId=null;
+  app.setupChoices={};
+  app.compositionChoices={};
+  dtComposedBook=null;
+  await prepareStories();
+  showScreen('stories');
+};
+
 window.renderBookWorkspace=async function(){
   await loadBookStories();
   await ensureBookCharactersHydrated();
@@ -3347,9 +3787,11 @@ window.renderBookWorkspace=async function(){
     const story=storyForBookStory(bookStory);
     const assignment=getStoryProtagonistAssignment(bookStory);
     const character=getSavedCharacterById(assignment?.character_asset_id);
+    const castNames=dtBookStoryCastNames(bookStory);
     return `<div class="book-story-item">
       <div><h3>${index+1}. ${escapeHtml(story?.title||bookStory.story_slug)}</h3>
-      <p>Protagonista: ${escapeHtml(character?.name||'Non assegnato')} · ${bookStory.status==='ready'?'storia completata':'da completare'}</p></div>
+      <p>Protagonista: ${escapeHtml(character?.name||'Non assegnato')} · ${bookStory.status==='ready'?'storia completata':'da completare'}</p>
+      ${castNames.length?`<div class="dt-cast-line">${castNames.map(name=>`<span class="dt-cast-name">${escapeHtml(name)}</span>`).join('')}</div>`:''}</div>
       <button class="icon-btn" type="button" title="Rimuovi storia" onclick="removeBookStory('${bookStory.id}')">×</button>
     </div>`;
   }).join('');
@@ -3361,12 +3803,23 @@ window.renderBookWorkspace=async function(){
     <div class="panel book-summary" style="max-width:900px;margin:0 auto">
       <div class="phase">Bozza salvata</div>
       <h1 class="step-title">${app.bookStories.length===1?'Una storia nel libro':`${app.bookStories.length} storie nel libro`}</h1>
-      <p class="intro">Puoi aggiungere altre storie, anche con protagonisti diversi. Concludi il libro solo quando è completo.</p>
+      <p class="intro">Qui trovi tutto ciò che hai già costruito: ogni storia conserva il proprio protagonista, il cast e le scelte.</p>
       <div class="book-story-list">${rows}</div>
-      <div class="form-actions" style="flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="beginAddStory()">Aggiungi un’altra storia →</button>
-        <button class="btn btn-soft" onclick="openDtCheckout()" ${allComplete?'':'disabled'}>Concludi il libro e vai al checkout →</button>
-        <button class="btn btn-ghost" onclick="openCharacterLibrary()">Vai alla libreria</button>
+      <div class="dt-next-heading">
+        <div class="phase">Il prossimo passo</div>
+        <h2>Come vuoi continuare il tuo libro?</h2>
+        <p>Puoi raccontare un’altra avventura con lo stesso protagonista, cambiare personaggio oppure concludere il libro.</p>
+      </div>
+      <div class="dt-next-grid">
+        <button class="dt-next-card primary" type="button" onclick="beginAddStoryWithSameProtagonist()">
+          <span class="dt-next-icon">↻</span><strong>Stesso protagonista</strong><span>Aggiungi una nuova storia mantenendo il protagonista appena utilizzato.</span>
+        </button>
+        <button class="dt-next-card" type="button" onclick="beginAddStory()">
+          <span class="dt-next-icon">＋</span><strong>Un altro personaggio</strong><span>Scegli un personaggio della famiglia oppure creane uno nuovo.</span>
+        </button>
+        <button class="dt-next-card" type="button" onclick="openDtCheckout()" ${allComplete?'':'disabled'}>
+          <span class="dt-next-icon">✨</span><strong>Continua e genera il libro finale</strong><span>${allComplete?'Conferma il progetto e avvia la generazione IA delle illustrazioni finali.':'Completa prima tutte le storie già inserite.'}</span>
+        </button>
       </div>
       ${allComplete?'':'<div class="book-note">Completa tutte le storie prima del checkout.</div>'}
     </div>
@@ -3397,10 +3850,11 @@ window.renderBookSummary=function(){
     </div>
 
     <div class="dt-reader-shell ${spread?'with-spread':''}">
+      <div class="dt-preview-notice"><span class="dt-preview-badge">ANTEPRIMA</span><div><strong>Questa è un’anteprima del tuo libro</strong>Testi, scelte e composizione sono già quelli della tua storia. Dopo la conferma, DreamTaily genererà con l’IA le illustrazioni finali personalizzate con i tuoi personaggi.</div></div>
       <div class="dt-reader-nav" style="margin:0 0 16px">
         <button class="btn btn-ghost" ${dtBookPage===0?"disabled":""}
           onclick="goToDtBookPage(${dtBookPage-1})">← Indietro</button>
-        <button class="btn btn-soft" onclick="openCharacterLibrary()">Libreria</button>
+        <button class="btn btn-soft" onclick="openBookLibrary()">I tuoi libri</button>
         ${last
           ?`<button class="btn btn-primary" onclick="renderBookWorkspace()">Storia completata · Vai al libro →</button>`
           :`<button class="btn btn-primary" onclick="goToDtBookPage(${dtBookPage+1})">Avanti →</button>`}
@@ -3430,7 +3884,7 @@ window.renderBookSummary=function(){
 
       <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
         <button class="btn btn-soft" onclick="modifyDtBook()">← Modifica questa storia</button>
-        <button class="btn btn-primary" onclick="beginAddStory()">Aggiungi un’altra storia</button>
+        <button class="btn btn-primary" onclick="beginAddStory()">Aggiungi un altro racconto</button>
         <button class="btn btn-ghost" onclick="renderBookWorkspace()">Riepilogo libro</button>
       </div>
     </div>
@@ -3439,8 +3893,8 @@ window.renderBookSummary=function(){
 
 window.modifyDtBook=function(){
   dtBuildTrail();
-  dtTrailIndex=Math.max(0,dtTrail.length-1);
-  app.currentStepKey=dtTrail[dtTrailIndex];
+  dtTrailIndex=0;
+  app.currentStepKey=dtTrail[0]||app.activeStoryDefinition?.start||null;
   renderComposerStep();
   showScreen("composer");
 };
@@ -3462,6 +3916,7 @@ window.selectDtBookCoverLayout=async function(name){updateDtPayButton();dtBookCo
 window.selectDtBookCoverColor=async function(id){updateDtPayButton();dtBookCoverSelection={...dtBookCoverSelection,color_id:id};await openDtCheckout()};
 
 window.openDtCheckout=async function(){
+  if(!await requireDtAccount('checkout'))return;
   await loadBookStories();
   const complete=app.bookStories.length>0&&app.bookStories.every(item=>
     item.status==='ready'&&item.content_snapshot?.meta&&Array.isArray(item.content_snapshot?.pages)
@@ -3491,6 +3946,7 @@ window.openDtCheckout=async function(){
         <div class="phase">Libro digitale · €9,90</div>
         <h1 class="step-title">Scegli la copertina del libro</h1>
         <p class="intro">Inserisci il titolo generale. In copertina compariranno automaticamente tutti i protagonisti del libro, una sola volta ciascuno.</p>
+        <div class="dt-preview-notice"><span class="dt-preview-badge">LIBRO FINALE</span><div><strong>La conferma avvierà la generazione tramite IA</strong>Le illustrazioni definitive saranno create dopo la conferma usando i personaggi e le scelte approvate nell’anteprima.</div></div>
         <label for="dt-cover-title">Titolo del libro</label><input class="input" id="dt-cover-title" maxlength="${selectedLayout?.max_title||44}" value="${escapeHtml(dtBookCoverSelection.title)}" oninput="updateDtBookCoverField('title',this.value)">
         <h3 style="margin:20px 0 4px">Colore di fondo</h3><div class="dt-cover-colors">${colors}</div><div class="dt-cover-picker">${cards}</div>
         <p class="book-note">Solo i protagonisti unici entreranno nell’immagine. Titolo, logo e DreamTaily saranno applicati dopo la generazione.</p>
@@ -3552,28 +4008,31 @@ let dtFullRenderActive=false;
 window.renderDtBookStatus=async function(render=null){
   const job=render||await dtLoadRenderStatus();
   if(!job){ await renderBookWorkspace(); return; }
-  dtPendingRender=job;
-  const pages=Array.isArray(job.pages)?job.pages:[];
+  // checkout-book e render-book espongono l'identificativo come render_id,
+  // mentre il record letto da Supabase usa id. Normalizziamo qui affinché
+  // tutte le CTA funzionino già alla prima risposta, senza refresh manuali.
+  dtPendingRender={...job,id:job.id||job.render_id};
+  const currentJob=dtPendingRender;
+  const pages=Array.isArray(currentJob.pages)?currentJob.pages:[];
   const readyPages=pages.filter(page=>page?.render?.status==="ready").length;
   const labels={queued:"In attesa",running:"In creazione",ready:"Pronto",failed:"Interrotto",review:"Da verificare"};
-  const ready=job.status==="ready"&&job.permalink_slug;
+  const ready=currentJob.status==="ready"&&currentJob.permalink_slug;
   const screen=document.getElementById("screen-render-status");
   screen.innerHTML=`<div class="shell" style="max-width:760px">
     <div class="topbar"><button class="brand-dark" onclick="showScreen('landing')"><img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span></button><div class="phase">Stato del libro</div></div>
     <div class="panel" style="padding:clamp(28px,5vw,52px);text-align:center">
-      <div style="font-size:58px">${ready?'🎉':job.status==='failed'||job.status==='review'?'🛠️':'✨'}</div>
-      <div class="phase">${escapeHtml(labels[job.status]||job.status)}</div>
+      <div style="font-size:58px">${ready?'🎉':currentJob.status==='failed'||currentJob.status==='review'?'🛠️':'✨'}</div>
+      <div class="phase">${escapeHtml(labels[currentJob.status]||currentJob.status)}</div>
       <h1 class="step-title">${ready?'Il tuo libro è pronto':'Il tuo libro è stato confermato'}</h1>
-      <p class="intro">${job.status==='queued'
+      <p class="intro">${currentJob.status==='queued'
         ?'Contenuti e personaggi sono congelati. La generazione IA è volutamente sospesa durante questo collaudo.'
-        :job.status==='running'?`Pagine completate: ${readyPages} su ${pages.length}. Puoi chiudere questa pagina e tornare più tardi.`
+        :currentJob.status==='running'?`Pagine completate: ${readyPages} su ${pages.length}. Puoi chiudere questa pagina e tornare più tardi.`
         :ready?'La generazione è terminata e il libro può essere aperto.'
         :'Il lavoro è salvato e potrà essere ripreso senza rigenerare le pagine già completate.'}</p>
       <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
-        ${ready?`<button class="btn btn-primary" onclick="window.location.href='libro.html?slug=${encodeURIComponent(job.permalink_slug)}'">Apri il libro</button>`:''}
+        ${ready?`<button class="btn btn-primary" onclick="window.location.href='libro.html?slug=${encodeURIComponent(currentJob.permalink_slug)}'">Apri il libro</button>`:''}
         ${ready?`<button id="dt-regenerate-cover" class="btn btn-soft" onclick="regenerateDtBookCover()">Rigenera solo la copertina</button>`:''}
-        ${['queued','running','review'].includes(job.status)?`<button id="dt-full-render" class="btn btn-primary" onclick="startDtFullRender()">${job.status==='queued'?'Genera il libro':job.status==='review'?'Riprova la generazione':'Continua la generazione'}</button>`:''}
-        <button class="btn btn-soft" onclick="renderDtBookStatus()">Aggiorna stato</button>
+        ${['queued','running','review'].includes(currentJob.status)?`<button id="dt-full-render" class="btn btn-primary" onclick="startDtFullRender()">${currentJob.status==='queued'?'Genera il libro':currentJob.status==='review'?'Riprova la generazione':'Continua la generazione'}</button>`:''}
         <button class="btn btn-primary" onclick="startNewBook()">Crea un altro libro</button>
         <button class="btn btn-ghost" onclick="showScreen('landing')">Torna alla home</button>
       </div>
@@ -3698,7 +4157,7 @@ window.renderDtDelivered=function(){
       <div class="dt-delivery-link"><code id="dt-link">${escapeHtml(permanent)}</code><button class="btn btn-soft" onclick="copyDtLink()">Copia</button></div>
       <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="window.location.href=document.getElementById('dt-link').textContent">Apri il libro finale</button>
-        <button class="btn btn-ghost" onclick="openCharacterLibrary()">Torna alla libreria</button>
+        <button class="btn btn-ghost" onclick="openBookLibrary()">Torna ai tuoi libri</button>
         <button class="btn btn-soft" onclick="showScreen('landing')">Torna alla home</button>
       </div>
     </div>
@@ -3712,6 +4171,24 @@ window.copyDtLink=async function(){
 
 
 let dtSavedBooks=[];
+const dtBookLibrary={view:"active",query:"",status:"all",order:"priority",limit:8};
+
+window.dtSetBookView=function(view){dtBookLibrary.view=view==="archived"?"archived":"active";dtBookLibrary.limit=8;dtRenderSavedBooks()};
+window.dtUpdateBookFilters=function(){dtBookLibrary.query=document.getElementById("saved-books-search")?.value.trim().toLocaleLowerCase("it")||"";dtBookLibrary.status=document.getElementById("saved-books-filter")?.value||"all";dtBookLibrary.order=document.getElementById("saved-books-order")?.value||"priority";dtBookLibrary.limit=8;dtRenderSavedBooks()};
+window.dtShowMoreBooks=function(){dtBookLibrary.limit+=8;dtRenderSavedBooks()};
+
+function dtBookStatusGroup(book){if(book.status==="draft"||book.status==="ready_for_checkout")return"continue";if(book.status==="failed")return"failed";if(book.status==="ready")return"ready";return"creating"}
+function dtBookPriority(book){return({failed:0,draft:1,ready_for_checkout:1,generating:2,paid:2,ready:3})[book.status]??4}
+function dtVisibleBooks(){
+  const filtered=dtSavedBooks.filter(book=>{
+    if((dtBookLibrary.view==="archived")!==Boolean(book.archived_at))return false;
+    if(dtBookLibrary.status!=="all"&&dtBookStatusGroup(book)!==dtBookLibrary.status)return false;
+    if(!dtBookLibrary.query)return true;
+    const protagonists=(book.book_stories||[]).flatMap(story=>(story.story_cast_assignments||[]).filter(item=>item.slot_key==="protagonist").map(item=>app.savedCharacters.find(character=>character.id===item.character_asset_id)?.name||""));
+    return [book.title,...protagonists].join(" ").toLocaleLowerCase("it").includes(dtBookLibrary.query);
+  });
+  return filtered.sort((left,right)=>{if(dtBookLibrary.order==="title")return String(left.title||"").localeCompare(String(right.title||""),"it");const leftDate=new Date(left.updated_at||left.created_at||0),rightDate=new Date(right.updated_at||right.created_at||0);if(dtBookLibrary.order==="oldest")return leftDate-rightDate;if(dtBookLibrary.order==="recent")return rightDate-leftDate;return dtBookPriority(left)-dtBookPriority(right)||rightDate-leftDate});
+}
 
 async function dtLoadSavedBooks(){
   const status=document.getElementById("saved-books-status");
@@ -3733,6 +4210,7 @@ async function dtLoadSavedBooks(){
         current_style,
         created_at,
         updated_at,
+        archived_at,
         book_stories (
           id,
           story_slug,
@@ -3770,24 +4248,28 @@ async function dtLoadSavedBooks(){
     showError("saved-books-error","Non sono riuscito a recuperare i libri.");
   }
 }
+window.dtLoadSavedBooks=dtLoadSavedBooks;
 
 function dtRenderSavedBooks(){
   const status=document.getElementById("saved-books-status");
   const grid=document.getElementById("saved-books-grid");
   if(!status||!grid) return;
 
-  status.textContent="";
-  if(!dtSavedBooks.length){
+  document.querySelectorAll("[data-book-view]").forEach(button=>button.classList.toggle("active",button.dataset.bookView===dtBookLibrary.view));
+  const visible=dtVisibleBooks(),books=visible.slice(0,dtBookLibrary.limit),more=document.getElementById("saved-books-more");
+  if(more)more.hidden=books.length>=visible.length;
+  status.textContent=visible.length?`${visible.length} ${visible.length===1?"libro":"libri"}`:"";
+  if(!visible.length){
     grid.innerHTML=`
       <div class="dt-books-empty">
         <div style="font-size:38px;margin-bottom:8px">📚</div>
-        <strong>Non hai ancora creato libri.</strong>
-        <p style="margin-top:5px">Usa un personaggio qui sotto per iniziare la prima avventura.</p>
+        <strong>${dtBookLibrary.view==="archived"?"Nessun libro archiviato.":"Nessun libro corrisponde alla ricerca."}</strong>
+        <p style="margin-top:5px">${dtBookLibrary.view==="archived"?"I libri che nasconderai dalla libreria resteranno recuperabili qui.":"Cambia ricerca o filtro per vedere gli altri libri."}</p>
       </div>`;
     return;
   }
 
-  grid.innerHTML=dtSavedBooks.map(book=>{
+  grid.innerHTML=books.map(book=>{
     const stories=(book.book_stories||[]).slice()
       .sort((a,b)=>(a.position||0)-(b.position||0));
     const latest=stories.at(-1)||null;
@@ -3805,7 +4287,7 @@ function dtRenderSavedBooks(){
       .toLocaleDateString("it-IT",{day:"2-digit",month:"short",year:"numeric"});
 
     return `
-      <article class="dt-saved-book">
+      <article class="dt-saved-book ${book.archived_at?'archived':''}">
         <div class="dt-saved-book-cover">
           <img src="${escapeHtml(image)}" alt="" onerror="this.src='assets/char/water/rabbit.png'">
           <span class="dt-saved-book-status">${statusLabel}</span>
@@ -3822,6 +4304,7 @@ function dtRenderSavedBooks(){
               ${ready?"Apri":draft?"Riprendi":"Controlla"}
             </button>
             ${draft?`<button class="btn btn-ghost" style="color:#a8402e" onclick="dtDeleteSavedBook('${book.id}')">Elimina</button>`:""}
+            ${!draft?`<button class="btn btn-ghost" onclick="dtManageSavedBook('${book.id}','${book.archived_at?'restore':'archive'}')">${book.archived_at?'Ripristina':'Archivia'}</button>`:""}
           </div>
         </div>
       </article>`;
@@ -3880,8 +4363,19 @@ window.dtOpenSavedBook=async function(bookId){
   }catch(error){
     console.error("[DreamTaily] Open saved book error:",error);
     showError("saved-books-error","Non sono riuscito ad aprire questo libro.");
-    showScreen("library");
+    showScreen("books");
   }
+};
+
+window.dtManageSavedBook=async function(bookId,action){
+  const book=dtSavedBooks.find(item=>item.id===bookId),verb=action==="restore"?"ripristinare":"archiviare";
+  if(!confirm(`Vuoi ${verb} "${book?.title||"questo libro"}"?`))return;
+  try{
+    const {data,error}=await getSupabase().functions.invoke("manage-book",{body:{book_id:bookId,action}});
+    if(error||!data?.book)throw error||new Error("BOOK_MANAGEMENT_FAILED");
+    if(app.bookId===bookId&&action==="archive")dtClearOnlyActiveBook();
+    await dtLoadSavedBooks();
+  }catch(error){console.error("[DreamTaily] Manage saved book error:",error);showError("saved-books-error","Non sono riuscito ad aggiornare questo libro.")}
 };
 
 window.dtEditSavedBook=async function(bookId){
@@ -3925,7 +4419,7 @@ window.dtEditSavedBook=async function(bookId){
   }catch(error){
     console.error("[DreamTaily] Edit saved book error:",error);
     showError("saved-books-error","Non sono riuscito a modificare questo libro.");
-    showScreen("library");
+    showScreen("books");
   }
 };
 
@@ -3964,16 +4458,6 @@ window.dtDeleteSavedBook=async function(bookId){
     console.error("[DreamTaily] Delete saved book error:",error);
     showError("saved-books-error","Non sono riuscito a eliminare questo libro.");
   }
-};
-
-/*
- * Estende l'apertura della libreria, senza sostituire il flusso originale:
- * prima apre e carica i personaggi come sempre, poi carica i libri.
- */
-const dtOriginalOpenCharacterLibrary=window.openCharacterLibrary;
-window.openCharacterLibrary=async function(){
-  await dtOriginalOpenCharacterLibrary();
-  await dtLoadSavedBooks();
 };
 
 /* Avvio nel flusso reale, senza iframe e senza pagine parallele. */
@@ -4256,11 +4740,6 @@ window.addEventListener("pageshow",()=>window.detectDraftBook());
       io.observe(el);
     }
     setTimeout(fire,4000); // fallback: non deve mai restare buia
-    var replay=document.getElementById('dth-replay');
-    if(replay) replay.addEventListener('click',function(){
-      el.classList.remove('is-on');
-      setTimeout(function(){el.classList.add('is-on');},380);
-    });
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initDthReveal);
   else initDthReveal();
