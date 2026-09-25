@@ -407,6 +407,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
 .dt-auth-close{position:absolute;top:18px;right:18px;width:38px;height:38px;border:1px solid #e4d7c5;border-radius:50%;background:#fffaf0;color:#6f5b47;font-size:22px;line-height:1;cursor:pointer}.dt-auth-close:hover{background:#f5ead9;color:#3a2a1d}
 .dt-auth-body h2{font-family:'Faustina',Georgia,serif;font-size:clamp(32px,4vw,42px);line-height:1.02;margin:9px 0 13px;color:#34271d}.dt-auth-body .intro{margin-bottom:24px;line-height:1.6}.dt-auth-body label{font-weight:800;margin-bottom:7px}.dt-auth-body .input{background:#fff;border-color:#d9c9b3}.dt-auth-promise{display:flex;align-items:flex-start;gap:9px;margin:15px 0 0;padding:11px 13px;border-radius:13px;background:#edf5ef;color:#3e6657;font-size:13px;line-height:1.45}.dt-auth-promise::before{content:"\2713";display:grid;place-items:center;flex:0 0 20px;height:20px;border-radius:50%;background:#5b8874;color:#fff;font-size:12px;font-weight:900}
 .dt-auth-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}.dt-auth-actions .btn-primary{box-shadow:0 8px 18px rgba(194,87,67,.2)}
+.dt-auth-switch{margin-top:14px;text-align:center;color:var(--muted);font-size:13px}.dt-auth-switch button{color:var(--coral);font-weight:900;text-decoration:underline;text-underline-offset:3px}
 .dt-auth-confirmed{position:fixed;inset:0;width:min(480px,calc(100% - 28px));margin:auto;border:0;border-radius:28px;padding:0;overflow:hidden;background:#fffaf0;text-align:center;box-shadow:0 32px 100px rgba(32,24,18,.38)}.dt-auth-confirmed::backdrop{background:rgba(30,24,20,.66);backdrop-filter:blur(5px)}.dt-auth-confirmed-body{padding:42px clamp(26px,6vw,48px)}.dt-auth-confirmed-mark{display:grid;place-items:center;width:68px;height:68px;margin:0 auto 18px;border-radius:50%;background:#e5f1e9;color:#47755f;font-size:32px;font-weight:900}.dt-auth-confirmed h2{font-family:'Faustina',Georgia,serif;font-size:36px;line-height:1.05;margin:8px 0 12px;color:#34271d}.dt-auth-confirmed p{color:var(--muted);line-height:1.6}.dt-auth-confirmed .btn{width:100%;margin-top:24px}
 @media(max-width:760px){.dt-books-grid{grid-template-columns:1fr}.dt-saved-book{grid-template-columns:105px 1fr}.dt-books-tools{grid-template-columns:1fr}.dt-books-tools input,.dt-books-tools select{width:100%}.dt-auth-dialog{width:min(520px,calc(100% - 20px));max-height:calc(100% - 20px);border-radius:24px;overflow:auto}.dt-auth-shell{grid-template-columns:1fr;min-height:0}.dt-auth-art{min-height:190px;padding:22px 26px}.dt-auth-art img{width:190px;max-height:170px;left:auto;right:-4px;top:48%;transform:translateY(-50%);opacity:.92}.dt-auth-art-copy{max-width:61%}.dt-auth-art h3{font-size:23px}.dt-auth-art p{display:none}.dt-auth-body{padding:30px 25px 26px}.dt-auth-close{top:13px;right:13px}.dt-auth-body h2{font-size:32px;padding-right:22px}}
 
@@ -905,6 +906,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
       <div class="dt-auth-promise">Quello che hai fatto finora è già al sicuro e resterà collegato al tuo spazio.</div>
       <div class="error" id="dt-auth-error"></div>
       <div class="dt-auth-actions"><button class="btn btn-ghost" type="button" onclick="closeDtAuthGate()">Non ora</button><button class="btn btn-primary" id="dt-auth-submit" type="submit">Crea il mio spazio</button></div>
+      <p class="dt-auth-switch" id="dt-auth-switch">Hai già uno spazio DreamTaily? <button type="button" onclick="selectDtAuthMode('login')">Accedi</button></p>
       <p class="small" style="margin-top:12px">Ti invieremo un link di conferma. Nessuna password da ricordare.</p>
     </form>
   </div>
@@ -1447,6 +1449,7 @@ async function dtPermanentUser(){
 async function requireDtAccount(action){
   if(await dtPermanentUser()) return true;
   sessionStorage.setItem('dreamtaily.auth.pending_action',action);
+  selectDtAuthMode('signup');
   const dialog=document.getElementById('dt-auth-dialog');
   showError('dt-auth-error',null);
   if(dialog&&!dialog.open)dialog.showModal();
@@ -1454,6 +1457,42 @@ async function requireDtAccount(action){
 }
 
 window.closeDtAuthGate=function(){document.getElementById('dt-auth-dialog')?.close()};
+
+let dtAuthMode='signup';
+window.selectDtAuthMode=function(mode){
+  dtAuthMode=mode==='login'?'login':'signup';
+  const login=dtAuthMode==='login';
+  document.getElementById('dt-auth-title').textContent=login?'Bentornato nel tuo spazio':'Salva il mondo che hai creato';
+  document.querySelector('#dt-auth-form .intro').textContent=login
+    ?'Accedi con la tua email: conserveremo anche il personaggio e il racconto che hai appena creato.'
+    :'Crea gratuitamente il tuo spazio personale per aggiungere nuove avventure senza perdere il personaggio e il racconto che hai già creato.';
+  document.getElementById('dt-auth-submit').textContent=login?'Inviami il link di accesso':'Crea il mio spazio';
+  document.getElementById('dt-auth-switch').innerHTML=login
+    ?'Non hai ancora uno spazio? <button type="button" onclick="selectDtAuthMode(\'signup\')">Crealo ora</button>'
+    :'Hai già uno spazio DreamTaily? <button type="button" onclick="selectDtAuthMode(\'login\')">Accedi</button>';
+  showError('dt-auth-error',null);
+};
+
+async function prepareDtExistingAccountMerge(){
+  const {data,error}=await getSupabase().functions.invoke('merge-account',{body:{action:'prepare'}});
+  if(error||!data?.claim_token)throw error||new Error('MERGE_PREPARE_FAILED');
+  sessionStorage.setItem('dreamtaily.auth.merge_claim',data.claim_token);
+  sessionStorage.setItem('dreamtaily.auth.merge_expires_at',data.expires_at||'');
+}
+
+async function finalizeDtExistingAccountMerge(){
+  const claimToken=sessionStorage.getItem('dreamtaily.auth.merge_claim');
+  if(!claimToken)return null;
+  const {data,error}=await getSupabase().functions.invoke('merge-account',{body:{action:'finalize',claim_token:claimToken}});
+  if(error||data?.error)throw error||new Error(data.error);
+  sessionStorage.removeItem('dreamtaily.auth.merge_claim');
+  sessionStorage.removeItem('dreamtaily.auth.merge_expires_at');
+  authInFlight=null;
+  app.savedCharacters=[];app.bookId=null;app.bookStories=[];
+  await detectDraftBook();
+  await detectSavedCharactersForHomepage();
+  return data;
+}
 
 async function resumeDtAuthAction(){
   const action=sessionStorage.getItem('dreamtaily.auth.pending_action');
@@ -1534,6 +1573,7 @@ function initDtAccountUI(){
 function cleanDtAuthReturnUrl(){
   const url=new URL(location.href);
   url.searchParams.delete('auth_resume');
+  url.searchParams.delete('merge_resume');
   history.replaceState({},'',url.pathname+url.search);
 }
 
@@ -1557,11 +1597,31 @@ async function waitForDtPermanentUser(timeout=6500){
 }
 
 async function handleDtAuthReturn(){
-  const isReturn=new URL(location.href).searchParams.get('auth_resume')==='1';
+  const url=new URL(location.href);
+  const isMergeReturn=url.searchParams.get('merge_resume')==='1';
+  const isReturn=url.searchParams.get('auth_resume')==='1'||isMergeReturn;
   if(!isReturn)return resumeDtAuthAction();
   const user=await waitForDtPermanentUser();
   cleanDtAuthReturnUrl();
   if(!user)return;
+  if(isMergeReturn){
+    try{
+      await finalizeDtExistingAccountMerge();
+    }catch(error){
+      console.error('[DreamTaily] Existing account merge error:',error);
+      const code=String(error?.message||error||'');
+      const expired=/EXPIRED|INACTIVE|NOT_FOUND/.test(code);
+      sessionStorage.removeItem('dreamtaily.auth.merge_claim');
+      sessionStorage.removeItem('dreamtaily.auth.merge_expires_at');
+      document.getElementById('dt-auth-confirmed-title').textContent='Accesso completato';
+      document.getElementById('dt-auth-confirmed-copy').textContent=expired
+        ?'Il collegamento del lavoro anonimo è scaduto. Il tuo account è al sicuro; puoi riprovare dalla sessione in cui hai creato il contenuto.'
+        :'Sei entrato nel tuo spazio, ma non sono riuscito a collegare automaticamente il lavoro anonimo. Non creare duplicati: riprova tra un momento.';
+      document.getElementById('dt-auth-confirmed')?.showModal();
+      return;
+    }
+    document.getElementById('dt-auth-confirmed-copy').textContent='Bentornato. Il personaggio e il racconto appena creati sono stati aggiunti al tuo spazio senza perdere il lavoro precedente.';
+  }
   const action=sessionStorage.getItem('dreamtaily.auth.pending_action');
   const button=document.getElementById('dt-auth-confirmed-continue');
   if(!action){
@@ -1582,12 +1642,26 @@ document.getElementById('dt-auth-form')?.addEventListener('submit',async event=>
   const button=document.getElementById('dt-auth-submit'),email=document.getElementById('dt-auth-email').value.trim();
   button.disabled=true;showError('dt-auth-error',null);
   try{
-    const redirect=new URL(location.href);redirect.searchParams.set('auth_resume','1');
-    const {error}=await getSupabase().auth.updateUser({email},{emailRedirectTo:redirect.href});
+    const redirect=new URL(location.href);
+    let error=null;
+    if(dtAuthMode==='login'){
+      await prepareDtExistingAccountMerge();
+      redirect.searchParams.set('merge_resume','1');
+      ({error}=await getSupabase().auth.signInWithOtp({email,options:{shouldCreateUser:false,emailRedirectTo:redirect.href}}));
+    }else{
+      redirect.searchParams.set('auth_resume','1');
+      ({error}=await getSupabase().auth.updateUser({email},{emailRedirectTo:redirect.href}));
+    }
     if(error)throw error;
-    showError('dt-auth-error','Controlla la posta e apri il link: il personaggio e il racconto resteranno qui.');
+    showError('dt-auth-error',dtAuthMode==='login'?'Controlla la posta e apri il link per entrare: collegheremo anche il lavoro appena creato.':'Controlla la posta e apri il link: il personaggio e il racconto resteranno qui.');
     document.getElementById('dt-auth-error').classList.add('visible');
-  }catch(error){console.error('[DreamTaily] Account link error:',error);showError('dt-auth-error',String(error?.message||'').toLowerCase().includes('already')?'Questa email appartiene già a un account. Il recupero sicuro del lavoro richiede l’accesso dall’area personale.':'Non sono riuscito a inviare il link. Controlla l’email e riprova.')}finally{button.disabled=false}
+  }catch(error){
+    console.error('[DreamTaily] Account link error:',error);
+    sessionStorage.removeItem('dreamtaily.auth.merge_claim');
+    sessionStorage.removeItem('dreamtaily.auth.merge_expires_at');
+    const already=String(error?.message||'').toLowerCase().includes('already');
+    showError('dt-auth-error',already?'Questa email appartiene già a uno spazio: scegli “Accedi”.':'Non sono riuscito a inviare il link. Controlla l’email e riprova.');
+  }finally{button.disabled=false}
 });
 
 async function getAccessToken(){
