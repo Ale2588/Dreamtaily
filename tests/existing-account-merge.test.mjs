@@ -43,9 +43,10 @@ test("migrated private character files remain readable only by the new relationa
   assert.match(migration, /ca\.profile_id = \(select auth\.uid\(\)\)/i);
 });
 
-test("P1-18B is wired only through the explicit existing-account path", () => {
+test("account conversion always uses the server-side merge claim", () => {
   assert.match(frontend, /functions\.invoke\('merge-account'/);
   assert.match(frontend, /dtAuthMode==='login'/);
-  assert.match(frontend, /shouldCreateUser:false/);
+  assert.match(frontend, /signInWithPassword\(\{email,password\}\)/);
+  assert.match(frontend, /signUp\(\{email,password/);
   assert.doesNotMatch(frontend, /prepare_account_merge_v1/);
 });

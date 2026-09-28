@@ -13,8 +13,9 @@ test("anonymous visitors keep one character and one story before the account gat
   assert.match(html,/requireDtAccount\('checkout'\)/);
 });
 
-test("new registration links email to the current anonymous user and resumes intent",()=>{
-  assert.match(html,/auth\.updateUser\(\{email\},\{emailRedirectTo:redirect\.href\}\)/);
+test("new registration creates a password account and merges the anonymous work",()=>{
+  assert.match(html,/auth\.signUp\(\{email,password,options:\{emailRedirectTo:redirect\.href\}\}\)/);
+  assert.match(html,/await prepareDtExistingAccountMerge\(\)/);
   assert.match(html,/dreamtaily\.auth\.pending_action/);
   assert.match(html,/resumeDtAuthAction/);
   assert.match(html,/Salva il mondo che hai creato/);
@@ -38,12 +39,25 @@ test("email confirmation waits for Supabase and returns to the interrupted journ
   assert.match(html,/await detectDraftBook\(\);await detectSavedCharactersForHomepage\(\);await handleDtAuthReturn\(\)/);
 });
 
-test("existing accounts use a short-lived merge ticket before passwordless login",()=>{
+test("existing accounts use a short-lived merge ticket before password login",()=>{
   assert.match(html,/Hai già uno spazio DreamTaily\?/);
   assert.match(html,/functions\.invoke\('merge-account',\{body:\{action:'prepare'\}\}\)/);
   assert.match(html,/sessionStorage\.setItem\('dreamtaily\.auth\.merge_claim',data\.claim_token\)/);
-  assert.match(html,/signInWithOtp\(\{email,options:\{shouldCreateUser:false,emailRedirectTo:redirect\.href\}\}\)/);
-  assert.match(html,/redirect\.searchParams\.set\('merge_resume','1'\)/);
+  assert.match(html,/signInWithPassword\(\{email,password\}\)/);
+  assert.match(html,/await completeDtPasswordAccess\('login'\)/);
+});
+
+test("password recovery returns to a secure password update",()=>{
+  assert.match(html,/resetPasswordForEmail\(email,\{redirectTo:redirect\.href\}\)/);
+  assert.match(html,/password_recovery/);
+  assert.match(html,/auth\.updateUser\(\{password\}\)/);
+});
+
+test("Google and Facebook OAuth preserve the pending anonymous work",()=>{
+  assert.match(html,/startDtOAuth\('google'\)/);
+  assert.match(html,/startDtOAuth\('facebook'\)/);
+  assert.match(html,/signInWithOAuth\(\{provider,options:\{redirectTo:redirect\.href\}\}\)/);
+  assert.match(html,/\['google','facebook'\]\.includes\(provider\)/);
 });
 
 test("returning existing accounts finalize the merge before resuming the journey",()=>{

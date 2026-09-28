@@ -217,3 +217,7 @@ test('il backoffice gestisce la copertina della storia ma non quella globale',()
   assert.doesNotMatch(editor,/data-section="cover"/);
   assert.doesNotMatch(editor,/book-cover-editor/);
 });
+
+test('gli errori di tipologia riportano alla sezione Identità',()=>{
+  assert.match(editor,/\['TITLE_REQUIRED','AGE_RANGE_INVALID','STORY_TYPES_INVALID','TONE_INVALID'/);
+});

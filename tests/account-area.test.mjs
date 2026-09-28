@@ -24,7 +24,7 @@ test("voluntary signup remains distinct while existing accounts can opt into mer
   assert.match(html,/requireDtAccount\('account_home'\)/);
   assert.match(html,/if\(action==='account_home'\)return openBookLibrary\(\)/);
   assert.match(html,/dtAuthMode==='login'/);
-  assert.match(html,/shouldCreateUser:false/);
+  assert.match(html,/signInWithPassword/);
 });
 
 test("logout is local, clears pending intent and reloads away cached account data",()=>{
