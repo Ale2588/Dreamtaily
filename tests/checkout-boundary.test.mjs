@@ -52,18 +52,18 @@ test('renderer requires checkout and stays idle while queued',()=>{
   assert.doesNotMatch(renderer,/book_snapshot:ctx\.snapshot/);
 });
 
-test('full rendering starts explicitly and resumes page by page',()=>{
-  assert.match(html,/Genera il libro/);
-  assert.match(html,/Continua la generazione/);
+test('full rendering starts automatically and resumes page by page',()=>{
+  assert.match(html,/queueMicrotask\(\(\)=>startDtFullRender\(\)\)/);
+  assert.match(html,/Continua la creazione/);
   assert.match(html,/window\.startDtFullRender=async function/);
   const full=html.match(/window\.startDtFullRender=async function\(\)[\s\S]*?window\.startDtPilotRender/)?.[0]||'';
   assert.match(full,/functions\.invoke\("render-book"/);
   assert.match(full,/mode:"full"/);
   assert.match(full,/while\(dtPendingRender\?\.status==='queued'\|\|dtPendingRender\?\.status==='running'\|\|dtPendingRender\?\.status==='review'\)/);
-  assert.match(full,/Le pagine completate sono salve/);
+  assert.match(full,/status:'review'/);
   assert.match(renderer,/job\.status==="queued"\|\|job\.status==="review"/);
   assert.match(renderer,/status:"queued",attempts:0,error:null/);
-  assert.match(html,/Riprova la generazione/);
+  assert.match(html,/Riprendi la creazione/);
 });
 
 test('legacy pilot entry point remains compatible with existing sessions',()=>{

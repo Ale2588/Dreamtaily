@@ -4078,6 +4078,28 @@ async function dtLoadRenderStatus(){
 }
 
 let dtFullRenderActive=false;
+let dtAutoRenderBookId=null;
+
+function dtGenerationCast(){
+  const ids=[];
+  for(const story of app.bookStories||[]){
+    for(const assignment of story.story_cast_assignments||[]){
+      if(assignment.character_asset_id&&!ids.includes(assignment.character_asset_id))ids.push(assignment.character_asset_id);
+    }
+  }
+  return ids.map(id=>app.savedCharacters.find(character=>character.id===id)).filter(character=>character?.image_url).slice(0,4);
+}
+
+function dtGenerationMessage(progress,status){
+  if(status==='queued')return 'Apriamo il laboratorio delle storie…';
+  if(status==='review')return 'Un dettaglio ha bisogno di una piccola sistemata.';
+  if(status==='failed')return 'La magia si è fermata, ma tutto il lavoro è al sicuro.';
+  if(progress<30)return 'Prepariamo gli scenari e facciamo entrare i personaggi…';
+  if(progress<65)return 'Colori, espressioni e piccoli dettagli stanno prendendo vita…';
+  if(progress<90)return 'Rileggiamo ogni pagina e sistemiamo gli ultimi particolari…';
+  if(progress<100)return 'Ultimi tocchi alla copertina: ci siamo quasi…';
+  return 'La tua storia ha preso vita.';
+}
 
 window.renderDtBookStatus=async function(render=null){
   const job=render||await dtLoadRenderStatus();
@@ -4089,30 +4111,35 @@ window.renderDtBookStatus=async function(render=null){
   const currentJob=dtPendingRender;
   const pages=Array.isArray(currentJob.pages)?currentJob.pages:[];
   const readyPages=pages.filter(page=>page?.render?.status==="ready").length;
-  const labels={queued:"In attesa",running:"In creazione",ready:"Pronto",failed:"Interrotto",review:"Da verificare"};
   const ready=currentJob.status==="ready"&&currentJob.permalink_slug;
+  const progress=ready?100:pages.length?Math.min(99,Math.round((readyPages/pages.length)*100)):3;
+  const cast=dtGenerationCast();
+  const castMarkup=(cast.length?cast:[{name:'DreamTaily',image_url:'assets/brand/dreamtaily-icon.png'}]).map((character,index)=>`<div style="width:74px;height:74px;border-radius:50%;overflow:hidden;background:#fff;border:4px solid #fff;box-shadow:0 10px 25px rgba(61,43,31,.15);animation:float ${3.2+index*.35}s ease-in-out infinite"><img src="${escapeHtml(character.image_url)}" alt="${escapeHtml(character.name||'Personaggio DreamTaily')}" style="width:100%;height:100%;object-fit:cover"></div>`).join('');
+  const labels={queued:"In attesa",running:"In creazione",ready:"Pronto",failed:"Interrotto",review:"Da verificare"};
   const screen=document.getElementById("screen-render-status");
   screen.innerHTML=`<div class="shell" style="max-width:760px">
     <div class="topbar"><button class="brand-dark" onclick="showScreen('landing')"><img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span></button><div class="phase">Stato del libro</div></div>
     <div class="panel" style="padding:clamp(28px,5vw,52px);text-align:center">
-      <div style="font-size:58px">${ready?'🎉':currentJob.status==='failed'||currentJob.status==='review'?'🛠️':'✨'}</div>
+      <div style="display:flex;justify-content:center;gap:12px;min-height:82px;margin-bottom:12px">${castMarkup}</div>
       <div class="phase">${escapeHtml(labels[currentJob.status]||currentJob.status)}</div>
-      <h1 class="step-title">${ready?'Il tuo libro è pronto':'Il tuo libro è stato confermato'}</h1>
-      <p class="intro">${currentJob.status==='queued'
-        ?'Pagamento completato. Contenuti e personaggi sono congelati: ora puoi avviare la generazione del libro.'
-        :currentJob.status==='running'?`Pagine completate: ${readyPages} su ${pages.length}. Puoi chiudere questa pagina e tornare più tardi.`
-        :ready?'La generazione è terminata e il libro può essere aperto.'
-        :'Il lavoro è salvato e potrà essere ripreso senza rigenerare le pagine già completate.'}</p>
+      <h1 class="step-title">${ready?'Il tuo libro è pronto':'Stiamo dando vita al tuo libro'}</h1>
+      <div role="progressbar" aria-label="Avanzamento creazione libro" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" style="height:18px;max-width:560px;margin:24px auto 12px;padding:3px;background:#efe2cf;border-radius:999px;overflow:hidden"><div style="height:100%;width:${progress}%;border-radius:999px;background:linear-gradient(90deg,var(--coral),var(--gold));transition:width .55s ease"></div></div>
+      <strong style="display:block;font-family:'Faustina',Georgia,serif;font-size:22px;margin-bottom:8px">Il tuo libro è pronto al ${progress}%</strong>
+      <p class="intro">${escapeHtml(dtGenerationMessage(progress,currentJob.status))}${!ready&&['queued','running'].includes(currentJob.status)?'<br><small>Tieni aperta questa pagina mentre completiamo la creazione.</small>':''}</p>
       <div class="form-actions" style="justify-content:center;flex-wrap:wrap">
         ${ready?`<button class="btn btn-primary" onclick="window.location.href='libro.html?slug=${encodeURIComponent(currentJob.permalink_slug)}'">Apri il libro</button>`:''}
         ${ready?`<button id="dt-regenerate-cover" class="btn btn-soft" onclick="regenerateDtBookCover()">Rigenera solo la copertina</button>`:''}
-        ${['queued','running','review'].includes(currentJob.status)?`<button id="dt-full-render" class="btn btn-primary" onclick="startDtFullRender()">${currentJob.status==='queued'?'Genera il libro':currentJob.status==='review'?'Riprova la generazione':'Continua la generazione'}</button>`:''}
-        <button class="btn btn-primary" onclick="startNewBook()">Crea un altro libro</button>
-        <button class="btn btn-ghost" onclick="showScreen('landing')">Torna alla home</button>
+        ${['running','review'].includes(currentJob.status)?`<button id="dt-full-render" class="btn btn-primary" onclick="startDtFullRender()">${currentJob.status==='review'?'Riprendi la creazione':'Continua la creazione'}</button>`:''}
+        ${ready?'<button class="btn btn-primary" onclick="startNewBook()">Crea un altro libro</button>':''}
+        ${ready?'<button class="btn btn-ghost" onclick="showScreen(\'landing\')">Torna alla home</button>':''}
       </div>
     </div>
   </div>`;
   showScreen("render-status");
+  if(currentJob.status==='queued'&&!dtFullRenderActive&&dtAutoRenderBookId!==currentJob.book_id){
+    dtAutoRenderBookId=currentJob.book_id;
+    queueMicrotask(()=>startDtFullRender());
+  }
 };
 
 window.regenerateDtBookCover=async function(){
@@ -4154,8 +4181,8 @@ window.startDtFullRender=async function(){
     }
   }catch(error){
     console.error("[DreamTaily] Full render error:",error);
-    alert("La generazione si è fermata. Le pagine completate sono salve: premi ‘Continua la generazione’ per riprendere.");
-    await renderDtBookStatus();
+    dtPendingRender={...dtPendingRender,status:'review'};
+    await renderDtBookStatus(dtPendingRender);
   }finally{
     dtFullRenderActive=false;
   }
