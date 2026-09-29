@@ -34,6 +34,15 @@ test("final reader overlays the authored front cover and DreamTaily brand",()=>{
   assert.match(reader,/portrait:globalCover/);
 });
 
+test("final reader closes with the canonical DreamTaily back cover",()=>{
+  assert.match(reader,/function backCoverModel\(book,pages\)/);
+  assert.match(reader,/page_id:"book__back",kind:"back_cover"/);
+  assert.match(reader,/layout:\{gabbia:"Fascia"\}/);
+  assert.match(reader,/renderQuarta/);
+  assert.match(reader,/slides\.push\(backSpread\(backCover\)\)/);
+  assert.doesNotMatch(reader,/slides\.push\(`<article class="card end"/);
+});
+
 test("reader logo links home and every DreamTaily logo is circular",()=>{
   assert.match(reader,/<a class="brand" href="index\.html">/);
   assert.match(reader,/\.brand img\{[^}]*border-radius:50%/);
@@ -42,7 +51,7 @@ test("reader logo links home and every DreamTaily logo is circular",()=>{
 test("printer export keeps every sheet horizontal and preserves canonical spreads",()=>{
   assert.match(reader,/\.print-book-spread\{[^}]*width:480mm;height:180mm/);
   assert.match(reader,/\.print-full-spread \.layout-card,.print-full-spread \.dtb-doppia\{width:480mm!important;height:180mm!important/);
-  assert.match(reader,/function buildUnifiedPrint\(pages\)/);
+  assert.match(reader,/function buildUnifiedPrint\(pages,backCover\)/);
   assert.match(reader,/print-story-title/);
   assert.doesNotMatch(reader,/class="print-visual"/);
   assert.doesNotMatch(reader,/class="print-copy"/);
@@ -52,11 +61,12 @@ test("exporter produces one unified horizontal PDF without browser printing",()=
   assert.match(reader,/Scarica PDF del libro/);
   assert.doesNotMatch(reader,/PDF interni/);
   assert.doesNotMatch(reader,/PDF copertina/);
-  assert.match(reader,/exportBookPdf\(window\.dtBookPages\|\|\[\]\)/);
+  assert.match(reader,/exportBookPdf\(window\.dtBookPages\|\|\[\],window\.dtBackCover\)/);
   assert.match(reader,/buildImagePdf\(\{jpegs,width:PDF_WIDTH/);
   assert.doesNotMatch(reader,/window\.print\(\)/);
   assert.match(reader,/print-cover-back/);
   assert.match(reader,/print-cover-front/);
+  assert.match(reader,/await drawBackCover\(context,backCover\)/);
 });
 
 test("deterministic exporter draws assets and every spread directly at 300 DPI",()=>{

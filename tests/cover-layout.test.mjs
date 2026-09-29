@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
-import {gabbieCopertina, gabbiaCopertinaPerNome, inizializzaGabbieCopertina, renderCopertina, stiliCopertina, validaSceltaCopertina} from "../src/book/cover-layout.js";
+import {gabbieCopertina, gabbiaCopertinaPerNome, inizializzaGabbieCopertina, renderCopertina, renderQuarta, stiliCopertina, validaSceltaCopertina} from "../src/book/cover-layout.js";
 
 const raw=await readFile(new URL("../src/book/gabbie-copertina.json",import.meta.url),"utf8");
 const catalog=inizializzaGabbieCopertina(raw);
@@ -10,6 +10,15 @@ test("canonical cover catalog is version two with three front and two back layou
   assert.equal(catalog.versione,2);
   assert.equal(gabbieCopertina("front").length,3);
   assert.equal(gabbieCopertina("back").length,2);
+});
+
+test("canonical back cover renders its image band, editorial copy and brand",()=>{
+  const back=gabbiaCopertinaPerNome("Fascia","back");
+  const html=renderQuarta({gabbia:back,image:"cover.png",phrase:"Ogni storia comincia da una scelta.",description:"Una storia DreamTaily."});
+  assert.match(html,/dtc-back/);
+  assert.match(html,/dtc-back-phrase/);
+  assert.match(html,/dtc-back-description/);
+  assert.match(html,/DreamTaily/);
 });
 
 test("front cover requires layout, texts and authored scene prompts",()=>{

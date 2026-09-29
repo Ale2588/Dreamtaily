@@ -46,9 +46,7 @@ button:disabled{opacity:.35;cursor:default}
 .pdf-export-root .print-story-title{display:grid;grid-template-columns:620px 620px}
 .pdf-export-root .print-story-title .print-cover-front,.pdf-export-root .print-story-title .layout-card,.pdf-export-root .print-story-title .dtc-cover{width:620px!important;height:465px!important;max-width:none!important;margin:0!important}
 .pdf-export-root .print-cover-sheet{display:grid;grid-template-columns:620px 620px;background:#fdf8f0}
-.pdf-export-root .print-cover-back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:56px;color:#22321f;text-align:center;font-family:Faustina,Georgia,serif}
-.pdf-export-root .print-cover-back img{width:58px;height:58px;border-radius:50%;object-fit:cover;background:#fff}
-.pdf-export-root .print-cover-back strong{font-size:38px}.pdf-export-root .print-cover-back p{font-size:21px;line-height:1.5;max-width:390px}
+.pdf-export-root .print-cover-back{display:block;padding:0;overflow:hidden}.pdf-export-root .print-cover-back .layout-card,.pdf-export-root .print-cover-back .dtc-cover{width:620px!important;height:465px!important;max-width:none!important;margin:0!important}
 .pdf-export-root .print-cover-front,.pdf-export-root .print-cover-front .layout-card,.pdf-export-root .print-cover-front .dtc-cover{width:620px!important;height:465px!important;max-width:none!important;margin:0!important}
 @media(max-width:780px){
   body{padding:8px 8px 86px}.card{border-radius:18px}.spread{display:block;min-height:0}
@@ -65,9 +63,7 @@ button:disabled{opacity:.35;cursor:default}
   .print-story-title{display:grid;grid-template-columns:240mm 240mm}
   .print-story-title .print-cover-front,.print-story-title .layout-card,.print-story-title .dtc-cover{width:240mm!important;height:180mm!important;max-width:none!important;margin:0!important}
   .print-cover-sheet{display:grid;grid-template-columns:240mm 240mm;background:#fdf8f0}
-  .print-cover-back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5mm;padding:22mm;color:#22321f;text-align:center;font-family:Faustina,Georgia,serif}
-  .print-cover-back img{width:22mm;height:22mm;border-radius:50%;object-fit:cover;background:#fff}
-  .print-cover-back strong{font-size:22pt}.print-cover-back p{font-size:12pt;line-height:1.5;max-width:150mm}
+  .print-cover-back{display:block;padding:0;overflow:hidden}.print-cover-back .layout-card,.print-cover-back .dtc-cover{width:240mm!important;height:180mm!important;max-width:none!important;margin:0!important}
   .print-cover-front,.print-cover-front .layout-card,.print-cover-front .dtc-cover{width:240mm!important;height:180mm!important;max-width:none!important;margin:0!important}
 }
 </style>
@@ -89,7 +85,7 @@ button:disabled{opacity:.35;cursor:default}
 <script type="module">
 import {caricaGabbie,gabbiaPerNome} from "./src/book/gabbie.js";
 import {renderDoppia,stiliDoppia} from "./src/book/doppia.js";
-import {inizializzaGabbieCopertina,gabbiaCopertinaPerNome,renderCopertina,stiliCopertina} from "./src/book/cover-layout.js";
+import {inizializzaGabbieCopertina,gabbiaCopertinaPerNome,renderCopertina,renderQuarta,stiliCopertina} from "./src/book/cover-layout.js";
 import {buildImagePdf} from "./src/book/pdf-export.js";
 
 const DELIVERY_URL="https://hirzbtruxvjzmcnncvmv.supabase.co/functions/v1/deliver-book";
@@ -117,14 +113,29 @@ function spread(page,isCover=false,portraitOverride=null){
   }
   return `<article class="card spread ${isCover?"cover":""}"><div class="visual"><img src="${esc(page.image_url)}" alt=""></div><div class="copy"><div class="eyebrow">${isCover?"DreamTaily":`Capitolo ${esc(page.chapter??"")}`}</div>${isCover?`<h1>${esc(page.title||"")}</h1><div class="subtitle">${esc(page.text||"")}</div>`:`<div class="story">${esc(page.text||"")}</div><div class="page-number">— ${esc(page.chapter??"")} —</div>`}</div></article>`;
 }
-function buildCoverPrint(page){
-  if(!page) return "";
-  return `<section class="print-book-spread print-cover-sheet"><div class="print-cover-back"><img src="assets/brand/dreamtaily-icon.png" alt=""><strong>DreamTaily</strong><p>Storie illustrate da vivere, scegliere e rileggere insieme.</p></div><div class="print-cover-front">${spread(page,true,false)}</div></section>`;
+function backCoverModel(book,pages){
+  const globalCover=pages.find(page=>page.page_id==="book__cover")||pages.find(page=>page.kind==="cover");
+  const storyCount=new Set(pages.map(page=>page.book_story_id).filter(Boolean)).size||1;
+  return {
+    page_id:"book__back",kind:"back_cover",image_url:globalCover?.image_url||"assets/book-cover/cream.png",
+    layout:{gabbia:"Fascia"},brand_variant:"dark",
+    phrase:"Ogni storia comincia da una scelta.",
+    description:`${book.title||"Questo libro"} è un libro illustrato DreamTaily con ${storyCount} ${storyCount===1?"storia":"storie"}, creato per essere vissuto, scelto e riletto insieme.`
+  };
 }
-function buildUnifiedPrint(pages){
+function backSpread(page){
+  const layout=coverLayoutsReady?gabbiaCopertinaPerNome(page.layout?.gabbia||"Fascia","back"):null;
+  if(layout)return `<article class="card layout-card">${renderQuarta({gabbia:layout,image:page.image_url,phrase:page.phrase,description:page.description,brandVariant:page.brand_variant||"dark"})}</article>`;
+  return `<article class="card end"><div class="big">DreamTaily</div><p>${esc(page.description)}</p></article>`;
+}
+function buildCoverPrint(page,backCover){
+  if(!page) return "";
+  return `<section class="print-book-spread print-cover-sheet"><div class="print-cover-back">${backSpread(backCover)}</div><div class="print-cover-front">${spread(page,true,false)}</div></section>`;
+}
+function buildUnifiedPrint(pages,backCover){
   const sheets=[];
   const globalCover=pages.find(page=>page.page_id==="book__cover");
-  if(globalCover) sheets.push(buildCoverPrint(globalCover));
+  if(globalCover) sheets.push(buildCoverPrint(globalCover,backCover));
   for(const page of pages.filter(item=>item.page_id!=="book__cover")){
     if(page.kind==="cover") sheets.push(`<section class="print-book-spread print-story-title"><div></div><div class="print-cover-front">${spread(page,true,false)}</div></section>`);
     else sheets.push(`<section class="print-book-spread print-full-spread">${spread(page,false)}</section>`);
@@ -133,14 +144,16 @@ function buildUnifiedPrint(pages){
 }
 function build(book){
   const pages=Array.isArray(book.pages)?book.pages:[];
+  const backCover=backCoverModel(book,pages);
   slides=[];
   pages.forEach(page=>{
     const isCover=page.kind==="cover";
     slides.push(spread(page,isCover));
   });
-  slides.push(`<article class="card end"><div class="big">Fine ✨</div><p>Questa storia appartiene a ${esc(book.protagonist||"te")}.<br>Puoi rileggerla tutte le volte che vuoi.</p><button onclick="printWholeBook()">Scarica PDF del libro</button></article>`);
-  window.dtPrintBook=buildUnifiedPrint(pages);
+  slides.push(backSpread(backCover));
+  window.dtPrintBook=buildUnifiedPrint(pages,backCover);
   window.dtBookPages=pages;
+  window.dtBackCover=backCover;
 }
 function render(){
   document.getElementById("book").innerHTML=slides[current]||"";
@@ -252,15 +265,27 @@ async function drawCover(context,page,offsetX){
   context.save();context.beginPath();context.arc(start+logoSize/2,brand.y+brand.h/2,logoSize/2,0,Math.PI*2);context.clip();context.drawImage(logo,start,brand.y+(brand.h-logoSize)/2,logoSize,logoSize);context.restore();
   drawText(context,"DreamTaily",{x:start+34,y:brand.y+8,w:115,h:brand.h},{size:20,lineHeight:1,weight:"700",color:ink});
 }
-async function sheetJpeg(page,isGlobalCover=false){
+async function drawBackCover(context,page){
+  const layout=gabbiaCopertinaPerNome(page.layout?.gabbia||"Fascia","back");if(!layout)throw new Error("PDF_BACK_COVER_CATALOG_MISSING");
+  context.fillStyle="#fdf5e6";context.fillRect(0,0,620,465);
+  const image=await loadBitmap(page.image_url);drawCoverImage(context,image,layout.image_area,"center");
+  (layout.veil||[]).forEach(veil=>coverGradient(context,veil,page.brand_variant||"dark",0));
+  const ink=page.brand_variant==="light"?"#fdf5e6":"#22321f";
+  drawText(context,page.phrase,layout.subtitle_area,{size:layout.subtitle_area.corpo,lineHeight:layout.subtitle_area.interlinea/layout.subtitle_area.corpo,align:layout.subtitle_area.allineamento,weight:"700",style:"italic",maxLines:layout.subtitle_area.righe_max,color:ink});
+  drawText(context,page.description,layout.description_area,{size:layout.description_area.corpo,lineHeight:layout.description_area.interlinea/layout.description_area.corpo,align:layout.description_area.allineamento,maxLines:layout.description_area.righe_max,color:ink});
+  const brand=layout.brand_area,logo=await loadBitmap("assets/brand/dreamtaily-icon.png"),logoSize=24,start=brand.x+brand.w-122;
+  context.save();context.beginPath();context.arc(start+logoSize/2,brand.y+brand.h/2,logoSize/2,0,Math.PI*2);context.clip();context.drawImage(logo,start,brand.y+(brand.h-logoSize)/2,logoSize,logoSize);context.restore();
+  drawText(context,"DreamTaily",{x:start+30,y:brand.y+7,w:94,h:brand.h},{size:17,lineHeight:1,weight:"700",color:ink});
+}
+async function sheetJpeg(page,isGlobalCover=false,backCover=null){
   const canvas=document.createElement("canvas");canvas.width=EXPORT_WIDTH;canvas.height=EXPORT_HEIGHT;
   const context=canvas.getContext("2d",{alpha:false});context.scale(EXPORT_WIDTH/1240,EXPORT_HEIGHT/465);context.fillStyle="#fff";context.fillRect(0,0,1240,465);
-  if(isGlobalCover){context.fillStyle="#fdf8f0";context.fillRect(0,0,620,465);const logo=await loadBitmap("assets/brand/dreamtaily-icon.png");context.save();context.beginPath();context.arc(310,182,29,0,Math.PI*2);context.clip();context.drawImage(logo,281,153,58,58);context.restore();drawText(context,"DreamTaily",{x:210,y:225,w:200,h:50},{size:38,align:"center",weight:"700"});drawText(context,"Storie illustrate da vivere, scegliere e rileggere insieme.",{x:115,y:285,w:390,h:70},{size:18,lineHeight:1.5,align:"center"});await drawCover(context,page,620);}
+  if(isGlobalCover){await drawBackCover(context,backCover);await drawCover(context,page,620);}
   else if(page.kind==="cover")await drawCover(context,page,620);else await drawNarrative(context,page);
   const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error("PDF_CANVAS_EMPTY")),"image/jpeg",.94));
   return new Uint8Array(await blob.arrayBuffer());
 }
-async function exportBookPdf(pages){
+async function exportBookPdf(pages,backCover){
   const button=document.getElementById("print");
   try{
     button.disabled=true;button.textContent="Preparo il PDF…";
@@ -268,14 +293,14 @@ async function exportBookPdf(pages){
     const ordered=[],globalCover=pages.find(page=>page.page_id==="book__cover");if(globalCover)ordered.push({page:globalCover,global:true});pages.filter(page=>page.page_id!=="book__cover").forEach(page=>ordered.push({page,global:false}));
     if(!ordered.length)throw new Error("PDF_PAGES_EMPTY");
     const jpegs=[];
-    for(let index=0;index<ordered.length;index+=1){button.textContent=`Creo pagina ${index+1} di ${ordered.length}…`;jpegs.push(await sheetJpeg(ordered[index].page,ordered[index].global));}
+    for(let index=0;index<ordered.length;index+=1){button.textContent=`Creo pagina ${index+1} di ${ordered.length}…`;jpegs.push(await sheetJpeg(ordered[index].page,ordered[index].global,backCover));}
     const pdf=buildImagePdf({jpegs,width:PDF_WIDTH,height:PDF_HEIGHT,imageWidth:EXPORT_WIDTH,imageHeight:EXPORT_HEIGHT});
     const link=document.createElement("a");link.href=URL.createObjectURL(pdf);link.download=`${document.title.replace(/[^a-z0-9à-ž _—-]/gi,"").trim()||"DreamTaily"}.pdf`;link.click();
     setTimeout(()=>URL.revokeObjectURL(link.href),30000);
   }catch(error){console.error(error);alert(`Non riesco a preparare il PDF (${error?.message||"errore sconosciuto"}).`);}
   finally{button.disabled=false;button.textContent="Scarica PDF del libro";}
 }
-function printWholeBook(){return exportBookPdf(window.dtBookPages||[]);}
+function printWholeBook(){return exportBookPdf(window.dtBookPages||[],window.dtBackCover);}
 window.printWholeBook=printWholeBook;
 async function load(){
   const slug=new URLSearchParams(location.search).get("slug")||"";
