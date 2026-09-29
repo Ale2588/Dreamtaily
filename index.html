@@ -712,6 +712,13 @@ body.dreamtaily-configurator-open{overflow:hidden}
   .wow-pool{transform:translate(-50%,-50%) scale(1);opacity:1}
   .wow-sheet{opacity:1}.wow-scrim{opacity:0}.wow-caption{opacity:1}
 }
+.dth-authors{background:var(--carta);padding:64px 64px 60px}
+.dth-authors-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:48px;align-items:start;max-width:1080px;margin:0 auto}
+.dth-authors .dth-h2{color:var(--testo);text-wrap:balance}
+.dth-authors-copy{display:grid;gap:14px;max-width:60ch}
+.dth-authors-copy .dth-body{color:var(--testo-2)}
+.dth-authors-copy .dth-body:first-child{font-size:18px;color:var(--testo)}
+@media (max-width:760px){.dth-authors{padding:44px 22px 40px}.dth-authors-grid{grid-template-columns:1fr;gap:18px}.dth-authors .dth-h2{font-size:34px}}
 </style>
 </head>
 <body>
@@ -730,7 +737,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
       <nav class="dth-nav">
         <a href="#dth-passi">Come funziona</a>
         <a href="#dth-reveal">Gli stili</a>
-        <a href="#dth-passi">Le storie</a>
+        <a href="#dth-autori">Le storie</a>
       </nav>
       <div class="dt-account-menu">
         <button class="dt-account-trigger" id="dt-account-trigger" type="button" aria-expanded="false" aria-controls="dt-account-panel" onclick="toggleDtAccountMenu(event)">
@@ -763,7 +770,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
         <span class="dth-nb">Crea il suo <span class="dth-mark">personaggio.</span></span>
         <span class="dth-nb">Apri il suo mondo.</span>
       </h1>
-      <p class="dth-sub">Lo componiamo nello stile che scegli e diventa il protagonista di tutte le sue storie.</p>
+      <p class="dth-sub">Diventa il protagonista di storie scritte da autori, illustrate su misura per lui.</p>
 
       <div class="dth-ctarow">
         <button class="dth-cta" onclick="showScreen('creator')">Crea il suo personaggio</button>
@@ -795,7 +802,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
           <div class="dth-step-text">
             <span class="dth-num dth-rot1">1</span>
             <h3 class="dth-h3">Dai vita al personaggio</h3>
-            <p class="dth-body">Una foto o una descrizione. Basta questo.</p>
+            <p class="dth-body">Nome, età e un dettaglio che lo rende unico. Basta questo.</p>
           </div>
           <div class="dth-step-img dth-si-1">
             <div class="dth-disc-sm" aria-hidden="true"></div>
@@ -808,7 +815,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
           <div class="dth-step-text">
             <span class="dth-num dth-rot2">2</span>
             <h3 class="dth-h3">Scegli le sue avventure</h3>
-            <p class="dth-body">Il bosco, il mare, la notte prima di dormire.</p>
+            <p class="dth-body">Ogni storia della libreria è scritta da un autore, pronta ad accoglierlo.</p>
           </div>
           <div class="dth-step-img dth-si-2">
             <picture><source srcset="assets/home/scena-accampamento.webp" type="image/webp">
@@ -829,6 +836,17 @@ body.dreamtaily-configurator-open{overflow:hidden}
         </article>
       </div>
       <div class="dth-ground" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- ============ CHI SCRIVE LE STORIE ============ -->
+  <section class="dth-authors" id="dth-autori" aria-labelledby="dth-autori-h">
+    <div class="dth-authors-grid">
+      <h2 class="dth-h2" id="dth-autori-h">Le storie le scrive una persona.</h2>
+      <div class="dth-authors-copy">
+        <p class="dth-body">Ogni racconto è scritto da un autore prima che tu lo scelga.</p>
+        <p class="dth-body">L’AI crea le illustrazioni e rifinisce il testo, senza inventare trama, eventi o significato.</p>
+      </div>
     </div>
   </section>
 
@@ -881,7 +899,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
       </ul>
     </div>
     <footer class="dth-foot">
-      <span class="dth-hand">DreamTaily — storie illustrate su misura</span>
+      <span class="dth-hand">DreamTaily — storie d’autore, illustrate su misura</span>
       <span class="dth-footlinks"><a href="#">Privacy</a><a href="#">Contatti</a><a href="#">Aiuto</a></span>
     </footer>
   </section>
