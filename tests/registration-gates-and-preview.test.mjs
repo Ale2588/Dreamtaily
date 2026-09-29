@@ -53,11 +53,11 @@ test("password recovery returns to a secure password update",()=>{
   assert.match(html,/auth\.updateUser\(\{password\}\)/);
 });
 
-test("Google and Facebook OAuth preserve the pending anonymous work",()=>{
+test("Google OAuth preserves the pending anonymous work while Facebook stays hidden",()=>{
   assert.match(html,/startDtOAuth\('google'\)/);
-  assert.match(html,/startDtOAuth\('facebook'\)/);
+  assert.doesNotMatch(html,/startDtOAuth\('facebook'\)/);
   assert.match(html,/signInWithOAuth\(\{provider,options:\{redirectTo:redirect\.href\}\}\)/);
-  assert.match(html,/\['google','facebook'\]\.includes\(provider\)/);
+  assert.match(html,/provider!==['"]google['"]/);
 });
 
 test("returning existing accounts finalize the merge before resuming the journey",()=>{
@@ -71,5 +71,5 @@ test("book reader and checkout distinguish preview from final AI generation",()=
   assert.match(html,/Questa è un’anteprima del tuo libro/);
   assert.match(html,/genererà con l’IA le illustrazioni finali/);
   assert.match(html,/Continua e genera il libro finale/);
-  assert.match(html,/La conferma avvierà la generazione tramite IA/);
+  assert.match(html,/Il pagamento avverrà sul sito sicuro di Stripe/);
 });

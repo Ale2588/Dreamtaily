@@ -7,9 +7,10 @@ const checkout=await readFile(new URL('../supabase/functions/checkout-book/index
 const renderer=await readFile(new URL('../supabase/functions/render-book/index.ts',import.meta.url),'utf8');
 const migration=await readFile(new URL('../supabase/migrations/20260903075239_finalize_book_checkout_v1.sql',import.meta.url),'utf8');
 
-test('browser confirms checkout without invoking AI rendering',()=>{
+test('browser opens Stripe first and freezes the book only after payment return',()=>{
   const completion=html.match(/window\.completeDtCheckout=async function\(\)[\s\S]*?window\.startNewBook/)?.[0]||'';
-  assert.match(completion,/functions\.invoke\("checkout-book"/);
+  assert.match(completion,/functions\.invoke\("create-stripe-checkout"/);
+  assert.match(completion,/functions\.invoke\('checkout-book'/);
   assert.doesNotMatch(completion,/render-book|dtGenerateFinalRender|dtMarkReady/);
   assert.match(completion,/renderDtBookStatus/);
 });

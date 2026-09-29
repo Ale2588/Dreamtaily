@@ -6,11 +6,12 @@ const checkout=await readFile(new URL('../supabase/functions/checkout-book/index
 const renderer=await readFile(new URL('../supabase/functions/render-book/index.ts',import.meta.url),'utf8');
 const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
 const migration=await readFile(new URL('../supabase/migrations/20260925080000_add_book_entitlements.sql',import.meta.url),'utf8');
+const stripeCheckout=await readFile(new URL('../supabase/functions/create-stripe-checkout/index.ts',import.meta.url),'utf8');
 
 test('anonymous users are rejected by checkout and rendering with an explicit code',()=>{
   assert.match(checkout,/user\.is_anonymous===true[\s\S]*AUTH_ANONYMOUS/);
   assert.match(renderer,/user\.is_anonymous===true[\s\S]*AUTH_ANONYMOUS/);
-  assert.match(html,/ENTITLEMENT_REQUIRED[\s\S]*AUTH_ANONYMOUS/);
+  assert.match(stripeCheckout,/user\.is_anonymous[\s\S]*PERMANENT_ACCOUNT_REQUIRED/);
 });
 
 test('a permanent user without an available entitlement is rejected',()=>{

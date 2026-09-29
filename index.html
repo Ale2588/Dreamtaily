@@ -935,7 +935,7 @@ body.dreamtaily-configurator-open{overflow:hidden}
       <div class="error" id="dt-auth-error"></div>
       <div class="dt-auth-actions"><button class="btn btn-ghost" type="button" onclick="closeDtAuthGate()">Non ora</button><button class="btn btn-primary" id="dt-auth-submit" type="submit">Crea il mio spazio</button></div>
       <p class="dt-auth-switch" id="dt-auth-switch">Hai già uno spazio DreamTaily? <button type="button" onclick="selectDtAuthMode('login')">Accedi</button></p>
-      <div class="dt-auth-social" id="dt-auth-social"><div class="dt-auth-divider">oppure continua con</div><div class="dt-auth-social-buttons"><button class="btn btn-ghost" type="button" onclick="startDtOAuth('google')">Google</button><button class="btn btn-ghost" type="button" onclick="startDtOAuth('facebook')">Facebook</button></div><p class="dt-auth-social-note">Il lavoro creato finora verrà collegato allo stesso spazio.</p></div>
+      <div class="dt-auth-social" id="dt-auth-social"><div class="dt-auth-divider">oppure continua con</div><div class="dt-auth-social-buttons"><button class="btn btn-ghost" type="button" onclick="startDtOAuth('google')">Google</button></div><p class="dt-auth-social-note">Il lavoro creato finora verrà collegato allo stesso spazio.</p></div>
     </form>
   </div>
 </dialog>
@@ -1690,7 +1690,7 @@ async function completeDtPasswordAccess(kind){
 }
 
 window.startDtOAuth=async function(provider){
-  if(!['google','facebook'].includes(provider))return;
+  if(provider!=='google')return;
   showError('dt-auth-error',null);
   try{
     await prepareDtExistingAccountMerge();
@@ -1699,7 +1699,7 @@ window.startDtOAuth=async function(provider){
     if(error)throw error;
   }catch(error){
     console.error('[DreamTaily] OAuth error:',error);sessionStorage.removeItem('dreamtaily.auth.merge_claim');sessionStorage.removeItem('dreamtaily.auth.merge_expires_at');
-    showError('dt-auth-error',`Accesso con ${provider==='google'?'Google':'Facebook'} non disponibile. Riprova o usa email e password.`);
+    showError('dt-auth-error','Accesso con Google non disponibile. Riprova o usa email e password.');
   }
 };
 
@@ -3224,7 +3224,7 @@ async function startAnother(accountConfirmed=false){
   selectStyle(MVP_VISUAL_STYLE_ID);selectType('real_person');showScreen('creator');
 }
 
-document.addEventListener('DOMContentLoaded',async()=>{await loadStoryCatalog();await detectDraftBook();await detectSavedCharactersForHomepage();await handleDtAuthReturn();await initDtAccountUI()});
+document.addEventListener('DOMContentLoaded',async()=>{await loadStoryCatalog();await detectDraftBook();await detectSavedCharactersForHomepage();await handleDtAuthReturn();await initDtAccountUI();document.dispatchEvent(new Event('dreamtaily:ready'))});
 window.DreamTailyCharacterFlow={
   generate:generateCharacter,
   save:saveCharacter,
@@ -4013,14 +4013,14 @@ window.openDtCheckout=async function(){
       <button class="brand-dark" onclick="renderBookSummary();showScreen('book')">
         <img src="assets/brand/dreamtaily-icon.png" alt=""><span>DreamTaily</span>
       </button>
-      <div class="phase">7 · Checkout dimostrativo</div>
+      <div class="phase">7 · Acquisto libro</div>
     </div>
     <div class="dt-checkout-grid">
       <main class="panel" style="padding:clamp(24px,4vw,40px)">
         <div class="phase">Libro digitale · €9,90</div>
         <h1 class="step-title">Scegli la copertina del libro</h1>
         <p class="intro">Inserisci il titolo generale. In copertina compariranno automaticamente tutti i protagonisti del libro, una sola volta ciascuno.</p>
-        <div class="dt-preview-notice"><span class="dt-preview-badge">LIBRO FINALE</span><div><strong>La conferma avvierà la generazione tramite IA</strong>Le illustrazioni definitive saranno create dopo la conferma usando i personaggi e le scelte approvate nell’anteprima.</div></div>
+        <div class="dt-preview-notice"><span class="dt-preview-badge">LIBRO FINALE</span><div><strong>Il pagamento avverrà sul sito sicuro di Stripe</strong>Al ritorno, il libro sarà confermato e potrai avviare la generazione delle illustrazioni definitive.</div></div>
         <label for="dt-cover-title">Titolo del libro</label><input class="input" id="dt-cover-title" maxlength="${selectedLayout?.max_title||44}" value="${escapeHtml(dtBookCoverSelection.title)}" oninput="updateDtBookCoverField('title',this.value)">
         <h3 style="margin:20px 0 4px">Colore di fondo</h3><div class="dt-cover-colors">${colors}</div><div class="dt-cover-picker">${cards}</div>
         <p class="book-note">Solo i protagonisti unici entreranno nell’immagine. Titolo, logo e DreamTaily saranno applicati dopo la generazione.</p>
@@ -4030,7 +4030,7 @@ window.openDtCheckout=async function(){
           placeholder="nome@esempio.it" oninput="updateDtPayButton()">
         <div class="error" id="checkout-error"></div>
         <button class="btn btn-primary" id="dt-pay" style="width:100%;margin-top:18px"
-          onclick="completeDtCheckout()" disabled>Conferma il libro (nessun addebito)</button>
+          onclick="completeDtCheckout()" disabled>Acquista il PDF · €9,90</button>
       </main>
       <aside class="panel" style="padding:24px">
         <h2 style="font-family:'Faustina',Georgia,serif">Il tuo libro</h2>
@@ -4099,7 +4099,7 @@ window.renderDtBookStatus=async function(render=null){
       <div class="phase">${escapeHtml(labels[currentJob.status]||currentJob.status)}</div>
       <h1 class="step-title">${ready?'Il tuo libro è pronto':'Il tuo libro è stato confermato'}</h1>
       <p class="intro">${currentJob.status==='queued'
-        ?'Contenuti e personaggi sono congelati. La generazione IA è volutamente sospesa durante questo collaudo.'
+        ?'Pagamento completato. Contenuti e personaggi sono congelati: ora puoi avviare la generazione del libro.'
         :currentJob.status==='running'?`Pagine completate: ${readyPages} su ${pages.length}. Puoi chiudere questa pagina e tornare più tardi.`
         :ready?'La generazione è terminata e il libro può essere aperto.'
         :'Il lavoro è salvato e potrà essere ripreso senza rigenerare le pagine già completate.'}</p>
@@ -4193,10 +4193,11 @@ window.completeDtCheckout=async function(){
   );
   if(!complete){showError("checkout-error","Completa tutte le storie prima di concludere il libro.");return;}
   const button=document.getElementById("dt-pay");
-  button.disabled=true; button.textContent="Confermo il libro…"; showError("checkout-error",null);
+  button.disabled=true; button.textContent="Apro il pagamento sicuro…"; showError("checkout-error",null);
   try{
-    const {data,error}=await getSupabase().functions.invoke("checkout-book",{
-      body:{book_id:app.bookId,email:dtCheckoutEmail,idempotency_key:`checkout-${app.bookId}`,cover:dtBookCoverSelection}
+    localStorage.setItem(`dreamtaily.stripe.${app.bookId}`,JSON.stringify({email:dtCheckoutEmail,cover:dtBookCoverSelection}));
+    const {data,error}=await getSupabase().functions.invoke("create-stripe-checkout",{
+      body:{book_id:app.bookId}
     });
     if(error){
       let code="";
@@ -4205,18 +4206,41 @@ window.completeDtCheckout=async function(){
       checkoutError.code=code;
       throw checkoutError;
     }
-    if(!data?.render_id) throw new Error("CHECKOUT_EMPTY_RESPONSE");
-    await renderDtBookStatus(data);
+    if(!data?.checkout_url) throw new Error("CHECKOUT_EMPTY_RESPONSE");
+    location.assign(data.checkout_url);
   }catch(error){
     console.error("[DreamTaily] Checkout confirmation error:",error);
     const code=error?.code||error?.message||"";
-    const invitedOnly=code.includes("ENTITLEMENT_REQUIRED")||code.includes("AUTH_ANONYMOUS");
-    showError("checkout-error",invitedOnly
-      ?"La creazione dei libri completi è aperta solo ai tester invitati. Scrivici per partecipare. Il tuo lavoro è salvo."
-      :"Non sono riuscito a confermare il libro. La bozza è intatta: puoi riprovare senza perdere nulla.");
-    button.disabled=false; button.textContent="Riprova la conferma";
+    showError("checkout-error","Non sono riuscito ad aprire il pagamento. La bozza è intatta: puoi riprovare senza perdere nulla.");
+    button.disabled=false; button.textContent="Riprova il pagamento";
   }
 };
+
+async function finalizeDtStripeReturn(){
+  const url=new URL(location.href),status=url.searchParams.get('stripe'),bookId=url.searchParams.get('book_id');
+  if(!status||!bookId)return;
+  app.bookId=bookId;
+  if(status==='cancelled'){
+    url.searchParams.delete('stripe');url.searchParams.delete('book_id');history.replaceState({},'',url.pathname+url.search);
+    await openDtCheckout();showError('checkout-error','Pagamento annullato. Il libro è salvo e puoi riprovare quando vuoi.');return;
+  }
+  const saved=JSON.parse(localStorage.getItem(`dreamtaily.stripe.${bookId}`)||'{}');
+  const email=saved.email||((await getSupabase().auth.getUser()).data.user?.email)||'';
+  dtBookCoverSelection=saved.cover||dtBookCoverSelection;
+  const screen=document.getElementById('screen-render-status');
+  screen.innerHTML='<div class="shell" style="max-width:720px"><div class="panel" style="padding:52px;text-align:center"><div style="font-size:58px">✨</div><h1 class="step-title">Pagamento ricevuto</h1><p class="intro">Sto confermando il libro. Attendi qualche secondo senza chiudere la pagina.</p></div></div>';
+  showScreen('render-status');
+  let lastError=null;
+  for(let attempt=0;attempt<8;attempt++){
+    const {data,error}=await getSupabase().functions.invoke('checkout-book',{body:{book_id:bookId,email,idempotency_key:`checkout-${bookId}`,cover:dtBookCoverSelection}});
+    if(!error&&data?.render_id){localStorage.removeItem(`dreamtaily.stripe.${bookId}`);url.searchParams.delete('stripe');url.searchParams.delete('book_id');url.searchParams.delete('session_id');history.replaceState({},'',url.pathname+url.search);await renderDtBookStatus(data);return;}
+    lastError=error;await new Promise(resolve=>setTimeout(resolve,1500));
+  }
+  console.error('[DreamTaily] Stripe return finalization error:',lastError);
+  screen.querySelector('.intro').textContent='Il pagamento è registrato, ma la conferma sta impiegando più del previsto. Ricarica questa pagina tra poco: non verrai addebitato di nuovo.';
+}
+
+document.addEventListener('dreamtaily:ready',()=>finalizeDtStripeReturn().catch(console.error));
 
 window.startNewBook=async function(){
   resetActiveBookState();

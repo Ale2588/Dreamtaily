@@ -26,6 +26,7 @@
     "test:mask": "node --test tests/scene-mask.test.mjs",
     "test:render-planning": "node --test tests/render-prompts.test.mjs tests/render-job.test.mjs",
     "test:render-function": "node --test tests/render-book-multi-story.test.mjs tests/checkout-boundary.test.mjs tests/final-delivery.test.mjs",
+    "test:stripe": "node --test tests/stripe-pdf-checkout.test.mjs",
     "test:render-engine": "npm run test:identity && npm run test:mask && npm run test:render-planning && npm run test:render-function",
     "test": "node tools/run-tests.mjs unit"
   }
