@@ -57,21 +57,26 @@ test("printer export keeps every sheet horizontal and preserves canonical spread
   assert.doesNotMatch(reader,/class="print-copy"/);
 });
 
-test("exporter produces one unified horizontal PDF without browser printing",()=>{
+test("exporter produces a book PDF made of individual 4:3 pages",()=>{
   assert.match(reader,/Scarica PDF del libro/);
   assert.doesNotMatch(reader,/PDF interni/);
   assert.doesNotMatch(reader,/PDF copertina/);
   assert.match(reader,/exportBookPdf\(window\.dtBookPages\|\|\[\],window\.dtBackCover\)/);
   assert.match(reader,/buildImagePdf\(\{jpegs,width:PDF_WIDTH/);
+  assert.match(reader,/const PDF_WIDTH=680\.315/);
+  assert.match(reader,/const EXPORT_PAGE_WIDTH=2835/);
+  assert.match(reader,/async function narrativePageJpegs\(page\)/);
+  assert.match(reader,/side\*EXPORT_PAGE_WIDTH/);
+  assert.match(reader,/coverPageJpeg\(backCover,\{back:true\}\)/);
   assert.doesNotMatch(reader,/window\.print\(\)/);
   assert.match(reader,/print-cover-back/);
   assert.match(reader,/print-cover-front/);
-  assert.match(reader,/await drawBackCover\(context,backCover\)/);
+  assert.match(reader,/if\(back\)await drawBackCover\(context,page\)/);
 });
 
-test("deterministic exporter draws assets and every spread directly at 300 DPI",()=>{
+test("deterministic exporter draws assets and splits every spread into 300 DPI pages",()=>{
   assert.match(reader,/await document\.fonts\.ready/);
-  assert.match(reader,/const EXPORT_WIDTH=5669/);
+  assert.match(reader,/const EXPORT_SPREAD_WIDTH=EXPORT_PAGE_WIDTH\*2/);
   assert.match(reader,/const EXPORT_HEIGHT=2126/);
   assert.match(reader,/createImageBitmap\(blob\)/);
   assert.match(reader,/async function drawNarrative\(context,page\)/);

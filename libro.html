@@ -164,9 +164,10 @@ function render(){
   window.scrollTo({top:0,behavior:"instant"});
 }
 function go(delta){const n=current+delta;if(n<0||n>=slides.length)return;current=n;render();}
-const EXPORT_WIDTH=5669;
+const EXPORT_PAGE_WIDTH=2835;
+const EXPORT_SPREAD_WIDTH=EXPORT_PAGE_WIDTH*2;
 const EXPORT_HEIGHT=2126;
-const PDF_WIDTH=1360.63;
+const PDF_WIDTH=680.315;
 const PDF_HEIGHT=510.24;
 const imageCache=new Map();
 async function loadBitmap(src){
@@ -277,24 +278,45 @@ async function drawBackCover(context,page){
   context.save();context.beginPath();context.arc(start+logoSize/2,brand.y+brand.h/2,logoSize/2,0,Math.PI*2);context.clip();context.drawImage(logo,start,brand.y+(brand.h-logoSize)/2,logoSize,logoSize);context.restore();
   drawText(context,"DreamTaily",{x:start+30,y:brand.y+7,w:94,h:brand.h},{size:17,lineHeight:1,weight:"700",color:ink});
 }
-async function sheetJpeg(page,isGlobalCover=false,backCover=null){
-  const canvas=document.createElement("canvas");canvas.width=EXPORT_WIDTH;canvas.height=EXPORT_HEIGHT;
-  const context=canvas.getContext("2d",{alpha:false});context.scale(EXPORT_WIDTH/1240,EXPORT_HEIGHT/465);context.fillStyle="#fff";context.fillRect(0,0,1240,465);
-  if(isGlobalCover){await drawBackCover(context,backCover);await drawCover(context,page,620);}
-  else if(page.kind==="cover")await drawCover(context,page,620);else await drawNarrative(context,page);
+async function canvasJpeg(canvas){
   const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error("PDF_CANVAS_EMPTY")),"image/jpeg",.94));
   return new Uint8Array(await blob.arrayBuffer());
+}
+async function coverPageJpeg(page,{back=false}={}){
+  const canvas=document.createElement("canvas");canvas.width=EXPORT_PAGE_WIDTH;canvas.height=EXPORT_HEIGHT;
+  const context=canvas.getContext("2d",{alpha:false});context.scale(EXPORT_PAGE_WIDTH/620,EXPORT_HEIGHT/465);context.fillStyle="#fff";context.fillRect(0,0,620,465);
+  if(back)await drawBackCover(context,page);else await drawCover(context,page,0);
+  return canvasJpeg(canvas);
+}
+async function narrativePageJpegs(page){
+  const spread=document.createElement("canvas");spread.width=EXPORT_SPREAD_WIDTH;spread.height=EXPORT_HEIGHT;
+  const context=spread.getContext("2d",{alpha:false});context.scale(EXPORT_SPREAD_WIDTH/1240,EXPORT_HEIGHT/465);context.fillStyle="#fff";context.fillRect(0,0,1240,465);
+  await drawNarrative(context,page);
+  const halves=[];
+  for(let side=0;side<2;side+=1){
+    const canvas=document.createElement("canvas");canvas.width=EXPORT_PAGE_WIDTH;canvas.height=EXPORT_HEIGHT;
+    canvas.getContext("2d",{alpha:false}).drawImage(spread,side*EXPORT_PAGE_WIDTH,0,EXPORT_PAGE_WIDTH,EXPORT_HEIGHT,0,0,EXPORT_PAGE_WIDTH,EXPORT_HEIGHT);
+    halves.push(await canvasJpeg(canvas));
+  }
+  return halves;
 }
 async function exportBookPdf(pages,backCover){
   const button=document.getElementById("print");
   try{
     button.disabled=true;button.textContent="Preparo il PDF…";
     await document.fonts.ready;
-    const ordered=[],globalCover=pages.find(page=>page.page_id==="book__cover");if(globalCover)ordered.push({page:globalCover,global:true});pages.filter(page=>page.page_id!=="book__cover").forEach(page=>ordered.push({page,global:false}));
-    if(!ordered.length)throw new Error("PDF_PAGES_EMPTY");
+    const globalCover=pages.find(page=>page.page_id==="book__cover"),content=pages.filter(page=>page.page_id!=="book__cover");
+    if(!globalCover&&!content.length)throw new Error("PDF_PAGES_EMPTY");
+    const total=(globalCover?1:0)+content.reduce((sum,page)=>sum+(page.kind==="cover"?1:2),0)+1;
     const jpegs=[];
-    for(let index=0;index<ordered.length;index+=1){button.textContent=`Creo pagina ${index+1} di ${ordered.length}…`;jpegs.push(await sheetJpeg(ordered[index].page,ordered[index].global,backCover));}
-    const pdf=buildImagePdf({jpegs,width:PDF_WIDTH,height:PDF_HEIGHT,imageWidth:EXPORT_WIDTH,imageHeight:EXPORT_HEIGHT});
+    const add=async promise=>{button.textContent=`Creo pagina ${jpegs.length+1} di ${total}…`;jpegs.push(await promise);};
+    if(globalCover)await add(coverPageJpeg(globalCover));
+    for(const page of content){
+      if(page.kind==="cover")await add(coverPageJpeg(page));
+      else {const halves=await narrativePageJpegs(page);for(const half of halves){button.textContent=`Creo pagina ${jpegs.length+1} di ${total}…`;jpegs.push(half);}}
+    }
+    await add(coverPageJpeg(backCover,{back:true}));
+    const pdf=buildImagePdf({jpegs,width:PDF_WIDTH,height:PDF_HEIGHT,imageWidth:EXPORT_PAGE_WIDTH,imageHeight:EXPORT_HEIGHT});
     const link=document.createElement("a");link.href=URL.createObjectURL(pdf);link.download=`${document.title.replace(/[^a-z0-9à-ž _—-]/gi,"").trim()||"DreamTaily"}.pdf`;link.click();
     setTimeout(()=>URL.revokeObjectURL(link.href),30000);
   }catch(error){console.error(error);alert(`Non riesco a preparare il PDF (${error?.message||"errore sconosciuto"}).`);}
